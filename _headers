@@ -1,0 +1,15 @@
+# Cloudflare Pages — header cho toàn site
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+
+# Cache lâu cho tài nguyên tĩnh (đổi tên file khi cập nhật để tránh cache cũ)
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/css/*
+  Cache-Control: public, max-age=604800
+
+/js/*
+  Cache-Control: public, max-age=604800

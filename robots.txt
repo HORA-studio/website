@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+# Sửa domain thành domain thật khi public
+Sitemap: https://example.com/sitemap.xml

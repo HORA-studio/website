@@ -1,35 +1,31 @@
-# Gradle files
-.gradle/
-build/
-.kotlin/
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
 
-# Local configuration file (sdk path, etc)
-local.properties
+# Editor
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.swp
+*.swo
 
-# Log/OS Files
+# Logs
 *.log
 
-# Android Studio generated files and folders
-captures/
-.externalNativeBuild/
-.cxx/
-*.aab
-*.apk
-output-metadata.json
+# Local env / secrets — không commit lên GitHub
+.env
+.env.*
+!.env.example
 
-# IntelliJ
-*.iml
-.idea/
-misc.xml
-deploymentTargetDropDown.xml
-render.experimental.xml
+# Build / tooling (site này deploy tĩnh, không build — để sẵn nếu sau này thêm)
+node_modules/
+dist/
+.wrangler/
 
-# Keystore files
-*.jks
-*.keystore
-
-# Google Services (e.g. APIs or Firebase)
-google-services.json
-
-# Android Profiling
-*.hprof
+# File cài đặt lớn — host ở GitHub Releases / R2, không để trong repo
+# (Cloudflare Pages giới hạn 25 MiB/file)
+*.deb
+*.zip
+*.exe
+*.msi
