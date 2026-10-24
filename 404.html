@@ -73,36 +73,12 @@
     }
     h1 { font-size: clamp(24px, 4.5vw, 34px); margin: 14px 0 10px; }
     .lead { color: var(--muted); max-width: 520px; margin: 0 0 30px; font-size: 16px; }
-    .actions { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-bottom: 52px; }
-    .btn {
-      display: inline-flex; justify-content: center; align-items: center; gap: 9px;
-      padding: 12px 22px; border: 1px solid var(--line); border-radius: 11px;
-      background: #ffffff04; color: var(--text); font-weight: 700; text-decoration: none; transition: .2s;
-    }
-    .btn:hover { border-color: var(--accent); transform: translateY(-1px); }
-    .btn.primary {
-      background: linear-gradient(135deg, var(--accent2), var(--accent));
-      border-color: transparent; color: #052522;
-    }
-    .cards {
-      display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;
-      width: 100%; max-width: 820px; text-align: left;
-    }
-    .card {
-      background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
-      padding: 20px; text-decoration: none; color: var(--text); transition: .2s;
-    }
-    .card:hover { border-color: var(--accent); background: var(--panel2); transform: translateY(-2px); }
-    .card h2 { font-size: 16px; margin: 0 0 6px; }
-    .card p { color: var(--muted); margin: 0; font-size: 14px; }
-    .card .arrow { color: var(--accent); font-weight: 800; }
     footer {
       border-top: 1px solid var(--line); color: var(--muted); text-align: center;
       padding: 22px 20px; font-size: 14px;
     }
     @media (max-width: 720px) {
       main { padding-top: 120px; }
-      .cards { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -117,27 +93,7 @@
   <main>
     <div class="code" aria-hidden="true">404</div>
     <h1>Không tìm thấy trang này</h1>
-    <p class="lead">Đường dẫn bạn mở không tồn tại, đã bị đổi hoặc đã bị gỡ. Đừng lo — mọi nội dung chính vẫn ở trang chủ.</p>
-
-    <div class="actions">
-      <a class="btn primary" href="index.html">Về trang chủ</a>
-      <a class="btn" href="index.html#pricing">Xem bảng giá</a>
-    </div>
-
-    <div class="cards">
-      <a class="card" href="index.html#demos">
-        <h2>Video demo <span class="arrow">→</span></h2>
-        <p>Xem các video sản phẩm mẫu do HORA Media tạo ra.</p>
-      </a>
-      <a class="card" href="index.html#features">
-        <h2>Tính năng <span class="arrow">→</span></h2>
-        <p>Tìm hiểu công cụ tạo video sản phẩm bằng AI làm được gì.</p>
-      </a>
-      <a class="card" href="index.html#pricing">
-        <h2>Bảng giá <span class="arrow">→</span></h2>
-        <p>Xem các gói Go và Plus — chọn theo tháng hoặc theo năm.</p>
-      </a>
-    </div>
+    <p class="lead">Đường dẫn bạn mở không tồn tại, đã bị đổi hoặc đã bị gỡ.</p>
   </main>
 
   <footer>&copy; 2026 HORA Media</footer>
