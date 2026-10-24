@@ -173,6 +173,7 @@ document.documentElement.dataset.theme=savedTheme;themeSelect.value=savedTheme;
 themeSelect.addEventListener("change",()=>{document.documentElement.dataset.theme=themeSelect.value;localStorage.setItem("hora-theme",themeSelect.value)});
 const CONFIG = {
   releasesJsonUrl: "https://releases.hora.works/hora.media/latest.json",
+  releasesProxyUrl: "/releases-latest",
   downloadUrl: "#",
   downloadWindowsUrl: "#",
   downloadLinuxUrl: "#",
@@ -208,22 +209,40 @@ document.querySelectorAll(".dl-toggle").forEach(btn=>btn.addEventListener("click
 document.addEventListener("click",e=>{if(!e.target.closest(".dl-wrap")) closeDownloadMenus();});
 document.addEventListener("keydown",e=>{if(e.key==="Escape") closeDownloadMenus();});
 let releasesCache=null;
+function normalizeReleaseUrl(url){
+  if(typeof url!=="string") return url;
+  // latest.json dang dung host placeholder <domain> — thay bang host that chua file.
+  return url.replace(/^https?:\/\/<domain>\//i,"https://releases.hora.works/");
+}
 function isUsableDownloadUrl(url){
   return typeof url==="string" && /^https?:\/\//i.test(url) && !/[<>]/.test(url);
 }
+async function fetchReleasesJson(){
+  // Uu tien proxy cung domain (/releases-latest — Pages Function, khong bi CORS),
+  // du phong fetch thang releases.hora.works (can server bat CORS moi doc duoc).
+  const sources=[CONFIG.releasesProxyUrl, CONFIG.releasesJsonUrl].filter(Boolean);
+  let lastErr=null;
+  for(const src of sources){
+    try{
+      const r=await fetch(src,{cache:"no-cache"});
+      if(!r.ok) throw new Error("HTTP "+r.status);
+      return await r.json();
+    }catch(err){ lastErr=err; }
+  }
+  throw lastErr || new Error("khong doc duoc latest.json");
+}
 async function fetchReleaseUrl(platform){
   if(!releasesCache){
-    releasesCache=fetch(CONFIG.releasesJsonUrl,{cache:"no-cache"})
-      .then(r=>{ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); })
-      .catch(err=>{ releasesCache=null; throw err; });
+    releasesCache=fetchReleasesJson().catch(err=>{ releasesCache=null; throw err; });
   }
   const data=await releasesCache;
-  return data && data.platforms && data.platforms[platform] ? data.platforms[platform].url : null;
+  const raw=data && data.platforms && data.platforms[platform] ? data.platforms[platform].url : null;
+  return normalizeReleaseUrl(raw);
 }
 async function downloadFor(platform){
   const isWin=platform==="windows";
   const label=isWin?"Windows":"Linux";
-  const fallback=(isWin ? CONFIG.downloadWindowsUrl : CONFIG.downloadLinuxUrl) || CONFIG.downloadUrl;
+  const fallback=normalizeReleaseUrl((isWin ? CONFIG.downloadWindowsUrl : CONFIG.downloadLinuxUrl) || CONFIG.downloadUrl);
   closeDownloadMenus();
   // Mo tab ngay trong luc click de trinh duyet khong chan popup sau khi fetch xong.
   const tab=window.open("","_blank");
