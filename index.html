@@ -82,6 +82,7 @@ footer{border-top:1px solid var(--line);padding:28px 0 38px;color:var(--muted);f
 .price-card{display:flex;flex-direction:column;height:100%}
 .price-card ul{flex:1}
 .price-card .btn{margin-top:auto}
+.price-card .btn:disabled{opacity:.55;cursor:not-allowed}
 
 /* Theme switching: system / light / dark */
 .theme-select{width:42px;min-width:42px;height:40px;padding:6px;border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--text);font-size:17px;text-align:center;cursor:pointer;outline:none;appearance:none}
@@ -155,7 +156,7 @@ html[data-theme="light"] input,html[data-theme="light"] textarea,html[data-theme
        <li>Được hỗ trợ cài đặt &amp; kích hoạt</li>
        <li>License theo máy — 1 license dùng trên 1 máy</li>
       </ul>
-      <button class="btn" data-buy-plan="go">Chọn gói Go</button>
+      <button class="btn" data-buy-plan="go" disabled>Sắp mở bán</button>
      </article>
      <article class="price-card featured" data-plan-card="plus">
       <span class="popular">ĐƯỢC CHỌN NHIỀU</span>
@@ -170,7 +171,7 @@ html[data-theme="light"] input,html[data-theme="light"] textarea,html[data-theme
        <li>Được hỗ trợ cài đặt &amp; kích hoạt</li>
        <li>License theo máy — 1 license dùng trên 1 máy</li>
       </ul>
-      <button class="btn primary" data-buy-plan="plus">Chọn gói Plus</button>
+      <button class="btn primary" data-buy-plan="plus" disabled>Sắp mở bán</button>
      </article>
      <article class="price-card coming" aria-disabled="true">
       <span class="popular soon">COMING SOON</span>
