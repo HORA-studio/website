@@ -66,6 +66,19 @@ footer{border-top:1px solid var(--line);padding:28px 0 38px;color:var(--muted);f
 @media(max-width:900px){.hero{grid-template-columns:1fr;gap:28px;padding-top:55px}.hero-art{min-height:380px}.demo-grid{grid-template-columns:repeat(3,1fr)}.feature-grid{grid-template-columns:repeat(2,1fr)}.navlinks{gap:15px}.buy-layout{grid-template-columns:1fr}}
 @media(max-width:620px){.wrap{width:min(100% - 28px,1160px)}.nav{height:64px}body{padding-top:65px}.navlinks{display:none}.mobile-menu{display:inline-flex}.actions .btn:not(.primary){display:none}.hero{padding-top:43px}h1{font-size:43px}.lead{font-size:15px}.hero-art{padding:12px;min-height:330px}.preview{height:170px}.art-bottom{gap:6px}.mini-stat{padding:8px}.mini-stat b{font-size:14px}.section{padding:46px 0}.section-head{display:block}.section-head p{margin-top:10px}.demo-grid{grid-template-columns:repeat(2,1fr);gap:10px}.demo-thumb{height:170px}.demo-note{align-items:flex-start;flex-direction:column}.feature-grid{grid-template-columns:1fr 1fr;gap:9px}.feature{padding:14px}.pricing-wrap{padding:16px}.pricing-grid{grid-template-columns:1fr;gap:18px}.price-card.featured{margin-top:8px}.footer-inner{align-items:flex-start;flex-direction:column}.social{right:12px;bottom:12px}.social a{width:40px;height:40px}.buy-layout{gap:12px}.order-summary,.buy-form{padding:18px}}
 
+/* Pricing v2: chon thoi han + goi Go / Plus / Pro */
+.pricing-toggle-row{text-align:center}
+.billing-toggle{display:inline-flex;gap:4px;margin-top:20px;padding:4px;border:1px solid var(--line);border-radius:999px;background:var(--panel)}
+.billing-opt{border:0;background:transparent;color:var(--muted);font:inherit;font-weight:700;padding:9px 20px;border-radius:999px;cursor:pointer;transition:.2s;display:inline-flex;align-items:center}
+.billing-opt.active{background:linear-gradient(135deg,var(--gold2),var(--gold));color:#052522}
+.save-badge{background:#10dcc81f;color:var(--gold2);border:1px solid #10dcc840;font-size:10px;padding:2px 7px;border-radius:999px;margin-left:7px;font-weight:800}
+.billing-opt.active .save-badge{background:#05252226;color:#052522;border-color:transparent}
+.plan-desc{color:var(--muted);font-size:13px;margin:6px 0 0;min-height:38px}
+.price-card li.hl{color:var(--text);font-weight:700}
+.price-card.coming{opacity:.65}
+.price-card.coming .btn{cursor:not-allowed}
+.popular.soon{background:var(--panel2);color:var(--muted);border:1px solid var(--line)}
+
 /* Theme switching: system / light / dark */
 .theme-select{width:42px;min-width:42px;height:40px;padding:6px;border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--text);font-size:17px;text-align:center;cursor:pointer;outline:none;appearance:none}
 html[data-theme="light"]{color-scheme:light;--bg:#f4f8f9;--panel:#ffffff;--panel2:#eaf2f4;--line:#d7e2e5;--text:#14252b;--muted:#61747b;--gold:#079f94;--gold2:#087f79;--green:#079f94}
@@ -119,11 +132,54 @@ html[data-theme="light"] input,html[data-theme="light"] textarea,html[data-theme
   </section>
   <section class="section" id="pricing">
    <div class="pricing-wrap">
-    <div class="section-head"><div><h2>Chọn gói sử dụng</h2></div><p>Chọn thời hạn phù hợp và thanh toán nhanh chóng.</p></div>
+    <div class="section-head"><div><h2>Chọn gói phù hợp với bạn</h2></div><p>Mọi gói đều mở khóa toàn bộ tính năng. Chọn theo tháng để linh hoạt, hoặc theo năm để tiết kiệm hơn.</p></div>
+    <div class="pricing-toggle-row">
+     <div class="billing-toggle" role="tablist" aria-label="Chọn thời hạn">
+      <button type="button" class="billing-opt active" data-billing="month" role="tab" aria-selected="true">1 tháng</button>
+      <button type="button" class="billing-opt" data-billing="year" role="tab" aria-selected="false">1 năm<span class="save-badge">LỢI HƠN</span></button>
+     </div>
+    </div>
     <div class="pricing-grid">
-     <article class="price-card"><h3>1 tháng</h3><div class="price">250.000đ</div><div class="per">Linh hoạt để bắt đầu</div><ul><li>Đầy đủ tính năng hiện có</li><li>Cập nhật trong thời hạn</li><li>Hỗ trợ cài đặt</li><li>License theo máy</li></ul><button class="btn" data-buy-pack="Gói 1 tháng">Chọn gói</button></article>
-     <article class="price-card"><h3>2 tháng</h3><div class="price">400.000đ</div><div class="per">200.000đ / tháng</div><ul><li>Đầy đủ tính năng hiện có</li><li>Cập nhật trong thời hạn</li><li>Hỗ trợ cài đặt</li><li>License theo máy</li></ul><button class="btn" data-buy-pack="Gói 2 tháng">Chọn gói</button></article>
-     <article class="price-card featured"><span class="popular">GIÁ TRỊ TỐT</span><h3>3 tháng</h3><div class="price">550.000đ</div><div class="per">183.333đ / tháng</div><ul><li>Đầy đủ tính năng hiện có</li><li>Cập nhật trong thời hạn</li><li>Hỗ trợ cài đặt</li><li>License theo máy</li></ul><button class="btn primary" data-buy-pack="Gói 3 tháng">Chọn gói</button></article>
+     <article class="price-card" data-plan-card="go">
+      <h3>Go</h3>
+      <p class="plan-desc">Đầy đủ tính năng — bắt đầu làm video ngay</p>
+      <div class="price"><span data-price>250.000đ</span></div>
+      <div class="per" data-per>/ tháng · linh hoạt, gia hạn bất cứ lúc nào</div>
+      <ul>
+       <li>Toàn bộ tính năng hiện có, không khóa tính năng nào</li>
+       <li>Cập nhật miễn phí mọi phiên bản mới trong thời hạn</li>
+       <li>Được hỗ trợ cài đặt &amp; kích hoạt</li>
+       <li>License theo máy — 1 license dùng trên 1 máy</li>
+      </ul>
+      <button class="btn" data-buy-plan="go">Chọn gói Go</button>
+     </article>
+     <article class="price-card featured" data-plan-card="plus">
+      <span class="popular">ĐƯỢC CHỌN NHIỀU</span>
+      <h3>Plus</h3>
+      <p class="plan-desc">Tất cả của Go — thêm trợ lý AI đồng hành</p>
+      <div class="price"><span data-price>400.000đ</span></div>
+      <div class="per" data-per>/ tháng · linh hoạt, gia hạn bất cứ lúc nào</div>
+      <ul>
+       <li class="hl">Mọi quyền lợi của gói Go</li>
+       <li class="hl">✦ Trợ lý AI hỗ trợ trong suốt quá trình sử dụng</li>
+       <li>Cập nhật miễn phí mọi phiên bản mới trong thời hạn</li>
+       <li>Được hỗ trợ cài đặt &amp; kích hoạt</li>
+       <li>License theo máy — 1 license dùng trên 1 máy</li>
+      </ul>
+      <button class="btn primary" data-buy-plan="plus">Chọn gói Plus</button>
+     </article>
+     <article class="price-card coming" aria-disabled="true">
+      <span class="popular soon">COMING SOON</span>
+      <h3>Pro</h3>
+      <p class="plan-desc">Cho nhu cầu nâng cao — đang hoàn thiện</p>
+      <div class="price">—</div>
+      <div class="per">Sắp ra mắt</div>
+      <ul>
+       <li>Mọi quyền lợi của gói Plus</li>
+       <li>Tính năng nâng cao — công bố khi ra mắt</li>
+      </ul>
+      <button class="btn" type="button" disabled>Đang chờ</button>
+     </article>
     </div>
     
    </div>
@@ -144,22 +200,13 @@ html[data-theme="light"] input,html[data-theme="light"] textarea,html[data-theme
    </div>
   </section>
 
-  <section class="section" id="support">
-   <div class="section-head"><div><h2>Cần tư vấn trước khi mua?</h2></div><p></p></div>
-   <div class="feature-grid">
-    <a class="feature" id="zalo-link" href="#"><div class="feature-icon">Z</div><h3>Hỗ trợ qua Zalo ↗</h3><p>Trao đổi nhanh về cài đặt, mua hàng và kích hoạt license.</p></a>
-    <a class="feature" id="facebook-link" href="#"><div class="feature-icon">f</div><h3>Fanpage Facebook ↗</h3><p>Theo dõi thông báo sản phẩm, bản cập nhật và nội dung hướng dẫn.</p></a>
-    <div class="feature"><div class="feature-icon">?</div><h3>Câu hỏi thường gặp</h3><p>Thông tin về tải công cụ, thời hạn license và kích hoạt theo máy.</p></div>
-    <div class="feature"><div class="feature-icon">↻</div><h3>Cập nhật phiên bản</h3><p>Kiểm tra ghi chú phát hành và các thay đổi trong phiên bản mới.</p></div>
-   </div>
-  </section>
 </main>
 </div>
 <section class="purchase wrap" id="purchase">
  <h1 style="font-size:clamp(36px,4vw,52px);margin-bottom:10px">Hoàn tất thông tin <span>mua hàng.</span></h1>
  <p class="lead">Kiểm tra lại gói đã chọn, sau đó nhập thông tin để tiếp tục. Đây là giao diện mẫu; hiện chưa gửi dữ liệu lên máy chủ.</p>
  <div class="buy-layout">
-  <aside class="order-summary"><h3>Tóm tắt đơn hàng</h3><div class="summary-row"><span>Sản phẩm</span><strong>HORA Media</strong></div><div class="summary-row"><span>Gói license</span><strong id="summary-pack">Gói 3 tháng</strong></div><div class="summary-row"><span>Thời hạn</span><strong id="summary-duration">3 tháng</strong></div><div class="summary-row"><span>Tổng cộng</span><strong id="summary-price" style="color:var(--gold2);font-size:18px">550.000đ</strong></div><p class="summary-help">Thời hạn license bắt đầu theo điều kiện kích hoạt được công bố cho sản phẩm. Vui lòng xác nhận điều khoản trước khi thanh toán.</p><button class="btn" id="back-home" style="width:100%;margin-top:18px">← Quay lại trang sản phẩm</button></aside>
+  <aside class="order-summary"><h3>Tóm tắt đơn hàng</h3><div class="summary-row"><span>Sản phẩm</span><strong>HORA Media</strong></div><div class="summary-row"><span>Gói license</span><strong id="summary-pack">Plus — 1 tháng</strong></div><div class="summary-row"><span>Thời hạn</span><strong id="summary-duration">1 tháng</strong></div><div class="summary-row"><span>Tổng cộng</span><strong id="summary-price" style="color:var(--gold2);font-size:18px">400.000đ</strong></div><p class="summary-help">Thời hạn license bắt đầu theo điều kiện kích hoạt được công bố cho sản phẩm. Vui lòng xác nhận điều khoản trước khi thanh toán.</p><button class="btn" id="back-home" style="width:100%;margin-top:18px">← Quay lại trang sản phẩm</button></aside>
   <form class="buy-form" id="buy-form"><h3>Thông tin người mua</h3><label for="buyer-name">Họ và tên</label><input id="buyer-name" name="name" placeholder="Nhập họ tên" autocomplete="name" required><label for="buyer-phone">Số điện thoại</label><input id="buyer-phone" name="phone" placeholder="Ví dụ: 09xxxxxxxx" inputmode="tel" autocomplete="tel" required pattern="[0-9+ ()-]{9,16}"><label for="buyer-email">Email (không bắt buộc)</label><input id="buyer-email" name="email" type="email" placeholder="you@example.com" autocomplete="email"><button class="btn primary" type="submit">Tiếp tục mua hàng →</button><div class="form-note">Bằng việc tiếp tục, bạn đồng ý cung cấp thông tin để xử lý yêu cầu mua hàng và hỗ trợ license. Cần nối API/đơn hàng thật trước khi sử dụng.</div><div class="success" id="form-success">Thông tin đã được kiểm tra trên trình duyệt. Đây chỉ là demo giao diện; chưa có đơn hàng nào được gửi đi.</div></form>
  </div>
 </section>
@@ -192,7 +239,39 @@ const CONFIG = {
     {title:"Concept quảng cáo",type:"Creative Concept",desc:"Thử nghiệm phong cách hình ảnh",videoUrl:""}
   ]
 };
-const prices={"Gói 1 tháng":{price:"250.000đ",duration:"1 tháng"},"Gói 2 tháng":{price:"400.000đ",duration:"2 tháng"},"Gói 3 tháng":{price:"550.000đ",duration:"3 tháng"}};
+/* GIA TAM de xem layout — thay 4 so nay bang gia that khi chot ban. */
+const PLANS={
+  go:{name:"Go",month:250000,year:2500000},
+  plus:{name:"Plus",month:400000,year:4000000}
+};
+function fmtVnd(n){return Math.round(n).toLocaleString("vi-VN")+"đ";}
+const prices={};
+Object.values(PLANS).forEach(p=>{
+  prices[p.name+" — 1 tháng"]={price:fmtVnd(p.month),duration:"1 tháng"};
+  prices[p.name+" — 1 năm"]={price:fmtVnd(p.year),duration:"1 năm"};
+});
+let billing="month";
+function setBilling(period){
+  billing=period;
+  document.querySelectorAll("[data-billing]").forEach(b=>{
+    const on=b.dataset.billing===period;
+    b.classList.toggle("active",on);
+    b.setAttribute("aria-selected",on?"true":"false");
+  });
+  document.querySelectorAll("[data-plan-card]").forEach(card=>{
+    const p=PLANS[card.dataset.planCard]; if(!p) return;
+    const priceEl=card.querySelector("[data-price]");
+    const perEl=card.querySelector("[data-per]");
+    if(period==="year"){
+      const save=Math.round((1-p.year/(p.month*12))*100);
+      priceEl.textContent=fmtVnd(p.year);
+      perEl.textContent="≈ "+fmtVnd(p.year/12)+"/tháng · tiết kiệm "+save+"% so với theo tháng";
+    } else {
+      priceEl.textContent=fmtVnd(p.month);
+      perEl.textContent="/ tháng · linh hoạt, gia hạn bất cứ lúc nào";
+    }
+  });
+}
 const grid=document.getElementById("demo-grid");
 CONFIG.demos.forEach((d,i)=>{
  const card=document.createElement("article");card.className="demo-card";card.tabIndex=0;card.setAttribute("role","button");card.setAttribute("aria-label","Xem demo: "+d.title);
@@ -263,9 +342,9 @@ async function downloadFor(platform){
   }
 }
 document.querySelectorAll("[data-dl]").forEach(b=>b.addEventListener("click",()=>downloadFor(b.dataset.dl)));
-["zalo-link","zalo-float"].forEach(id=>document.getElementById(id).href=CONFIG.zaloUrl);
-["facebook-link","fb-float"].forEach(id=>document.getElementById(id).href=CONFIG.facebookUrl);
-let selectedPack="Gói 3 tháng";
+["zalo-link","zalo-float"].forEach(id=>{const el=document.getElementById(id); if(el) el.href=CONFIG.zaloUrl;});
+["facebook-link","fb-float"].forEach(id=>{const el=document.getElementById(id); if(el) el.href=CONFIG.facebookUrl;});
+let selectedPack="Plus — 1 tháng";
 function showPurchase(pack=selectedPack){selectedPack=pack;document.getElementById("main-content").classList.add("hidden");document.getElementById("purchase").classList.add("active");document.getElementById("summary-pack").textContent=pack;document.getElementById("summary-duration").textContent=prices[pack].duration;document.getElementById("summary-price").textContent=prices[pack].price;document.getElementById("form-success").style.display="none";window.scrollTo({top:0,behavior:"smooth"});}
 function showHome(){document.getElementById("purchase").classList.remove("active");document.getElementById("main-content").classList.remove("hidden");window.scrollTo({top:0,behavior:"smooth"});}
 function scrollToSection(target){
@@ -330,6 +409,9 @@ function scrollToPricing(){
 document.getElementById("nav-buy")?.addEventListener("click",scrollToPricing);
 document.getElementById("hero-buy")?.addEventListener("click",scrollToPricing);
 document.querySelectorAll("[data-buy-pack]").forEach(b=>b.addEventListener("click",()=>showPurchase(b.dataset.buyPack)));
+document.querySelectorAll("[data-buy-plan]").forEach(b=>b.addEventListener("click",()=>{const p=PLANS[b.dataset.buyPlan]; if(p) showPurchase(p.name+" — "+(billing==="year"?"1 năm":"1 tháng"));}));
+document.querySelectorAll("[data-billing]").forEach(b=>b.addEventListener("click",()=>setBilling(b.dataset.billing)));
+setBilling("month");
 document.getElementById("back-home")?.addEventListener("click",showHome);
 document.querySelectorAll(".navlinks a[data-home-link]").forEach(a=>a.addEventListener("click",e=>{
   const targetId=a.getAttribute("href");
