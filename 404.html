@@ -3,17 +3,143 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>404 — Không tìm thấy trang | My Product</title>
+  <title>404 — Không tìm thấy trang | HORA Media</title>
+  <meta name="description" content="Trang bạn tìm không tồn tại trên HORA Media.">
+  <meta name="robots" content="noindex">
   <link rel="icon" href="/favicon.ico" sizes="any">
-  <link rel="stylesheet" href="/css/style.css">
+  <script>
+    // Đồng bộ theme với trang chủ (index lưu lựa chọn ở localStorage "hora-theme")
+    (function () {
+      var saved = "system";
+      try { saved = localStorage.getItem("hora-theme") || "system"; } catch (e) {}
+      var light = saved === "light" ||
+        (saved === "system" && window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches);
+      document.documentElement.dataset.theme = light ? "light" : "dark";
+    })();
+  </script>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #080d12; --panel: #111a20; --panel2: #17232b; --line: #293941;
+      --text: #e7f0f2; --muted: #9baeb4; --accent: #10dcc8; --accent2: #62f0e2;
+      --radius: 18px;
+    }
+    [data-theme="light"] {
+      color-scheme: light;
+      --bg: #f4f8f9; --panel: #ffffff; --panel2: #eaf2f4; --line: #d7e2e5;
+      --text: #14252b; --muted: #61747b; --accent: #079f94; --accent2: #087f79;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh; display: flex; flex-direction: column;
+      background:
+        radial-gradient(640px 380px at 85% -60px, #10dcc81f, transparent 65%),
+        radial-gradient(560px 340px at 8% 110%, #10dcc814, transparent 60%),
+        var(--bg);
+      color: var(--text);
+      font: 15px/1.55 Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    }
+    header {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 20;
+      border-bottom: 1px solid var(--line);
+      background: color-mix(in srgb, var(--bg) 88%, transparent);
+      backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+    }
+    .nav {
+      max-width: 1120px; margin: 0 auto; padding: 0 20px; height: 64px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .brand {
+      color: var(--text); text-decoration: none; font-weight: 800; font-size: 18px;
+      letter-spacing: .2px; display: inline-flex; align-items: center; gap: 10px;
+    }
+    .brand .dot {
+      width: 11px; height: 11px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent2), var(--accent));
+      box-shadow: 0 0 14px #10dcc880;
+    }
+    .brand span { color: var(--accent); }
+    .nav .home-link { color: var(--muted); text-decoration: none; font-weight: 600; }
+    .nav .home-link:hover { color: var(--text); }
+    main {
+      flex: 1; width: 100%; max-width: 1120px; margin: 0 auto;
+      padding: 148px 20px 56px; display: flex; flex-direction: column; align-items: center; text-align: center;
+    }
+    .code {
+      font-size: clamp(96px, 22vw, 190px); font-weight: 900; line-height: .95; letter-spacing: -2px;
+      background: linear-gradient(135deg, var(--accent2), var(--accent) 55%, #0aa696);
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+      filter: drop-shadow(0 12px 34px #10dcc82e);
+    }
+    h1 { font-size: clamp(24px, 4.5vw, 34px); margin: 14px 0 10px; }
+    .lead { color: var(--muted); max-width: 520px; margin: 0 0 30px; font-size: 16px; }
+    .actions { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-bottom: 52px; }
+    .btn {
+      display: inline-flex; justify-content: center; align-items: center; gap: 9px;
+      padding: 12px 22px; border: 1px solid var(--line); border-radius: 11px;
+      background: #ffffff04; color: var(--text); font-weight: 700; text-decoration: none; transition: .2s;
+    }
+    .btn:hover { border-color: var(--accent); transform: translateY(-1px); }
+    .btn.primary {
+      background: linear-gradient(135deg, var(--accent2), var(--accent));
+      border-color: transparent; color: #052522;
+    }
+    .cards {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;
+      width: 100%; max-width: 820px; text-align: left;
+    }
+    .card {
+      background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
+      padding: 20px; text-decoration: none; color: var(--text); transition: .2s;
+    }
+    .card:hover { border-color: var(--accent); background: var(--panel2); transform: translateY(-2px); }
+    .card h2 { font-size: 16px; margin: 0 0 6px; }
+    .card p { color: var(--muted); margin: 0; font-size: 14px; }
+    .card .arrow { color: var(--accent); font-weight: 800; }
+    footer {
+      border-top: 1px solid var(--line); color: var(--muted); text-align: center;
+      padding: 22px 20px; font-size: 14px;
+    }
+    @media (max-width: 720px) {
+      main { padding-top: 120px; }
+      .cards { grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
 <body>
+  <header>
+    <div class="nav">
+      <a class="brand" href="/" aria-label="HORA Media — trang chủ"><span class="dot"></span>HORA&nbsp;<span>Media</span></a>
+      <a class="home-link" href="/">← Trang chủ</a>
+    </div>
+  </header>
+
   <main>
-    <section class="hero">
-      <h1>404</h1>
-      <p class="tagline">Trang bạn tìm không tồn tại.</p>
-      <a class="btn" href="/">Về trang chủ</a>
-    </section>
+    <div class="code" aria-hidden="true">404</div>
+    <h1>Không tìm thấy trang này</h1>
+    <p class="lead">Đường dẫn bạn mở không tồn tại, đã bị đổi hoặc đã bị gỡ. Đừng lo — mọi nội dung chính vẫn ở trang chủ.</p>
+
+    <div class="actions">
+      <a class="btn primary" href="/">Về trang chủ</a>
+      <a class="btn" href="/#pricing">Xem bảng giá</a>
+    </div>
+
+    <div class="cards">
+      <a class="card" href="/#demos">
+        <h2>Video demo <span class="arrow">→</span></h2>
+        <p>Xem các video sản phẩm mẫu do HORA Media tạo ra.</p>
+      </a>
+      <a class="card" href="/#features">
+        <h2>Tính năng <span class="arrow">→</span></h2>
+        <p>Tìm hiểu công cụ tạo video sản phẩm bằng AI làm được gì.</p>
+      </a>
+      <a class="card" href="/#support">
+        <h2>Hỗ trợ <span class="arrow">→</span></h2>
+        <p>Cần giúp đỡ về cài đặt, mua hàng hoặc kích hoạt license.</p>
+      </a>
+    </div>
   </main>
+
+  <footer>&copy; 2026 HORA Media</footer>
 </body>
 </html>
