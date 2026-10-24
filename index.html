@@ -78,6 +78,10 @@ footer{border-top:1px solid var(--line);padding:28px 0 38px;color:var(--muted);f
 .price-card.coming{opacity:.65}
 .price-card.coming .btn{cursor:not-allowed}
 .popular.soon{background:var(--panel2);color:var(--muted);border:1px solid var(--line)}
+.pricing-grid{align-items:stretch}
+.price-card{display:flex;flex-direction:column;height:100%}
+.price-card ul{flex:1}
+.price-card .btn{margin-top:auto}
 
 /* Theme switching: system / light / dark */
 .theme-select{width:42px;min-width:42px;height:40px;padding:6px;border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--text);font-size:17px;text-align:center;cursor:pointer;outline:none;appearance:none}
@@ -344,10 +348,19 @@ async function downloadFor(platform){
 document.querySelectorAll("[data-dl]").forEach(b=>b.addEventListener("click",()=>downloadFor(b.dataset.dl)));
 ["zalo-link","zalo-float"].forEach(id=>{const el=document.getElementById(id); if(el) el.href=CONFIG.zaloUrl;});
 ["facebook-link","fb-float"].forEach(id=>{const el=document.getElementById(id); if(el) el.href=CONFIG.facebookUrl;});
+function openSocial(kind){
+  const isZalo=kind==="zalo";
+  const url=isZalo ? CONFIG.zaloUrl : CONFIG.facebookUrl;
+  const label=isZalo ? "Zalo" : "Facebook";
+  if(url && url !== "#"){ window.open(url,"_blank","noopener"); }
+  else { alert("Link "+label+" chưa được cấu hình. Hãy cập nhật CONFIG."+(isZalo?"zaloUrl":"facebookUrl")+" trong mã nguồn."); }
+}
+["zalo-link","zalo-float"].forEach(id=>{const el=document.getElementById(id); if(el) el.addEventListener("click",e=>{e.preventDefault(); openSocial("zalo");});});
+["facebook-link","fb-float"].forEach(id=>{const el=document.getElementById(id); if(el) el.addEventListener("click",e=>{e.preventDefault(); openSocial("facebook");});});
 let selectedPack="Plus — 1 tháng";
 function showPurchase(pack=selectedPack){selectedPack=pack;document.getElementById("main-content").classList.add("hidden");document.getElementById("purchase").classList.add("active");document.getElementById("summary-pack").textContent=pack;document.getElementById("summary-duration").textContent=prices[pack].duration;document.getElementById("summary-price").textContent=prices[pack].price;document.getElementById("form-success").style.display="none";window.scrollTo({top:0,behavior:"smooth"});}
 function showHome(){document.getElementById("purchase").classList.remove("active");document.getElementById("main-content").classList.remove("hidden");window.scrollTo({top:0,behavior:"smooth"});}
-function scrollToSection(target){
+function scrollToSection(target, focusEl){
   if(!target) return;
   // Header duoc pin o top (sticky) nen vung nhin that = chieu cao man hinh - chieu cao header.
   // Moi so deu DO TRUC TIEP ngay luc click theo dung man hinh dang mo, khong co dinh theo may:
@@ -358,7 +371,7 @@ function scrollToSection(target){
   function computeTargetY(){
     const headerHeight=header ? header.offsetHeight : 0;
     const visibleHeight=window.innerHeight-headerHeight;
-    const rect=target.getBoundingClientRect();
+    const rect=(focusEl||target).getBoundingClientRect();
     // Section ngan hon vung nhin: can giua vung nhin duoi header.
     // Section cao hon vung nhin (vd Video demo): ghim canh tren sat duoi header + 16px.
     let topOffset = rect.height <= visibleHeight - 32
@@ -370,7 +383,7 @@ function scrollToSection(target){
     topOffset -= Math.round(visibleHeight * SCROLL_LIFT_RATIO);
     // Khong day qua muc bi header pin che: noi dung that (sau padding-top cua section)
     // phai nam duoi header it nhat 8px.
-    const padTop=parseFloat(getComputedStyle(target).paddingTop)||0;
+    const padTop=parseFloat(getComputedStyle(focusEl||target).paddingTop)||0;
     topOffset=Math.max(topOffset, headerHeight + 8 - padTop);
     const maxY=Math.max(0,document.documentElement.scrollHeight-window.innerHeight);
     return Math.min(maxY, Math.max(0, rect.top + window.scrollY - topOffset));
@@ -403,7 +416,7 @@ function scrollToPricing(){
   if(pricing){
     document.getElementById("main-content").classList.remove("hidden");
     document.getElementById("purchase").classList.remove("active");
-    requestAnimationFrame(()=>scrollToSection(pricing));
+    requestAnimationFrame(()=>scrollToSection(pricing, pricing.querySelector(".pricing-grid")));
   }
 }
 document.getElementById("nav-buy")?.addEventListener("click",scrollToPricing);
@@ -423,7 +436,7 @@ document.querySelectorAll(".navlinks a[data-home-link]").forEach(a=>a.addEventLi
   const wasPurchasing=purchase.classList.contains("active");
   if(wasPurchasing) showHome();
   requestAnimationFrame(()=>requestAnimationFrame(()=>{
-    scrollToSection(target);
+    scrollToSection(target, targetId==="#pricing" ? target.querySelector(".pricing-grid") : null);
     history.replaceState(null,"",targetId);
   }));
 }));
