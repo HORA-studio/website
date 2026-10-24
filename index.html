@@ -172,6 +172,7 @@ const savedTheme=localStorage.getItem("hora-theme")||"system";
 document.documentElement.dataset.theme=savedTheme;themeSelect.value=savedTheme;
 themeSelect.addEventListener("change",()=>{document.documentElement.dataset.theme=themeSelect.value;localStorage.setItem("hora-theme",themeSelect.value)});
 const CONFIG = {
+  releasesJsonUrl: "https://releases.hora.works/hora.media/latest.json",
   downloadUrl: "#",
   downloadWindowsUrl: "#",
   downloadLinuxUrl: "#",
@@ -206,12 +207,41 @@ document.querySelectorAll(".dl-toggle").forEach(btn=>btn.addEventListener("click
 }));
 document.addEventListener("click",e=>{if(!e.target.closest(".dl-wrap")) closeDownloadMenus();});
 document.addEventListener("keydown",e=>{if(e.key==="Escape") closeDownloadMenus();});
-function downloadFor(platform){
+let releasesCache=null;
+function isUsableDownloadUrl(url){
+  return typeof url==="string" && /^https?:\/\//i.test(url) && !/[<>]/.test(url);
+}
+async function fetchReleaseUrl(platform){
+  if(!releasesCache){
+    releasesCache=fetch(CONFIG.releasesJsonUrl,{cache:"no-cache"})
+      .then(r=>{ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); })
+      .catch(err=>{ releasesCache=null; throw err; });
+  }
+  const data=await releasesCache;
+  return data && data.platforms && data.platforms[platform] ? data.platforms[platform].url : null;
+}
+async function downloadFor(platform){
   const isWin=platform==="windows";
-  const url=(isWin ? CONFIG.downloadWindowsUrl : CONFIG.downloadLinuxUrl) || CONFIG.downloadUrl;
+  const label=isWin?"Windows":"Linux";
+  const fallback=(isWin ? CONFIG.downloadWindowsUrl : CONFIG.downloadLinuxUrl) || CONFIG.downloadUrl;
   closeDownloadMenus();
-  if(url && url !== "#"){ window.open(url,"_blank","noopener"); }
-  else { alert("Link tải bản "+(isWin?"Windows":"Linux")+" chưa được cấu hình. Hãy cập nhật CONFIG.download"+(isWin?"Windows":"Linux")+"Url trong mã nguồn."); }
+  // Mo tab ngay trong luc click de trinh duyet khong chan popup sau khi fetch xong.
+  const tab=window.open("","_blank");
+  let url=null, fetchError=null, jsonUrl=null;
+  try{ jsonUrl=await fetchReleaseUrl(platform); }catch(err){ fetchError=err; }
+  if(isUsableDownloadUrl(jsonUrl)){ url=jsonUrl; }
+  else if(isUsableDownloadUrl(fallback)){ url=fallback; }
+  if(url){
+    if(tab){ tab.opener=null; tab.location=url; }
+    else{ window.open(url,"_blank","noopener"); }
+    return;
+  }
+  if(tab) tab.close();
+  if(fetchError){
+    alert("Chưa tải được bản "+label+": không đọc được file latest.json ("+fetchError.message+"). Kiểm tra lại đường truyền hoặc cấu hình CORS của releases.hora.works.");
+  } else {
+    alert("Link tải bản "+label+" trong latest.json chưa hợp lệ (đang là placeholder). Hãy cập nhật platforms."+platform+".url trong latest.json.");
+  }
 }
 document.querySelectorAll("[data-dl]").forEach(b=>b.addEventListener("click",()=>downloadFor(b.dataset.dl)));
 ["zalo-link","zalo-float"].forEach(id=>document.getElementById(id).href=CONFIG.zaloUrl);
