@@ -379,8 +379,10 @@ function scrollToSection(target, focusEl){
       : headerHeight + 16;
     // Day len them theo TY LE chieu cao man hinh (man hinh cao day nhieu, thap day it)
     // chu khong co dinh px. Muon day nhieu/it hon: sua SCROLL_LIFT_RATIO (0.12 = 12%).
+    // Rieng khi focus vao 1 khoi cu the (vd khoi the gia): KHONG day len — de khoi
+    // nam dung giua vung nhin, day len se lam khoi bi cao hon giua man hinh.
     const SCROLL_LIFT_RATIO=0.12;
-    topOffset -= Math.round(visibleHeight * SCROLL_LIFT_RATIO);
+    if(!focusEl) topOffset -= Math.round(visibleHeight * SCROLL_LIFT_RATIO);
     // Khong day qua muc bi header pin che: noi dung that (sau padding-top cua section)
     // phai nam duoi header it nhat 8px.
     const padTop=parseFloat(getComputedStyle(focusEl||target).paddingTop)||0;
