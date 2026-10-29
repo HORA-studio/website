@@ -26,7 +26,16 @@ export async function onRequestGet({ request, env }) {
   const { results } = await env.DB.prepare(
     "SELECT * FROM orders WHERE customer_id = ?1 ORDER BY created_at DESC"
   ).bind(a.customer.id).all();
-  return json({ orders: (results || []).map(orderOut) });
+  const orders = (results || []).map((r) => {
+    const o = orderOut(r);
+    // Don dang cho thanh toan qua SePay: kem huong dan chuyen khoan de khach
+    // mo lai man thanh toan tu tab Lich su (nut "Mo").
+    if ((o.status === "created" || o.status === "awaiting_payment") && o.gateway === "sepay" && isGatewayConfigured(env, "sepay")) {
+      o.payment_instructions = buildSepayInstructions(env, { code: sepayPaymentCode(o.id), amount: o.amountVnd });
+    }
+    return o;
+  });
+  return json({ orders });
 }
 
 export async function onRequestPost({ request, env }) {
