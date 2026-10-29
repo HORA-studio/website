@@ -751,6 +751,12 @@ html[data-theme="dark"] .plan-plus:before{color:#04211c}
 .plan-opt-label strong{font-weight:800}
 .buy-now{min-width:124px}
 @media (max-width:560px){.plan-opt{flex-direction:column;gap:8px}.plan-opt-label{width:auto;text-align:center}}
+
+/* Goi chia 2 cot (Go | Plus); toggle chi hien dong gia cua ky dang chon */
+.pricing-wrap .pricing-grid{display:grid !important;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
+.plan-block + .plan-block{border-top:0}
+@media (max-width:900px){.plan-opt{flex-direction:column;gap:8px}.plan-opt-label{width:auto;text-align:center}}
+@media (max-width:640px){.pricing-wrap .pricing-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
