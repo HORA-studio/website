@@ -872,6 +872,9 @@ body{padding-top:0 !important}
 .lic-table th:nth-child(7){width:8%}
 .lic-table td{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .lic-table td.key-cell{white-space:normal}
+
+/* Tab Lich su: padding trai/phai than bang = 20px */
+#dash .orders-body{padding-left:20px !important;padding-right:20px !important}
 </style>
 </head>
 <body>
@@ -1263,7 +1266,7 @@ function renderHistory() {
       <td class="export-cell"><button type="button" class="export-btn" data-export-kind="order" data-export-id="${esc(o.id || "")}" title="Xuất đơn hàng này"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 11 5 5 5-5"></path><path d="M4 21h16"></path></svg> Xuất</button></td>
     </tr>`);
   }
-  body.innerHTML = html.length ? html.join("") : '<tr class="empty-row"><td colspan="7"><div class="empty-title">Chưa có đơn hàng nào</div><div class="empty-sub">Dưới đây sẽ ghi nhận lịch sử mua hàng của người dùng</div></td></tr>';
+  body.innerHTML = html.length ? html.join("") : '<tr class="empty-row"><td colspan="7"><div class="empty-title">Chưa có dữ liệu</div><div class="empty-sub">Lịch sử đơn hàng sẽ lưu ở đây</div></td></tr>';
   document.querySelectorAll("[data-copy]").forEach((b) => b.addEventListener("click", async () => {
     try { await navigator.clipboard.writeText(b.dataset.copy); b.textContent = "Đã copy"; } catch { /* clipboard bi chan */ }
   }));
