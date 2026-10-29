@@ -1,15 +1,16 @@
 // Thu vien dung chung cho cac Pages Function /api/* cua website HORA.
 // Chay tren Cloudflare Workers runtime (WebCrypto, fetch, D1 qua env.DB).
 
+// GIA TAM — user chot tam 2026-10-29, cho gia that (khong phai gia chinh thuc).
 export const PLANS = {
-  go:   { name: "Go",   month: null, year: null },
-  plus: { name: "Plus", month: null, year: null },
+  go:   { name: "Go",   month: 250000, year: 2500000 },
+  plus: { name: "Plus", month: 400000, year: 4000000 },
 };
 
 // Gia chinh thuc nam trong PLANS o tren (dong bo tay voi PLANS trong index.html;
 // account.html tu lay gia tu GET /api/plans nen tu dong theo server, chi con
 // ban sao du phong khi fetch loi). Cac bien PRICE_* chi la override de test
-// local/staging, mac dinh khong dat -> gia null nhu PLANS.
+// local/staging, mac dinh khong dat -> dung gia PLANS o tren.
 export function getPlans(env = {}) {
   const out = {};
   for (const [key, p] of Object.entries(PLANS)) {

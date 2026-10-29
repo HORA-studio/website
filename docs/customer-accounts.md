@@ -1,4 +1,4 @@
-Trạng thái: ĐÃ implement code + ĐÃ kiểm chứng local (node --check toàn bộ file JS mới; unit test hàm ký MoMo/VNPay, checksum và PBKDF2; chạy thật `wrangler pages dev` với D1 local — đăng ký/đăng nhập/đăng xuất, nhận license bằng key, tạo đơn, IPN VNPay ký đúng/sai/lặp đều đúng kỳ vọng). ĐÃ thêm SePay làm cổng chính (2026-10-29) + kiểm chứng local tương tự (tạo đơn ra hướng dẫn chuyển khoản + QR, webhook sai key 401 / lệch tiền / đúng mã+tiền / trùng giao dịch đều đúng kỳ vọng). CHƯA deploy, CHƯA push, giá bán CHƯA chốt, tài khoản SePay + merchant MoMo/VNPay CHƯA có, endpoint cấp license phía hệ license CHƯA implement.
+Trạng thái: ĐÃ implement code + ĐÃ kiểm chứng local (node --check toàn bộ file JS mới; unit test hàm ký MoMo/VNPay, checksum và PBKDF2; chạy thật `wrangler pages dev` với D1 local — đăng ký/đăng nhập/đăng xuất, nhận license bằng key, tạo đơn, IPN VNPay ký đúng/sai/lặp đều đúng kỳ vọng). ĐÃ thêm SePay làm cổng chính (2026-10-29) + kiểm chứng local tương tự (tạo đơn ra hướng dẫn chuyển khoản + QR, webhook sai key 401 / lệch tiền / đúng mã+tiền / trùng giao dịch đều đúng kỳ vọng). CHƯA deploy, CHƯA push, GIÁ TẠM đã áp 2026-10-29 (Go 250.000đ/tháng, 2.500.000đ/năm; Plus 400.000đ/tháng, 4.000.000đ/năm — GIÁ TẠM, chờ giá thật), tài khoản SePay + merchant MoMo/VNPay CHƯA có, endpoint cấp license phía hệ license CHƯA implement.
 
 # Tài khoản khách + dashboard + thanh toán tự động (website)
 
@@ -52,10 +52,16 @@ Trình duyệt ── /account.html (tĩnh, cùng origin)
   `functions/api/_lib.js` (phía server là nơi quyết định số tiền đơn).
   `account.html` tự lấy giá qua `GET /api/plans` (Pages Function
   `functions/api/plans.js`, trả đúng `getPlans(env)`) nên tự động theo server,
-  chỉ còn bản sao dự phòng khi fetch lỗi. Hiện giá vẫn `null` (chưa chốt) ->
-  nút mua bị khóa, API tạo đơn trả `422 PRICE_NOT_SET`. Đổi giá chính thức =
-  sửa 2 chỗ trên. Biến `PRICE_GO_MONTH` v.v. chỉ là override để test
-  local/staging, không dùng cho production.
+  chỉ còn bản sao dự phòng khi fetch lỗi. **GIÁ TẠM đã áp (user chốt tạm
+  2026-10-29, chờ giá thật): Go 250.000đ/tháng, 2.500.000đ/năm; Plus
+  400.000đ/tháng, 4.000.000đ/năm** — đã điền vào cả 2 bản sao bắt buộc +
+  bản sao dự phòng trong `account.html`. Nút mua ở trang chủ đã mở ("Chọn
+  gói", chuyển thẳng sang `/account.html?plan=<go|plus>&period=<month|year>`
+  để checkout thật), API tạo đơn dùng đúng số tiền này (không còn trả
+  `422 PRICE_NOT_SET`). Đổi giá = sửa `PLANS` ở 2 nơi bắt buộc trên
+  (`account.html` tự theo server qua `/api/plans`; nhớ sửa cả bản sao dự
+  phòng của nó cho khớp). Biến `PRICE_GO_MONTH` v.v. chỉ là override để
+  test local/staging, không dùng cho production.
 - Stripe **không** dùng: Stripe không onboard merchant có trụ sở tại Việt
   Nam. Kiến trúc cổng nằm ở `functions/api/payments/_gateway.js` để sau này
   thêm cổng khác.
@@ -161,9 +167,11 @@ URL cần đăng ký với từng cổng (khi có merchant):
 
 ## Checklist mở bán (go-live)
 
-1. [ ] User chốt giá thật -> điền vào `PLANS` ở 2 nơi (`index.html`,
-   `functions/api/_lib.js`) — bỏ khóa nút mua ở trang chủ. Trang tài khoản
-   tự theo qua `/api/plans`.
+1. [x] GIÁ TẠM đã điền 2026-10-29 (Go 250.000đ/tháng, 2.500.000đ/năm;
+   Plus 400.000đ/tháng, 4.000.000đ/năm), nút mua trang chủ đã mở và nối
+   checkout thật ở `/account.html`. [ ] Khi user chốt GIÁ THẬT: sửa lại
+   `PLANS` ở 2 nơi (`index.html`, `functions/api/_lib.js`) + bản sao dự
+   phòng trong `account.html`.
 2. [ ] Áp `db/schema.sql` lên D1 `hora-core` thật (`--remote`, cần đăng nhập
    Cloudflare của user).
 3. [ ] **SePay trước:** đăng ký sepay.vn + liên kết tài khoản ngân hàng +
@@ -228,3 +236,20 @@ URL cần đăng ký với từng cổng (khi có merchant):
   webhook -> **503** `{success:false}` vì chưa đặt `SEPAY_WEBHOOK_API_KEY`.
 - **Chưa** kiểm chứng: tiền thật qua SePay (cần tài khoản SePay thật liên
   kết ngân hàng của user + webhook thật trên domain đã deploy).
+
+## Đã kiểm chứng local — GIÁ TẠM (2026-10-29, bổ sung)
+
+- Grep toàn bộ bản sao `PLANS` (`index.html`, `account.html`,
+  `functions/api/_lib.js`): không còn `month/year: null`.
+- `node --check`: đạt cho `_lib.js`, `plans.js`, JS inline của
+  `account.html` (gồm handler `applyPreselect` mới) và block script chính
+  của `index.html` (gồm handler nút mua mới chuyển sang
+  `/account.html?plan=…&period=…`). Diff `index.html` chỉ 5 hunk nhỏ.
+- `wrangler pages dev` + D1 local, KHÔNG đặt biến `PRICE_*`/`SEPAY_*`:
+  `GET /api/plans` trả đúng giá tạm (Go 250000/2500000, Plus
+  400000/4000000) -> đăng ký 201 -> `me` 200 -> tạo đơn SePay gói Go/1
+  tháng -> **503 `GATEWAY_NOT_CONFIGURED`** (đúng kỳ vọng vì chưa có tài
+  khoản SePay) và đơn được tạo với `amountVnd = 250000`, trạng thái
+  `created` — **không còn `422 PRICE_NOT_SET`**; đơn Plus/1 năm có
+  `amountVnd = 4000000` -> lịch sử giao dịch liệt kê đúng số tiền -> đăng
+  nhập sai 401 / đúng 200. Đã dọn `.wrangler/` local sau test.

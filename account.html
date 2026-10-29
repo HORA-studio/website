@@ -144,10 +144,10 @@ code{background:var(--panel2);padding:1px 6px;border-radius:6px;word-break:break
 
 <script>
 // Gia lay tu GET /api/plans (server la nguon dung). Ban sao duoi day chi la
-// du phong khi fetch loi. Gia chua chot -> null -> "Sap mo ban" + khoa nut mua.
+// du phong khi fetch loi. GIA TAM — user chot tam 2026-10-29, cho gia that.
 let PLANS = {
-  go:   { name: "Go",   month: null, year: null },
-  plus: { name: "Plus", month: null, year: null }
+  go:   { name: "Go",   month: 250000, year: 2500000 },
+  plus: { name: "Plus", month: 400000, year: 4000000 }
 };
 async function loadPlans() {
   try {
@@ -218,6 +218,7 @@ async function loadDash() {
   $("acc-name").textContent = data.customer.displayName ? " — " + data.customer.displayName : "";
   await loadPlans();
   renderPlans();
+  applyPreselect();
   await Promise.all([loadLicenses(), loadOrders()]);
 }
 
@@ -253,6 +254,20 @@ async function loadOrders() {
     </tr>`).join("")
     : '<tr><td colspan="6" class="muted">Chưa có giao dịch nào.</td></tr>';
   return rows;
+}
+
+// Chon san goi/ky tu link trang chu: /account.html?plan=go|plus&period=month|year
+// (bo qua gia tri khong hop le). Chi to sang + cuon toi nut mua tuong ung.
+function applyPreselect() {
+  const qs = new URLSearchParams(location.search);
+  const plan = qs.get("plan"), period = qs.get("period");
+  if (!PLANS[plan] || !["month", "year"].includes(period)) return;
+  const btn = document.querySelector(`[data-buy="${plan}:${period}"]`);
+  if (!btn) return;
+  btn.style.outline = "2px solid var(--gold2)";
+  btn.style.outlineOffset = "2px";
+  btn.textContent = "Mua ngay — đã chọn từ trang chủ";
+  btn.scrollIntoView({ behavior: "smooth", block: "center" });
 }
 
 function renderPlans() {

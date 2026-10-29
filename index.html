@@ -137,7 +137,7 @@ html[data-theme="light"] input,html[data-theme="light"] textarea,html[data-theme
   </section>
   <section class="section" id="pricing">
    <div class="pricing-wrap">
-    <div class="section-head"><div><h2>Chọn gói phù hợp với bạn</h2></div><p>Mọi gói đều mở khóa toàn bộ tính năng. Giá sẽ được công bố khi mở bán.</p></div>
+    <div class="section-head"><div><h2>Chọn gói phù hợp với bạn</h2></div><p>Mọi gói đều mở khóa toàn bộ tính năng. Giá hiển thị là GIÁ TẠM.</p></div>
 
     <div class="pricing-grid">
      <article class="price-card" data-plan-card="go">
@@ -151,7 +151,7 @@ html[data-theme="light"] input,html[data-theme="light"] textarea,html[data-theme
        <li>Được hỗ trợ cài đặt &amp; kích hoạt</li>
        <li>License theo máy — 1 license dùng trên 1 máy</li>
       </ul>
-      <button class="btn" data-buy-plan="go" disabled>Sắp mở bán</button>
+      <button class="btn" data-buy-plan="go">Chọn gói</button>
      </article>
      <article class="price-card featured" data-plan-card="plus">
       <span class="popular">ĐƯỢC CHỌN NHIỀU</span>
@@ -166,7 +166,7 @@ html[data-theme="light"] input,html[data-theme="light"] textarea,html[data-theme
        <li>Được hỗ trợ cài đặt &amp; kích hoạt</li>
        <li>License theo máy — 1 license dùng trên 1 máy</li>
       </ul>
-      <button class="btn primary" data-buy-plan="plus" disabled>Sắp mở bán</button>
+      <button class="btn primary" data-buy-plan="plus">Chọn gói</button>
      </article>
      <article class="price-card coming" aria-disabled="true">
       <span class="popular soon">COMING SOON</span>
@@ -239,10 +239,10 @@ const CONFIG = {
     {title:"Concept quảng cáo",type:"Creative Concept",desc:"Thử nghiệm phong cách hình ảnh",videoUrl:""}
   ]
 };
-/* GIA CHUA CHOT — chua mo ban nen khong hien so tien. Khi chot gia that, dien month/year vao PLANS. */
+/* GIA TAM — user chot tam 2026-10-29, cho gia that. Doi gia = sua PLANS nay + PLANS trong functions/api/_lib.js. */
 const PLANS={
-  go:{name:"Go",month:null,year:null},
-  plus:{name:"Plus",month:null,year:null}
+  go:{name:"Go",month:250000,year:2500000},
+  plus:{name:"Plus",month:400000,year:4000000}
 };
 function fmtVnd(n){return Math.round(n).toLocaleString("vi-VN")+"đ";}
 const prices={};
@@ -421,7 +421,7 @@ function scrollToPricing(){
 document.getElementById("nav-buy")?.addEventListener("click",scrollToPricing);
 document.getElementById("hero-buy")?.addEventListener("click",scrollToPricing);
 document.querySelectorAll("[data-buy-pack]").forEach(b=>b.addEventListener("click",()=>showPurchase(b.dataset.buyPack)));
-document.querySelectorAll("[data-buy-plan]").forEach(b=>b.addEventListener("click",()=>{const p=PLANS[b.dataset.buyPlan]; if(p) showPurchase(p.name+" — "+(billing==="year"?"1 năm":"1 tháng"));}));
+document.querySelectorAll("[data-buy-plan]").forEach(b=>b.addEventListener("click",()=>{location.href="/account.html?plan="+encodeURIComponent(b.dataset.buyPlan)+"&period="+billing;}));
 document.querySelectorAll("[data-billing]").forEach(b=>b.addEventListener("click",()=>setBilling(b.dataset.billing)));
 setBilling("month");
 document.getElementById("back-home")?.addEventListener("click",showHome);
