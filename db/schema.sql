@@ -119,6 +119,7 @@ CREATE TABLE IF NOT EXISTS licenses (
   device_count   INTEGER NOT NULL DEFAULT 0,
   created_at     TEXT NOT NULL
 );
+CREATE INDEX IF NOT EXISTS idx_licenses_order ON licenses(order_id);
 CREATE INDEX IF NOT EXISTS idx_licenses_cust ON licenses(customer_id);
 CREATE INDEX IF NOT EXISTS idx_licenses_app ON licenses(app);
 

@@ -4,6 +4,7 @@
 // '97' sai checksum, '01' khong thay don, '04' sai so tien, '02' don da xac nhan.
 import { json, tryIssueLicense } from "../_lib.js";
 import { isVnpayConfigured, verifyVnpayChecksum } from "./_gateway.js";
+import { logEvent, clientIp } from "../_log.js";
 
 const rsp = (code, message) => json({ RspCode: code, Message: message }, 200);
 
@@ -60,7 +61,15 @@ export async function onRequestGet({ request, env }) {
 
   await env.DB.prepare("UPDATE orders SET status = 'paid', paid_at = ?2 WHERE id = ?1").bind(order.id, now).run();
   const cust = await env.DB.prepare("SELECT email FROM customers WHERE id = ?1").bind(order.customer_id).first();
-  await tryIssueLicense(env, { ...order, email: cust ? cust.email : null });
+  // Cap license (idempotent theo order_id). That bai SAU khi da ghi nhan
+  // tien -> don ve 'paid_pending_issue' de retry noi bo cap lai; van tra
+  // RspCode '00' cho VNPay (tien da ghi nhan dung).
+  try {
+    await tryIssueLicense(env, { ...order, email: cust ? cust.email : null });
+  } catch (e) {
+    await env.DB.prepare("UPDATE orders SET status = 'paid_pending_issue' WHERE id = ?1").bind(order.id).run();
+    await logEvent(env, { eventType: "license.issue_failed", customerId: order.customer_id, actor: "vnpay", ip: clientIp(request), details: { orderId: order.id, error: String((e && e.message) || e) } });
+  }
 
   return rsp("00", "Success");
 }

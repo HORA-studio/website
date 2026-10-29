@@ -420,3 +420,28 @@ lan ngoài phạm vi:
 
 Không cần: endpoint mới phía Worker, biến `LICENSE_ISSUE_*`, thay đổi
 schema bắt buộc nào, thay đổi phía HORA.Admin.
+
+---
+
+## 10. Trạng thái triển khai (cập nhật 2026-10-29)
+
+- **L1 (mục 3) — ĐÃ IMPLEMENT:** `tryIssueLicense` trong
+  `functions/api/_lib.js` có nhánh idempotent theo `order_id` (đã có
+  license → đồng bộ `orders` sang `paid` + `license_id` cũ, không INSERT
+  mới); thêm index `idx_licenses_order` trong `db/schema.sql`. MoMo IPN
+  có guard trạng thái đơn (`paid`/`paid_pending_issue` → chỉ ack 204,
+  không xử lý lại), tương đương guard của VNPay/SePay.
+- **L2 (mục 3) — ĐÃ IMPLEMENT:** cả 3 handler (`sepay-webhook`,
+  `momo-ipn`, `vnpay-ipn`) bọc `tryIssueLicense` trong try/catch — lỗi
+  cấp sau khi đã ghi nhận tiền → đơn về `paid_pending_issue` + event
+  `license.issue_failed`, hợp đồng trả lời cho cổng giữ nguyên (SePay
+  `200 {success:true}`, MoMo `204`, VNPay RspCode `00`).
+- **Endpoint retry (mục 4.2) — ĐÃ IMPLEMENT:**
+  `functions/api/internal/retry-issue.js` (`POST /api/internal/retry-issue`,
+  header `X-Identity-Secret`). Ngoài chế độ 1 đơn `{orderId}` như mục
+  4.2, endpoint hỗ trợ chế độ quét khi không gửi `orderId`: quét tối đa
+  20 đơn kẹt (`paid`/`paid_pending_issue` chưa có license) mỗi lần gọi,
+  trả `{ processed, issued, stillPending }`.
+- **Chưa làm (ngoài phạm vi đợt này):** L3 (prefix key — chờ bằng chứng
+  C2), L4 (mapping plan→app), dọn docs ở mục 8, checklist remote/prod ở
+  mục 7.2 (phía user/Cloudflare).

@@ -83,13 +83,22 @@ export async function onRequestPost({ request, env }) {
     return ok({ matched: false, reason: "amount_mismatch" });
   }
 
-  // Thanh cong: cap nhat phien thanh toan + don, roi thu cap license
-  // (chua cau hinh endpoint cap -> don thanh 'paid_pending_issue').
+  // Thanh cong: cap nhat phien thanh toan + don, roi thu cap license ngay
+  // trong DB web (tryIssueLicense idempotent theo order_id). Cap THAT BAI
+  // sau khi da ghi nhan tien -> don ve 'paid_pending_issue' de endpoint
+  // retry noi bo cap lai sau; van tra success cho SePay (tien da ghi nhan
+  // dung) — khong de webhook vang 500 roi SePay retry trung vao guard
+  // giao dich (duplicate) khien don ket khong license.
   await env.DB.prepare("UPDATE payments SET status = 'paid', gateway_trans_id = ?2, raw_json = ?3 WHERE id = ?1")
     .bind(payRow.id, transId || null, raw).run();
   await env.DB.prepare("UPDATE orders SET status = 'paid', paid_at = ?2 WHERE id = ?1").bind(order.id, now).run();
   const cust = await env.DB.prepare("SELECT email FROM customers WHERE id = ?1").bind(order.customer_id).first();
-  await tryIssueLicense(env, { ...order, email: cust ? cust.email : null });
+  try {
+    await tryIssueLicense(env, { ...order, email: cust ? cust.email : null });
+  } catch (e) {
+    await env.DB.prepare("UPDATE orders SET status = 'paid_pending_issue' WHERE id = ?1").bind(order.id).run();
+    await logEvent(env, { eventType: "license.issue_failed", customerId: order.customer_id, actor: "sepay", ip: clientIp(request), details: { orderId: order.id, error: String((e && e.message) || e) } });
+  }
   await logEvent(env, { eventType: "payment.paid", customerId: order.customer_id, actor: "sepay", ip: clientIp(request), details: { orderId: order.id, amount, transId } });
 
   return ok({});

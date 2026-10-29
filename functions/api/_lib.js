@@ -192,7 +192,19 @@ export function appForPlan(plan) {
 // Cap license cho don da thanh toan — NGAY TRONG DB web (khong con goi endpoint
 // ngoai). expiry_utc = NULL de han bat dau dem tu luc bind device (giong logic
 // he license cu). Doi lai, don thanh 'paid' + co license_id.
+// IDEMPOTENT theo order_id: don da co license thi chi dong bo lai orders
+// (status 'paid' + license_id cu), KHONG cap license thu hai — IPN/webhook
+// cua cong goi lai bao nhieu lan cung an toan.
 export async function tryIssueLicense(env, order) {
+  const existing = await env.DB.prepare(
+    "SELECT id FROM licenses WHERE order_id = ?1 LIMIT 1"
+  ).bind(order.id).first();
+  if (existing) {
+    await env.DB.prepare("UPDATE orders SET status = 'paid', license_id = ?2 WHERE id = ?1")
+      .bind(order.id, existing.id).run();
+    return true;
+  }
+
   const now = new Date().toISOString();
   const app = appForPlan(order.plan);
   const productId = app;
