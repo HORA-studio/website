@@ -123,51 +123,21 @@ CREATE INDEX IF NOT EXISTS idx_licenses_cust ON licenses(customer_id);
 CREATE INDEX IF NOT EXISTS idx_licenses_app ON licenses(app);
 
 -- Device binding: 1 license = 1 may (fingerprint do client gui).
--- PK (app, device_id) — dung chung cho moi app. Worker app dung bang nay qua
--- AppDeviceStore (app_device_bindings) va LicenseStore (device_components).
+-- PK (app, device_id). Day la BANG DUY NHAT cho bind device (da gop
+-- app_device_bindings + app_device_lastchange vao day 2026-10-29).
+-- Worker app doc qua AppDeviceStore; LicenseStore doc device_components.
 CREATE TABLE IF NOT EXISTS devices (
   app               TEXT NOT NULL,
-  device_id         TEXT NOT NULL,
+  device_id         TEXT NOT NULL,      -- fingerprint THO do client gui
   license_id        TEXT NOT NULL REFERENCES licenses(id),
   customer_id       TEXT REFERENCES customers(id),
   bound_at          TEXT NOT NULL,
-  device_components TEXT,               -- JSON mang thanh phan fingerprint (unbind flow)
+  device_components TEXT,               -- JSON mang thanh phan fingerprint (unbind/validate)
   device_id_hash    TEXT,
   last_change_at    TEXT,
   PRIMARY KEY (app, device_id)
 );
 CREATE INDEX IF NOT EXISTS idx_devices_license ON devices(license_id);
-
--- Worker app (hora-worker-vb) doc/ghi cac bang duoi day qua binding DB_VB.
--- Giu dung TEN COT nhu schema app cu cua hora-vb de khong phai sua store.
-
--- Device binding theo app: device nao dang gan license nao.
-CREATE TABLE IF NOT EXISTS app_device_bindings (
-  app        TEXT NOT NULL,
-  device_id  TEXT NOT NULL,
-  license_id TEXT NOT NULL,
-  bound_at   TEXT NOT NULL,
-  PRIMARY KEY (app, device_id)
-);
-CREATE INDEX IF NOT EXISTS idx_app_bind_license ON app_device_bindings(app, license_id);
-
--- Lan doi may gan nhat (cooldown).
-CREATE TABLE IF NOT EXISTS app_device_lastchange (
-  app        TEXT NOT NULL,
-  license_id TEXT NOT NULL,
-  changed_at TEXT NOT NULL,
-  PRIMARY KEY (app, license_id)
-);
-
--- Lich su device da thay (batch cu) — chi ghi/ doc boi license flow cu.
-CREATE TABLE IF NOT EXISTS license_devices (
-  id          INTEGER PRIMARY KEY AUTOINCREMENT,
-  license_id  TEXT NOT NULL,
-  device_hash TEXT NOT NULL,
-  first_seen  TEXT NOT NULL,
-  UNIQUE(license_id, device_hash)
-);
-CREATE INDEX IF NOT EXISTS idx_license_devices_license ON license_devices(license_id);
 
 -- Plans/quota theo app (worker doc de tra plan; co fallback default trong code).
 CREATE TABLE IF NOT EXISTS plans (
@@ -177,45 +147,6 @@ CREATE TABLE IF NOT EXISTS plans (
   quota_json TEXT NOT NULL,
   PRIMARY KEY (app, tier)
 );
-
--- Yeu cau go thiet bi (unbind) — tu dong hoac admin duyet.
-CREATE TABLE IF NOT EXISTS unbind_requests (
-  request_id       TEXT PRIMARY KEY,
-  license_id       TEXT,
-  status           TEXT NOT NULL,
-  old_device       TEXT,
-  new_device       TEXT,
-  customer_email   TEXT,
-  customer_name    TEXT,
-  bill_reference   TEXT,
-  reason           TEXT,
-  auto_check_notes TEXT,
-  license_key_hash TEXT,
-  client_ip_hash   TEXT,
-  created_at       TEXT NOT NULL,
-  decided_at       TEXT,
-  decided_by       TEXT
-);
-
--- Feedback cua khach tren app desktop.
-CREATE TABLE IF NOT EXISTS app_feedback (
-  id               INTEGER PRIMARY KEY AUTOINCREMENT,
-  code             TEXT NOT NULL UNIQUE,
-  app              TEXT NOT NULL,
-  created_at       TEXT NOT NULL,
-  device_id        TEXT NOT NULL,
-  device_hash      TEXT,
-  license_id       TEXT,
-  plan             TEXT,
-  kind             TEXT NOT NULL,
-  content          TEXT NOT NULL,
-  app_version      TEXT,
-  os               TEXT,
-  log_text         TEXT,
-  attachments_json TEXT NOT NULL DEFAULT '[]'
-);
-CREATE INDEX IF NOT EXISTS idx_app_feedback_created ON app_feedback(app, created_at);
-CREATE INDEX IF NOT EXISTS idx_app_feedback_license ON app_feedback(app, license_id);
 
 -- Blocklist version (LicenseStore doc/ghi khi revoke/restore license).
 CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
@@ -229,3 +160,7 @@ CREATE TABLE IF NOT EXISTS device_changes (
   changed_at  TEXT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_device_changes_license ON device_changes(license_id);
+
+-- (Da xoa 2026-10-29: app_device_bindings, app_device_lastchange, license_devices —
+--  gop vao `devices`; app_feedback — desktop dung Google Sheet; unbind_requests —
+--  thay bang /api/app/device-change.)
