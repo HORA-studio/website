@@ -633,7 +633,9 @@ html[data-theme="dark"] .plan-plus:before{color:#04211c}
 .billing-opt{border:0;background:transparent;color:var(--muted);font:inherit;font-weight:650;padding:9px 20px;border-radius:999px;cursor:pointer;display:inline-flex;align-items:center}
 .billing-opt.on{background:var(--panel);color:var(--text);box-shadow:var(--shadow)}
 .save-badge{background:var(--accent-soft);color:var(--gold2);border:1px solid var(--line);font-size:10px;padding:2px 8px;border-radius:999px;margin-left:8px;font-weight:800}
-.pricing-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:26px;align-items:stretch;width:100%;max-width:880px;margin-inline:auto}
+.pricing-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:26px;align-items:stretch;width:100%;max-width:1160px;margin-inline:auto}
+.price-card.coming{opacity:.62}
+.popular.soon{background:var(--panel2);color:var(--muted);border:1px solid var(--line)}
 .price-card{position:relative;border:1px solid var(--line);background:var(--panel);border-radius:22px;padding:28px;display:flex;flex-direction:column}
 .price-card.featured{border-color:var(--gold);box-shadow:var(--shadow-lg)}
 .price-card h3{font-size:20px;margin:0}
@@ -689,7 +691,7 @@ html[data-theme="dark"] .plan-plus:before{color:#04211c}
       <button type="button" class="side-item active" data-view-btn="account"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4.5 20.5c1.4-3.8 4.4-5.5 7.5-5.5s6.1 1.7 7.5 5.5"></path></svg> Thông tin tài khoản</button>
       
       
-      <button type="button" class="side-item" data-view-btn="buy"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.6-6.3"></path><path d="M21 3v6h-6"></path></svg> Mua / gia hạn</button>
+      <button type="button" class="side-item" data-view-btn="buy"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.6-6.3"></path><path d="M21 3v6h-6"></path></svg> Mua gói</button>
       <button type="button" class="side-item" data-view-btn="orders"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M8.5 6h12M8.5 12h12M8.5 18h12"></path><path d="M4 6h.01M4 12h.01M4 18h.01"></path></svg> Lịch sử giao dịch</button>
     </nav>
     <div class="side-foot">
@@ -835,14 +837,6 @@ html[data-theme="dark"] .plan-plus:before{color:#04211c}
       <div class="orders-welcome"><div><h2>Lịch sử giao dịch</h2><p>Đơn mua, license và số ngày còn lại của bạn.</p></div></div>
       <div class="orders-body">
       <div id="ord-list" class="lic-list"></div>
-<form id="claim-form" style="margin-top:16px">
-        <label for="claim-key">Nhận license đã có — dán license key bạn đã được cấp:</label>
-        <div class="row">
-          <input id="claim-key" style="flex:1;min-width:260px" placeholder="HORA_0123ABCD…" autocomplete="off">
-          <button class="btn" type="submit">Nhận license</button>
-        </div>
-        <p class="muted" style="margin:6px 0 0">Dán key để gắn license vào tài khoản — license sẽ hiện ngay trong bảng lịch sử phía trên.</p>
-      </form>
     </div>
     </section>
   </div>
@@ -886,7 +880,7 @@ async function api(path, opts = {}) {
   return { res, data };
 }
 // ----- Dieu huong app shell (sidebar) -----
-const VIEW_TITLES = { account: "Thông tin tài khoản", buy: "Mua / gia hạn", orders: "Lịch sử giao dịch" };
+const VIEW_TITLES = { account: "Thông tin tài khoản", buy: "Mua gói", orders: "Lịch sử giao dịch" };
 let currentView = "account";
 try { currentView = sessionStorage.getItem("hora-view") || "account"; } catch { /* sessionStorage bi chan */ }
 if (!VIEW_TITLES[currentView]) currentView = "account";
@@ -1117,7 +1111,16 @@ function renderPlans() {
         <ul>${(PLAN_FEATURES[key] || []).map((f, idx) => `<li class="${isPlus && idx < 2 ? "hl" : ""}">${esc(f)}</li>`).join("")}</ul>
         <button class="btn ${isPlus ? "primary" : ""}" type="button" data-buy="${key}:${BILLING}" ${price ? "" : "disabled"}>Chọn gói</button>
       </article>`;
-  }).join("");
+  }).join("") + `
+      <article class="price-card coming" aria-disabled="true">
+        <span class="popular soon">COMING SOON</span>
+        <h3>Pro</h3>
+        <p class="plan-desc">Cho nhu cầu nâng cao — đang hoàn thiện</p>
+        <div class="price">—</div>
+        <div class="per">Sắp ra mắt</div>
+        <ul><li>Mọi quyền lợi của gói Plus</li><li>Tính năng nâng cao — công bố khi ra mắt</li></ul>
+        <button class="btn" type="button" disabled>Đang chờ</button>
+      </article>`;
   document.querySelectorAll("[data-buy]").forEach((b) => b.addEventListener("click", async () => {
     const [plan, period] = b.dataset.buy.split(":");
     const gateway = "sepay"; // Chi con SePay — da go bo chon cong thanh toan.
@@ -1206,17 +1209,6 @@ function startSepayPolling(orderId) {
     }
   }, 15000);
 }
-
-$("claim-form").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const key = $("claim-key").value.trim();
-  if (!key) return;
-  const { res, data } = await api("/api/licenses/claim", { method: "POST", body: JSON.stringify({ key }) });
-  if (!res.ok) { showMsg("err", errText(data, "Không nhận được license.")); return; }
-  $("claim-key").value = "";
-  showMsg("ok", "Đã nhận license vào tài khoản của bạn.");
-  await loadLicenses();
-});
 
 $("logout-btn").addEventListener("click", async () => {
   await api("/api/auth/logout", { method: "POST", body: "{}" });
