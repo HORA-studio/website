@@ -1,4 +1,4 @@
-Trạng thái: ĐÃ implement code + ĐÃ kiểm chứng local (node --check toàn bộ file JS mới; unit test hàm ký MoMo/VNPay, checksum và PBKDF2; chạy thật `wrangler pages dev` với D1 local — đăng ký/đăng nhập/đăng xuất, nhận license bằng key, tạo đơn, IPN VNPay ký đúng/sai/lặp đều đúng kỳ vọng). CHƯA deploy, CHƯA push, giá bán CHƯA chốt, merchant MoMo/VNPay CHƯA có, endpoint cấp license phía hệ license CHƯA implement.
+Trạng thái: ĐÃ implement code + ĐÃ kiểm chứng local (node --check toàn bộ file JS mới; unit test hàm ký MoMo/VNPay, checksum và PBKDF2; chạy thật `wrangler pages dev` với D1 local — đăng ký/đăng nhập/đăng xuất, nhận license bằng key, tạo đơn, IPN VNPay ký đúng/sai/lặp đều đúng kỳ vọng). ĐÃ thêm SePay làm cổng chính (2026-10-29) + kiểm chứng local tương tự (tạo đơn ra hướng dẫn chuyển khoản + QR, webhook sai key 401 / lệch tiền / đúng mã+tiền / trùng giao dịch đều đúng kỳ vọng). CHƯA deploy, CHƯA push, giá bán CHƯA chốt, tài khoản SePay + merchant MoMo/VNPay CHƯA có, endpoint cấp license phía hệ license CHƯA implement.
 
 # Tài khoản khách + dashboard + thanh toán tự động (website)
 
@@ -24,9 +24,10 @@ Trình duyệt ── /account.html (tĩnh, cùng origin)
                  ├─ auth: register / login / logout / me
                  ├─ licenses: GET danh sách, POST claim key đã có
                  ├─ orders: POST tạo đơn, GET lịch sử giao dịch
-                 └─ payments: MoMo IPN / VNPay IPN / return redirect
+                 └─ payments: SePay webhook / MoMo IPN / VNPay IPN / return redirect
             D1 "hora-core" (binding DB trong wrangler.toml): db/schema.sql
-            Cổng ngoài: MoMo (tạo thanh toán qua API), VNPay (URL redirect)
+            Cổng ngoài: SePay (webhook sau chuyển khoản — cổng chính),
+                        MoMo (tạo thanh toán qua API), VNPay (URL redirect)
             Hệ license: chỉ khi LICENSE_ISSUE_URL/SECRET được cấu hình
 ```
 
@@ -47,14 +48,58 @@ Trình duyệt ── /account.html (tĩnh, cùng origin)
 - **IPN là nơi duy nhất được ghi "đã thanh toán"**, sau khi đã (1) xác minh
   chữ ký/checksum của cổng và (2) đối chiếu số tiền với đơn đã lưu. Trang
   `return` chỉ điều hướng về `/account.html`, không ghi trạng thái gì.
-- **Giá:** object `PLANS` ở 3 nơi phải khớp nhau — `index.html`,
-  `account.html`, `functions/api/_lib.js` (phía server là nơi quyết định số
-  tiền đơn). Hiện cả 3 đều `null` (chưa chốt giá) -> nút mua bị khóa, API tạo
-  đơn trả `422 PRICE_NOT_SET`. Biến `PRICE_GO_MONTH` v.v. chỉ là override để
-  test local/staging, không dùng cho production.
+- **Giá:** object `PLANS` ở 2 nơi phải khớp nhau — `index.html` và
+  `functions/api/_lib.js` (phía server là nơi quyết định số tiền đơn).
+  `account.html` tự lấy giá qua `GET /api/plans` (Pages Function
+  `functions/api/plans.js`, trả đúng `getPlans(env)`) nên tự động theo server,
+  chỉ còn bản sao dự phòng khi fetch lỗi. Hiện giá vẫn `null` (chưa chốt) ->
+  nút mua bị khóa, API tạo đơn trả `422 PRICE_NOT_SET`. Đổi giá chính thức =
+  sửa 2 chỗ trên. Biến `PRICE_GO_MONTH` v.v. chỉ là override để test
+  local/staging, không dùng cho production.
 - Stripe **không** dùng: Stripe không onboard merchant có trụ sở tại Việt
   Nam. Kiến trúc cổng nằm ở `functions/api/payments/_gateway.js` để sau này
   thêm cổng khác.
+
+## SePay — cổng chính (user chốt 2026-10-29)
+
+SePay không có trang thanh toán redirect như MoMo/VNPay. Luồng:
+
+1. Khách đăng nhập, chọn gói -> website tạo đơn + một **mã thanh toán riêng**
+   dạng `HORA` + 8 ký tự (lấy từ mã đơn, lưu ở `payments.gateway_order_id`),
+   trả về **hướng dẫn chuyển khoản**: ngân hàng, số tài khoản, chủ tài khoản,
+   số tiền đúng, nội dung = mã thanh toán, kèm ảnh QR VietQR
+   (`img.vietqr.io/image/<BIN>-<số tài khoản>-compact2.png?amount=…&addInfo=<mã>`)
+   để khách quét bằng app ngân hàng. Có sẵn hướng dẫn dạng chữ nếu dịch vụ
+   ảnh QR lỗi.
+2. Khách chuyển khoản ngân hàng vào tài khoản người bán, ghi đúng mã vào
+   nội dung.
+3. SePay quét biến động tài khoản đó rồi gọi **webhook**
+   `POST https://hora.works/api/payments/sepay-webhook`, xác thực bằng header
+   `Authorization: Apikey <SEPAY_WEBHOOK_API_KEY>`.
+4. Webhook đối chiếu: tìm phiên thanh toán theo mã (ưu tiên field `code`,
+   không có thì quét `content`/`description` sau khi chuẩn hóa viết hoa + bỏ
+   ký tự lạ) và yêu cầu `transferAmount` **bằng đúng** `amount_vnd` của đơn.
+   Lệch tiền -> ghi `payments` trạng thái `amount_mismatch`, không ghi paid.
+   Trùng id giao dịch SePay -> trả `duplicate:true`, không xử lý lại. Khớp
+   -> đơn `paid` + `paid_at`, rồi gọi cấp license như các cổng khác (chưa có
+   endpoint cấp -> `paid_pending_issue`).
+5. Trang tài khoản tự hỏi lại `GET /api/orders` mỗi 15 giây (tối đa ~10
+   phút) để báo khách khi tiền đã về.
+
+**Cài đặt SePay (user tự làm — cần tài khoản ngân hàng của người bán):**
+
+1. Đăng ký tài khoản tại **sepay.vn** và liên kết tài khoản ngân hàng nhận
+   tiền vào SePay.
+2. Trong SePay, tạo webhook trỏ tới
+   `https://hora.works/api/payments/sepay-webhook`, kiểu xác thực **API Key**;
+   lấy API key SePay cấp.
+3. Đặt cùng API key đó vào biến `SEPAY_WEBHOOK_API_KEY` của Pages project
+   (xem bảng biến bên dưới), và điền `SEPAY_BANK_NAME` (tên ngân hàng),
+   `SEPAY_BANK_BIN` (mã BIN số, ví dụ MB là `970422`), `SEPAY_ACCOUNT_NUMBER`,
+   `SEPAY_ACCOUNT_NAME` — đúng tài khoản đã liên kết SePay, vì mã QR VietQR
+   được tạo từ các giá trị này.
+4. Thiếu các biến ngân hàng -> tạo đơn SePay trả `503 GATEWAY_NOT_CONFIGURED`
+   như các cổng khác; thiếu API key -> webhook trả 503.
 
 ## Áp schema vào D1 thật (cần đăng nhập Cloudflare của user)
 
@@ -73,6 +118,11 @@ vào repo:
 
 | Tên | Bắt buộc cho | Ghi chú |
 | --- | --- | --- |
+| `SEPAY_BANK_NAME` | SePay (cổng chính) | Tên ngân hàng nhận tiền, hiển thị cho khách |
+| `SEPAY_BANK_BIN` | SePay | Mã BIN số của ngân hàng (ví dụ MB `970422`) — dùng tạo QR VietQR |
+| `SEPAY_ACCOUNT_NUMBER` | SePay | Số tài khoản nhận tiền (đã liên kết SePay) |
+| `SEPAY_ACCOUNT_NAME` | SePay | Tên chủ tài khoản |
+| `SEPAY_WEBHOOK_API_KEY` | SePay webhook | API key đặt trong cấu hình webhook ở SePay; website so khớp header `Authorization: Apikey …` — secret, không log |
 | `MOMO_PARTNER_CODE` | MoMo | Mã đối tác MoMo cấp |
 | `MOMO_ACCESS_KEY` | MoMo | Access key MoMo cấp |
 | `MOMO_SECRET_KEY` | MoMo | Secret — chỉ dùng để ký HMAC-SHA256 |
@@ -89,13 +139,18 @@ không tạo URL thanh toán giả.
 
 URL cần đăng ký với từng cổng (khi có merchant):
 
+- SePay webhook: `https://hora.works/api/payments/sepay-webhook` (xác thực API Key)
 - MoMo IPN: `https://<domain web>/api/payments/momo-ipn`
 - VNPay IPN: `https://<domain web>/api/payments/vnpay-ipn`
 - Trang quay về (cả hai cổng): `https://<domain web>/api/payments/return`
 
 ## Lấy thông tin merchant
 
-- **MoMo:** ký hợp đồng đối tác kinh doanh với MoMo (cổng thanh toán cho
+- **SePay (làm trước):** đăng ký tại sepay.vn, liên kết tài khoản ngân hàng
+  nhận tiền, tạo webhook về website và lấy API key — xem mục "SePay — cổng
+  chính" ở trên. Không cần hợp đồng merchant như MoMo/VNPay, có thể mở bán
+  ngay khi có giá.
+- **MoMo (tùy chọn, làm sau):** ký hợp đồng đối tác kinh doanh với MoMo (cổng thanh toán cho
   doanh nghiệp) -> được cấp `partnerCode`, `accessKey`, `secretKey`. Có môi
   trường test (`test-payment.momo.vn`, app MoMo test) để đối soát IPN trước,
   sau đó mới chuyển bộ key production (`payment.momo.vn`, `MOMO_ENV=production`).
@@ -106,18 +161,24 @@ URL cần đăng ký với từng cổng (khi có merchant):
 
 ## Checklist mở bán (go-live)
 
-1. [ ] User chốt giá thật -> điền vào `PLANS` ở cả 3 nơi (`index.html`,
-   `account.html`, `functions/api/_lib.js`) — bỏ khóa nút mua ở trang chủ.
+1. [ ] User chốt giá thật -> điền vào `PLANS` ở 2 nơi (`index.html`,
+   `functions/api/_lib.js`) — bỏ khóa nút mua ở trang chủ. Trang tài khoản
+   tự theo qua `/api/plans`.
 2. [ ] Áp `db/schema.sql` lên D1 `hora-core` thật (`--remote`, cần đăng nhập
    Cloudflare của user).
-3. [ ] Có merchant MoMo và/hoặc VNPay -> đặt các secret ở trên cho Pages
-   project, đăng ký URL IPN với cổng, test 1 đơn giá nhỏ ở môi trường test.
-4. [ ] Implement endpoint cấp license phía hệ license theo
+3. [ ] **SePay trước:** đăng ký sepay.vn + liên kết tài khoản ngân hàng +
+   tạo webhook (API Key) -> đặt 5 biến `SEPAY_*` cho Pages project -> test
+   1 đơn thật giá nhỏ (chuyển khoản đúng mã + đúng số tiền, xem đơn chuyển
+   `paid_pending_issue`).
+4. [ ] MoMo/VNPay (tùy chọn, sau): có merchant -> đặt các secret tương ứng
+   cho Pages project, đăng ký URL IPN với cổng, test 1 đơn giá nhỏ ở môi
+   trường test.
+5. [ ] Implement endpoint cấp license phía hệ license theo
    `docs/customer-license-issue-endpoint.md` (việc riêng phía Worker prod,
    không thuộc repo này) -> đặt `LICENSE_ISSUE_URL` / `LICENSE_ISSUE_SECRET`.
    Trước bước này, đơn trả tiền thành công vẫn bán được nhưng license phải
    cấp tay theo trạng thái `paid_pending_issue`.
-5. [ ] Deploy: push nhánh + merge/deploy Pages như quy trình website hiện tại.
+6. [ ] Deploy: push nhánh + merge/deploy Pages như quy trình website hiện tại.
 
 ## Đã kiểm chứng local (2026-10-29, trên VM này)
 
@@ -140,3 +201,30 @@ URL cần đăng ký với từng cổng (khi có merchant):
   xử lý trùng).
 - **Chưa** kiểm chứng: thanh toán tiền thật với MoMo (tạo thanh toán cần gọi
   API MoMo bằng merchant thật — chưa có), deploy lên Cloudflare, D1 remote.
+
+## Đã kiểm chứng local — SePay (2026-10-29, bổ sung)
+
+- `node --check` (bản sao `.mjs`): đạt cho các file mới/sửa (`plans.js`,
+  `sepay-webhook.js`, `_gateway.js`, `orders/index.js`, `_lib.js` + các
+  handler sẵn có).
+- Unit test node cho helper SePay: mã thanh toán ổn định/duy nhất theo đơn
+  (đúng mẫu `HORA` + 8 ký tự), chuẩn hóa nội dung (viết hoa, bỏ ký tự lạ),
+  tìm mã trong nội dung chứa chữ thừa/dấu cách, URL QR VietQR đúng mẫu
+  (`970422-…-compact2.png?amount=…&addInfo=<mã>&accountName=…`). **Đạt.**
+- `wrangler pages dev` + D1 local với biến test (`PRICE_GO_MONTH` override
+  chỉ-local + `SEPAY_*` giả): `GET /api/plans` trả giá server -> đăng ký/me
+  -> tạo đơn SePay 201, trả `payment_instructions` đủ ngân hàng/số tài
+  khoản/số tiền/mã `HORA…` + `qr_url`, đơn `awaiting_payment` -> webhook
+  không key / sai key -> **401** -> webhook đúng key (header
+  `X-SePay-Api-Key`) nhưng lệch số tiền -> `matched:false,
+  reason:'amount_mismatch'`, đơn vẫn `awaiting_payment` -> webhook đúng mã
+  (tìm qua quét `content`, chữ thường) + đúng tiền -> `{success:true}`, đơn
+  thành `paid_pending_issue`, có `paid_at` -> gửi lại cùng id giao dịch ->
+  `duplicate:true` -> mã lạ -> `matched:false` -> `transferType:'out'` ->
+  `ignored` -> đăng xuất/`me` 401/đăng nhập sai 401/đúng 200 (không hồi
+  quy auth).
+- Chạy instance riêng KHÔNG đặt biến SePay: tạo đơn -> **503
+  `GATEWAY_NOT_CONFIGURED`** (đơn `created`, không có hướng dẫn giả);
+  webhook -> **503** `{success:false}` vì chưa đặt `SEPAY_WEBHOOK_API_KEY`.
+- **Chưa** kiểm chứng: tiền thật qua SePay (cần tài khoản SePay thật liên
+  kết ngân hàng của user + webhook thật trên domain đã deploy).

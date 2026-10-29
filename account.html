@@ -43,6 +43,9 @@ th{color:var(--muted);font-weight:600;font-size:13px}
 .plan h3{margin:0 0 4px}
 .price{font-size:20px;font-weight:800;color:var(--gold2)}
 code{background:var(--panel2);padding:1px 6px;border-radius:6px;word-break:break-all}
+.pay-panel{margin-top:16px;background:var(--panel2);border:1px solid var(--gold);border-radius:12px;padding:16px}
+.pay-panel .qr{display:block;max-width:260px;width:100%;margin:0 auto 12px;background:#fff;border-radius:12px;padding:8px}
+.pay-panel table td:first-child{color:var(--muted);width:150px}
 .hidden{display:none}
 </style>
 </head>
@@ -107,10 +110,26 @@ code{background:var(--panel2);padding:1px 6px;border-radius:6px;word-break:break
       <h2>Mua / gia hạn</h2>
       <div class="plan-grid" id="plan-grid"></div>
       <label for="gateway">Cổng thanh toán</label>
-      <select id="gateway" style="max-width:260px">
+      <select id="gateway" style="max-width:340px">
+        <option value="sepay" selected>SePay — chuyển khoản ngân hàng (tự xác nhận)</option>
         <option value="momo">MoMo</option>
         <option value="vnpay">VNPay</option>
       </select>
+
+      <!-- Huong dan chuyen khoan SePay — chi hien sau khi tao don SePay -->
+      <div id="sepay-panel" class="pay-panel hidden">
+        <h3 style="margin:0 0 10px">Chuyển khoản để thanh toán</h3>
+        <img id="sepay-qr" class="qr" alt="Mã QR VietQR thanh toán">
+        <table>
+          <tr><td>Ngân hàng</td><td><strong id="sepay-bank"></strong></td></tr>
+          <tr><td>Số tài khoản</td><td><code id="sepay-account"></code> <button class="btn small" type="button" id="sepay-copy-account">Copy</button></td></tr>
+          <tr><td>Chủ tài khoản</td><td id="sepay-name"></td></tr>
+          <tr><td>Số tiền</td><td><strong id="sepay-amount" style="color:var(--gold2)"></strong></td></tr>
+          <tr><td>Nội dung chuyển khoản</td><td><code id="sepay-content"></code> <button class="btn small" type="button" id="sepay-copy-content">Copy</button></td></tr>
+        </table>
+        <p style="margin:12px 0 4px"><strong>Chuyển đúng số tiền và đúng nội dung</strong>, hệ thống tự xác nhận sau khi nhận được tiền (thường vài phút).</p>
+        <p class="muted" style="margin:0">Trạng thái: <span id="sepay-status">Đang chờ chuyển khoản… trang sẽ tự kiểm tra lại sau mỗi 15 giây.</span></p>
+      </div>
     </section>
 
     <section class="card">
@@ -124,12 +143,18 @@ code{background:var(--panel2);padding:1px 6px;border-radius:6px;word-break:break
 </main>
 
 <script>
-// Ban sao PLANS phia client — PHAI khop PLANS trong index.html va functions/api/_lib.js.
-// Gia chua chot -> null -> hien "Sap mo ban" va khoa nut mua, giong het trang chu.
-const PLANS = {
+// Gia lay tu GET /api/plans (server la nguon dung). Ban sao duoi day chi la
+// du phong khi fetch loi. Gia chua chot -> null -> "Sap mo ban" + khoa nut mua.
+let PLANS = {
   go:   { name: "Go",   month: null, year: null },
   plus: { name: "Plus", month: null, year: null }
 };
+async function loadPlans() {
+  try {
+    const { res, data } = await api("/api/plans");
+    if (res.ok && data && data.go && data.plus) PLANS = data;
+  } catch { /* dung ban sao du phong */ }
+}
 const PERIODS = { month: "1 tháng", year: "1 năm" };
 const STATUS_VI = {
   created: "Vừa tạo", awaiting_payment: "Chờ thanh toán",
@@ -191,6 +216,7 @@ async function loadDash() {
   $("dash").classList.remove("hidden");
   $("acc-email").textContent = data.customer.email;
   $("acc-name").textContent = data.customer.displayName ? " — " + data.customer.displayName : "";
+  await loadPlans();
   renderPlans();
   await Promise.all([loadLicenses(), loadOrders()]);
 }
@@ -212,6 +238,7 @@ async function loadLicenses() {
   }));
 }
 
+const GATEWAY_VI = { sepay: "SePay", momo: "MoMo", vnpay: "VNPay" };
 async function loadOrders() {
   const { data } = await api("/api/orders");
   const rows = (data && data.orders) || [];
@@ -220,11 +247,12 @@ async function loadOrders() {
       <td><code>${esc(o.id)}</code></td>
       <td>${esc((PLANS[o.plan] || {}).name || o.plan)} — ${esc(PERIODS[o.period] || o.period)}</td>
       <td>${esc(fmtVnd(o.amountVnd))}</td>
-      <td>${esc(o.gateway === "momo" ? "MoMo" : o.gateway === "vnpay" ? "VNPay" : (o.gateway || "—"))}</td>
+      <td>${esc(GATEWAY_VI[o.gateway] || o.gateway || "—")}</td>
       <td>${esc(STATUS_VI[o.status] || o.status)}</td>
       <td>${esc(fmtDate(o.createdAt))}</td>
     </tr>`).join("")
     : '<tr><td colspan="6" class="muted">Chưa có giao dịch nào.</td></tr>';
+  return rows;
 }
 
 function renderPlans() {
@@ -244,9 +272,57 @@ function renderPlans() {
     const { res, data } = await api("/api/orders", { method: "POST", body: JSON.stringify({ plan, period, gateway }) });
     if (res.ok && data.paymentUrl) { window.location.href = data.paymentUrl; return; }
     b.disabled = false;
+    if (res.ok && data.payment_instructions) {
+      showSepayPanel(data.payment_instructions);
+      showMsg("ok", "Đã tạo đơn. Chuyển khoản theo hướng dẫn bên dưới — đúng số tiền và đúng nội dung, hệ thống sẽ tự xác nhận.");
+      await loadOrders();
+      startSepayPolling(data.order && data.order.id);
+      return;
+    }
     showMsg("err", errText(data, "Chưa tạo được đơn, thử lại sau."));
     await loadOrders();
   }));
+}
+
+// ----- SePay: huong dan chuyen khoan + tu kiem tra trang thai don -----
+function showSepayPanel(ins) {
+  $("sepay-panel").classList.remove("hidden");
+  $("sepay-qr").src = ins.qr_url;
+  $("sepay-bank").textContent = ins.bank || "";
+  $("sepay-account").textContent = ins.account_number || "";
+  $("sepay-name").textContent = ins.account_name || "";
+  $("sepay-amount").textContent = fmtVnd(ins.amount);
+  $("sepay-content").textContent = ins.content || "";
+  $("sepay-status").textContent = "Đang chờ chuyển khoản… trang sẽ tự kiểm tra lại sau mỗi 15 giây.";
+  $("sepay-panel").scrollIntoView({ behavior: "smooth", block: "center" });
+}
+async function copyText(text, btn) {
+  try { await navigator.clipboard.writeText(text); btn.textContent = "Đã copy"; setTimeout(() => { btn.textContent = "Copy"; }, 2000); } catch { /* clipboard bi chan */ }
+}
+$("sepay-copy-account").addEventListener("click", () => copyText($("sepay-account").textContent, $("sepay-copy-account")));
+$("sepay-copy-content").addEventListener("click", () => copyText($("sepay-content").textContent, $("sepay-copy-content")));
+
+let sepayPollTimer = null;
+function startSepayPolling(orderId) {
+  if (sepayPollTimer) clearInterval(sepayPollTimer);
+  if (!orderId) return;
+  let tries = 0;
+  sepayPollTimer = setInterval(async () => {
+    tries += 1;
+    const rows = await loadOrders();
+    const o = rows.find((x) => x.id === orderId);
+    if (o && (o.status === "paid" || o.status === "paid_pending_issue")) {
+      clearInterval(sepayPollTimer); sepayPollTimer = null;
+      $("sepay-status").textContent = o.status === "paid" ? "Đã nhận được tiền — thanh toán hoàn tất." : "Đã nhận được tiền — đang cấp license cho bạn.";
+      showMsg("ok", "Đã nhận được tiền của bạn. " + (o.status === "paid" ? "Thanh toán hoàn tất." : "License đang được cấp, xem mục License của tôi."));
+      await loadLicenses();
+      return;
+    }
+    if (tries >= 40) { // ~10 phut thi dung tu kiem tra, khach van tai lai trang duoc
+      clearInterval(sepayPollTimer); sepayPollTimer = null;
+      $("sepay-status").textContent = "Vẫn chưa thấy tiền về sau 10 phút. Nếu bạn đã chuyển, tải lại trang sau ít phút nữa để kiểm tra.";
+    }
+  }, 15000);
 }
 
 $("claim-form").addEventListener("submit", async (e) => {

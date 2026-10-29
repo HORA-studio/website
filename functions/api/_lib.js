@@ -6,9 +6,10 @@ export const PLANS = {
   plus: { name: "Plus", month: null, year: null },
 };
 
-// Gia chinh thuc nam trong PLANS o tren (dong bo tay voi PLANS trong index.html
-// va account.html). Cac bien PRICE_* chi la override de test local/staging,
-// mac dinh khong dat -> gia null nhu PLANS.
+// Gia chinh thuc nam trong PLANS o tren (dong bo tay voi PLANS trong index.html;
+// account.html tu lay gia tu GET /api/plans nen tu dong theo server, chi con
+// ban sao du phong khi fetch loi). Cac bien PRICE_* chi la override de test
+// local/staging, mac dinh khong dat -> gia null nhu PLANS.
 export function getPlans(env = {}) {
   const out = {};
   for (const [key, p] of Object.entries(PLANS)) {

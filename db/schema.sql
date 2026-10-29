@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS orders (
   amount_vnd  INTEGER NOT NULL,
   status      TEXT NOT NULL DEFAULT 'created',
   -- created -> awaiting_payment -> paid | paid_pending_issue | payment_failed
-  gateway     TEXT,                     -- 'momo' | 'vnpay'
+  gateway     TEXT,                     -- 'sepay' | 'momo' | 'vnpay'
   created_at  TEXT NOT NULL,
   paid_at     TEXT,
   license_id  TEXT
@@ -38,11 +38,11 @@ CREATE INDEX IF NOT EXISTS idx_orders_customer ON orders(customer_id);
 CREATE TABLE IF NOT EXISTS payments (
   id               TEXT PRIMARY KEY,
   order_id         TEXT NOT NULL REFERENCES orders(id),
-  gateway          TEXT NOT NULL,       -- 'momo' | 'vnpay'
-  gateway_order_id TEXT,                -- MoMo orderId / VNPay vnp_TxnRef
-  gateway_trans_id TEXT,                -- MoMo transId / VNPay vnp_TransactionNo
+  gateway          TEXT NOT NULL,       -- 'sepay' | 'momo' | 'vnpay'
+  gateway_order_id TEXT,                -- SePay ma thanh toan / MoMo orderId / VNPay vnp_TxnRef
+  gateway_trans_id TEXT,                -- SePay transaction id / MoMo transId / VNPay vnp_TransactionNo
   amount_vnd       INTEGER NOT NULL,
-  status           TEXT NOT NULL DEFAULT 'initiated',  -- initiated | paid | failed
+  status           TEXT NOT NULL DEFAULT 'initiated',  -- initiated | paid | failed | amount_mismatch
   raw_json         TEXT,                -- payload IPN gan nhat (da xac minh chu ky)
   created_at       TEXT NOT NULL
 );

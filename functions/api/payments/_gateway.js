@@ -1,4 +1,7 @@
-// Module cong thanh toan: MoMo + VNPay.
+// Module cong thanh toan: SePay (chinh) + MoMo + VNPay.
+// SePay khac han 2 cong kia: KHONG co trang thanh toan redirect — khach chuyen
+// khoan ngan hang kem MA RIENG trong noi dung, SePay quet tai khoan nguoi ban
+// roi goi webhook ve website; website doi ma + so tien de ghi 'paid'.
 // Thong tin merchant doc TU BIEN MOI TRUONG — chua cau hinh thi nem loi
 // GATEWAY_NOT_CONFIGURED, TUYET DOI khong tra URL thanh toan gia.
 // Stripe khong duoc dung: Stripe khong onboard merchant co tru so tai Viet Nam.
@@ -23,7 +26,13 @@ export function isMomoConfigured(env = {}) {
 export function isVnpayConfigured(env = {}) {
   return Boolean(env.VNPAY_TMN_CODE && env.VNPAY_HASH_SECRET);
 }
+export function isSepayConfigured(env = {}) {
+  return Boolean(
+    env.SEPAY_BANK_NAME && env.SEPAY_BANK_BIN && env.SEPAY_ACCOUNT_NUMBER && env.SEPAY_ACCOUNT_NAME
+  );
+}
 export function isGatewayConfigured(env, gateway) {
+  if (gateway === "sepay") return isSepayConfigured(env);
   if (gateway === "momo") return isMomoConfigured(env);
   if (gateway === "vnpay") return isVnpayConfigured(env);
   return false;
@@ -178,6 +187,51 @@ export async function verifyVnpayChecksum(env, queryParams) {
   }
   const expected = await buildVnpaySecureHash(params, env.VNPAY_HASH_SECRET);
   return expected.toLowerCase() === String(queryParams.vnp_SecureHash).toLowerCase();
+}
+
+// ---------- SePay: ma thanh toan + huong dan chuyen khoan ----------
+// Ma thanh toan cua 1 don: 'HORA' + 8 ky tu chu/so lay tu order id (order id da
+// duy nhat nen ma duy nhat theo don). Ma nay luu o payments.gateway_order_id,
+// khach ghi NGUYEN VAN vao noi dung chuyen khoan.
+export function sepayPaymentCode(orderId) {
+  const clean = String(orderId || "").replace(/[^A-Za-z0-9]/g, "").toUpperCase();
+  return "HORA" + clean.slice(-8);
+}
+
+// Chuan hoa de doi khop: viet hoa + bo moi ky tu khong phai chu/so
+// (noi dung chuyen khoan thuong bi ngan hang doi dau cach/dau '-').
+export function normalizePaymentText(s) {
+  return String(s ?? "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+}
+
+// Tim ma (dang tho, vd 'HORAAB12CD34') trong doan text tho; tra ve ma tim thay
+// hoac null. So sanh tren dang da chuan hoa ca 2 phia.
+export function findPaymentCodeInText(text, codes) {
+  const haystack = normalizePaymentText(text);
+  if (!haystack) return null;
+  for (const code of codes || []) {
+    const needle = normalizePaymentText(code);
+    if (needle && haystack.includes(needle)) return code;
+  }
+  return null;
+}
+
+// Huong dan thanh toan tra cho client khi tao don SePay thanh cong.
+// qr_url theo chuan anh VietQR (img.vietqr.io) — chi la anh tien ich,
+// kem huong dan chu de trang van dung duoc khi dich vu anh loi.
+export function buildSepayInstructions(env, { code, amount }) {
+  const amt = Math.round(Number(amount));
+  const qrUrl =
+    `https://img.vietqr.io/image/${encodeURIComponent(env.SEPAY_BANK_BIN)}-${encodeURIComponent(env.SEPAY_ACCOUNT_NUMBER)}-compact2.png` +
+    `?amount=${amt}&addInfo=${encodeURIComponent(code)}&accountName=${encodeURIComponent(env.SEPAY_ACCOUNT_NAME)}`;
+  return {
+    bank: env.SEPAY_BANK_NAME,
+    account_number: env.SEPAY_ACCOUNT_NUMBER,
+    account_name: env.SEPAY_ACCOUNT_NAME,
+    amount: amt,
+    content: code,
+    qr_url: qrUrl,
+  };
 }
 
 // ---------- Dispatcher dung cho POST /api/orders ----------
