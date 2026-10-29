@@ -807,8 +807,8 @@ html[data-theme="dark"] .plan-plus:before{color:#04211c}
       <div class="orders-welcome"><div><h2>Lịch sử giao dịch</h2><p>Đơn mua, license và số ngày còn lại của bạn.</p></div></div>
       <div class="orders-body">
       <table>
-        <thead><tr><th>Mã đơn</th><th>Gói</th><th>Số tiền</th><th>Trạng thái</th><th>License</th><th>Hạn dùng</th></tr></thead>
-        <tbody id="ord-body"><tr><td colspan="6" class="muted">Chưa có giao dịch nào.</td></tr></tbody>
+        <thead><tr><th>License</th><th>Máy đã sử dụng</th><th>Thời gian</th><th>Gói</th><th>Hạn dùng</th><th>Mua hàng</th></tr></thead>
+        <tbody id="ord-body"><tr><td colspan="6" class="muted">Chưa có license nào.</td></tr></tbody>
       </table>
 <form id="claim-form" style="margin-top:16px">
         <label for="claim-key">Nhận license đã có — dán license key bạn đã được cấp:</label>
@@ -968,39 +968,48 @@ function expiryCell(l) {
   if (days < 0) return `Đã hết hạn (${esc(fmtDate(l.expiresAt))})`;
   return `${esc(fmtDate(l.expiresAt))} · còn ${days} ngày`;
 }
-// Lich su giao dich = noi xem license luon: don mua gan license cua don do;
-// license nhan bang key (khong co don) hien thanh dong rieng trong cung bang.
+// Lich su giao dich = danh sach license da mua: id (key), may da su dung,
+// thoi gian, goi, han dung va binding mua hang (don lien ket / nguon).
+// Don dang cho thanh toan hoac cho cap license (chua co license) hien tam 1 dong.
+function shortId(x) { return x ? (x.length > 14 ? x.slice(0, 14) + "…" : x) : "—"; }
+function deviceCell(l) {
+  if (!l.deviceId) return '<span class="muted">Chưa gắn máy</span>';
+  return `<code title="${esc(l.deviceId)}">${esc(shortId(l.deviceId))}</code>${l.deviceBoundAt ? `<br><span class="muted">gắn ${esc(fmtDate(l.deviceBoundAt))}</span>` : ""}`;
+}
+function bindingCell(l) {
+  if (l.orderId) return `Đơn <code title="${esc(l.orderId)}">${esc(shortId(l.orderId))}</code>`;
+  if (l.source === "claim") return "Nhận key có sẵn";
+  return "Được cấp";
+}
 function renderHistory() {
   const body = $("ord-body");
   if (!body) return;
-  const byId = new Map(), byOrder = new Map();
-  for (const l of LICENSES_CACHE) { byId.set(l.id, l); if (l.orderId) byOrder.set(l.orderId, l); }
-  const used = new Set();
   const html = [];
-  for (const o of ORDERS_CACHE) {
-    const l = (o.licenseId && byId.get(o.licenseId)) || byOrder.get(o.id) || null;
-    if (l) used.add(l.id);
-    html.push(`<tr>
-      <td><code>${esc(o.id)}</code></td>
-      <td>${esc((PLANS[o.plan] || {}).name || o.plan)} — ${esc(PERIODS[o.period] || o.period)}${l && l.tier ? ` · tier ${esc(tierName(l.tier))}` : ""}</td>
-      <td>${esc(fmtVnd(o.amountVnd))}</td>
-      <td>${esc(STATUS_VI[o.status] || o.status)}</td>
-      <td>${licenseCell(l)}</td>
-      <td>${expiryCell(l)}</td>
-    </tr>`);
-  }
   for (const l of LICENSES_CACHE) {
-    if (used.has(l.id)) continue;
     html.push(`<tr>
-      <td><span class="muted">License đã nhận</span></td>
-      <td>${l.tier ? "Gói " + esc(tierName(l.tier)) : "—"}${l.deviceBound ? ' <span class="muted">· 1 máy</span>' : ""}</td>
-      <td><span class="muted">—</span></td>
-      <td>${l.source === "claim" ? "Nhận key có sẵn" : "Được cấp"}</td>
       <td>${licenseCell(l)}</td>
+      <td>${deviceCell(l)}</td>
+      <td>${esc(fmtDate(l.createdAt))}</td>
+      <td>${l.tier ? esc(tierName(l.tier)) : "—"}${l.app ? ` <span class="muted">· ${esc(APP_VI[l.app] || l.app)}</span>` : ""}</td>
       <td>${expiryCell(l)}</td>
+      <td>${bindingCell(l)}</td>
     </tr>`);
   }
-  body.innerHTML = html.length ? html.join("") : '<tr><td colspan="6" class="muted">Chưa có giao dịch nào.</td></tr>';
+  const licensedOrders = new Set(LICENSES_CACHE.map((l) => l.orderId).filter(Boolean));
+  const licensedIds = new Set(LICENSES_CACHE.map((l) => l.id));
+  for (const o of ORDERS_CACHE) {
+    if (licensedOrders.has(o.id) || (o.licenseId && licensedIds.has(o.licenseId))) continue;
+    if (!["created", "awaiting_payment", "paid_pending_issue"].includes(o.status)) continue;
+    html.push(`<tr>
+      <td><span class="muted">Chưa có license</span></td>
+      <td><span class="muted">—</span></td>
+      <td>${esc(fmtDate(o.createdAt))}</td>
+      <td>${esc((PLANS[o.plan] || {}).name || o.plan)} — ${esc(PERIODS[o.period] || o.period)}</td>
+      <td><span class="muted">—</span></td>
+      <td>Đơn <code title="${esc(o.id)}">${esc(shortId(o.id))}</code> · ${esc(STATUS_VI[o.status] || o.status)}</td>
+    </tr>`);
+  }
+  body.innerHTML = html.length ? html.join("") : '<tr><td colspan="6" class="muted">Chưa có license nào.</td></tr>';
   document.querySelectorAll("[data-copy]").forEach((b) => b.addEventListener("click", async () => {
     try { await navigator.clipboard.writeText(b.dataset.copy); b.textContent = "Đã copy"; } catch { /* clipboard bi chan */ }
   }));
