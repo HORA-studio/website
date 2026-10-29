@@ -738,6 +738,19 @@ html[data-theme="dark"] .plan-plus:before{color:#04211c}
 
 /* Day cum nut Theo thang/Theo nam xuong: padding-top 25px */
 .pricing-toggle-row{padding-top:25px}
+
+/* Tab Mua goi: dang danh sach tung goi, can giua ngang */
+.pricing-wrap .pricing-grid{display:block !important}
+.plan-block{text-align:center;padding:28px 0}
+.plan-block:first-child{padding-top:4px}
+.plan-block:last-child{padding-bottom:4px}
+.plan-block + .plan-block{border-top:1px dashed var(--line)}
+.plan-block-name{font-size:22px;font-weight:800;margin:0 0 12px}
+.plan-opt{display:flex;align-items:center;justify-content:center;gap:18px;padding:7px 0}
+.plan-opt-label{font-size:15.5px;width:250px;text-align:right}
+.plan-opt-label strong{font-weight:800}
+.buy-now{min-width:124px}
+@media (max-width:560px){.plan-opt{flex-direction:column;gap:8px}.plan-opt-label{width:auto;text-align:center}}
 </style>
 </head>
 <body>
@@ -863,7 +876,6 @@ html[data-theme="dark"] .plan-plus:before{color:#04211c}
       </div>
       <div class="pricing-wrap">
       <div class="pricing-toggle-row"><div class="billing-toggle" role="tablist" aria-label="Chọn thời hạn"><button type="button" class="billing-opt active" data-billing="month" role="tab" aria-selected="true">Theo tháng</button><button type="button" class="billing-opt" data-billing="year" role="tab" aria-selected="false">Theo năm<span class="save-badge">Tiết kiệm 17%</span></button></div></div>
-      
       <div class="pricing-grid" id="plan-grid">
     <div class="plan">
       <h3>Go</h3>
@@ -1164,29 +1176,18 @@ function planPer(key, period) {
   return "/ tháng · linh hoạt, gia hạn bất cứ lúc nào";
 }
 function renderPlans() {
-  $("plan-grid").innerHTML = Object.entries(PLANS).map(([key, p]) => {
-    const isPlus = key === "plus";
-    const price = BILLING === "year" ? p.year : p.month;
-    return `
-      <article class="price-card ${isPlus ? "featured" : ""}" data-plan-card="${key}">
-        ${isPlus ? '<span class="popular">ĐƯỢC CHỌN NHIỀU</span>' : ""}
-        <h3>${esc(p.name)}</h3>
-        <p class="plan-desc">${esc(PLAN_DESCS[key] || "")}</p>
-        <div class="price"><span data-price>${price ? fmtVnd(price) : "Sắp mở bán"}</span></div>
-        <div class="per" data-per>${esc(planPer(key, BILLING))}</div>
-        <ul>${(PLAN_FEATURES[key] || []).map((f, idx) => `<li class="${isPlus && idx < 2 ? "hl" : ""}">${esc(f)}</li>`).join("")}</ul>
-        <button class="btn ${isPlus ? "primary" : ""}" type="button" data-buy="${key}:${BILLING}" ${price ? "" : "disabled"}>Chọn gói</button>
-      </article>`;
-  }).join("") + `
-      <article class="price-card coming" aria-disabled="true">
-        <span class="popular soon">COMING SOON</span>
-        <h3>Pro</h3>
-        <p class="plan-desc">Cho nhu cầu nâng cao — đang hoàn thiện</p>
-        <div class="price">—</div>
-        <div class="per">Sắp ra mắt</div>
-        <ul><li>Mọi quyền lợi của gói Plus</li><li>Tính năng nâng cao — công bố khi ra mắt</li></ul>
-        <button class="btn" type="button" disabled>Đang chờ</button>
-      </article>`;
+  $("plan-grid").innerHTML = Object.entries(PLANS).map(([key, p]) => `
+    <div class="plan-block">
+      <h3 class="plan-block-name">${esc(p.name)}</h3>
+      <div class="plan-opt" data-period="month">
+        <span class="plan-opt-label">1 tháng: <strong>${p.month ? fmtVnd(p.month) : "Sắp mở bán"}</strong></span>
+        <button class="btn buy-now" type="button" data-buy="${key}:month" ${p.month ? "" : "disabled"}>Mua ngay</button>
+      </div>
+      <div class="plan-opt" data-period="year">
+        <span class="plan-opt-label">1 năm: <strong>${p.year ? fmtVnd(p.year) : "Sắp mở bán"}</strong></span>
+        <button class="btn buy-now" type="button" data-buy="${key}:year" ${p.year ? "" : "disabled"}>Mua ngay</button>
+      </div>
+    </div>`).join("");
   document.querySelectorAll("[data-buy]").forEach((b) => b.addEventListener("click", async () => {
     const [plan, period] = b.dataset.buy.split(":");
     const gateway = "sepay"; // Chi con SePay — da go bo chon cong thanh toan.
@@ -1209,6 +1210,7 @@ function renderPlans() {
     showMsg("err", errText(data, "Chưa tạo được đơn, thử lại sau."));
     await loadOrders();
   }));
+  setBilling(BILLING);
 }
 // Doi ky han: cap nhat tai cho (gia, dong /ky, data-buy) — khong render lai de
 // giu nguyen cac nut bam da gan su kien mua.
@@ -1231,6 +1233,9 @@ function setBilling(period) {
     if (perEl) perEl.textContent = planPer(key, period);
     const btn = card.querySelector("[data-buy]");
     if (btn) { btn.setAttribute("data-buy", `${key}:${period}`); btn.disabled = !price; }
+  });
+  document.querySelectorAll(".plan-opt").forEach((row) => {
+    row.style.display = row.dataset.period === period ? "" : "none";
   });
 }
 document.querySelectorAll(".billing-opt").forEach((b) => b.addEventListener("click", () => setBilling(b.dataset.billing)));
