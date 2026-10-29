@@ -1,4 +1,15 @@
+# DB rieng cho website (khach hang, don hang, thanh toan).
+# KHONG dung chung voi hora-core (DB license/auth cua app desktop).
+# Binding Pages duoc set qua dashboard/API (xem docs). File nay giu de tham chieu
+# database_id va cho wrangler d1 execute.
 [[d1_databases]]
 binding = "DB"
-database_name = "hora-core"
-database_id = "1e4c1c95-2bf9-44b5-aafb-bc819424ff31"
+database_name = "hora-website"
+database_id = "4d398618-5d89-456d-beb9-3b4cadd9329f"
+
+# Nhat ky hanh vi (append-only) — tach rieng de deploy/hong UI khong dung toi log
+# va bang log phinh to khong lam cham query nghiep vu.
+[[d1_databases]]
+binding = "DB_EVENTS"
+database_name = "hora-website-events"
+database_id = "e4c3459f-0d38-48ce-b069-d7318b928cb4"

@@ -102,8 +102,28 @@ code{background:var(--panel2);padding:1px 6px;border-radius:6px;word-break:break
           <input id="claim-key" style="flex:1;min-width:260px" placeholder="HORA_0123ABCD…" autocomplete="off">
           <button class="btn" type="submit">Nhận license</button>
         </div>
-        <p class="muted" style="margin:6px 0 0">License nhận bằng cách này hiển thị gói là “Chưa đồng bộ” cho tới khi hệ thống đối soát được key.</p>
+        <p class="muted" style="margin:6px 0 0">Dán key để gắn license vào tài khoản, sau đó mở ứng dụng và bấm “Kết nối tài khoản”.</p>
       </form>
+    </section>
+
+    <section class="card">
+      <h2>Kết nối ứng dụng</h2>
+      <p class="muted" style="margin:0 0 12px">Mở ứng dụng HORA trên máy, chọn <strong>Kết nối tài khoản</strong>, rồi tạo mã dưới đây và dán vào ứng dụng. Một tài khoản dùng cho mọi ứng dụng HORA.</p>
+      <div class="row">
+        <select id="link-app" style="max-width:240px">
+          <option value="video-builder" selected>HORA Video Builder</option>
+          <option value="facebook-builder">HORA Facebook Builder</option>
+        </select>
+        <button class="btn" type="button" id="link-create-btn">Tạo mã kết nối</button>
+      </div>
+      <div id="link-result" class="hidden" style="margin-top:14px">
+        <div style="font-family:ui-monospace,monospace;font-size:24px;letter-spacing:2px;background:var(--panel2);border:1px dashed var(--line);border-radius:10px;padding:16px;text-align:center;user-select:all" id="link-code"></div>
+        <div class="row" style="margin-top:10px">
+          <button class="btn small" type="button" id="link-copy-btn">Copy mã</button>
+          <button class="btn small" type="button" id="link-open-btn">Mở trang kết nối</button>
+        </div>
+        <p class="muted" style="margin:8px 0 0" id="link-exp"></p>
+      </div>
     </section>
 
     <section class="card">
@@ -156,6 +176,7 @@ async function loadPlans() {
   } catch { /* dung ban sao du phong */ }
 }
 const PERIODS = { month: "1 tháng", year: "1 năm" };
+const APP_VI = { "video-builder": "HORA Video Builder", "facebook-builder": "HORA Facebook Builder" };
 const STATUS_VI = {
   created: "Vừa tạo", awaiting_payment: "Chờ thanh toán",
   paid: "Đã thanh toán", paid_pending_issue: "Đã thanh toán — đang cấp license",
@@ -227,11 +248,11 @@ async function loadLicenses() {
   const rows = (data && data.licenses) || [];
   $("lic-body").innerHTML = rows.length ? rows.map((l) => `
     <tr>
-      <td>${esc(l.product || "Chưa đồng bộ")}</td>
-      <td>${esc(l.tier || "Chưa đồng bộ")}</td>
-      <td>${l.expiresAt ? esc(fmtDate(l.expiresAt)) : "Chưa đồng bộ"}</td>
-      <td>${l.source === "purchase" ? "Mua trên web" : "Nhận key có sẵn"}</td>
-      <td>${l.licenseKeyPlain ? `<code>${esc(l.licenseKeyPlain)}</code> <button class="btn small" type="button" data-copy="${esc(l.licenseKeyPlain)}">Copy</button>` : '<span class="muted">—</span>'}</td>
+      <td>${esc(APP_VI[l.app] || l.app || "—")}</td>
+      <td>${esc(l.tier || "—")}${l.deviceBound ? ' <span class="muted" title="Đã gắn 1 thiết bị">· 1 máy</span>' : ""}</td>
+      <td>${l.expiresAt ? esc(fmtDate(l.expiresAt)) : "Chưa kích hoạt"}</td>
+      <td>${l.source === "purchase" ? "Mua trên web" : l.source === "claim" ? "Nhận key có sẵn" : "Cấp tay"}</td>
+      <td>${l.licenseKey ? `<code>${esc(l.licenseKey)}</code> <button class="btn small" type="button" data-copy="${esc(l.licenseKey)}">Copy</button>` : '<span class="muted">—</span>'}</td>
     </tr>`).join("")
     : '<tr><td colspan="5" class="muted">Chưa có license nào.</td></tr>';
   document.querySelectorAll("[data-copy]").forEach((b) => b.addEventListener("click", async () => {
@@ -350,6 +371,23 @@ $("claim-form").addEventListener("submit", async (e) => {
   showMsg("ok", "Đã nhận license vào tài khoản của bạn.");
   await loadLicenses();
 });
+
+// ----- Ket noi ung dung -----
+let _linkUrl = "";
+$("link-create-btn").addEventListener("click", async () => {
+  const app = $("link-app").value;
+  const { res, data } = await api("/api/identity/link-create", { method: "POST", body: JSON.stringify({ app }) });
+  if (!res.ok) { showMsg("err", errText(data, "Không tạo được mã kết nối.")); return; }
+  _linkUrl = data.linkUrl;
+  $("link-code").textContent = data.code;
+  $("link-exp").textContent = "Mã hết hạn lúc " + fmtDate(data.expiresAt) + " và chỉ dùng được một lần.";
+  $("link-result").classList.remove("hidden");
+});
+$("link-copy-btn").addEventListener("click", async () => {
+  try { await navigator.clipboard.writeText($("link-code").textContent); $("link-copy-btn").textContent = "Đã copy"; }
+  catch { /* clipboard bi chan */ }
+});
+$("link-open-btn").addEventListener("click", () => { if (_linkUrl) window.open(_linkUrl, "_blank", "noopener"); });
 
 $("logout-btn").addEventListener("click", async () => {
   await api("/api/auth/logout", { method: "POST", body: "{}" });

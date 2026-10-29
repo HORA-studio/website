@@ -171,55 +171,43 @@ export function newOrderId() {
 
 export const LICENSE_KEY_RE = /^[A-Z][A-Z0-9]*_[0-9A-F]{32}$/;
 
-// Co gang cap license cho don da thanh toan qua endpoint noi bo cua he license.
-// Chi chay khi LICENSE_ISSUE_URL + LICENSE_ISSUE_SECRET duoc cau hinh; neu chua
-// cau hinh hoac endpoint loi, don giu trang thai 'paid_pending_issue' (da thu
-// tien nhung chua cap key) de doi xu ly — TUYET DOI khong tu bia key.
-// order: hang orders + email cua khach (order.email; neu thieu se truy van DB).
+// Sinh license key: <PREFIX>_<32 hex>. PREFIX lay tu app (mac dinh HORA).
+export function newLicenseKey(prefix = "HORA") {
+  const hex = [...crypto.getRandomValues(new Uint8Array(16))]
+    .map((b) => b.toString(16).padStart(2, "0")).join("").toUpperCase();
+  return `${prefix}_${hex}`;
+}
+
+export function newLicenseId() {
+  return [...crypto.getRandomValues(new Uint8Array(16))]
+    .map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+// Plan -> app + tier. Don mua tren web hien chi co go/plus cua Video Builder.
+const PLAN_APP = { go: "video-builder", plus: "video-builder" };
+export function appForPlan(plan) {
+  return PLAN_APP[plan] || "video-builder";
+}
+
+// Cap license cho don da thanh toan — NGAY TRONG DB web (khong con goi endpoint
+// ngoai). expiry_utc = NULL de han bat dau dem tu luc bind device (giong logic
+// he license cu). Doi lai, don thanh 'paid' + co license_id.
 export async function tryIssueLicense(env, order) {
-  const markPending = async () => {
-    await env.DB.prepare("UPDATE orders SET status = 'paid_pending_issue' WHERE id = ?1").bind(order.id).run();
-    return false;
-  };
-  if (!env.LICENSE_ISSUE_URL || !env.LICENSE_ISSUE_SECRET) return markPending();
+  const now = new Date().toISOString();
+  const app = appForPlan(order.plan);
+  const productId = app;
+  const validityDays = order.period === "year" ? 365 : 30;
+  const licenseId = newLicenseId();
+  const licenseKey = newLicenseKey("HORA");
 
-  let email = order.email;
-  if (!email) {
-    const c = await env.DB.prepare("SELECT email FROM customers WHERE id = ?1").bind(order.customer_id).first();
-    email = c ? c.email : null;
-  }
-
-  let data;
-  try {
-    const res = await fetch(env.LICENSE_ISSUE_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "X-Issue-Secret": env.LICENSE_ISSUE_SECRET },
-      body: JSON.stringify({ orderId: order.id, email, plan: order.plan, period: order.period }),
-    });
-    if (!res.ok) return markPending();
-    data = await res.json();
-  } catch {
-    return markPending();
-  }
-  if (!data || !data.licenseKey) return markPending();
-
-  const keyHash = await sha256Hex(String(data.licenseKey).trim());
   await env.DB.prepare(
-    `INSERT OR IGNORE INTO customer_licenses
-       (id, customer_id, license_key_hash, license_key_plain, product, tier, expires_at, source, order_id, created_at)
-     VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, 'purchase', ?8, ?9)`
-  ).bind(
-    crypto.randomUUID(),
-    order.customer_id,
-    keyHash,
-    String(data.licenseKey).trim(),
-    "HORA Media",
-    data.tier || order.plan,
-    data.expiresAt || null,
-    order.id,
-    new Date().toISOString()
-  ).run();
+    `INSERT INTO licenses
+       (id, license_key, customer_id, app, product_id, tier, status, organization,
+        expiry_utc, validity_days, activated_at, revoked_at, source, order_id, created_at)
+     VALUES (?1, ?2, ?3, ?4, ?5, ?6, 'active', 'user', NULL, ?7, NULL, NULL, 'purchase', ?8, ?9)`
+  ).bind(licenseId, licenseKey, order.customer_id, app, productId, order.plan, validityDays, order.id, now).run();
+
   await env.DB.prepare("UPDATE orders SET status = 'paid', license_id = ?2 WHERE id = ?1")
-    .bind(order.id, data.licenseId || null).run();
+    .bind(order.id, licenseId).run();
   return true;
 }

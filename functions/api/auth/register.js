@@ -1,5 +1,6 @@
 // POST /api/auth/register — dang ky tai khoan khach (email + mat khau >= 8 ky tu).
 import { json, errorJson, readJson, hashPassword, createSession } from "../_lib.js";
+import { logEvent, clientIp } from "../_log.js";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
@@ -24,6 +25,7 @@ export async function onRequestPost({ request, env }) {
   ).bind(id, email, hash, salt, iterations, displayName, new Date().toISOString()).run();
 
   const session = await createSession(env, id);
+  await logEvent(env, { eventType: "auth.register", customerId: id, ip: clientIp(request) });
   return json(
     { customer: { id, email, displayName } },
     201,

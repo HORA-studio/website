@@ -1,5 +1,4 @@
-// GET /api/licenses — danh sach license cua khach dang dang nhap.
-// Key claim chi luu hash, tier/han dung NULL -> UI hien "Chua dong bo".
+// GET /api/licenses — danh sach license cua khach dang dang nhap (cho dashboard).
 import { json, errorJson, requireAuth } from "../_lib.js";
 
 export async function onRequestGet({ request, env }) {
@@ -7,20 +6,25 @@ export async function onRequestGet({ request, env }) {
   if (a.response) return a.response;
 
   const { results } = await env.DB.prepare(
-    `SELECT id, license_key_plain, product, tier, expires_at, source, order_id, created_at
-       FROM customer_licenses WHERE customer_id = ?1 ORDER BY created_at DESC`
+    `SELECT l.id, l.license_key, l.app, l.product_id, l.tier, l.status, l.organization,
+            l.expiry_utc, l.validity_days, l.activated_at, l.revoked_at, l.source, l.order_id, l.created_at,
+            (SELECT d.device_id FROM devices d WHERE d.license_id = l.id LIMIT 1) AS device_id
+       FROM licenses l WHERE l.customer_id = ?1 ORDER BY l.created_at DESC`
   ).bind(a.customer.id).all();
 
   const licenses = (results || []).map((r) => ({
     id: r.id,
-    product: r.product,
+    licenseKey: r.license_key,
+    app: r.app,
+    product: r.product_id,
     tier: r.tier,
-    expiresAt: r.expires_at,
+    status: r.status,
+    organization: r.organization,
+    expiresAt: r.expiry_utc,
+    activatedAt: r.activated_at,
     source: r.source,
     orderId: r.order_id,
-    // Chi key mua qua web (he thong cap) moi co ban tho de khach copy; key claim -> null.
-    licenseKeyPlain: r.license_key_plain || null,
-    syncStatus: r.tier ? "synced" : "not_synced",
+    deviceBound: Boolean(r.device_id),
     createdAt: r.created_at,
   }));
   return json({ licenses });

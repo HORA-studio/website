@@ -13,6 +13,7 @@
 // - KHONG bao gio log API key.
 import { json, readJson, tryIssueLicense } from "../_lib.js";
 import { normalizePaymentText, findPaymentCodeInText } from "./_gateway.js";
+import { logEvent, clientIp } from "../_log.js";
 
 const ok = (extra = {}) => json({ success: true, ...extra }, 200);
 
@@ -89,6 +90,7 @@ export async function onRequestPost({ request, env }) {
   await env.DB.prepare("UPDATE orders SET status = 'paid', paid_at = ?2 WHERE id = ?1").bind(order.id, now).run();
   const cust = await env.DB.prepare("SELECT email FROM customers WHERE id = ?1").bind(order.customer_id).first();
   await tryIssueLicense(env, { ...order, email: cust ? cust.email : null });
+  await logEvent(env, { eventType: "payment.paid", customerId: order.customer_id, actor: "sepay", ip: clientIp(request), details: { orderId: order.id, amount, transId } });
 
   return ok({});
 }

@@ -4,6 +4,7 @@
 // TUYET DOI khong tra URL thanh toan gia.
 import { json, errorJson, readJson, requireAuth, getPlans, newOrderId } from "../_lib.js";
 import { isGatewayConfigured, createGatewayPayment, sepayPaymentCode, buildSepayInstructions } from "../payments/_gateway.js";
+import { logEvent, clientIp } from "../_log.js";
 
 function orderOut(r) {
   return {
@@ -60,6 +61,7 @@ export async function onRequestPost({ request, env }) {
   await env.DB.prepare(
     "INSERT INTO orders (id, customer_id, plan, period, amount_vnd, status, gateway, created_at) VALUES (?1, ?2, ?3, ?4, ?5, 'created', ?6, ?7)"
   ).bind(order.id, order.customer_id, plan, period, amount, gateway, new Date().toISOString()).run();
+  await logEvent(env, { eventType: "order.create", customerId: a.customer.id, ip: clientIp(request), details: { orderId: order.id, plan, period, amount, gateway } });
 
   if (!isGatewayConfigured(env, gateway)) {
     return json(

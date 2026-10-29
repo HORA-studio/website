@@ -1,5 +1,6 @@
 // POST /api/auth/login — dang nhap bang email + mat khau.
 import { json, errorJson, readJson, verifyPassword, createSession } from "../_lib.js";
+import { logEvent, clientIp } from "../_log.js";
 
 export async function onRequestPost({ request, env }) {
   const body = await readJson(request);
@@ -18,6 +19,7 @@ export async function onRequestPost({ request, env }) {
   if (!ok) return errorJson("INVALID_CREDENTIALS", "Email hoặc mật khẩu không đúng.", 401);
 
   const session = await createSession(env, row.id);
+  await logEvent(env, { eventType: "auth.login", customerId: row.id, ip: clientIp(request) });
   return json(
     { customer: { id: row.id, email: row.email, displayName: row.display_name } },
     200,
