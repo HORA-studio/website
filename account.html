@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<html lang="vi">
-<head>
-<meta charset="utf-8">
+<!-- saved from url=(0040)https://hora.works/account?mode=register -->
+<html lang="vi"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Tài khoản — HORA Media</title>
-<link rel="icon" href="/favicon.ico">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;550;600;700;800&display=swap" rel="stylesheet">
+<title>Tài khoản — HORA</title>
+<link rel="icon" href="https://hora.works/favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com/">
+<link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">
+<link href="./Tài khoản — HORA_files/css2" rel="stylesheet">
 <style>
-/* HORA Media — trang tai khoan, dong bo thiet ke v10 cua trang chu (2026-10-29).
+/* HORA — trang tai khoan, dong bo thiet ke v10 cua trang chu (2026-10-29).
    Dung chung tokens voi index.html v10: nen giay #f6f5f1, teal #0a9787,
    nut pill, the radius 22 + bong mem, chu Inter 15.5. Giao dien theo system:
    may de toi thi trang tu toi (giong trang chu). Phan "tam" — user se sua tiep. */
@@ -107,6 +107,139 @@ code{background:var(--panel2);padding:2px 7px;border-radius:7px;word-break:break
 .pay-panel .qr{display:block;max-width:260px;width:100%;margin:0 auto 12px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:8px}
 .pay-panel table td:first-child{color:var(--muted);width:150px}
 .hidden{display:none}
+
+
+/* Viewport-fit auth and full-panel password recovery */
+html,body{min-height:100%;height:100%;overflow:hidden}
+body{padding-top:72px}
+.shell.solo{height:calc(100dvh - 72px);min-height:0;overflow:hidden;padding-top:14px;padding-bottom:14px;align-items:center}
+.shell.solo .content{height:100%;display:flex;flex-direction:column;justify-content:center;min-height:0}
+.auth-layout{height:min(680px,calc(100dvh - 100px));min-height:0;margin:0 auto;width:100%}
+.auth-visual{min-height:0}
+.auth-form-panel{min-height:0;overflow:hidden;scrollbar-width:none}
+.auth-form-panel::-webkit-scrollbar{display:none}
+#forgot-wrap{display:none!important}
+.auth-layout.forgot-mode .auth-visual-copy h1{font-size:clamp(30px,3.5vw,42px)}
+.auth-layout.forgot-mode .auth-form-head{margin-bottom:20px}
+.auth-layout.forgot-mode .tabs{display:none}
+.auth-layout.forgot-mode #auth-form{display:none}
+.auth-layout.forgot-mode #forgot-wrap{display:block!important;border-top:0!important;margin-top:0!important;padding-top:0!important}
+.auth-layout.forgot-mode .auth-terms{margin-top:24px}
+.forgot-back{display:inline-flex;align-items:center;gap:7px;margin:0 0 16px;border:0;background:transparent;color:var(--muted);font:inherit;font-size:12px;font-weight:650;cursor:pointer;padding:0}
+.forgot-back:hover{color:var(--text)}
+#forgot-wrap label{margin-top:8px}
+#forgot-wrap .row{display:flex;flex-direction:column;align-items:stretch;width:100%;gap:10px}
+#forgot-wrap input#forgot-email{display:block;box-sizing:border-box;width:100%;min-width:0!important;height:46px!important;min-height:46px;padding:0 14px;border:1px solid var(--line2);border-radius:12px;background:var(--input-bg);color:var(--text);font-family:inherit;font-size:13.5px;line-height:normal}
+#forgot-submit{width:100%;min-height:48px;border-radius:12px;background:var(--gold);color:white;border-color:transparent;font-size:13px;font-weight:700}
+#forgot-wrap>p{font-size:11.5px;line-height:1.65;margin-top:12px!important}
+@media(max-width:760px){
+  html,body{height:100%;overflow:hidden}
+  .shell.solo{height:calc(100dvh - 72px);padding:10px 12px 14px;overflow:hidden}
+  .auth-layout{height:100%;max-height:680px;min-height:0;margin:0 auto}
+  .auth-form-panel{overflow-y:auto}
+  .auth-layout.forgot-mode{height:auto;max-height:560px}
+}
+@media(max-height:780px){
+  .auth-form-panel{padding-top:18px;padding-bottom:18px}
+  .auth-mobile-logo{margin-bottom:18px}
+  .auth-form-head{margin-bottom:12px}
+  .auth-form-head h2{font-size:26px}
+  .auth-form-panel label{margin-top:9px}
+  .auth-actions{margin-top:10px}
+  .auth-terms{margin-top:10px}
+}
+@media(max-height:720px) and (min-width:761px){
+  .auth-layout{height:calc(100dvh - 92px)}
+  .auth-form-panel{padding-top:24px;padding-bottom:24px}
+  .auth-form-head{margin-bottom:14px}
+  .auth-form-head h2{font-size:26px}
+  .auth-form-panel label{margin-top:11px}
+  .auth-actions{margin-top:16px}
+  .auth-perks{gap:12px}
+  .auth-visual-copy{margin:20px 0}
+}
+
+/* ----- Auth refresh: polished, responsive account experience ----- */
+#shell.solo .content{max-width:100%;width:100%}
+#shell.solo .content>h1,#shell.solo .content>.sub{display:none}
+#notice:empty{display:none}
+.auth-layout{display:grid;grid-template-columns:minmax(300px,.92fr) minmax(360px,1.08fr);max-width:1000px;min-height:620px;margin:22px auto 0;overflow:hidden;border:1px solid var(--line);border-radius:28px;background:var(--panel);box-shadow:var(--shadow-lg)}
+.auth-visual{position:relative;isolation:isolate;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;min-height:620px;padding:32px;color:#f4fffc;background:#092d2b}
+.auth-visual:before{content:"";position:absolute;z-index:-2;inset:0;background:radial-gradient(ellipse at 90% 15%,#0a978766,transparent 42%),radial-gradient(ellipse at 5% 90%,#0a978755,transparent 48%),linear-gradient(145deg,#092d2b,#071c20)}
+.auth-logo,.auth-mobile-logo{font-weight:850;letter-spacing:-.04em;font-size:20px;text-decoration:none;color:inherit}
+.auth-logo span,.auth-mobile-logo span{color:#53dfc9}
+.auth-visual-copy{position:relative;z-index:2;margin:46px 0 30px}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;color:var(--gold2);font-size:10px;font-weight:800;letter-spacing:.16em}
+.auth-visual .eyebrow{color:#6ce7d5}
+.eyebrow-dot{width:7px;height:7px;border-radius:50%;background:#53dfc9;box-shadow:0 0 0 5px #53dfc91c}
+.auth-visual h1{font-size:clamp(32px,3.8vw,46px);line-height:1.12;letter-spacing:-.055em;margin:22px 0 16px;color:#fff}
+.auth-visual h1 em{font-style:normal;color:#62e2ce}
+.auth-visual-copy p{max-width:340px;margin:0;color:#c1d8d5;font-size:14px;line-height:1.8}
+.auth-perks{display:grid;gap:18px;position:relative;z-index:2}
+.auth-perk{display:flex;align-items:center;gap:12px}
+.perk-icon{display:grid;place-items:center;width:34px;height:34px;border:1px solid #ffffff25;border-radius:11px;color:#70e7d4;background:#ffffff0a;font-weight:800}
+.auth-perk strong,.auth-perk small{display:block}
+.auth-perk strong{font-size:12.5px;color:#f3fffd}
+.auth-perk small{font-size:11px;color:#a9c6c2;margin-top:2px}
+.auth-visual-foot{position:relative;z-index:2;margin-top:34px;padding-top:18px;border-top:1px solid #ffffff20;color:#8eb2ad;font-size:9px;letter-spacing:.15em;font-weight:700}
+.auth-visual-foot span{padding:0 6px;color:#54ddc8}
+.auth-orbit{position:absolute;z-index:-1;border:1px solid #73e6d51c;border-radius:50%;pointer-events:none}
+.orbit-one{width:390px;height:390px;right:-220px;top:110px}
+.orbit-two{width:300px;height:300px;right:-175px;top:155px;border-color:#73e6d51a}
+.auth-form-panel{padding:clamp(22px,3.5vw,48px);display:flex;flex-direction:column;justify-content:center;min-width:0;overflow:hidden}
+.auth-mobile-logo{display:none;color:var(--text);margin-bottom:32px}
+.auth-form-head{margin-bottom:18px}
+.auth-form-head .eyebrow{margin-bottom:10px}
+.auth-form-head h2{font-size:30px;letter-spacing:-.045em;margin:0 0 7px;font-weight:800}
+.auth-form-head p{font-size:13.5px;color:var(--muted);margin:0;line-height:1.7}
+.auth-form-panel .tabs{display:grid;grid-template-columns:1fr 1fr;width:100%;margin:0 0 10px;border-radius:13px;padding:4px}
+.auth-form-panel .tabs button{border-radius:10px;padding:10px 12px;font-size:13px}
+.auth-form-panel .tabs button.on{background:var(--panel);color:var(--text);box-shadow:0 1px 5px #00000013}
+.auth-form-panel label{font-size:12px;color:var(--text);font-weight:700;margin:12px 0 6px}
+.auth-form-panel .optional{font-weight:500;color:var(--muted)}
+.auth-form-panel input{height:46px;border-radius:12px;padding:0 14px;font-size:13.5px;transition:border-color .15s,box-shadow .15s}
+.auth-form-panel input::placeholder{color:var(--muted);opacity:.72}
+.auth-form-panel input:focus{border-color:var(--gold);box-shadow:0 0 0 3px var(--accent-soft)}
+.password-label{display:flex;justify-content:space-between;align-items:center}
+.password-label label{margin-bottom:7px}
+#password-hint{font-size:10.5px;color:var(--muted)}
+.password-field{position:relative}
+.password-field input{padding-right:14px}
+
+#confirm-password-wrap{margin-top:2px}
+#confirm-password-wrap label{margin-top:17px}
+.auth-actions{display:flex;flex-direction:column;gap:10px;margin-top:12px}
+.auth-actions #forgot-link{align-self:flex-end;font-size:12px;text-decoration:none}
+.auth-submit{width:100%;min-height:49px;justify-content:center;position:relative;padding:0 44px;border-radius:12px;font-size:13.5px;text-align:center}
+.auth-submit span:first-child{flex:1;text-align:center}
+.auth-submit span:last-child{position:absolute;right:18px}
+.auth-submit span:last-child{font-size:20px;transition:transform .15s}
+.auth-submit:hover span:last-child{transform:translateX(3px)}
+.auth-terms{font-size:10.5px;line-height:1.55;color:var(--muted);text-align:center;margin:14px 0 0}
+#forgot-wrap{border-top:1px solid var(--line);margin-top:20px!important;padding-top:8px!important}
+#forgot-wrap .row{align-items:stretch}
+#forgot-wrap input{min-width:0!important;flex:1}
+#forgot-submit{font-size:12px;padding:10px 13px}
+#reset-card{max-width:560px;margin:24px auto}
+#reset-card h2{font-size:24px}
+@media(max-width:760px){
+  .auth-layout{grid-template-columns:1fr;max-width:500px;min-height:0;margin:8px auto 24px;border-radius:22px}
+  .auth-visual{display:none}
+  .auth-form-panel{padding:28px 24px 24px}
+  .auth-mobile-logo{display:block}
+  .auth-form-head{margin-bottom:22px}
+  .auth-form-head h2{font-size:27px}
+  .auth-terms{margin-top:20px}
+  #forgot-wrap .row{flex-direction:column}
+  #forgot-submit{width:100%}
+}
+@media(max-width:420px){
+  .shell.solo{padding:12px 12px 36px}
+  .auth-form-panel{padding:23px 18px 20px}
+  .auth-form-head h2{font-size:25px}
+}
+@media(prefers-reduced-motion:reduce){.auth-submit span:last-child,.btn{transition:none}}
+
 @media(max-width:860px){
   .shell{flex-direction:column;gap:16px;padding-top:18px}
   .side{width:100%;position:static;padding:10px}
@@ -120,23 +253,34 @@ code{background:var(--panel2);padding:2px 7px;border-radius:7px;word-break:break
   th,td{padding:8px 5px}
 }
 
+
+/* Keep password-recovery email input identical to standard auth fields */
+.auth-form-panel #forgot-wrap input#forgot-email{
+  height:46px!important;
+  min-height:46px!important;
+  box-sizing:border-box;
+  padding:0 14px;
+  line-height:normal;
+  font-family:inherit;
+  font-size:13.5px;
+}
 </style>
 </head>
 <body>
 <header><div class="wrap nav">
-  <a class="brand" href="/">HORA <span>Media</span></a>
-  <a href="/">← Trang chủ</a>
+  <a class="brand" href="https://hora.works/">HORA</a>
+  <a href="https://hora.works/">← Trang chủ</a>
 </div></header>
 
 <div class="shell solo" id="shell">
   <aside id="side" class="side hidden">
-    <div class="side-brand">HORA <span>Media</span></div>
+    <div class="side-brand">HORA</div>
     <nav class="side-nav" aria-label="Mục tài khoản">
-      <button type="button" class="side-item active" data-view-btn="account"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4.5 20.5c1.4-3.8 4.4-5.5 7.5-5.5s6.1 1.7 7.5 5.5"/></svg> Thông tin tài khoản</button>
-      <button type="button" class="side-item" data-view-btn="licenses"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="15.5" r="4.5"/><path d="M11.3 12.2 20 3.5"/><path d="M16.5 7l3 3"/></svg> License của tôi</button>
-      <button type="button" class="side-item" data-view-btn="link"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 14a5 5 0 0 0 7.1 0l2.4-2.4a5 5 0 0 0-7-7.1L11 6"/><path d="M14 10a5 5 0 0 0-7.1 0L4.5 12.4a5 5 0 0 0 7 7.1L13 18"/></svg> Kết nối ứng dụng</button>
-      <button type="button" class="side-item" data-view-btn="buy"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.6-6.3"/><path d="M21 3v6h-6"/></svg> Mua / gia hạn</button>
-      <button type="button" class="side-item" data-view-btn="orders"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M8.5 6h12M8.5 12h12M8.5 18h12"/><path d="M4 6h.01M4 12h.01M4 18h.01"/></svg> Lịch sử giao dịch</button>
+      <button type="button" class="side-item active" data-view-btn="account"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4.5 20.5c1.4-3.8 4.4-5.5 7.5-5.5s6.1 1.7 7.5 5.5"></path></svg> Thông tin tài khoản</button>
+      <button type="button" class="side-item" data-view-btn="licenses"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="15.5" r="4.5"></circle><path d="M11.3 12.2 20 3.5"></path><path d="M16.5 7l3 3"></path></svg> License của tôi</button>
+      <button type="button" class="side-item" data-view-btn="link"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 14a5 5 0 0 0 7.1 0l2.4-2.4a5 5 0 0 0-7-7.1L11 6"></path><path d="M14 10a5 5 0 0 0-7.1 0L4.5 12.4a5 5 0 0 0 7 7.1L13 18"></path></svg> Kết nối ứng dụng</button>
+      <button type="button" class="side-item" data-view-btn="buy"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.6-6.3"></path><path d="M21 3v6h-6"></path></svg> Mua / gia hạn</button>
+      <button type="button" class="side-item" data-view-btn="orders"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M8.5 6h12M8.5 12h12M8.5 18h12"></path><path d="M4 6h.01M4 12h.01M4 18h.01"></path></svg> Lịch sử giao dịch</button>
     </nav>
     <div class="side-foot">
       <div class="side-email" id="side-email"></div>
@@ -144,38 +288,59 @@ code{background:var(--panel2);padding:2px 7px;border-radius:7px;word-break:break
     </div>
   </aside>
   <main class="content">
-  <h1>Tài khoản của bạn</h1>
-  <p class="sub">Đăng nhập để mua license, xem gói (tier) và lịch sử giao dịch của bạn.</p>
-
   <div id="notice" class="msg"></div>
 
   <!-- Chua dang nhap -->
-  <section id="auth-card" class="card hidden">
-    <div class="tabs">
-      <button type="button" id="tab-login" class="on">Đăng nhập</button>
-      <button type="button" id="tab-register">Đăng ký</button>
-    </div>
-    <form id="auth-form">
-      <div id="name-wrap" class="hidden">
-        <label for="f-name">Tên hiển thị (không bắt buộc)</label>
-        <input id="f-name" autocomplete="name">
+  <section id="auth-card" class="auth-layout">
+    <div class="auth-visual">
+      <a class="auth-logo" href="https://hora.works/">HORA</a>
+      <div class="auth-visual-copy">
+        <span class="eyebrow"><span class="eyebrow-dot"></span> WORKFLOW SÁNG TẠO</span>
+        <h1>Một tài khoản.<br><em>Toàn bộ</em> HORA.</h1>
+        <p>Quản lý license, kết nối ứng dụng và theo dõi giao dịch của bạn — tất cả tại một nơi.</p>
       </div>
+      <div class="auth-perks">
+        <div class="auth-perk"><span class="perk-icon">✓</span><span><strong>Quản lý tập trung</strong><small>Một tài khoản cho các ứng dụng HORA</small></span></div>
+        <div class="auth-perk"><span class="perk-icon">↗</span><span><strong>Kích hoạt nhanh chóng</strong><small>Kết nối license trong vài bước</small></span></div>
+      </div>
+      <div class="auth-orbit orbit-one"></div><div class="auth-orbit orbit-two"></div>
+      <div class="auth-visual-foot">HORA <span>•</span> CREATE WITHOUT LIMITS</div>
+    </div>
+    <div class="auth-form-panel">
+      <div class="auth-mobile-logo">HORA</div>
+      <div class="auth-form-head">
+        <span class="eyebrow">CHÀO MỪNG BẠN</span>
+        <h2 id="auth-title">Tạo tài khoản</h2>
+        <p id="auth-description">Bắt đầu trải nghiệm hệ sinh thái HORA ngay hôm nay.</p>
+      </div>
+      <div class="tabs" role="tablist" aria-label="Chọn hình thức tài khoản">
+        <button type="button" id="tab-login" role="tab" aria-selected="false">Đăng nhập</button>
+        <button type="button" id="tab-register" class="on" role="tab" aria-selected="true">Đăng ký</button>
+      </div>
+    <form id="auth-form">
       <label for="f-email">Email</label>
-      <input id="f-email" type="email" required autocomplete="email">
-      <label for="f-password">Mật khẩu (ít nhất 8 ký tự)</label>
-      <input id="f-password" type="password" required minlength="8" autocomplete="current-password">
-      <div class="row" style="margin-top:16px">
-        <button class="btn primary" type="submit" id="auth-submit">Đăng nhập</button>
-        <a href="#" id="forgot-link">Quên mật khẩu?</a>
+      <input id="f-email" type="email" required="" autocomplete="email" placeholder="ban@example.com">
+      <div class="password-label"><label for="f-password">Mật khẩu</label><span id="password-hint">Ít nhất 8 ký tự</span></div>
+      <div class="password-field"><input id="f-password" type="password" required="" minlength="8" autocomplete="new-password" placeholder="Nhập mật khẩu"></div>
+      <div id="confirm-password-wrap">
+        <label for="f-confirm-password">Xác nhận mật khẩu</label>
+        <div class="password-field"><input id="f-confirm-password" type="password" minlength="8" autocomplete="new-password" placeholder="Nhập lại mật khẩu"></div>
+      </div>
+      <div class="auth-actions">
+        <a href="https://hora.works/account?mode=register#" id="forgot-link" style="display: none;">Quên mật khẩu?</a>
+        <button class="btn primary auth-submit" type="submit" id="auth-submit"><span>Đăng ký</span><span aria-hidden="true">→</span></button>
       </div>
     </form>
     <div id="forgot-wrap" class="hidden" style="margin-top:14px;border-top:1px solid var(--line);padding-top:6px">
+      <button type="button" id="forgot-back" class="forgot-back">← Quay lại đăng nhập</button>
       <label for="forgot-email">Email của tài khoản cần đặt lại mật khẩu</label>
       <div class="row">
         <input id="forgot-email" type="email" style="flex:1;min-width:240px" autocomplete="email">
         <button class="btn" type="button" id="forgot-submit">Gửi link đặt lại mật khẩu</button>
       </div>
       <p class="muted" style="margin:6px 0 0">Hệ thống sẽ gửi link đặt lại mật khẩu vào email (nếu email có trong hệ thống). Link có hiệu lực 1 giờ.</p>
+    </div>
+      <p class="auth-terms">Bằng việc tiếp tục, bạn đồng ý với các điều khoản sử dụng và chính sách bảo mật của HORA.</p>
     </div>
   </section>
 
@@ -184,7 +349,7 @@ code{background:var(--panel2);padding:2px 7px;border-radius:7px;word-break:break
     <h2>Đặt mật khẩu mới</h2>
     <form id="reset-form">
       <label for="reset-password">Mật khẩu mới (ít nhất 8 ký tự)</label>
-      <input id="reset-password" type="password" required minlength="8" autocomplete="new-password">
+      <input id="reset-password" type="password" required="" minlength="8" autocomplete="new-password">
       <div class="row" style="margin-top:16px">
         <button class="btn primary" type="submit">Đặt lại mật khẩu</button>
       </div>
@@ -224,7 +389,7 @@ code{background:var(--panel2);padding:2px 7px;border-radius:7px;word-break:break
       <p class="muted" style="margin:0 0 12px">Mở ứng dụng HORA trên máy, chọn <strong>Kết nối tài khoản</strong>, rồi tạo mã dưới đây và dán vào ứng dụng. Một tài khoản dùng cho mọi ứng dụng HORA.</p>
       <div class="row">
         <select id="link-app" style="max-width:240px">
-          <option value="video-builder" selected>HORA Video Builder</option>
+          <option value="video-builder" selected="">HORA Video Builder</option>
           <option value="facebook-builder">HORA Facebook Builder</option>
         </select>
         <button class="btn" type="button" id="link-create-btn">Tạo mã kết nối</button>
@@ -244,7 +409,7 @@ code{background:var(--panel2);padding:2px 7px;border-radius:7px;word-break:break
       <div class="plan-grid" id="plan-grid"></div>
       <label for="gateway">Cổng thanh toán</label>
       <select id="gateway" style="max-width:340px">
-        <option value="sepay" selected>SePay — chuyển khoản ngân hàng (tự xác nhận)</option>
+        <option value="sepay" selected="">SePay — chuyển khoản ngân hàng (tự xác nhận)</option>
         <option value="momo">MoMo</option>
         <option value="vnpay">VNPay</option>
       </select>
@@ -254,12 +419,12 @@ code{background:var(--panel2);padding:2px 7px;border-radius:7px;word-break:break
         <h3 style="margin:0 0 10px">Chuyển khoản để thanh toán</h3>
         <img id="sepay-qr" class="qr" alt="Mã QR VietQR thanh toán">
         <table>
-          <tr><td>Ngân hàng</td><td><strong id="sepay-bank"></strong></td></tr>
+          <tbody><tr><td>Ngân hàng</td><td><strong id="sepay-bank"></strong></td></tr>
           <tr><td>Số tài khoản</td><td><code id="sepay-account"></code> <button class="btn small" type="button" id="sepay-copy-account">Copy</button></td></tr>
           <tr><td>Chủ tài khoản</td><td id="sepay-name"></td></tr>
           <tr><td>Số tiền</td><td><strong id="sepay-amount" style="color:var(--gold2)"></strong></td></tr>
           <tr><td>Nội dung chuyển khoản</td><td><code id="sepay-content"></code> <button class="btn small" type="button" id="sepay-copy-content">Copy</button></td></tr>
-        </table>
+        </tbody></table>
         <p style="margin:12px 0 4px"><strong>Chuyển đúng số tiền và đúng nội dung</strong>, hệ thống tự xác nhận sau khi nhận được tiền (thường vài phút).</p>
         <p class="muted" style="margin:0">Trạng thái: <span id="sepay-status">Đang chờ chuyển khoản… trang sẽ tự kiểm tra lại sau mỗi 15 giây.</span></p>
       </div>
@@ -338,19 +503,50 @@ function setMode(m) {
   mode = m;
   $("tab-login").classList.toggle("on", m === "login");
   $("tab-register").classList.toggle("on", m === "register");
-  $("name-wrap").classList.toggle("hidden", m === "login");
-  $("auth-submit").textContent = m === "login" ? "Đăng nhập" : "Đăng ký";
+  $("confirm-password-wrap").classList.toggle("hidden", m === "login");
+  $("f-confirm-password").required = m === "register";
+  if (m === "login") {
+    $("f-confirm-password").value = "";
+  }
+  $("auth-submit").innerHTML = `<span>${m === "login" ? "Đăng nhập" : "Tạo tài khoản"}</span><span aria-hidden="true">→</span>`;
+  $("auth-title").textContent = m === "login" ? "Chào mừng trở lại" : "Tạo tài khoản";
+  $("auth-description").textContent = m === "login" ? "Đăng nhập để tiếp tục với không gian HORA của bạn." : "Bắt đầu trải nghiệm hệ sinh thái HORA ngay hôm nay.";
+  $("password-hint").textContent = m === "login" ? "Mật khẩu của bạn" : "Ít nhất 8 ký tự";
+  $("tab-login").setAttribute("aria-selected", String(m === "login"));
+  $("tab-register").setAttribute("aria-selected", String(m === "register"));
   $("f-password").autocomplete = m === "login" ? "current-password" : "new-password";
   $("forgot-link").style.display = m === "login" ? "" : "none";
   if (m !== "login") $("forgot-wrap").classList.add("hidden");
 }
-$("tab-login").addEventListener("click", () => setMode("login"));
-$("tab-register").addEventListener("click", () => setMode("register"));
+$("tab-login").addEventListener("click", () => { $("auth-card").classList.remove("forgot-mode"); $("forgot-wrap").classList.add("hidden"); setMode("login"); });
+$("tab-register").addEventListener("click", () => { $("auth-card").classList.remove("forgot-mode"); $("forgot-wrap").classList.add("hidden"); setMode("register"); });
+function checkPasswordMatch() {
+  const confirm = $("f-confirm-password");
+  if (mode !== "register" || !confirm.value) {
+    hint.textContent = "";
+    hint.className = "password-match-hint";
+    confirm.setCustomValidity("");
+    return true;
+  }
+  const match = $("f-password").value === confirm.value;
+  confirm.setCustomValidity(match ? "" : "Mật khẩu xác nhận không khớp.");
+  return match;
+}
+$("f-password").addEventListener("input", checkPasswordMatch);
+$("f-confirm-password").addEventListener("input", checkPasswordMatch);
 
 $("auth-form").addEventListener("submit", async (e) => {
   e.preventDefault();
+  if (mode === "register" && !checkPasswordMatch()) {
+    $("f-confirm-password").reportValidity();
+    return;
+  }
   const payload = { email: $("f-email").value.trim(), password: $("f-password").value };
-  if (mode === "register") payload.displayName = $("f-name").value.trim();
+  const submit = $("auth-submit");
+  const originalLabel = mode === "login" ? "Đăng nhập" : "Tạo tài khoản";
+  submit.disabled = true;
+  submit.innerHTML = '<span>Đang xử lý…</span><span aria-hidden="true">…</span>';
+  try {
   const { res, data } = await api("/api/auth/" + mode, { method: "POST", body: JSON.stringify(payload) });
   if (!res.ok) { showMsg("err", errText(data, "Không thực hiện được, thử lại sau.")); return; }
   if (mode === "login") {
@@ -361,14 +557,33 @@ $("auth-form").addEventListener("submit", async (e) => {
     showMsg("ok", "Đăng ký thành công. Đã gửi email xác thực, hãy kiểm tra hộp thư.");
   }
   await loadDash();
+  } catch {
+    showMsg("err", "Không thể kết nối máy chủ. Vui lòng kiểm tra mạng và thử lại.");
+  } finally {
+    submit.disabled = false;
+    submit.innerHTML = `<span>${originalLabel}</span><span aria-hidden="true">→</span>`;
+  }
 });
 
 // ----- Quen mat khau -----
+function showForgotMode() {
+  $("auth-card").classList.add("forgot-mode");
+  $("auth-title").textContent = "Quên mật khẩu?";
+  $("auth-description").textContent = "Nhập email tài khoản, HORA sẽ gửi cho bạn liên kết đặt lại mật khẩu.";
+  $("forgot-wrap").classList.remove("hidden");
+  if (!$("forgot-email").value) $("forgot-email").value = $("f-email").value.trim();
+  $("forgot-email").focus();
+}
+function hideForgotMode() {
+  $("auth-card").classList.remove("forgot-mode");
+  $("forgot-wrap").classList.add("hidden");
+  setMode("login");
+}
 $("forgot-link").addEventListener("click", (e) => {
   e.preventDefault();
-  $("forgot-wrap").classList.toggle("hidden");
-  if (!$("forgot-email").value) $("forgot-email").value = $("f-email").value.trim();
+  showForgotMode();
 });
+$("forgot-back").addEventListener("click", hideForgotMode);
 $("forgot-submit").addEventListener("click", async () => {
   const email = $("forgot-email").value.trim();
   if (!email) { showMsg("err", "Hãy nhập email của bạn."); return; }
@@ -577,7 +792,7 @@ $("resend-verify-btn").addEventListener("click", async () => {
 let resetToken = null;
 {
   const qs = new URLSearchParams(location.search);
-  if (qs.get("mode") === "register") setMode("register");
+  setMode(qs.get("mode") === "register" ? "register" : "login");
   const verifyParam = qs.get("verify");
   const resetParam = qs.get("reset");
   if (verifyParam || resetParam) {
@@ -596,7 +811,6 @@ let resetToken = null;
   if (resetParam) {
     resetToken = resetParam;
     $("reset-card").classList.remove("hidden");
-    $("reset-card").scrollIntoView({ behavior: "smooth", block: "center" });
   }
 }
 $("reset-form").addEventListener("submit", async (e) => {
@@ -619,5 +833,7 @@ else if (payParam === "pending") showMsg("info", "Đang chờ cổng thanh toán
 
 loadDash();
 </script>
-</body>
-</html>
+<script type="module" src="./Tài khoản — HORA_files/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon="{&quot;version&quot;:&quot;2024.11.0&quot;,&quot;token&quot;:&quot;b0e20c7e34864117982785ed2cc48b14&quot;,&quot;r&quot;:1,&quot;spa&quot;:2}" crossorigin="anonymous"></script>
+
+
+</body></html>
