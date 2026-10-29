@@ -608,6 +608,14 @@ html[data-theme="dark"] .plan-plus:before{color:#04211c}
 .content{height:100%;overflow:hidden;align-self:stretch}
 #dash{position:relative;flex:1;min-height:0}
 .view-panel:not(.hidden){position:absolute;inset:0;overflow:auto}
+.account-panel:not(.hidden){height:100% !important;display:flex;flex-direction:column;justify-content:center}
+.purchase-panel:not(.hidden){height:100% !important;display:flex;flex-direction:column}
+.purchase-panel:not(.hidden)>*{flex-shrink:0}
+.purchase-hero{justify-content:center;text-align:center}
+.purchase-hero p{margin-inline:auto}
+.purchase-trust{justify-content:center}
+.purchase-panel .plan-section-head,.purchase-panel .plan-grid{width:100%;max-width:880px;margin-inline:auto}
+.view-panel[data-view="orders"]>h2{display:block}
 @media(max-width:860px){
   .shell{height:auto !important;min-height:calc(100vh - 64px);min-height:calc(100dvh - 64px);overflow:visible}
   .side{overflow:visible}
@@ -692,7 +700,7 @@ html[data-theme="dark"] .plan-plus:before{color:#04211c}
     <section class="card view-panel account-panel" data-view="account">
       <div class="account-welcome">
         <div>
-          <span class="eyebrow">ACCOUNT OVERVIEW</span>
+          
           <h2>Tài khoản của bạn<span id="acc-name"></span></h2>
           <p class="muted">Đăng nhập để mua license, xem gói (tier) và lịch sử giao dịch của bạn.</p>
         </div>
