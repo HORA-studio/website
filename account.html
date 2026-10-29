@@ -886,28 +886,19 @@ html[data-theme="dark"] .plan-plus:before{color:#04211c}
       <div class="pricing-wrap">
       <div class="pricing-toggle-row"><div class="billing-toggle" role="tablist" aria-label="Chọn thời hạn"><button type="button" class="billing-opt active" data-billing="month" role="tab" aria-selected="true">Theo tháng</button><button type="button" class="billing-opt" data-billing="year" role="tab" aria-selected="false">Theo năm<span class="save-badge">Tiết kiệm 17%</span></button></div></div>
       <div class="pricing-grid" id="plan-grid">
-    <div class="plan-block">
-      <h3 class="plan-block-name">Go</h3>
-      <div class="plan-opt" data-period="month">
-        <span class="plan-opt-label">1 tháng: <strong>250.000đ</strong></span>
-        <button class="btn buy-now" type="button" data-buy="go:month">Mua ngay</button>
-      </div>
-      <div class="plan-opt" data-period="year" style="display:none">
-        <span class="plan-opt-label">1 năm: <strong>2.500.000đ</strong></span>
-        <button class="btn buy-now" type="button" data-buy="go:year">Mua ngay</button>
-      </div>
-    </div>
-    <div class="plan-block">
-      <h3 class="plan-block-name">Plus</h3>
-      <div class="plan-opt" data-period="month">
-        <span class="plan-opt-label">1 tháng: <strong>400.000đ</strong></span>
-        <button class="btn buy-now" type="button" data-buy="plus:month">Mua ngay</button>
-      </div>
-      <div class="plan-opt" data-period="year" style="display:none">
-        <span class="plan-opt-label">1 năm: <strong>4.000.000đ</strong></span>
-        <button class="btn buy-now" type="button" data-buy="plus:year">Mua ngay</button>
-      </div>
-    </div></div>
+    <article class="price-card" data-plan-card="go">
+        <h3>Go</h3>
+        <div class="price"><span data-price>250.000đ</span></div>
+        <div class="per" data-per>/ tháng · linh hoạt, gia hạn bất cứ lúc nào</div>
+        <button class="btn buy-now" type="button" data-buy-plan="go">Mua ngay</button>
+      </article>
+      <article class="price-card featured" data-plan-card="plus">
+        <span class="popular">ĐƯỢC CHỌN NHIỀU</span>
+        <h3>Plus</h3>
+        <div class="price"><span data-price>400.000đ</span></div>
+        <div class="per" data-per>/ tháng · linh hoạt, gia hạn bất cứ lúc nào</div>
+        <button class="btn buy-now" type="button" data-buy-plan="plus">Mua ngay</button>
+      </article></div>
       
 
       </div>
@@ -1075,7 +1066,7 @@ async function loadDash() {
   $("acc-name").textContent = data.customer.displayName ? " — " + data.customer.displayName : "";
   $("verify-banner").style.display = data.customer.emailVerified === false ? "block" : "none";
   await loadPlans().catch(() => {});
-  renderPlans();
+  setBilling(BILLING);
   applyPreselect();
   await Promise.all([loadLicenses(), loadOrders()]);
 }
@@ -1194,21 +1185,10 @@ function planPer(key, period) {
   if (period === "year") { if (!p.year) return "/ năm · thanh toán theo năm"; const save = p.month ? Math.round((1 - p.year / (p.month * 12)) * 100) : 0; return `≈ ${fmtVnd(Math.round(p.year / 12))}/tháng · tiết kiệm ${save}% so với theo tháng`; }
   return "/ tháng · linh hoạt, gia hạn bất cứ lúc nào";
 }
-function renderPlans() {
-  $("plan-grid").innerHTML = Object.entries(PLANS).map(([key, p]) => `
-    <div class="plan-block">
-      <h3 class="plan-block-name">${esc(p.name)}</h3>
-      <div class="plan-opt" data-period="month">
-        <span class="plan-opt-label">1 tháng: <strong>${p.month ? fmtVnd(p.month) : "Sắp mở bán"}</strong></span>
-        <button class="btn buy-now" type="button" data-buy="${key}:month" ${p.month ? "" : "disabled"}>Mua ngay</button>
-      </div>
-      <div class="plan-opt" data-period="year">
-        <span class="plan-opt-label">1 năm: <strong>${p.year ? fmtVnd(p.year) : "Sắp mở bán"}</strong></span>
-        <button class="btn buy-now" type="button" data-buy="${key}:year" ${p.year ? "" : "disabled"}>Mua ngay</button>
-      </div>
-    </div>`).join("");
-  document.querySelectorAll("[data-buy]").forEach((b) => b.addEventListener("click", async () => {
-    const [plan, period] = b.dataset.buy.split(":");
+function bindBuyButtons() {
+  document.querySelectorAll("[data-buy-plan]").forEach((b) => b.addEventListener("click", async () => {
+    const plan = b.dataset.buyPlan;
+    const period = BILLING;
     const gateway = "sepay"; // Chi con SePay — da go bo chon cong thanh toan.
     b.disabled = true;
     b.classList.add("is-loading");
@@ -1250,14 +1230,13 @@ function setBilling(period) {
     if (priceEl) priceEl.textContent = price ? fmtVnd(price) : "Sắp mở bán";
     const perEl = card.querySelector("[data-per]");
     if (perEl) perEl.textContent = planPer(key, period);
-    const btn = card.querySelector("[data-buy]");
-    if (btn) { btn.setAttribute("data-buy", `${key}:${period}`); btn.disabled = !price; }
+    const btn = card.querySelector("[data-buy-plan]");
+    if (btn) btn.disabled = !price;
   });
-  document.querySelectorAll(".plan-opt").forEach((row) => {
-    row.style.display = row.dataset.period === period ? "" : "none";
-  });
+
 }
 document.querySelectorAll(".billing-opt").forEach((b) => b.addEventListener("click", () => setBilling(b.dataset.billing)));
+bindBuyButtons();
 
 // ----- SePay: huong dan chuyen khoan + tu kiem tra trang thai don -----
 function showSepayPanel(ins) {
