@@ -555,6 +555,7 @@ $("resend-verify-btn").addEventListener("click", async () => {
 let resetToken = null;
 {
   const qs = new URLSearchParams(location.search);
+  if (qs.get("mode") === "register") setMode("register");
   const verifyParam = qs.get("verify");
   const resetParam = qs.get("reset");
   if (verifyParam || resetParam) {
