@@ -75,18 +75,24 @@ export async function sendEmail(env, { to, subject, html, text, customerId = nul
   }
 }
 
+// Giao dien email dong bo thiet ke v10 cua web (2026-10-29): nen giay
+// #f6f5f1, the trang vien #e3e0d8, chu muc #14161a, nhan teal #0a9787,
+// nut vien tron. Ban "tam" — user se sua tiep.
 function wrapHtml(title, bodyHtml) {
-  return `<!DOCTYPE html><html lang="vi"><body style="margin:0;background:#0b1417;color:#e9f2f3;font:15px/1.55 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif">
+  return `<!DOCTYPE html><html lang="vi"><body style="margin:0;background:#f6f5f1;color:#14161a;font:15px/1.6 Inter,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif">
 <div style="max-width:560px;margin:0 auto;padding:28px 20px">
-<h1 style="font-size:20px;margin:0 0 12px;color:#f2cd63">${title}</h1>
+<div style="background:#ffffff;border:1px solid #e3e0d8;border-radius:22px;padding:32px 28px">
+<p style="margin:0 0 18px;font-weight:800;font-size:15px;letter-spacing:-.01em">HORA <span style="color:#0a9787">Media</span></p>
+<h1 style="font-size:22px;margin:0 0 12px;letter-spacing:-.02em">${title}</h1>
 ${bodyHtml}
-<p style="color:#93a8ad;font-size:13px;margin-top:24px">Email này được gửi tự động từ HORA Media (hora.works). Nếu bạn không yêu cầu, hãy bỏ qua email này.</p>
+</div>
+<p style="color:#5f6a70;font-size:13px;margin-top:20px">Email này được gửi tự động từ HORA Media (hora.works). Nếu bạn không yêu cầu, hãy bỏ qua email này.</p>
 </div></body></html>`;
 }
 
 function actionButton(link, label) {
-  return `<p style="margin:20px 0"><a href="${link}" style="background:#e2b33c;color:#1d1603;padding:11px 20px;border-radius:9px;text-decoration:none;font-weight:700">${label}</a></p>
-<p style="color:#93a8ad;font-size:13px">Hoặc mở link này trong trình duyệt:<br><a href="${link}" style="color:#f2cd63;word-break:break-all">${link}</a></p>`;
+  return `<p style="margin:22px 0"><a href="${link}" style="background:#0a9787;color:#ffffff;padding:12px 24px;border-radius:999px;text-decoration:none;font-weight:700;display:inline-block">${label}</a></p>
+<p style="color:#5f6a70;font-size:13px">Hoặc mở link này trong trình duyệt:<br><a href="${link}" style="color:#078a7b;word-break:break-all">${link}</a></p>`;
 }
 
 // Email xac thuc dia chi khi dang ky (link het han sau 24 gio).
