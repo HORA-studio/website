@@ -5,35 +5,65 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Tài khoản — HORA Media</title>
 <link rel="icon" href="/favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;550;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#0b1417;--panel:#122024;--panel2:#17282d;--line:#244046;--text:#e9f2f3;--muted:#93a8ad;--gold:#e2b33c;--gold2:#f2cd63;--danger:#ff7a72;--ok:#43d68a}
+/* HORA Media — trang tai khoan, app shell kieu Linear (reskin 2026-10-29).
+   Nen gan den, panel trang mo + vien 1px, sidebar trai; mau nhan giu nguyen
+   vang HORA cua trang nay (#e2b33c / #f2cd63). */
+:root{--bg:#08090a;--panel:#0d1013;--panel2:#12161a;--line:#ffffff14;--text:#e9f2f3;--muted:#93a8ad;--gold:#e2b33c;--gold2:#f2cd63;--danger:#ff7a72;--ok:#43d68a}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font:15px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
-.wrap{max-width:960px;margin:0 auto;padding:0 20px}
-header{border-bottom:1px solid var(--line)}
-.nav{display:flex;align-items:center;justify-content:space-between;height:60px}
-.brand{color:var(--text);text-decoration:none;font-weight:800;letter-spacing:.4px}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.55 Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;background:radial-gradient(900px 420px at 50% -10%,#e2b33c0d,transparent 70%)}
+.wrap{max-width:1120px;margin:0 auto;padding:0 20px;position:relative}
+header{border-bottom:1px solid var(--line);background:#08090ad9;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);position:relative;z-index:5}
+.nav{display:flex;align-items:center;justify-content:space-between;height:58px}
+.brand{color:var(--text);text-decoration:none;font-weight:800;letter-spacing:.2px;font-size:16px}
 .brand span{color:var(--gold)}
+header .nav>a:last-child{color:var(--muted);text-decoration:none;font-size:14px}
+header .nav>a:last-child:hover{color:var(--text)}
 a{color:var(--gold2)}
-main{padding:28px 0 60px}
-h1{font-size:26px;margin:6px 0 4px}
+/* ----- App shell: sidebar + vung chinh ----- */
+.shell{display:flex;gap:26px;align-items:flex-start;max-width:1200px;margin:0 auto;padding:26px 20px 60px;position:relative}
+.side{width:242px;flex-shrink:0;position:sticky;top:26px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 12px}
+.side-brand{font-weight:800;letter-spacing:.2px;font-size:15px;padding:2px 10px 12px;border-bottom:1px solid var(--line);margin-bottom:10px}
+.side-brand span{color:var(--gold)}
+.side-nav{display:flex;flex-direction:column;gap:2px}
+.side-item{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:none;border:0;border-radius:8px;padding:8px 10px;color:var(--muted);font:inherit;font-size:14px;font-weight:550;cursor:pointer;transition:background .15s,color .15s}
+.side-item svg{flex-shrink:0;opacity:.85}
+.side-item:hover{background:#ffffff07;color:var(--text)}
+.side-item.active{background:#ffffff0a;color:var(--text);box-shadow:inset 2px 0 0 var(--gold)}
+.side-foot{border-top:1px solid var(--line);margin-top:12px;padding:12px 10px 2px}
+.side-email{font-size:12.5px;color:var(--muted);word-break:break-all;margin-bottom:10px}
+.content{flex:1;min-width:0}
+.shell.solo .content{max-width:740px;margin:0 auto;width:100%}
+.content-head{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:2px 0 16px}
+.content-head h2{font-size:21px;margin:0;letter-spacing:-.02em;font-weight:650}
+.view-panel>h2{display:none}
+h1{font-size:26px;margin:6px 0 4px;letter-spacing:-.02em}
 h2{font-size:19px;margin:0 0 12px}
 .sub{color:var(--muted);margin:0 0 20px}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px;margin:0 0 18px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px;margin:0 0 18px}
 .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 label{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px}
-input,select{width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:9px;color:var(--text);padding:10px 12px;font-size:15px}
-.btn{background:transparent;border:1px solid var(--gold);color:var(--gold2);border-radius:9px;padding:9px 16px;font-weight:600;cursor:pointer}
-.btn.primary{background:var(--gold);color:#1d1603}
+input,select{width:100%;background:#ffffff05;border:1px solid var(--line);border-radius:10px;color:var(--text);padding:10px 12px;font-size:15px;font:inherit}
+input:focus,select:focus{outline:none;border-color:#e2b33c80}
+.btn{background:transparent;border:1px solid #e2b33c70;color:var(--gold2);border-radius:9px;padding:9px 16px;font-weight:600;cursor:pointer;font:inherit;transition:background .15s,border-color .15s}
+.btn:hover{border-color:var(--gold)}
+.btn.primary{background:var(--gold);color:#1d1603;border-color:transparent}
+.btn.primary:hover{background:var(--gold2)}
 .btn:disabled{opacity:.45;cursor:not-allowed}
 .btn.small{padding:5px 10px;font-size:13px}
-.tabs{display:flex;gap:8px;margin-bottom:14px}
-.tabs button{background:var(--panel2);border:1px solid var(--line);color:var(--muted);border-radius:9px;padding:8px 14px;cursor:pointer}
-.tabs button.on{color:var(--gold2);border-color:var(--gold)}
+.tabs{display:inline-flex;gap:4px;margin-bottom:16px;background:#ffffff05;border:1px solid var(--line);border-radius:11px;padding:4px}
+.tabs button{background:transparent;border:0;color:var(--muted);border-radius:8px;padding:7px 16px;cursor:pointer;font:inherit;font-weight:600}
+.tabs button.on{color:var(--text);background:#ffffff0d}
 table{width:100%;border-collapse:collapse;font-size:14px}
-th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:top}
-th{color:var(--muted);font-weight:600;font-size:13px}
-.msg{border-radius:9px;padding:10px 12px;margin:12px 0;display:none}
+th,td{text-align:left;padding:9px 8px;border-bottom:1px solid #ffffff0d;vertical-align:top}
+tbody tr{transition:background .12s}
+tbody tr:hover{background:#ffffff03}
+th{color:var(--muted);font-weight:600;font-size:11.5px;text-transform:uppercase;letter-spacing:.06em}
+.msg{border-radius:10px;padding:10px 12px;margin:12px 0;display:none}
 .msg.err{display:block;background:#3a1714;border:1px solid var(--danger);color:#ffc9c4}
 .msg.ok{display:block;background:#123324;border:1px solid var(--ok);color:#c9f5dc}
 .msg.info{display:block;background:#2a2410;border:1px solid var(--gold);color:#f5e3ae}
@@ -42,11 +72,24 @@ th{color:var(--muted);font-weight:600;font-size:13px}
 .plan{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:16px}
 .plan h3{margin:0 0 4px}
 .price{font-size:20px;font-weight:800;color:var(--gold2)}
-code{background:var(--panel2);padding:1px 6px;border-radius:6px;word-break:break-all}
+code{background:#ffffff08;padding:1px 6px;border-radius:6px;word-break:break-all}
 .pay-panel{margin-top:16px;background:var(--panel2);border:1px solid var(--gold);border-radius:12px;padding:16px}
 .pay-panel .qr{display:block;max-width:260px;width:100%;margin:0 auto 12px;background:#fff;border-radius:12px;padding:8px}
 .pay-panel table td:first-child{color:var(--muted);width:150px}
 .hidden{display:none}
+@media(max-width:860px){
+  .shell{flex-direction:column;gap:16px;padding-top:18px}
+  .side{width:100%;position:static;padding:10px}
+  .side-brand{display:none}
+  .side-nav{flex-direction:row;overflow-x:auto;padding-bottom:2px}
+  .side-item{white-space:nowrap;width:auto}
+  .side-item.active{box-shadow:inset 0 -2px 0 var(--gold)}
+  .side-foot{display:flex;align-items:center;gap:12px;margin-top:8px;padding:8px 6px 0}
+  .side-email{margin-bottom:0;flex:1}
+  .card{padding:16px}
+  table{font-size:13px}
+  th,td{padding:8px 5px}
+}
 </style>
 </head>
 <body>
@@ -55,7 +98,22 @@ code{background:var(--panel2);padding:1px 6px;border-radius:6px;word-break:break
   <a href="/">← Trang chủ</a>
 </div></header>
 
-<main class="wrap">
+<div class="shell solo" id="shell">
+  <aside id="side" class="side hidden">
+    <div class="side-brand">HORA <span>Media</span></div>
+    <nav class="side-nav" aria-label="Mục tài khoản">
+      <button type="button" class="side-item active" data-view-btn="account"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4.5 20.5c1.4-3.8 4.4-5.5 7.5-5.5s6.1 1.7 7.5 5.5"/></svg> Thông tin tài khoản</button>
+      <button type="button" class="side-item" data-view-btn="licenses"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="15.5" r="4.5"/><path d="M11.3 12.2 20 3.5"/><path d="M16.5 7l3 3"/></svg> License của tôi</button>
+      <button type="button" class="side-item" data-view-btn="link"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 14a5 5 0 0 0 7.1 0l2.4-2.4a5 5 0 0 0-7-7.1L11 6"/><path d="M14 10a5 5 0 0 0-7.1 0L4.5 12.4a5 5 0 0 0 7 7.1L13 18"/></svg> Kết nối ứng dụng</button>
+      <button type="button" class="side-item" data-view-btn="buy"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.6-6.3"/><path d="M21 3v6h-6"/></svg> Mua / gia hạn</button>
+      <button type="button" class="side-item" data-view-btn="orders"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M8.5 6h12M8.5 12h12M8.5 18h12"/><path d="M4 6h.01M4 12h.01M4 18h.01"/></svg> Lịch sử giao dịch</button>
+    </nav>
+    <div class="side-foot">
+      <div class="side-email" id="side-email"></div>
+      <button class="btn small" id="logout-btn" type="button">Đăng xuất</button>
+    </div>
+  </aside>
+  <main class="content">
   <h1>Tài khoản của bạn</h1>
   <p class="sub">Đăng nhập để mua license, xem gói (tier) và lịch sử giao dịch của bạn.</p>
 
@@ -105,17 +163,17 @@ code{background:var(--panel2);padding:1px 6px;border-radius:6px;word-break:break
 
   <!-- Da dang nhap -->
   <div id="dash" class="hidden">
-    <section class="card">
+    <div class="content-head"><h2 id="view-title">Thông tin tài khoản</h2></div>
+    <section class="card view-panel" data-view="account">
       <h2>Thông tin tài khoản</h2>
       <p style="margin:0">Email: <strong id="acc-email"></strong><span id="acc-name" class="muted"></span></p>
       <div id="verify-banner" class="msg info hidden" style="display:none">
         <span>Email của bạn chưa được xác thực.</span>
         <button class="btn small" type="button" id="resend-verify-btn" style="margin-left:8px">Gửi lại email xác thực</button>
       </div>
-      <div class="row" style="margin-top:12px"><button class="btn" id="logout-btn" type="button">Đăng xuất</button></div>
     </section>
 
-    <section class="card">
+    <section class="card view-panel" data-view="licenses">
       <h2>License của tôi</h2>
       <table>
         <thead><tr><th>Sản phẩm</th><th>Gói (tier)</th><th>Hạn dùng</th><th>Nguồn</th><th>License key</th></tr></thead>
@@ -131,7 +189,7 @@ code{background:var(--panel2);padding:1px 6px;border-radius:6px;word-break:break
       </form>
     </section>
 
-    <section class="card">
+    <section class="card view-panel" data-view="link">
       <h2>Kết nối ứng dụng</h2>
       <p class="muted" style="margin:0 0 12px">Mở ứng dụng HORA trên máy, chọn <strong>Kết nối tài khoản</strong>, rồi tạo mã dưới đây và dán vào ứng dụng. Một tài khoản dùng cho mọi ứng dụng HORA.</p>
       <div class="row">
@@ -151,7 +209,7 @@ code{background:var(--panel2);padding:1px 6px;border-radius:6px;word-break:break
       </div>
     </section>
 
-    <section class="card">
+    <section class="card view-panel" data-view="buy">
       <h2>Mua / gia hạn</h2>
       <div class="plan-grid" id="plan-grid"></div>
       <label for="gateway">Cổng thanh toán</label>
@@ -177,7 +235,7 @@ code{background:var(--panel2);padding:1px 6px;border-radius:6px;word-break:break
       </div>
     </section>
 
-    <section class="card">
+    <section class="card view-panel" data-view="orders">
       <h2>Lịch sử giao dịch</h2>
       <table>
         <thead><tr><th>Mã đơn</th><th>Gói</th><th>Số tiền</th><th>Cổng</th><th>Trạng thái</th><th>Ngày tạo</th></tr></thead>
@@ -186,6 +244,7 @@ code{background:var(--panel2);padding:1px 6px;border-radius:6px;word-break:break
     </section>
   </div>
 </main>
+</div>
 
 <script>
 // Gia lay tu GET /api/plans (server la nguon dung). Ban sao duoi day chi la
@@ -223,6 +282,22 @@ async function api(path, opts = {}) {
   const data = await res.json().catch(() => null);
   return { res, data };
 }
+// ----- Dieu huong app shell (sidebar) -----
+const VIEW_TITLES = { account: "Thông tin tài khoản", licenses: "License của tôi", link: "Kết nối ứng dụng", buy: "Mua / gia hạn", orders: "Lịch sử giao dịch" };
+let currentView = "account";
+try { currentView = sessionStorage.getItem("hora-view") || "account"; } catch { /* sessionStorage bi chan */ }
+if (!VIEW_TITLES[currentView]) currentView = "account";
+function showView(v) {
+  if (!VIEW_TITLES[v]) v = "account";
+  currentView = v;
+  try { sessionStorage.setItem("hora-view", v); } catch { /* bo qua */ }
+  document.querySelectorAll("[data-view-btn]").forEach((b) => b.classList.toggle("active", b.dataset.viewBtn === v));
+  document.querySelectorAll("[data-view]").forEach((p) => p.classList.toggle("hidden", p.dataset.view !== v));
+  const t = $("view-title");
+  if (t) t.textContent = VIEW_TITLES[v];
+}
+document.querySelectorAll("[data-view-btn]").forEach((b) => b.addEventListener("click", () => showView(b.dataset.viewBtn)));
+
 function errText(data, fallback) {
   return (data && data.error && data.error.message) || fallback;
 }
@@ -279,10 +354,16 @@ async function loadDash() {
   if (!res.ok) {
     $("auth-card").classList.remove("hidden");
     $("dash").classList.add("hidden");
+    $("side").classList.add("hidden");
+    $("shell").classList.add("solo");
     return;
   }
   $("auth-card").classList.add("hidden");
   $("dash").classList.remove("hidden");
+  $("side").classList.remove("hidden");
+  $("shell").classList.remove("solo");
+  $("side-email").textContent = data.customer.email;
+  showView(currentView);
   $("acc-email").textContent = data.customer.email;
   $("acc-name").textContent = data.customer.displayName ? " — " + data.customer.displayName : "";
   $("verify-banner").style.display = data.customer.emailVerified === false ? "block" : "none";
@@ -332,6 +413,7 @@ function applyPreselect() {
   const qs = new URLSearchParams(location.search);
   const plan = qs.get("plan"), period = qs.get("period");
   if (!PLANS[plan] || !["month", "year"].includes(period)) return;
+  showView("buy");
   const btn = document.querySelector(`[data-buy="${plan}:${period}"]`);
   if (!btn) return;
   btn.style.outline = "2px solid var(--gold2)";
