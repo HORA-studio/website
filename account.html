@@ -863,18 +863,27 @@ body{padding-top:0 !important}
 
 /* Tab Lich su: dan deu cac cot bang theo toan bo chieu rong */
 .lic-table{table-layout:fixed}
-.lic-table th:nth-child(1){width:27%}
-.lic-table th:nth-child(2){width:9%}
-.lic-table th:nth-child(3){width:17%}
-.lic-table th:nth-child(4){width:15%}
+.lic-table th:nth-child(1){width:22%}
+.lic-table th:nth-child(2){width:14%}
+.lic-table th:nth-child(3){width:16%}
+.lic-table th:nth-child(4){width:11%}
 .lic-table th:nth-child(5){width:13%}
-.lic-table th:nth-child(6){width:11%}
+.lic-table th:nth-child(6){width:16%}
 .lic-table th:nth-child(7){width:8%}
 .lic-table td{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .lic-table td.key-cell{white-space:normal}
+.lic-table td.wrap-cell{white-space:normal}
+.lic-table .lic-chip{font-size:12px;padding:3px 7px}
 
 /* Tab Lich su: padding trai/phai than bang = 20px */
 #dash .orders-body{padding-left:20px !important;padding-right:20px !important}
+
+/* Dong don loi trong bang Lich su */
+.lic-table .error-row td{background:rgba(214,69,69,.06)}
+.lic-table .status-fail{color:#e06565;font-weight:650;font-size:12.5px}
+
+/* Bang Lich su phai la display:table that (rule .view-panel table{display:block} cua CSS goc pha layout cot) */
+#dash .lic-table{display:table}
 </style>
 </head>
 <body>
@@ -1092,6 +1101,7 @@ const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const fmtVnd = (n) => n == null ? "—" : Math.round(n).toLocaleString("vi-VN") + "đ";
 const fmtDate = (iso) => iso ? new Date(iso).toLocaleString("vi-VN") : "—";
+const fmtDay = (iso) => iso ? new Date(iso).toLocaleDateString("vi-VN") : "—";
 
 function showMsg(kind, text) {
   const el = $("notice");
@@ -1220,8 +1230,8 @@ function expiryCell(l) {
   if (l.status === "revoked") return "Đã bị thu hồi";
   if (!l.expiresAt) return "Chưa kích hoạt";
   const days = Math.ceil((new Date(l.expiresAt).getTime() - Date.now()) / 86400000);
-  if (days < 0) return `Đã hết hạn (${esc(fmtDate(l.expiresAt))})`;
-  return `${esc(fmtDate(l.expiresAt))} · còn ${days} ngày`;
+  if (days < 0) return `Đã hết hạn (${esc(fmtDay(l.expiresAt))})`;
+  return `${esc(fmtDay(l.expiresAt))} · còn ${days} ngày`;
 }
 // Lich su giao dich = danh sach license da mua: id (key), may da su dung,
 // thoi gian, goi, han dung va binding mua hang (don lien ket / nguon).
@@ -1229,40 +1239,62 @@ function expiryCell(l) {
 function shortId(x) { return x ? (x.length > 14 ? x.slice(0, 14) + "…" : x) : "—"; }
 function deviceCell(l) {
   if (!l.deviceId) return '<span class="muted">Chưa gắn máy</span>';
-  return `<code title="${esc(l.deviceId)}">${esc(shortId(l.deviceId))}</code>${l.deviceBoundAt ? `<br><span class="muted">gắn ${esc(fmtDate(l.deviceBoundAt))}</span>` : ""}`;
+  return `<code title="${esc(l.deviceId)}">${esc(shortId(l.deviceId))}</code>${l.deviceBoundAt ? `<br><span class="muted">gắn ${esc(fmtDay(l.deviceBoundAt))}</span>` : ""}`;
 }
 function bindingCell(l) {
-  if (l.orderId) return `Đơn <code title="${esc(l.orderId)}">${esc(shortId(l.orderId))}</code>`;
+  if (l.orderId) return `<code title="${esc(l.orderId)}">${esc(shortId(l.orderId))}</code>`;
   if (l.source === "claim") return "Nhận key có sẵn";
   return "Được cấp";
+}
+
+// ----- Du lieu DEMO cho tab Lich su — chi hien khi URL co ?demo=1 -----
+const DEMO_HISTORY = new URLSearchParams(location.search).has("demo");
+function demoLicenses() {
+  const now = Date.now(), day = 86400000;
+  return [{
+    id: "demo-license-1", licenseKey: "HORA_DEMO1A2B3C4D5E6F7A8B9C0D1", tier: "plus",
+    deviceId: "DEMO-DESKTOP-7X8K2", deviceBoundAt: new Date(now - 2 * day).toISOString(),
+    createdAt: new Date(now - 2 * day).toISOString(), expiresAt: new Date(now + 363 * day).toISOString(),
+    orderId: "demo-order-paid", source: "purchase",
+  }];
+}
+function demoOrders() {
+  const now = Date.now(), day = 86400000, hour = 3600000;
+  return [
+    { id: "demo-order-cho", plan: "plus", period: "year", status: "awaiting_payment", createdAt: new Date(now - 3 * hour).toISOString() },
+    { id: "demo-order-moi", plan: "go", period: "month", status: "created", createdAt: new Date(now - 1 * hour).toISOString() },
+    { id: "demo-order-loi", plan: "go", period: "year", status: "payment_failed", createdAt: new Date(now - 1 * day).toISOString() },
+  ];
 }
 function renderHistory() {
   const body = $("ord-list");
   if (!body) return;
+  const licenses = DEMO_HISTORY ? [...demoLicenses(), ...LICENSES_CACHE] : LICENSES_CACHE;
+  const orders = DEMO_HISTORY ? [...demoOrders(), ...ORDERS_CACHE] : ORDERS_CACHE;
   const html = [];
-  for (const l of LICENSES_CACHE) {
+  for (const l of licenses) {
     html.push(`<tr>
       <td class="key-cell">${licenseCell(l)}</td>
       <td><span class="lic-chip">${l.tier ? esc(tierName(l.tier)) : "—"}${l.app ? ` · ${esc(APP_VI[l.app] || l.app)}` : ""}</span></td>
       <td>${deviceCell(l)}</td>
-      <td>${esc(fmtDate(l.createdAt))}</td>
-      <td>${expiryCell(l)}</td>
+      <td>${esc(fmtDay(l.createdAt))}</td>
+      <td class="wrap-cell">${expiryCell(l)}</td>
       <td>${bindingCell(l)}</td>
       <td class="export-cell"><button type="button" class="export-btn" data-export-kind="license" data-export-id="${esc(l.id || "")}" title="Xuất đơn hàng này"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 11 5 5 5-5"></path><path d="M4 21h16"></path></svg> Xuất</button></td>
     </tr>`);
   }
-  const licensedOrders = new Set(LICENSES_CACHE.map((l) => l.orderId).filter(Boolean));
-  const licensedIds = new Set(LICENSES_CACHE.map((l) => l.id));
-  for (const o of ORDERS_CACHE) {
+  const licensedOrders = new Set(licenses.map((l) => l.orderId).filter(Boolean));
+  const licensedIds = new Set(licenses.map((l) => l.id));
+  for (const o of orders) {
     if (licensedOrders.has(o.id) || (o.licenseId && licensedIds.has(o.licenseId))) continue;
-    if (!["created", "awaiting_payment", "paid_pending_issue"].includes(o.status)) continue;
-    html.push(`<tr class="pending-row">
+    if (!["created", "awaiting_payment", "paid_pending_issue", "payment_failed"].includes(o.status)) continue;
+    html.push(`<tr class="pending-row${o.status === "payment_failed" ? " error-row" : ""}">
       <td class="muted">Chưa có license</td>
       <td><span class="lic-chip">${esc((PLANS[o.plan] || {}).name || o.plan)} — ${esc(PERIODS[o.period] || o.period)}</span></td>
       <td class="muted">—</td>
-      <td>${esc(fmtDate(o.createdAt))}</td>
+      <td>${esc(fmtDay(o.createdAt))}</td>
       <td class="muted">—</td>
-      <td>Đơn <code title="${esc(o.id)}">${esc(shortId(o.id))}</code> · ${esc(STATUS_VI[o.status] || o.status)}</td>
+      <td><code title="${esc(o.id)}">${esc(shortId(o.id))}</code><br>${o.status === "payment_failed" ? `<span class="status-fail">${esc(STATUS_VI[o.status])}</span>` : esc(STATUS_VI[o.status] || o.status)}</td>
       <td class="export-cell"><button type="button" class="export-btn" data-export-kind="order" data-export-id="${esc(o.id || "")}" title="Xuất đơn hàng này"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 11 5 5 5-5"></path><path d="M4 21h16"></path></svg> Xuất</button></td>
     </tr>`);
   }
