@@ -14,16 +14,22 @@ const PAGE = `<!doctype html>
 <title>Kết nối ứng dụng — HORA</title>
 <link rel="icon" href="/favicon.ico">
 <style>
-  body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:#0b0d12;color:#e8eaed;margin:0;display:flex;min-height:100vh;align-items:center;justify-content:center;padding:24px}
-  .card{background:#151923;border:1px solid #232838;border-radius:14px;max-width:560px;width:100%;padding:28px}
-  h1{margin:0 0 8px;font-size:22px}
-  p{color:#9aa4b2;line-height:1.6;margin:8px 0}
-  .code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:26px;letter-spacing:2px;background:#0b0d12;border:1px dashed #3a4256;border-radius:10px;padding:18px;text-align:center;margin:18px 0;user-select:all}
-  button{background:#2563eb;color:#fff;border:0;border-radius:8px;padding:12px 18px;font-size:15px;cursor:pointer}
-  button.ghost{background:transparent;border:1px solid #3a4256;color:#cbd5e1}
-  .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
-  .err{color:#f87171}
-  ol{color:#9aa4b2;line-height:1.8;padding-left:20px}
+  :root{--bg:#f6f5f1;--panel:#ffffff;--panel2:#efede8;--line:#e3e0d8;--line2:#d8d4c9;--text:#14161a;--muted:#5f6a70;--gold:#0a9787;--gold2:#078a7b;--danger:#c93a32;--shadow:0 1px 2px #14161a08,0 16px 40px -16px #14161a1f;color-scheme:light}
+  @media(prefers-color-scheme:dark){:root{--bg:#0a0c0f;--panel:#12151b;--panel2:#171b22;--line:#ffffff17;--line2:#ffffff24;--text:#eef2f3;--muted:#9fb0b5;--gold:#17dcc3;--gold2:#5ff0db;--danger:#ff8d85;--shadow:0 1px 2px #00000040,0 16px 40px -16px #00000080;color-scheme:dark}}
+  *{box-sizing:border-box}
+  body{font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);margin:0;display:flex;min-height:100vh;align-items:center;justify-content:center;padding:24px}
+  body:before{content:"";position:fixed;inset:0;pointer-events:none;background:radial-gradient(1000px 520px at 85% -10%,#0a978714,transparent 65%)}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:22px;max-width:560px;width:100%;padding:28px;box-shadow:var(--shadow);position:relative}
+  h1{margin:0 0 8px;font-size:22px;font-weight:800;letter-spacing:-.02em}
+  p{color:var(--muted);line-height:1.6;margin:8px 0}
+  .code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:26px;letter-spacing:2px;background:var(--panel2);border:1px dashed var(--line2);border-radius:14px;padding:18px;text-align:center;margin:18px 0;user-select:all;color:var(--text)}
+  button{background:var(--gold);color:#fff;border:0;border-radius:999px;padding:12px 22px;font-size:15px;font-weight:650;cursor:pointer}
+  button:hover{background:var(--gold2)}
+  .ghost{display:inline-flex;align-items:center;background:transparent;border:1px solid var(--line2);border-radius:999px;padding:12px 18px;color:var(--text);text-decoration:none;font-size:15px;font-weight:600}
+  .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;align-items:center}
+  .err{color:var(--danger)}
+  .note{color:var(--muted);font-size:13px;margin-top:16px}
+  ol{color:var(--muted);line-height:1.8;padding-left:20px}
 </style>
 </head>
 <body>
@@ -54,9 +60,9 @@ const PAGE = `<!doctype html>
       '</ol>',
       '<div class="row">',
         '<button id="copy">Sao chép mã</button>',
-        '<a class="ghost" style="text-decoration:none;padding:12px 18px;border:1px solid #3a4256;border-radius:8px;color:#cbd5e1" href="/account.html">Về trang tài khoản</a>',
+        '<a class="ghost" href="/account.html">Về trang tài khoản</a>',
       '</div>',
-      '<p style="color:#6b7280;font-size:13px;margin-top:16px">Mã hết hạn sau 10 phút và chỉ dùng được một lần.</p>',
+      '<p class="note">Mã hết hạn sau 10 phút và chỉ dùng được một lần.</p>',
     ].join("");
     document.getElementById("copy").addEventListener("click", async () => {
       try { await navigator.clipboard.writeText(code); document.getElementById("copy").textContent = "Đã sao chép"; }
