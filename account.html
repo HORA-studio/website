@@ -791,6 +791,33 @@ html[data-theme="dark"] .plan-plus:before{color:#04211c}
 body{padding-top:0 !important}
 @media (min-width:761px){.shell{height:100vh !important;height:100dvh !important}}
 @media (max-width:760px){.shell{min-height:100vh !important;min-height:100dvh !important}}
+
+/* Tab Mua goi: ep noi dung vua khung, khong can scroll (co theo chieu cao man hinh) */
+#dash .purchase-panel{overflow:hidden !important}
+#dash .purchase-panel:has(#sepay-panel:not(.hidden)){overflow:auto !important}
+#dash .purchase-panel .pricing-wrap{flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
+#dash .purchase-panel .pricing-grid{flex:1 1 auto;min-height:0;align-items:stretch}
+#dash .purchase-panel .price-card{min-height:0}
+#dash .purchase-panel .price-card ul{min-height:0}
+@media (max-height:920px){
+  #dash .purchase-panel .pricing-wrap{padding-bottom:22px}
+  #dash .purchase-panel .price-card{padding:22px}
+  #dash .purchase-panel .price-card .price{font-size:38px}
+  #dash .purchase-panel .plan-desc{min-height:0}
+  #dash .purchase-panel .price-card ul{gap:7px;margin:14px 0 16px;font-size:13px}
+}
+@media (max-height:830px){
+  #dash .purchase-panel .pricing-wrap{padding-bottom:14px}
+  #dash .purchase-panel .pricing-grid{margin-top:14px !important}
+  #dash .purchase-panel .billing-opt{padding:7px 16px}
+  #dash .purchase-panel .price-card{padding:18px}
+  #dash .purchase-panel .price-card h3{font-size:18px}
+  #dash .purchase-panel .plan-desc{font-size:12.5px;margin-top:4px}
+  #dash .purchase-panel .price-card .price{font-size:34px;margin-top:10px}
+  #dash .purchase-panel .price-card .per{font-size:12px}
+  #dash .purchase-panel .price-card ul{gap:6px;margin:12px 0 14px;font-size:12.5px}
+  #dash .purchase-panel .price-card .btn{padding:10px 20px}
+}
 </style>
 </head>
 <body>
