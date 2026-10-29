@@ -78,6 +78,27 @@ code{background:var(--panel2);padding:1px 6px;border-radius:6px;word-break:break
       <input id="f-password" type="password" required minlength="8" autocomplete="current-password">
       <div class="row" style="margin-top:16px">
         <button class="btn primary" type="submit" id="auth-submit">Đăng nhập</button>
+        <a href="#" id="forgot-link">Quên mật khẩu?</a>
+      </div>
+    </form>
+    <div id="forgot-wrap" class="hidden" style="margin-top:14px;border-top:1px solid var(--line);padding-top:6px">
+      <label for="forgot-email">Email của tài khoản cần đặt lại mật khẩu</label>
+      <div class="row">
+        <input id="forgot-email" type="email" style="flex:1;min-width:240px" autocomplete="email">
+        <button class="btn" type="button" id="forgot-submit">Gửi link đặt lại mật khẩu</button>
+      </div>
+      <p class="muted" style="margin:6px 0 0">Hệ thống sẽ gửi link đặt lại mật khẩu vào email (nếu email có trong hệ thống). Link có hiệu lực 1 giờ.</p>
+    </div>
+  </section>
+
+  <!-- Dat lai mat khau (mo tu link ?reset=<token> trong email) -->
+  <section id="reset-card" class="card hidden">
+    <h2>Đặt mật khẩu mới</h2>
+    <form id="reset-form">
+      <label for="reset-password">Mật khẩu mới (ít nhất 8 ký tự)</label>
+      <input id="reset-password" type="password" required minlength="8" autocomplete="new-password">
+      <div class="row" style="margin-top:16px">
+        <button class="btn primary" type="submit">Đặt lại mật khẩu</button>
       </div>
     </form>
   </section>
@@ -87,6 +108,10 @@ code{background:var(--panel2);padding:1px 6px;border-radius:6px;word-break:break
     <section class="card">
       <h2>Thông tin tài khoản</h2>
       <p style="margin:0">Email: <strong id="acc-email"></strong><span id="acc-name" class="muted"></span></p>
+      <div id="verify-banner" class="msg info hidden" style="display:none">
+        <span>Email của bạn chưa được xác thực.</span>
+        <button class="btn small" type="button" id="resend-verify-btn" style="margin-left:8px">Gửi lại email xác thực</button>
+      </div>
       <div class="row" style="margin-top:12px"><button class="btn" id="logout-btn" type="button">Đăng xuất</button></div>
     </section>
 
@@ -211,6 +236,8 @@ function setMode(m) {
   $("name-wrap").classList.toggle("hidden", m === "login");
   $("auth-submit").textContent = m === "login" ? "Đăng nhập" : "Đăng ký";
   $("f-password").autocomplete = m === "login" ? "current-password" : "new-password";
+  $("forgot-link").style.display = m === "login" ? "" : "none";
+  if (m !== "login") $("forgot-wrap").classList.add("hidden");
 }
 $("tab-login").addEventListener("click", () => setMode("login"));
 $("tab-register").addEventListener("click", () => setMode("register"));
@@ -221,8 +248,29 @@ $("auth-form").addEventListener("submit", async (e) => {
   if (mode === "register") payload.displayName = $("f-name").value.trim();
   const { res, data } = await api("/api/auth/" + mode, { method: "POST", body: JSON.stringify(payload) });
   if (!res.ok) { showMsg("err", errText(data, "Không thực hiện được, thử lại sau.")); return; }
-  showMsg("ok", mode === "login" ? "Đăng nhập thành công." : "Đăng ký thành công.");
+  if (mode === "login") {
+    showMsg("ok", "Đăng nhập thành công.");
+  } else if (data && data.mailConfigured === false) {
+    showMsg("info", "Đăng ký thành công. Hệ thống gửi email chưa được cấu hình — tính năng xác thực email sẽ hoạt động khi quản trị viên kết nối dịch vụ gửi mail.");
+  } else {
+    showMsg("ok", "Đăng ký thành công. Đã gửi email xác thực, hãy kiểm tra hộp thư.");
+  }
   await loadDash();
+});
+
+// ----- Quen mat khau -----
+$("forgot-link").addEventListener("click", (e) => {
+  e.preventDefault();
+  $("forgot-wrap").classList.toggle("hidden");
+  if (!$("forgot-email").value) $("forgot-email").value = $("f-email").value.trim();
+});
+$("forgot-submit").addEventListener("click", async () => {
+  const email = $("forgot-email").value.trim();
+  if (!email) { showMsg("err", "Hãy nhập email của bạn."); return; }
+  const { res } = await api("/api/auth/forgot-password", { method: "POST", body: JSON.stringify({ email }) });
+  // Endpoint luon tra ok (chong do email) — thong bao chuan cho moi truong hop.
+  if (res.ok) showMsg("info", "Nếu email tồn tại trong hệ thống, link đặt lại mật khẩu đã được gửi. Link có hiệu lực 1 giờ.");
+  else showMsg("err", "Không gửi được yêu cầu, thử lại sau.");
 });
 
 // ----- Dashboard -----
@@ -237,6 +285,7 @@ async function loadDash() {
   $("dash").classList.remove("hidden");
   $("acc-email").textContent = data.customer.email;
   $("acc-name").textContent = data.customer.displayName ? " — " + data.customer.displayName : "";
+  $("verify-banner").style.display = data.customer.emailVerified === false ? "block" : "none";
   await loadPlans();
   renderPlans();
   applyPreselect();
@@ -392,6 +441,61 @@ $("link-open-btn").addEventListener("click", () => { if (_linkUrl) window.open(_
 $("logout-btn").addEventListener("click", async () => {
   await api("/api/auth/logout", { method: "POST", body: "{}" });
   location.reload();
+});
+
+// ----- Xac thuc email: gui lai + xu ly link trong email -----
+$("resend-verify-btn").addEventListener("click", async () => {
+  const { res, data } = await api("/api/auth/resend-verification", { method: "POST", body: "{}" });
+  if (!res.ok) { showMsg("err", errText(data, "Không gửi lại được email xác thực.")); return; }
+  if (data.alreadyVerified) {
+    $("verify-banner").style.display = "none";
+    showMsg("ok", "Email của bạn đã được xác thực.");
+  } else if (data.mailConfigured === false) {
+    showMsg("info", "Hệ thống gửi email chưa được cấu hình — tính năng xác thực email sẽ hoạt động khi quản trị viên kết nối dịch vụ gửi mail.");
+  } else if (data.mailSent) {
+    showMsg("ok", "Đã gửi email xác thực, hãy kiểm tra hộp thư.");
+  } else {
+    showMsg("err", "Chưa gửi được email xác thực, thử lại sau.");
+  }
+});
+
+// Link tu email: ?verify=<token> (xac thuc) / ?reset=<token> (dat lai mat khau).
+// Token duoc lay ra va XOA khoi URL ngay (history.replaceState) de khong
+// con nam tren thanh dia chi / lich su trinh duyet.
+let resetToken = null;
+{
+  const qs = new URLSearchParams(location.search);
+  const verifyParam = qs.get("verify");
+  const resetParam = qs.get("reset");
+  if (verifyParam || resetParam) {
+    const clean = new URL(location.href);
+    clean.searchParams.delete("verify");
+    clean.searchParams.delete("reset");
+    history.replaceState(null, "", clean.pathname + clean.search + clean.hash);
+  }
+  if (verifyParam) {
+    (async () => {
+      const { res, data } = await api("/api/auth/verify-email", { method: "POST", body: JSON.stringify({ token: verifyParam }) });
+      if (res.ok) showMsg("ok", "Đã xác thực email thành công. Cảm ơn bạn!");
+      else showMsg("err", errText(data, "Link xác thực không hợp lệ hoặc đã hết hạn."));
+    })();
+  }
+  if (resetParam) {
+    resetToken = resetParam;
+    $("reset-card").classList.remove("hidden");
+    $("reset-card").scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+}
+$("reset-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  if (!resetToken) { showMsg("err", "Thiếu token đặt lại mật khẩu. Hãy mở lại link trong email."); return; }
+  const { res, data } = await api("/api/auth/reset-password", { method: "POST", body: JSON.stringify({ token: resetToken, password: $("reset-password").value }) });
+  if (!res.ok) { showMsg("err", errText(data, "Không đặt lại được mật khẩu.")); return; }
+  resetToken = null;
+  $("reset-card").classList.add("hidden");
+  setMode("login");
+  showMsg("ok", "Đã đặt lại mật khẩu, hãy đăng nhập lại.");
+  await loadDash();
 });
 
 // Thong bao sau khi quay ve tu cong thanh toan (chi IPN moi xac nhan da tra tien).

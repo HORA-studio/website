@@ -1,6 +1,10 @@
 // POST /api/auth/register — dang ky tai khoan khach (email + mat khau >= 8 ky tu).
-import { json, errorJson, readJson, hashPassword, createSession } from "../_lib.js";
+// Sau khi tao tai khoan: phat token xac thuc email + gui mail qua Resend.
+// Chua cau hinh mail (RESEND_API_KEY de trong) thi buoc gui bi bo qua —
+// dang ky van thanh cong binh thuong (xem functions/api/_mail.js).
+import { json, errorJson, readJson, hashPassword, createSession, issueAuthToken, siteUrl } from "../_lib.js";
 import { logEvent, clientIp } from "../_log.js";
+import { isMailConfigured, sendVerificationEmail } from "../_mail.js";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
@@ -26,8 +30,21 @@ export async function onRequestPost({ request, env }) {
 
   const session = await createSession(env, id);
   await logEvent(env, { eventType: "auth.register", customerId: id, ip: clientIp(request) });
+
+  // Gui email xac thuc (token 24h, dung 1 lan). Moi loi o buoc nay deu bi
+  // nuot — dang ky da thanh cong thi khong duoc vo chi vi mail/token loi
+  // (vd DB chua ap migration auth_tokens).
+  const mailConfigured = isMailConfigured(env);
+  try {
+    const verifyToken = await issueAuthToken(env, id, "verify_email", 24 * 3600 * 1000);
+    const link = `${siteUrl(env)}/account.html?verify=${verifyToken}`;
+    await sendVerificationEmail(env, { to: email, customerId: id, link });
+  } catch (err) {
+    console.warn("register: send verification email failed:", err && err.message ? err.message : String(err));
+  }
+
   return json(
-    { customer: { id, email, displayName } },
+    { customer: { id, email, displayName, emailVerified: false }, mailConfigured },
     201,
     { "Set-Cookie": session.cookie }
   );

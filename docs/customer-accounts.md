@@ -1,4 +1,5 @@
 Trạng thái: ĐÃ implement + ĐÃ deploy web (`hora.works`) — tài khoản khách, license/device, **Identity Provider cho app desktop** (kết nối tài khoản bằng link code), checkout SePay. ĐÃ kiểm chứng local (`wrangler pages dev` + D1 local) cho toàn bộ luồng link + license + bootstrap + device-change + cooldown. GIÁ TẠM đã áp 2026-10-29 (Go 250.000đ/tháng, 2.500.000đ/năm; Plus 400.000đ/tháng, 4.000.000đ/năm — GIÁ TẠM, chờ giá thật). **CHƯA deploy worker VB** (code đã sửa, chờ desktop mới) — xem mục "Chuyển đổi sang Identity Provider".
+**Bổ sung 2026-10-29 (nhánh `feature/auth-email`, CHƯA merge / CHƯA deploy):** quên mật khẩu + xác thực email qua Resend — đã build + kiểm chứng local (xem mục "Quên mật khẩu + xác thực email (Resend)"). `RESEND_API_KEY` đang **ĐỂ TRỐNG** theo quyết định của user: mail ở chế độ bỏ qua (log `mail.skipped`), mọi luồng vẫn chạy bình thường; điền key + áp migration `db/migrate-auth-2026-10-29.sql` lên D1 remote là tính năng hoạt động thật.
 
 # Tài khoản khách + dashboard + thanh toán + Identity Provider (website)
 
@@ -200,6 +201,10 @@ vào repo:
 | `VNPAY_ENV` | VNPay | `test` (mặc định) hoặc `production` |
 | `LICENSE_ISSUE_URL` | Cấp license tự động | URL endpoint nội bộ — xem bản spec, chưa tồn tại |
 | `LICENSE_ISSUE_SECRET` | Cấp license tự động | Shared secret với hệ license, chưa tồn tại |
+| `RESEND_API_KEY` | Gửi email (xác thực / quên mật khẩu) | Secret của Resend — **ĐỂ TRỐNG ở giai đoạn này** (user chốt 2026-10-29): thiếu key thì mail bị bỏ qua + log `mail.skipped`, không lỗi |
+| `EMAIL_FROM` | Gửi email | Địa chỉ gửi, mặc định `HORA <no-reply@hora.works>` (domain phải đã xác thực trong Resend) |
+| `SITE_URL` | Link trong email | Mặc định `https://hora.works`; chỉ đặt khi test/staging domain khác |
+| `MAIL_DRY_RUN` | CHỈ test local | Đặt `1`: không gọi Resend, ghi log `mail.dry_run` kèm link hành động để lấy link test từ DB events local. **Không bao giờ bật trên production** (link chứa token tho) |
 
 Thiếu biến của cổng nào thì tạo đơn qua cổng đó trả
 `503 GATEWAY_NOT_CONFIGURED` và đơn nằm ở trạng thái `created` — hệ thống
@@ -253,6 +258,59 @@ URL cần đăng ký với từng cổng (khi có merchant):
   `vnp_TmnCode` và `vnp_HashSecret`. Có môi trường sandbox
   (`sandbox.vnpayment.vn`, thẻ test do VNPay cung cấp) trước khi lấy bộ
   production (`pay.vnpay.vn`, `VNPAY_ENV=production`).
+
+## Quên mật khẩu + xác thực email (Resend) — build 2026-10-29, nhánh `feature/auth-email`, CHƯA deploy
+
+Hai tính năng chạy trên cùng một cơ chế **auth token dùng 1 lần** (bảng
+`auth_tokens`): server chỉ lưu **SHA-256** của token; token tho chỉ xuất
+hiện trong link gửi qua email. Phát hành token mới sẽ hủy mọi token chưa
+dùng cùng khách + mục đích. Verify có hạn **24 giờ**, reset có hạn
+**1 giờ**; token dùng xong/hủy đều bị đánh dấu `used_at` và không dùng
+lại được.
+
+**Endpoint (`functions/api/auth/`):**
+
+| Endpoint | Việc |
+| --- | --- |
+| `POST /api/auth/verify-email {token}` | Dùng token `verify_email` → đặt `customers.email_verified_at`. Sai/đã dùng → `400 TOKEN_INVALID`; hết hạn → `400 TOKEN_EXPIRED` |
+| `POST /api/auth/resend-verification` (cần đăng nhập) | Gửi lại email xác thực. Đã xác thực → `{ok:true, alreadyVerified:true}`; chưa → `{ok:true, mailConfigured, mailSent}` |
+| `POST /api/auth/forgot-password {email}` | **Luôn** trả `200 {ok:true}` dù email có tồn tại hay không (chống dò email). Tồn tại → phát token `reset_password` + gửi mail |
+| `POST /api/auth/reset-password {token, password}` | Mật khẩu ≥ 8 ký tự (`422 WEAK_PASSWORD`). Thành công → đổi hash + **xóa toàn bộ `sessions` của khách** (thu hồi mọi phiên đăng nhập), trả `{ok:true}` |
+
+**Đăng ký:** sau khi tạo tài khoản, `POST /api/auth/register` tự phát
+token verify + gửi mail; response thêm `customer.emailVerified:false` và
+`mailConfigured` (boolean). `GET /api/auth/me` trả thêm
+`customer.emailVerified`. **Đăng nhập KHÔNG bị chặn khi chưa xác thực
+email** — xác thực hiện là mềm: dashboard hiện banner "Email của bạn
+chưa được xác thực" + nút gửi lại; trang tài khoản tự xử lý link
+`?verify=<token>` (xác thực + xóa param khỏi URL) và `?reset=<token>`
+(hiện form đặt mật khẩu mới).
+
+**Gửi mail (`functions/api/_mail.js` → Resend API):**
+- `isMailConfigured(env)`: có `RESEND_API_KEY` hay không. **Giai đoạn này
+  key ĐỂ TRỐNG** (user chốt 2026-10-29) → `sendEmail` trả
+  `{sent:false, reason:'MAIL_NOT_CONFIGURED'}` và ghi event
+  `mail.skipped` — **không throw, không làm vỡ bất kỳ luồng nào** (đăng
+  ký vẫn 201, forgot vẫn 200). Có key → POST `api.resend.com/emails`;
+  lỗi HTTP/mạng → event `mail.failed`, vẫn không throw; thành công →
+  `mail.sent`. Không bao giờ log giá trị API key.
+- `MAIL_DRY_RUN=1` (chỉ test local): không gọi Resend, ghi event
+  `mail.dry_run` kèm **link hành động trong details** để test lấy link từ
+  DB events local. Production tuyệt đối không bật.
+
+**Schema / migration:** DB mới cài bằng `db/schema.sql` đã gồm cột
+`customers.email_verified_at` + bảng `auth_tokens`. DB remote **đã tồn
+tại** phải áp thêm file riêng trước khi deploy code này:
+`npx wrangler d1 execute hora-website --remote --file db/migrate-auth-2026-10-29.sql`
+(lưu ý tên DB hiện tại là `hora-website`). Lệnh `ALTER TABLE ... ADD
+COLUMN` trong file chỉ chạy được 1 lần — chạy lại sẽ báo lỗi duplicate
+column (đã ghi rõ trong comment đầu file). Chưa áp migration mà deploy
+code: đăng ký/đăng nhập vẫn chạy (phần phát token được bọc lỗi), nhưng
+token không lưu được nên link xác thực/reset sẽ không hoạt động.
+
+**Để bật gửi mail thật:** xác thực domain `hora.works` trong Resend
+(SPF/DKIM), tạo API key, đặt secret `RESEND_API_KEY` cho Pages (và
+`EMAIL_FROM` nếu muốn khác mặc định `HORA <no-reply@hora.works>`).
 
 ## Checklist mở bán (go-live)
 
@@ -342,3 +400,36 @@ URL cần đăng ký với từng cổng (khi có merchant):
   `created` — **không còn `422 PRICE_NOT_SET`**; đơn Plus/1 năm có
   `amountVnd = 4000000` -> lịch sử giao dịch liệt kê đúng số tiền -> đăng
   nhập sai 401 / đúng 200. Đã dọn `.wrangler/` local sau test.
+
+## Đã kiểm chứng local — xác thực email + quên mật khẩu (2026-10-29, nhánh `feature/auth-email`)
+
+- `node --check`: đạt cho toàn bộ file mới/sửa (`_lib.js`, `_mail.js`,
+  `register.js`, `me.js`, `verify-email.js`, `resend-verification.js`,
+  `forgot-password.js`, `reset-password.js`) + script inline của
+  `account.html`.
+- **Migration:** tạo DB local từ schema CŨ (ở `main`) → áp
+  `db/migrate-auth-2026-10-29.sql` → `customers` có thêm
+  `email_verified_at`, bảng `auth_tokens` + index được tạo. Chạy lại
+  migration → báo đúng lỗi `duplicate column name: email_verified_at`
+  như comment trong file đã ghi.
+- `wrangler pages dev` + D1 local (schema mới), `MAIL_DRY_RUN=1`, không
+  đặt `RESEND_API_KEY`: đăng ký → 201 (`emailVerified:false`,
+  `mailConfigured:false`) → lấy link verify từ event `mail.dry_run`
+  trong DB events local → `verify-email` → 200 → `me` trả
+  `emailVerified:true` → dùng lại token → `400 TOKEN_INVALID` →
+  `resend-verification` khi đã xác thực → `alreadyVerified:true`.
+- Quên mật khẩu: email có thật và email không tồn tại đều trả `200
+  {ok:true}` giống hệt → lấy link reset (dry-run) → `reset-password`
+  → 200 → session cũ bị thu hồi (`me` bằng cookie cũ → 401) → đăng
+  nhập mật khẩu cũ → 401, mật khẩu mới → 200 → token reset bị sửa
+  `expires_at` về quá khứ → `400 TOKEN_EXPIRED` → mật khẩu yếu → `422
+  WEAK_PASSWORD`. User thứ hai: `resend-verification` khi chưa xác
+  thực → `{ok:true, mailConfigured:false, mailSent:false}`, token mới
+  xác thực thành công.
+- Chạy lại KHÔNG dry-run, KHÔNG `RESEND_API_KEY`: đăng ký vẫn 201,
+  forgot vẫn 200, token rác → 400 (không 500); events ghi
+  `mail.skipped` với `reason: MAIL_NOT_CONFIGURED` cho cả verify và
+  reset. Đã dọn `.wrangler/` local sau test.
+- **Chưa** kiểm chứng: gửi mail THẬT qua Resend (chưa có API key —
+  đang để trống theo quyết định của user), áp migration lên D1 remote,
+  deploy nhánh này.

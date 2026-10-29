@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS customers (
   salt          TEXT NOT NULL,          -- base64, random 16 bytes / khach
   iterations    INTEGER NOT NULL DEFAULT 100000,
   display_name  TEXT,
+  email_verified_at TEXT,               -- NULL = chua xac thuc email; ISO 8601 UTC khi da xac thuc
   created_at    TEXT NOT NULL           -- ISO 8601 UTC
 );
 
@@ -19,6 +20,19 @@ CREATE TABLE IF NOT EXISTS sessions (
   created_at  TEXT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_sessions_customer ON sessions(customer_id);
+
+-- Token dung 1 lan cho xac thuc email + dat lai mat khau (chi luu SHA-256).
+-- Token tho chi xuat hien trong link gui qua email, khong bao gio luu/log.
+CREATE TABLE IF NOT EXISTS auth_tokens (
+  id          TEXT PRIMARY KEY,
+  customer_id TEXT NOT NULL REFERENCES customers(id),
+  purpose     TEXT NOT NULL,            -- 'verify_email' | 'reset_password'
+  token_hash  TEXT NOT NULL UNIQUE,     -- SHA-256 cua token tho
+  expires_at  TEXT NOT NULL,            -- ISO 8601 UTC
+  used_at     TEXT,                     -- NULL = chua dung; set khi da dung/bi huy
+  created_at  TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_auth_tokens_customer ON auth_tokens(customer_id);
 
 CREATE TABLE IF NOT EXISTS orders (
   id          TEXT PRIMARY KEY,         -- dang HORA-<time36>-<random6>

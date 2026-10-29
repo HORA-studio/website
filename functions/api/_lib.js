@@ -211,3 +211,60 @@ export async function tryIssueLicense(env, order) {
     .bind(order.id, licenseId).run();
   return true;
 }
+
+// ---------- Auth token dung 1 lan (xac thuc email / dat lai mat khau) ----------
+// Chi luu SHA-256 cua token trong bang auth_tokens; token tho chi nam trong
+// link gui qua email. Xem functions/api/_mail.js va docs/customer-accounts.md.
+
+// URL goc cua website de dung link trong email (env.SITE_URL tuy chon).
+export function siteUrl(env = {}) {
+  return String(env.SITE_URL || "https://hora.works").replace(/\/+$/, "");
+}
+
+// Phat hanh token moi: huy (danh dau used) moi token chua dung cung
+// customer + purpose truoc, roi tao token tho ngau nhien 32 byte (hex).
+export async function issueAuthToken(env, customerId, purpose, ttlMs) {
+  const now = new Date();
+  const nowIso = now.toISOString();
+  await env.DB.prepare(
+    "UPDATE auth_tokens SET used_at = ?1 WHERE customer_id = ?2 AND purpose = ?3 AND used_at IS NULL"
+  ).bind(nowIso, customerId, purpose).run();
+
+  const raw = [...crypto.getRandomValues(new Uint8Array(32))]
+    .map((b) => b.toString(16).padStart(2, "0")).join("");
+  const tokenHash = await sha256Hex(raw);
+  const expiresAt = new Date(now.getTime() + ttlMs).toISOString();
+  await env.DB.prepare(
+    `INSERT INTO auth_tokens (id, customer_id, purpose, token_hash, expires_at, used_at, created_at)
+     VALUES (?1, ?2, ?3, ?4, ?5, NULL, ?6)`
+  ).bind(crypto.randomUUID(), customerId, purpose, tokenHash, expiresAt, nowIso).run();
+  return raw;
+}
+
+// Dung token: khong thay/da dung -> TOKEN_INVALID; het han -> TOKEN_EXPIRED;
+// hop le -> danh dau used_at va tra customerId. Token chi dung duoc 1 lan.
+export async function consumeAuthToken(env, rawToken, purpose) {
+  if (!rawToken) return { ok: false, code: "TOKEN_INVALID" };
+  const tokenHash = await sha256Hex(String(rawToken));
+  const row = await env.DB.prepare(
+    "SELECT id, customer_id, expires_at, used_at FROM auth_tokens WHERE token_hash = ?1 AND purpose = ?2"
+  ).bind(tokenHash, purpose).first();
+  if (!row || row.used_at) return { ok: false, code: "TOKEN_INVALID" };
+  if (new Date(row.expires_at).getTime() <= Date.now()) return { ok: false, code: "TOKEN_EXPIRED" };
+  await env.DB.prepare("UPDATE auth_tokens SET used_at = ?1 WHERE id = ?2")
+    .bind(new Date().toISOString(), row.id).run();
+  return { ok: true, customerId: row.customer_id };
+}
+
+// Doc email_verified_at cua khach (null = chua xac thuc). Fail-soft: DB chua
+// ap migration (thieu cot) thi tra null thay vi nem loi lam vo /api/auth/me.
+export async function getEmailVerifiedAt(env, customerId) {
+  try {
+    const row = await env.DB.prepare(
+      "SELECT email_verified_at FROM customers WHERE id = ?1"
+    ).bind(customerId).first();
+    return row ? row.email_verified_at : null;
+  } catch {
+    return null;
+  }
+}
