@@ -602,13 +602,16 @@ html[data-theme="dark"] .plan-plus:before{color:#04211c}
   .view-panel[data-view="account"]:not(.hidden) { width: 100%; }
 }
 
-/* ===== Chieu cao (yeu cau rieng): menu trai co theo noi dung (fit), panel phai cao bang menu ===== */
-.shell{height:auto !important;min-height:0;overflow:visible;align-items:flex-start !important}
-.side{align-self:flex-start !important;height:fit-content;max-height:none;overflow:visible}
-.content{height:auto;overflow:visible;align-self:stretch}
+/* ===== Chieu cao (yeu cau rieng): noi dung tab keo full chieu cao man hinh con lai, trang khong scroll ===== */
+.shell{height:calc(100vh - 70px) !important;height:calc(100dvh - 70px) !important;min-height:0;overflow:hidden;align-items:stretch !important}
+.side{align-self:stretch !important;height:auto;max-height:none;overflow:auto}
+.content{height:100%;overflow:hidden;align-self:stretch}
 #dash{position:relative;flex:1;min-height:0}
 .view-panel:not(.hidden){position:absolute;inset:0;overflow:auto}
 @media(max-width:860px){
+  .shell{height:auto !important;min-height:calc(100vh - 64px);min-height:calc(100dvh - 64px);overflow:visible}
+  .side{overflow:visible}
+  .content{height:auto;overflow:visible}
   #dash{position:static}
   .view-panel:not(.hidden){position:static;overflow:visible}
 }
