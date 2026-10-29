@@ -794,7 +794,7 @@ body{padding-top:0 !important}
 
 /* Tab Mua goi: ep noi dung vua khung, khong can scroll (co theo chieu cao man hinh) */
 #dash .purchase-panel{overflow:hidden !important}
-#dash .purchase-panel:has(#sepay-panel:not(.hidden)){overflow:auto !important}
+
 #dash .purchase-panel .pricing-wrap{flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
 #dash .purchase-panel .pricing-grid{flex:1 1 auto;min-height:0;align-items:stretch}
 #dash .purchase-panel .price-card{min-height:0}
@@ -847,6 +847,19 @@ body{padding-top:0 !important}
 
 /* Gian space cac item quyen loi theo chieu doc: cach nhau 20px */
 #dash .purchase-panel .price-card ul{gap:20px}
+
+/* View thanh toan so tu duoi len (bottom sheet) khi bam Mua ngay */
+.pay-sheet{position:fixed;inset:0;z-index:300}
+.pay-sheet.hidden{display:none}
+.pay-sheet-backdrop{position:absolute;inset:0;background:rgba(3,8,10,.62);opacity:0;transition:opacity .32s ease}
+.pay-sheet.open .pay-sheet-backdrop{opacity:1}
+.pay-sheet-box{position:absolute;left:50%;bottom:0;width:min(600px,100%);max-height:92dvh;overflow-y:auto;background:var(--panel);border:1px solid var(--line);border-bottom:0;border-radius:22px 22px 0 0;padding:8px 18px 22px;transform:translate(-50%,106%);transition:transform .38s cubic-bezier(.32,.72,.24,1);box-shadow:0 -16px 48px rgba(0,0,0,.5)}
+.pay-sheet.open .pay-sheet-box{transform:translate(-50%,0)}
+.pay-sheet-handle{width:46px;height:5px;border-radius:99px;background:var(--line);margin:8px auto 6px}
+.pay-sheet-close{position:absolute;top:12px;right:12px;width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:transparent;color:var(--text);font-size:17px;line-height:1;cursor:pointer;z-index:2}
+.pay-sheet .pay-panel{margin:0 !important}
+#pay-pending-bar{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin:0 0 16px;padding:11px 16px;border-radius:12px;border:1px solid var(--gold);background:var(--accent-soft);color:var(--text);font:inherit;font-weight:650;cursor:pointer}
+#pay-pending-bar.hidden{display:none}
 </style>
 </head>
 <body>
@@ -969,6 +982,7 @@ body{padding-top:0 !important}
       </div>
       <div class="pricing-wrap">
       <div class="pricing-toggle-row"><div class="billing-toggle" role="tablist" aria-label="Chọn thời hạn"><button type="button" class="billing-opt active" data-billing="month" role="tab" aria-selected="true">Theo tháng</button><button type="button" class="billing-opt" data-billing="year" role="tab" aria-selected="false">Theo năm<span class="save-badge">Tiết kiệm 17%</span></button></div></div>
+      <button id="pay-pending-bar" class="hidden" type="button">Đơn đang chờ thanh toán — bấm để xem mã QR</button>
       <div class="pricing-grid" id="plan-grid">
     <article class="price-card" data-plan-card="go">
         <h3>Go</h3>
@@ -1026,6 +1040,16 @@ body{padding-top:0 !important}
     </section>
   </div>
 </main>
+</div>
+
+<!-- View thanh toan so tu duoi len -->
+<div id="pay-sheet" class="pay-sheet hidden" aria-hidden="true">
+  <div class="pay-sheet-backdrop" data-close-sheet></div>
+  <div class="pay-sheet-box" role="dialog" aria-modal="true" aria-label="Thanh toán">
+    <div class="pay-sheet-handle"></div>
+    <button class="pay-sheet-close" type="button" data-close-sheet aria-label="Đóng">✕</button>
+    <div id="pay-sheet-slot"></div>
+  </div>
 </div>
 
 <script>
@@ -1304,7 +1328,7 @@ function bindBuyButtons() {
     b.innerHTML = originalText;
     if (res.ok && data.payment_instructions) {
       showSepayPanel(data.payment_instructions);
-      showMsg("ok", "Đã tạo đơn. Chuyển khoản theo hướng dẫn bên dưới — đúng số tiền và đúng nội dung, hệ thống sẽ tự xác nhận.");
+      showMsg("ok", "Đã tạo đơn. Quét mã QR trong khung thanh toán vừa mở — chuyển đúng số tiền và đúng nội dung, hệ thống sẽ tự xác nhận.");
       await loadOrders();
       startSepayPolling(data.order && data.order.id);
       return;
@@ -1350,7 +1374,7 @@ function showSepayPanel(ins) {
   $("sepay-amount").textContent = fmtVnd(ins.amount);
   $("sepay-content").textContent = ins.content || "";
   $("sepay-status").textContent = "Đang chờ chuyển khoản… trang sẽ tự kiểm tra lại sau mỗi 15 giây.";
-  $("sepay-panel").scrollIntoView({ behavior: "smooth", block: "center" });
+  openPaySheet(); $("pay-pending-bar").classList.remove("hidden");
 }
 async function copyText(text, btn) {
   try { await navigator.clipboard.writeText(text); btn.textContent = "Đã copy"; setTimeout(() => { btn.textContent = "Copy"; }, 2000); } catch { /* clipboard bi chan */ }
@@ -1369,6 +1393,7 @@ function startSepayPolling(orderId) {
     const o = rows.find((x) => x.id === orderId);
     if (o && (o.status === "paid" || o.status === "paid_pending_issue")) {
       clearInterval(sepayPollTimer); sepayPollTimer = null;
+      $("pay-pending-bar").classList.add("hidden");
       $("sepay-status").textContent = o.status === "paid" ? "Đã nhận được tiền — thanh toán hoàn tất." : "Đã nhận được tiền — đang cấp license cho bạn.";
       showMsg("ok", "Đã nhận được tiền của bạn. " + (o.status === "paid" ? "Thanh toán hoàn tất." : "License đang được cấp, xem mục License của tôi."));
       await loadLicenses();
@@ -1380,6 +1405,23 @@ function startSepayPolling(orderId) {
     }
   }, 15000);
 }
+// ----- View thanh toan so tu duoi len: chuyen panel SePay vao sheet -----
+const paySheetEl = $("pay-sheet");
+$("pay-sheet-slot").appendChild($("sepay-panel"));
+function openPaySheet() {
+  paySheetEl.classList.remove("hidden");
+  requestAnimationFrame(() => requestAnimationFrame(() => paySheetEl.classList.add("open")));
+  paySheetEl.setAttribute("aria-hidden", "false");
+}
+function closePaySheet() {
+  paySheetEl.classList.remove("open");
+  paySheetEl.setAttribute("aria-hidden", "true");
+  setTimeout(() => paySheetEl.classList.add("hidden"), 400);
+}
+document.querySelectorAll("[data-close-sheet]").forEach((el) => el.addEventListener("click", closePaySheet));
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !paySheetEl.classList.contains("hidden")) closePaySheet(); });
+$("pay-pending-bar").addEventListener("click", openPaySheet);
+
 
 $("logout-btn").addEventListener("click", async () => {
   await api("/api/auth/logout", { method: "POST", body: "{}" });
