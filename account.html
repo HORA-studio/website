@@ -628,6 +628,13 @@ html[data-theme="dark"] .plan-plus:before{color:#04211c}
 .purchase-trust{color:var(--text);margin-top:10px}
 .purchase-hero h2{margin-bottom:6px}
 .account-welcome,.orders-welcome,.purchase-hero{height:96px;min-height:96px;box-sizing:border-box;padding-top:0;padding-bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.lic-list{display:flex;flex-direction:column;gap:12px}
+.lic-item{border:1px solid var(--line);border-radius:14px;background:var(--panel);padding:14px 16px}
+.lic-item-pending{border-style:dashed}
+.lic-item-top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+.lic-chip{font-size:12px;font-weight:700;background:var(--accent-soft);color:var(--gold);border-radius:999px;padding:4px 10px;white-space:nowrap}
+.lic-meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px 18px;font-size:13px}
+.lic-meta-label{display:block;font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
 .account-stats{padding:18px !important}
 .stat-card{background:var(--panel2)}
 .stat-card>strong{font-size:19px !important;letter-spacing:-.035em}
@@ -806,10 +813,7 @@ html[data-theme="dark"] .plan-plus:before{color:#04211c}
     <section class="card view-panel hidden" data-view="orders">
       <div class="orders-welcome"><div><h2>Lịch sử giao dịch</h2><p>Đơn mua, license và số ngày còn lại của bạn.</p></div></div>
       <div class="orders-body">
-      <table>
-        <thead><tr><th>License</th><th>Máy đã sử dụng</th><th>Thời gian</th><th>Gói</th><th>Hạn dùng</th><th>Mua hàng</th></tr></thead>
-        <tbody id="ord-body"><tr><td colspan="6" class="muted">Chưa có license nào.</td></tr></tbody>
-      </table>
+      <div id="ord-list" class="lic-list"></div>
 <form id="claim-form" style="margin-top:16px">
         <label for="claim-key">Nhận license đã có — dán license key bạn đã được cấp:</label>
         <div class="row">
@@ -982,34 +986,40 @@ function bindingCell(l) {
   return "Được cấp";
 }
 function renderHistory() {
-  const body = $("ord-body");
+  const body = $("ord-list");
   if (!body) return;
   const html = [];
   for (const l of LICENSES_CACHE) {
-    html.push(`<tr>
-      <td>${licenseCell(l)}</td>
-      <td>${deviceCell(l)}</td>
-      <td>${esc(fmtDate(l.createdAt))}</td>
-      <td>${l.tier ? esc(tierName(l.tier)) : "—"}${l.app ? ` <span class="muted">· ${esc(APP_VI[l.app] || l.app)}</span>` : ""}</td>
-      <td>${expiryCell(l)}</td>
-      <td>${bindingCell(l)}</td>
-    </tr>`);
+    html.push(`<div class="lic-item">
+      <div class="lic-item-top">
+        <span class="lic-key">${licenseCell(l)}</span>
+        <span class="lic-chip">${l.tier ? esc(tierName(l.tier)) : "—"}${l.app ? ` · ${esc(APP_VI[l.app] || l.app)}` : ""}</span>
+      </div>
+      <div class="lic-meta">
+        <div><span class="lic-meta-label">Máy đã sử dụng</span>${deviceCell(l)}</div>
+        <div><span class="lic-meta-label">Thời gian</span>${esc(fmtDate(l.createdAt))}</div>
+        <div><span class="lic-meta-label">Hạn dùng</span>${expiryCell(l)}</div>
+        <div><span class="lic-meta-label">Mua hàng</span>${bindingCell(l)}</div>
+      </div>
+    </div>`);
   }
   const licensedOrders = new Set(LICENSES_CACHE.map((l) => l.orderId).filter(Boolean));
   const licensedIds = new Set(LICENSES_CACHE.map((l) => l.id));
   for (const o of ORDERS_CACHE) {
     if (licensedOrders.has(o.id) || (o.licenseId && licensedIds.has(o.licenseId))) continue;
     if (!["created", "awaiting_payment", "paid_pending_issue"].includes(o.status)) continue;
-    html.push(`<tr>
-      <td><span class="muted">Chưa có license</span></td>
-      <td><span class="muted">—</span></td>
-      <td>${esc(fmtDate(o.createdAt))}</td>
-      <td>${esc((PLANS[o.plan] || {}).name || o.plan)} — ${esc(PERIODS[o.period] || o.period)}</td>
-      <td><span class="muted">—</span></td>
-      <td>Đơn <code title="${esc(o.id)}">${esc(shortId(o.id))}</code> · ${esc(STATUS_VI[o.status] || o.status)}</td>
-    </tr>`);
+    html.push(`<div class="lic-item lic-item-pending">
+      <div class="lic-item-top">
+        <span class="lic-key muted">Chưa có license</span>
+        <span class="lic-chip">${esc((PLANS[o.plan] || {}).name || o.plan)} — ${esc(PERIODS[o.period] || o.period)}</span>
+      </div>
+      <div class="lic-meta">
+        <div><span class="lic-meta-label">Thời gian</span>${esc(fmtDate(o.createdAt))}</div>
+        <div><span class="lic-meta-label">Mua hàng</span>Đơn <code title="${esc(o.id)}">${esc(shortId(o.id))}</code> · ${esc(STATUS_VI[o.status] || o.status)}</div>
+      </div>
+    </div>`);
   }
-  body.innerHTML = html.length ? html.join("") : '<tr><td colspan="6" class="muted">Chưa có license nào.</td></tr>';
+  body.innerHTML = html.length ? html.join("") : '<p class="muted" style="margin:0">Chưa có license nào.</p>';
   document.querySelectorAll("[data-copy]").forEach((b) => b.addEventListener("click", async () => {
     try { await navigator.clipboard.writeText(b.dataset.copy); b.textContent = "Đã copy"; } catch { /* clipboard bi chan */ }
   }));
