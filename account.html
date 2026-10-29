@@ -834,6 +834,14 @@ body{padding-top:0 !important}
 /* The Go/Plus: giam khoang thua giua text va nut Mua ngay (the cao theo noi dung thay vi dan het khung) */
 #dash .purchase-panel .pricing-grid{flex:0 1 auto}
 #dash .purchase-panel .price-card ul{margin-bottom:12px}
+
+/* Tang co chu gia (44 -> 60; 64 tran gia nam 13px nen chot 60) + nut Mua ngay cao them 20px */
+#dash .purchase-panel .price-card .price{font-size:60px}
+#dash .purchase-panel .price-card .btn{padding-top:22px;padding-bottom:22px;font-size:17px}
+@media (max-height:920px){#dash .purchase-panel .price-card .price{font-size:58px}}
+@media (max-height:830px){#dash .purchase-panel .price-card .price{font-size:54px}}
+@media (max-width:1250px){#dash .purchase-panel .price-card .price{font-size:56px}}
+@media (max-width:1080px){#dash .purchase-panel .price-card .price{font-size:48px}}
 </style>
 </head>
 <body>
@@ -955,12 +963,12 @@ body{padding-top:0 !important}
         </div>
       </div>
       <div class="pricing-wrap">
-      <div class="pricing-toggle-row"><div class="billing-toggle" role="tablist" aria-label="Chọn thời hạn"><button type="button" class="billing-opt active" data-billing="month" role="tab" aria-selected="true">Theo tháng</button><button type="button" class="billing-opt" data-billing="year" role="tab" aria-selected="false">Theo năm<span class="save-badge">Tiết kiệm đến 27%</span></button></div></div>
+      <div class="pricing-toggle-row"><div class="billing-toggle" role="tablist" aria-label="Chọn thời hạn"><button type="button" class="billing-opt active" data-billing="month" role="tab" aria-selected="true">Theo tháng</button><button type="button" class="billing-opt" data-billing="year" role="tab" aria-selected="false">Theo năm<span class="save-badge">Tiết kiệm 17%</span></button></div></div>
       <div class="pricing-grid" id="plan-grid">
     <article class="price-card" data-plan-card="go">
         <h3>Go</h3>
         <p class="plan-desc">Cho người bắt đầu làm video bán hàng bằng AI</p>
-        <div class="price"><span data-price>249.000đ</span></div>
+        <div class="price"><span data-price>199.000đ</span></div>
         <ul>
           <li>Tạo ảnh và video bằng AI — đầy đủ tính năng, không khóa</li>
           <li>Workflow video quảng cáo dựng sẵn, chỉ cần thay sản phẩm của bạn</li>
@@ -974,7 +982,7 @@ body{padding-top:0 !important}
         <span class="popular">ĐƯỢC CHỌN NHIỀU</span>
         <h3>Plus</h3>
         <p class="plan-desc">Cho người làm nghiêm túc — thêm trợ lý AI đồng hành</p>
-        <div class="price"><span data-price>399.000đ</span></div>
+        <div class="price"><span data-price>299.000đ</span></div>
         <ul>
           <li class="hl">Mọi quyền lợi của gói Go</li>
           <li class="hl">✦ Trợ lý AI hỗ trợ lên ý tưởng, viết kịch bản và tối ưu video trong suốt quá trình sử dụng</li>
@@ -1021,8 +1029,8 @@ body{padding-top:0 !important}
 // Gia lay tu GET /api/plans (server la nguon dung). Ban sao duoi day chi la
 // du phong khi fetch loi. GIA TAM — user chot tam 2026-10-29, cho gia that.
 let PLANS = {
-  go:   { name: "Go",   month: 249000, year: 2490000 },
-  plus: { name: "Plus", month: 399000, year: 3490000 }
+  go:   { name: "Go",   month: 199000, year: 1990000 },
+  plus: { name: "Plus", month: 299000, year: 2990000 }
 };
 async function loadPlans() {
   try {
