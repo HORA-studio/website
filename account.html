@@ -886,17 +886,27 @@ html[data-theme="dark"] .plan-plus:before{color:#04211c}
       <div class="pricing-wrap">
       <div class="pricing-toggle-row"><div class="billing-toggle" role="tablist" aria-label="Chọn thời hạn"><button type="button" class="billing-opt active" data-billing="month" role="tab" aria-selected="true">Theo tháng</button><button type="button" class="billing-opt" data-billing="year" role="tab" aria-selected="false">Theo năm<span class="save-badge">Tiết kiệm 17%</span></button></div></div>
       <div class="pricing-grid" id="plan-grid">
-    <div class="plan">
-      <h3>Go</h3>
-      <p style="margin:8px 0">1 tháng: <span class="price">250.000đ</span><br>
-        <button class="btn primary" type="button" style="margin-top:6px" data-buy="go:month">Mua ngay</button></p><p style="margin:8px 0">1 năm: <span class="price">2.500.000đ</span><br>
-        <button class="btn primary" type="button" style="margin-top:6px" data-buy="go:year">Mua ngay</button></p>
+    <div class="plan-block">
+      <h3 class="plan-block-name">Go</h3>
+      <div class="plan-opt" data-period="month">
+        <span class="plan-opt-label">1 tháng: <strong>250.000đ</strong></span>
+        <button class="btn buy-now" type="button" data-buy="go:month">Mua ngay</button>
+      </div>
+      <div class="plan-opt" data-period="year" style="display:none">
+        <span class="plan-opt-label">1 năm: <strong>2.500.000đ</strong></span>
+        <button class="btn buy-now" type="button" data-buy="go:year">Mua ngay</button>
+      </div>
     </div>
-    <div class="plan">
-      <h3>Plus</h3>
-      <p style="margin:8px 0">1 tháng: <span class="price">400.000đ</span><br>
-        <button class="btn primary" type="button" style="margin-top:6px" data-buy="plus:month">Mua ngay</button></p><p style="margin:8px 0">1 năm: <span class="price">4.000.000đ</span><br>
-        <button class="btn primary" type="button" style="margin-top:6px" data-buy="plus:year">Mua ngay</button></p>
+    <div class="plan-block">
+      <h3 class="plan-block-name">Plus</h3>
+      <div class="plan-opt" data-period="month">
+        <span class="plan-opt-label">1 tháng: <strong>400.000đ</strong></span>
+        <button class="btn buy-now" type="button" data-buy="plus:month">Mua ngay</button>
+      </div>
+      <div class="plan-opt" data-period="year" style="display:none">
+        <span class="plan-opt-label">1 năm: <strong>4.000.000đ</strong></span>
+        <button class="btn buy-now" type="button" data-buy="plus:year">Mua ngay</button>
+      </div>
     </div></div>
       
 
@@ -1064,7 +1074,7 @@ async function loadDash() {
   $("acc-email").textContent = data.customer.email;
   $("acc-name").textContent = data.customer.displayName ? " — " + data.customer.displayName : "";
   $("verify-banner").style.display = data.customer.emailVerified === false ? "block" : "none";
-  await loadPlans();
+  await loadPlans().catch(() => {});
   renderPlans();
   applyPreselect();
   await Promise.all([loadLicenses(), loadOrders()]);
