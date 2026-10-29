@@ -716,6 +716,15 @@ html[data-theme="dark"] .plan-plus:before{color:#04211c}
 .pricing-wrap{padding:44px}
 .pricing-wrap .pricing-grid{gap:24px;margin-top:30px}
 @media (max-width:760px){.pricing-wrap{padding:24px}}
+
+/* Nut Xuat o cuoi moi dong bang Lich su */
+.lic-table .export-cell{white-space:nowrap;text-align:right}
+.export-btn{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border:1px solid var(--line);border-radius:999px;background:var(--panel);font-weight:600;font-size:12.5px;color:var(--text);cursor:pointer}
+.export-btn:hover{border-color:var(--muted)}
+
+/* Label khi Lich su trong */
+.lic-table .empty-title{font-size:15px;font-weight:750;color:var(--text)}
+.lic-table .empty-sub{font-size:13px;color:var(--muted);margin-top:4px}
 </style>
 </head>
 <body>
@@ -878,7 +887,7 @@ html[data-theme="dark"] .plan-plus:before{color:#04211c}
       <div class="orders-welcome"><div><h2>Lịch sử giao dịch</h2><p>Đơn mua, license và số ngày còn lại của bạn.</p></div></div>
       <div class="orders-body">
       <div class="lic-table-wrap"><table class="lic-table">
-          <thead><tr><th>License key</th><th>Gói</th><th>Máy đã sử dụng</th><th>Thời gian</th><th>Hạn dùng</th><th>Mua hàng</th></tr></thead>
+          <thead><tr><th>License key</th><th>Gói</th><th>Máy đã sử dụng</th><th>Thời gian</th><th>Hạn dùng</th><th>Mua hàng</th><th></th></tr></thead>
           <tbody id="ord-list"></tbody>
         </table></div>
     </div>
@@ -1068,6 +1077,7 @@ function renderHistory() {
       <td>${esc(fmtDate(l.createdAt))}</td>
       <td>${expiryCell(l)}</td>
       <td>${bindingCell(l)}</td>
+      <td class="export-cell"><button type="button" class="export-btn" data-export-kind="license" data-export-id="${esc(l.id || "")}" title="Xuất đơn hàng này"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 11 5 5 5-5"></path><path d="M4 21h16"></path></svg> Xuất</button></td>
     </tr>`);
   }
   const licensedOrders = new Set(LICENSES_CACHE.map((l) => l.orderId).filter(Boolean));
@@ -1082,11 +1092,16 @@ function renderHistory() {
       <td>${esc(fmtDate(o.createdAt))}</td>
       <td class="muted">—</td>
       <td>Đơn <code title="${esc(o.id)}">${esc(shortId(o.id))}</code> · ${esc(STATUS_VI[o.status] || o.status)}</td>
+      <td class="export-cell"><button type="button" class="export-btn" data-export-kind="order" data-export-id="${esc(o.id || "")}" title="Xuất đơn hàng này"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 11 5 5 5-5"></path><path d="M4 21h16"></path></svg> Xuất</button></td>
     </tr>`);
   }
-  body.innerHTML = html.length ? html.join("") : '<tr class="empty-row"><td colspan="6">Chưa có license nào.</td></tr>';
+  body.innerHTML = html.length ? html.join("") : '<tr class="empty-row"><td colspan="7"><div class="empty-title">Chưa có đơn hàng nào</div><div class="empty-sub">Dưới đây sẽ ghi nhận lịch sử mua hàng của người dùng</div></td></tr>';
   document.querySelectorAll("[data-copy]").forEach((b) => b.addEventListener("click", async () => {
     try { await navigator.clipboard.writeText(b.dataset.copy); b.textContent = "Đã copy"; } catch { /* clipboard bi chan */ }
+  }));
+  // Nut Xuat don hang: dinh dang JSON/PDF se lam sau — hien tai chi thong bao.
+  document.querySelectorAll("[data-export-kind]").forEach((b) => b.addEventListener("click", () => {
+    showMsg("info", "Chức năng xuất đơn hàng (JSON/PDF) sẽ được bổ sung sau.");
   }));
 }
 
