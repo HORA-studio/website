@@ -29,3 +29,12 @@ CREATE TABLE IF NOT EXISTS event_daily (
   count      INTEGER NOT NULL,
   PRIMARY KEY (day, event_type)
 );
+
+-- Nhat ky archive: moi ngay dong duoc export len R2 dung 1 lan (cron worker core
+-- archive ca DB web-events nay). Thieu bang nay thi archive khong chay duoc.
+CREATE TABLE IF NOT EXISTS events_archive_log (
+  day         TEXT PRIMARY KEY,   -- 'YYYY-MM-DD'
+  rows        INTEGER NOT NULL,
+  bytes       INTEGER NOT NULL,
+  archived_at TEXT NOT NULL
+);
