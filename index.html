@@ -488,18 +488,6 @@ footer{border-top:1px solid #14161a;background:#101216;color:#c9cdc9;padding:36p
       </ul>
       <button class="btn primary" data-buy-plan="plus">Chọn gói</button>
      </article>
-     <article class="price-card coming" aria-disabled="true">
-      <span class="popular soon">COMING SOON</span>
-      <h3>Pro</h3>
-      <p class="plan-desc">Cho nhu cầu nâng cao — đang hoàn thiện</p>
-      <div class="price">—</div>
-      <div class="per">Sắp ra mắt</div>
-      <ul>
-       <li>Mọi quyền lợi của gói Plus</li>
-       <li>Tính năng nâng cao — công bố khi ra mắt</li>
-      </ul>
-      <button class="btn" type="button" disabled>Đang chờ</button>
-     </article>
     </div>
     
    </div>
@@ -992,4 +980,6 @@ fetch("/api/auth/me",{credentials:"same-origin"}).then(function(r){return r.ok?r
 #demos .demo-grid .demo-info p{margin-top:7px;font-size:12px;line-height:1.5;}
 @media(max-width:900px){#demos .demo-grid,#demos .demo-grid[data-ratio="masonry"],#demos .demo-grid[data-ratio="9/16"],#demos .demo-grid[data-ratio="16/9"],#demos .demo-grid[data-ratio="1/1"]{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;}}
 @media(max-width:520px){#demos{padding-top:36px;padding-bottom:36px;}#demos .demo-grid,#demos .demo-grid[data-ratio="masonry"],#demos .demo-grid[data-ratio="9/16"],#demos .demo-grid[data-ratio="16/9"],#demos .demo-grid[data-ratio="1/1"]{grid-template-columns:1fr;gap:18px;}#demos .demo-toolbar{gap:10px;}#demos .demo-info p{font-size:12px;}}
+
+@media (min-width:901px){.pricing-grid{grid-template-columns:repeat(2,1fr);max-width:742px;margin-left:auto;margin-right:auto}}
 </style>
