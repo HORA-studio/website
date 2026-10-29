@@ -143,6 +143,33 @@ Thiếu biến của cổng nào thì tạo đơn qua cổng đó trả
 `503 GATEWAY_NOT_CONFIGURED` và đơn nằm ở trạng thái `created` — hệ thống
 không tạo URL thanh toán giả.
 
+## File credential trên máy Muse (quy ước đặt tên)
+
+Mọi file bí mật dùng cho dự án đều nằm ở thư mục home của máy Muse, tên bắt
+đầu bằng `~/.hora_`, quyền `0600`. Tài liệu này chỉ ghi **tên file + công
+dụng** — **giá trị bí mật không bao giờ ghi vào repo, chat hay log**.
+
+| File | Chứa gì | Dùng để làm gì | Trạng thái |
+| --- | --- | --- | --- |
+| `~/.hora_github_token` | GitHub fine-grained PAT (Contents R+W) | Muse push/pull các repo `HORA-studio` | ĐÃ CÓ |
+| `~/.hora_cloudflare_token` | Cloudflare API token (Account: D1 Edit + Pages Edit) | Muse áp schema D1 + nạp secret cho Pages khi deploy | CHƯA TẠO |
+| `~/.hora_sepay_key` | API key webhook SePay (dãy user tự đặt trong cấu hình webhook ở SePay) | Muse nạp vào biến `SEPAY_WEBHOOK_API_KEY` của Pages | CHƯA TẠO |
+
+Cách user tạo 2 file chưa có (chạy trên máy Muse, thay phần trong `<>` bằng
+giá trị thật, xong nhắn Muse "done"):
+
+```bash
+cat > ~/.hora_cloudflare_token <<'EOF'
+<token Cloudflare>
+EOF
+chmod 600 ~/.hora_cloudflare_token
+
+cat > ~/.hora_sepay_key <<'EOF'
+<API key SePay>
+EOF
+chmod 600 ~/.hora_sepay_key
+```
+
 URL cần đăng ký với từng cổng (khi có merchant):
 
 - SePay webhook: `https://hora.works/api/payments/sepay-webhook` (xác thực API Key)
