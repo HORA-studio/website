@@ -884,6 +884,21 @@ body{padding-top:0 !important}
 
 /* Bang Lich su phai la display:table that (rule .view-panel table{display:block} cua CSS goc pha layout cot) */
 #dash .lic-table{display:table}
+
+/* Thong bao dang toast: noi de len noi dung, khong day body xuong */
+#notice{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:600;width:max-content;max-width:min(700px,calc(100vw - 32px));margin:0 !important;text-align:center;box-shadow:0 14px 34px rgba(0,0,0,.35);cursor:pointer;animation:noticeIn .25s ease}
+@keyframes noticeIn{from{opacity:0;margin-top:-8px}to{opacity:1;margin-top:0}}
+/* Dem nguoc cho thanh toan o tab Lich su + nut Mo lai thanh toan */
+.lic-table .countdown{font-weight:700;color:var(--gold2);font-variant-numeric:tabular-nums;white-space:nowrap}
+.pay-open-btn{border-color:var(--gold) !important;color:var(--gold2) !important;font-weight:700}
+/* Man thanh toan (bottom sheet) vua khung khong can scroll */
+.pay-sheet .pay-panel{padding:16px}
+.pay-sheet .pay-panel .qr{max-width:205px}
+@media (max-height:860px){.pay-sheet .pay-panel .qr{max-width:168px}.pay-sheet .pay-panel{padding:14px}}
+@media (max-height:740px){.pay-sheet .pay-panel .qr{max-width:138px}.pay-sheet .pay-panel{padding:12px}.pay-sheet .pay-panel h3{font-size:16px}.pay-sheet .pay-panel table td{padding:5px 8px}}
+
+/* Man hinh rat thap (<=710px): tab Mua goi chuyen sang cuon doc thay vi ep the (tranh noi dung de len nut) */
+@media (max-height:710px){#dash .purchase-panel{overflow-y:auto !important;display:block}}
 </style>
 </head>
 <body>
@@ -1103,11 +1118,20 @@ const fmtVnd = (n) => n == null ? "—" : Math.round(n).toLocaleString("vi-VN") 
 const fmtDate = (iso) => iso ? new Date(iso).toLocaleString("vi-VN") : "—";
 const fmtDay = (iso) => iso ? new Date(iso).toLocaleDateString("vi-VN") : "—";
 
+let noticeTimer = null;
+function hideNotice() {
+  const el = $("notice");
+  el.className = "msg hidden";
+  el.textContent = "";
+}
 function showMsg(kind, text) {
   const el = $("notice");
   el.className = "msg " + kind;
   el.textContent = text;
+  if (noticeTimer) clearTimeout(noticeTimer);
+  if (kind === "ok" || kind === "info") noticeTimer = setTimeout(hideNotice, 6000);
 }
+$("notice").addEventListener("click", hideNotice);
 async function api(path, opts = {}) {
   const res = await fetch(path, { credentials: "same-origin", headers: { "Content-Type": "application/json" }, ...opts });
   const data = await res.json().catch(() => null);
@@ -1259,10 +1283,11 @@ function demoLicenses() {
   }];
 }
 function demoOrders() {
-  const now = Date.now(), day = 86400000, hour = 3600000;
+  const now = Date.now(), day = 86400000, min = 60000;
+  const ins = (code, amount) => ({ bank: "BIDV", account_number: "8838552916", account_name: "NGUYEN THE HOANG", amount, content: code, qr_url: "https://img.vietqr.io/image/970418-8838552916-compact2.png?amount=" + amount + "&addInfo=" + code + "&accountName=NGUYEN%20THE%20HOANG" });
   return [
-    { id: "demo-order-cho", plan: "plus", period: "year", status: "awaiting_payment", createdAt: new Date(now - 3 * hour).toISOString() },
-    { id: "demo-order-moi", plan: "go", period: "month", status: "created", createdAt: new Date(now - 1 * hour).toISOString() },
+    { id: "demo-order-cho", plan: "plus", period: "year", status: "awaiting_payment", createdAt: new Date(now - 2 * min).toISOString(), payment_instructions: ins("HORAORDERCHO", 2990000) },
+    { id: "demo-order-moi", plan: "go", period: "month", status: "created", createdAt: new Date(now - 40 * 1000).toISOString(), payment_instructions: ins("HORAORDERMOI", 199000) },
     { id: "demo-order-loi", plan: "go", period: "year", status: "payment_failed", createdAt: new Date(now - 1 * day).toISOString() },
   ];
 }
@@ -1288,14 +1313,17 @@ function renderHistory() {
   for (const o of orders) {
     if (licensedOrders.has(o.id) || (o.licenseId && licensedIds.has(o.licenseId))) continue;
     if (!["created", "awaiting_payment", "paid_pending_issue", "payment_failed"].includes(o.status)) continue;
+    if (["created", "awaiting_payment"].includes(o.status) && Date.now() > payDeadline(o)) continue; // Het 15 phut cho thanh toan -> an khoi Lich su
     html.push(`<tr class="pending-row${o.status === "payment_failed" ? " error-row" : ""}">
       <td class="muted">Chưa có license</td>
       <td><span class="lic-chip">${esc((PLANS[o.plan] || {}).name || o.plan)} — ${esc(PERIODS[o.period] || o.period)}</span></td>
       <td class="muted">—</td>
       <td>${esc(fmtDay(o.createdAt))}</td>
-      <td class="muted">—</td>
+      ${["created", "awaiting_payment"].includes(o.status) ? `<td><span class="countdown" data-deadline="${payDeadline(o)}">Còn ${fmtCountdown(payDeadline(o) - Date.now())}</span></td>` : '<td class="muted">—</td>'}
       <td><code title="${esc(o.id)}">${esc(shortId(o.id))}</code><br>${o.status === "payment_failed" ? `<span class="status-fail">${esc(STATUS_VI[o.status])}</span>` : esc(STATUS_VI[o.status] || o.status)}</td>
-      <td class="export-cell"><button type="button" class="export-btn" data-export-kind="order" data-export-id="${esc(o.id || "")}" title="Xuất đơn hàng này"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 11 5 5 5-5"></path><path d="M4 21h16"></path></svg> Xuất</button></td>
+      <td class="export-cell">${["created", "awaiting_payment"].includes(o.status)
+        ? `<button type="button" class="export-btn pay-open-btn" data-pay-open="${esc(o.id)}" title="Mở lại màn thanh toán">Mở</button>`
+        : `<button type="button" class="export-btn" data-export-kind="order" data-export-id="${esc(o.id || "")}" title="Xuất đơn hàng này"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 11 5 5 5-5"></path><path d="M4 21h16"></path></svg> Xuất</button>`}</td>
     </tr>`);
   }
   body.innerHTML = html.length ? html.join("") : '<tr class="empty-row"><td colspan="7"><div class="empty-title">Chưa có dữ liệu</div><div class="empty-sub">Lịch sử đơn hàng sẽ lưu ở đây</div></td></tr>';
@@ -1303,10 +1331,42 @@ function renderHistory() {
     try { await navigator.clipboard.writeText(b.dataset.copy); b.textContent = "Đã copy"; } catch { /* clipboard bi chan */ }
   }));
   // Nut Xuat don hang: dinh dang JSON/PDF se lam sau — hien tai chi thong bao.
+  document.querySelectorAll("[data-pay-open]").forEach((b) => b.addEventListener("click", () => {
+    const o = orders.find((x) => x.id === b.dataset.payOpen);
+    if (o) openPaymentForOrder(o);
+  }));
   document.querySelectorAll("[data-export-kind]").forEach((b) => b.addEventListener("click", () => {
     showMsg("info", "Chức năng xuất đơn hàng (JSON/PDF) sẽ được bổ sung sau.");
   }));
 }
+
+// Don cho thanh toan chi hien trong 15 phut ke tu luc tao
+const PAY_WINDOW_MS = 15 * 60 * 1000;
+function payDeadline(o) { return new Date(o.createdAt).getTime() + PAY_WINDOW_MS; }
+function fmtCountdown(ms) {
+  const sec = Math.max(0, Math.floor(ms / 1000));
+  return String(Math.floor(sec / 60)).padStart(2, "0") + ":" + String(sec % 60).padStart(2, "0");
+}
+// Mo lai man thanh toan (bottom sheet) cho 1 don dang cho — nut "Mo" o tab Lich su
+function openPaymentForOrder(o) {
+  const ins = o.payment_instructions || o.paymentInstructions;
+  if (!ins) { showMsg("err", "Chưa lấy được thông tin thanh toán cho đơn này — cổng thanh toán có thể chưa được cấu hình."); return; }
+  showSepayPanel(ins);
+  startSepayPolling(o.id);
+}
+// Dem nguoc moi giay; het gio thi render lai (dong don cho se bi an)
+function tickCountdowns() {
+  const els = document.querySelectorAll(".countdown[data-deadline]");
+  if (!els.length) return;
+  let expired = false;
+  els.forEach((el) => {
+    const left = Number(el.dataset.deadline) - Date.now();
+    if (left <= 0) { expired = true; return; }
+    el.textContent = "Còn " + fmtCountdown(left);
+  });
+  if (expired) renderHistory();
+}
+setInterval(tickCountdowns, 1000);
 
 async function loadLicenses() {
   const { data } = await api("/api/licenses");
