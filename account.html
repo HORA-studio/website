@@ -628,6 +628,25 @@ html[data-theme="dark"] .plan-plus:before{color:#04211c}
 .purchase-trust{color:var(--text);margin-top:10px}
 .purchase-hero h2{margin-bottom:6px}
 .account-welcome,.orders-welcome,.purchase-hero{height:96px;min-height:96px;box-sizing:border-box;padding-top:0;padding-bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.pricing-toggle-row{text-align:center;margin:10px 0 4px}
+.billing-toggle{display:inline-flex;gap:4px;padding:4px;border:1px solid var(--line);border-radius:999px;background:var(--panel2)}
+.billing-opt{border:0;background:transparent;color:var(--muted);font:inherit;font-weight:650;padding:9px 20px;border-radius:999px;cursor:pointer;display:inline-flex;align-items:center}
+.billing-opt.on{background:var(--panel);color:var(--text);box-shadow:var(--shadow)}
+.save-badge{background:var(--accent-soft);color:var(--gold2);border:1px solid var(--line);font-size:10px;padding:2px 8px;border-radius:999px;margin-left:8px;font-weight:800}
+.pricing-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:26px;align-items:stretch;width:100%;max-width:880px;margin-inline:auto}
+.price-card{position:relative;border:1px solid var(--line);background:var(--panel);border-radius:22px;padding:28px;display:flex;flex-direction:column}
+.price-card.featured{border-color:var(--gold);box-shadow:var(--shadow-lg)}
+.price-card h3{font-size:20px;margin:0}
+.popular{position:absolute;top:-12px;left:24px;background:var(--gold);color:#fff;border-radius:999px;padding:5px 11px;font-size:10.5px;font-weight:900;letter-spacing:.07em}
+.plan-desc{color:var(--muted);font-size:13.5px;margin:7px 0 0;min-height:40px}
+.price-card .price{font-size:34px;font-weight:800;letter-spacing:-.03em;margin-top:14px}
+.price-card .per{color:var(--muted);font-size:12.5px;margin-top:2px}
+.price-card ul{list-style:none;margin:18px 0 22px;padding:0;display:grid;gap:9px;font-size:13.5px}
+.price-card ul li{padding-left:24px;position:relative}
+.price-card ul li:before{content:"✓";position:absolute;left:0;color:var(--gold);font-weight:800}
+.price-card ul li.hl{font-weight:650}
+.price-card .btn{margin-top:auto}
+@media(max-width:860px){.pricing-grid{grid-template-columns:1fr}}
 .lic-list{display:flex;flex-direction:column;gap:12px}
 .lic-item{border:1px solid var(--line);border-radius:14px;background:var(--panel);padding:14px 16px}
 .lic-item-pending{border-style:dashed}
@@ -775,11 +794,9 @@ html[data-theme="dark"] .plan-plus:before{color:#04211c}
           <p class="muted">Mở khóa công cụ HORA và quản lý license của bạn trong cùng một tài khoản.</p>
         </div>
       </div>
-      <div class="plan-section-head">
-        <div><h3>Các gói thành viên</h3><p class="muted">Chọn thời hạn thanh toán phù hợp.</p></div>
-        <span class="billing-note">Giá hiển thị bằng VNĐ</span>
-      </div>
-      <div class="plan-grid" id="plan-grid">
+      <div class="pricing-toggle-row"><div class="billing-toggle" role="tablist" aria-label="Chọn thời hạn"><button type="button" class="billing-opt on" data-billing="month" role="tab" aria-selected="true">Theo tháng</button><button type="button" class="billing-opt" data-billing="year" role="tab" aria-selected="false">Theo năm<span class="save-badge">Tiết kiệm 17%</span></button></div></div>
+      
+      <div class="pricing-grid" id="plan-grid">
     <div class="plan">
       <h3>Go</h3>
       <p style="margin:8px 0">1 tháng: <span class="price">250.000đ</span><br>
@@ -1062,6 +1079,7 @@ function applyPreselect() {
   const plan = qs.get("plan"), period = qs.get("period");
   if (!PLANS[plan] || !["month", "year"].includes(period)) return;
   showView("buy");
+  setBilling(period);
   const btn = document.querySelector(`[data-buy="${plan}:${period}"]`);
   if (!btn) return;
   btn.style.outline = "2px solid var(--gold2)";
@@ -1070,44 +1088,30 @@ function applyPreselect() {
   btn.scrollIntoView({ behavior: "smooth", block: "center" });
 }
 
+const PLAN_DESCS = { go: "Đầy đủ tính năng — bắt đầu làm video ngay", plus: "Tất cả của Go — thêm trợ lý AI đồng hành" };
+const PLAN_FEATURES = {
+  go: ["Toàn bộ tính năng hiện có, không khóa tính năng nào", "Cập nhật miễn phí mọi phiên bản mới trong thời hạn", "Được hỗ trợ cài đặt & kích hoạt", "License theo máy — 1 license dùng trên 1 máy"],
+  plus: ["Mọi quyền lợi của gói Go", "✦ Trợ lý AI hỗ trợ trong suốt quá trình sử dụng", "Cập nhật miễn phí mọi phiên bản mới trong thời hạn", "Được hỗ trợ cài đặt & kích hoạt", "License theo máy — 1 license dùng trên 1 máy"],
+};
+let BILLING = "month";
+function planPer(key, period) {
+  const p = PLANS[key] || {};
+  if (period === "year") return p.year ? `/ năm · tương đương ${fmtVnd(Math.round(p.year / 12))}/tháng` : "/ năm · thanh toán theo năm";
+  return "/ tháng · linh hoạt, gia hạn bất cứ lúc nào";
+}
 function renderPlans() {
-  $("plan-grid").innerHTML = Object.entries(PLANS).map(([key, p], index) => {
+  $("plan-grid").innerHTML = Object.entries(PLANS).map(([key, p]) => {
     const isPlus = key === "plus";
-    const planLabel = isPlus ? "Dành cho creator phát triển" : "Bắt đầu đơn giản";
-    const planDescription = isPlus
-      ? "Mở rộng quy trình làm nội dung với bộ công cụ HORA."
-      : "Đủ gọn để bắt đầu làm việc với HORA.";
-    const monthly = p.month;
-    const yearly = p.year;
-    const saving = monthly && yearly ? Math.max(0, Math.round((monthly * 12 - yearly) / (monthly * 12) * 100)) : 0;
+    const price = BILLING === "year" ? p.year : p.month;
     return `
-      <article class="plan plan-${esc(key)} ${isPlus ? "plan-featured" : ""}">
-        <div class="plan-topline">
-          <span class="plan-mark">${isPlus ? "✦" : "◈"}</span>
-          <span class="plan-kicker">${isPlus ? "HORA PLUS" : "HORA GO"}</span>
-          ${isPlus ? '<span class="plan-recommended">PLUS</span>' : ""}
-        </div>
+      <article class="price-card ${isPlus ? "featured" : ""}" data-plan-card="${key}">
+        ${isPlus ? '<span class="popular">ĐƯỢC CHỌN NHIỀU</span>' : ""}
         <h3>${esc(p.name)}</h3>
-        <p class="plan-description">${planDescription}</p>
-        <div class="plan-benefit">${isPlus ? "Dành cho nhu cầu sử dụng nâng cao" : "Lựa chọn linh hoạt để bắt đầu"}</div>
-        <div class="plan-periods">
-          <div class="plan-period">
-            <div class="period-copy">
-              <span class="period-name">Thanh toán hàng tháng</span>
-              <span class="period-price">${monthly ? fmtVnd(monthly) : "Sắp mở bán"}</span>
-              <span class="period-note">Gia hạn mỗi tháng</span>
-            </div>
-            <button class="btn ${monthly ? "primary" : ""} plan-buy" type="button" data-buy="${key}:month" ${monthly ? "" : "disabled"} aria-label="Mua gói ${esc(p.name)} theo tháng">${monthly ? "Chọn gói" : "Sắp mở bán"} <span aria-hidden="true">↗</span></button>
-          </div>
-          <div class="plan-period plan-period-year">
-            <div class="period-copy">
-              <span class="period-name">Thanh toán hàng năm ${saving ? `<span class="saving-tag">Tiết kiệm ${saving}%</span>` : ""}</span>
-              <span class="period-price">${yearly ? fmtVnd(yearly) : "Sắp mở bán"}</span>
-              <span class="period-note">${yearly && monthly ? `Tương đương ${fmtVnd(Math.round(yearly / 12))}/tháng` : "Thanh toán theo năm"}</span>
-            </div>
-            <button class="btn ${yearly ? "primary" : ""} plan-buy" type="button" data-buy="${key}:year" ${yearly ? "" : "disabled"} aria-label="Mua gói ${esc(p.name)} theo năm">${yearly ? "Chọn gói" : "Sắp mở bán"} <span aria-hidden="true">↗</span></button>
-          </div>
-        </div>
+        <p class="plan-desc">${esc(PLAN_DESCS[key] || "")}</p>
+        <div class="price"><span data-price>${price ? fmtVnd(price) : "Sắp mở bán"}</span></div>
+        <div class="per" data-per>${esc(planPer(key, BILLING))}</div>
+        <ul>${(PLAN_FEATURES[key] || []).map((f, idx) => `<li class="${isPlus && idx < 2 ? "hl" : ""}">${esc(f)}</li>`).join("")}</ul>
+        <button class="btn ${isPlus ? "primary" : ""}" type="button" data-buy="${key}:${BILLING}" ${price ? "" : "disabled"}>Chọn gói</button>
       </article>`;
   }).join("");
   document.querySelectorAll("[data-buy]").forEach((b) => b.addEventListener("click", async () => {
@@ -1133,6 +1137,30 @@ function renderPlans() {
     await loadOrders();
   }));
 }
+// Doi ky han: cap nhat tai cho (gia, dong /ky, data-buy) — khong render lai de
+// giu nguyen cac nut bam da gan su kien mua.
+function setBilling(period) {
+  if (!["month", "year"].includes(period)) period = "month";
+  BILLING = period;
+  document.querySelectorAll(".billing-opt").forEach((b) => {
+    const on = b.dataset.billing === period;
+    b.classList.toggle("on", on);
+    b.setAttribute("aria-selected", on ? "true" : "false");
+  });
+  document.querySelectorAll("[data-plan-card]").forEach((card) => {
+    const key = card.dataset.planCard;
+    const p = PLANS[key];
+    if (!p) return;
+    const price = period === "year" ? p.year : p.month;
+    const priceEl = card.querySelector("[data-price]");
+    if (priceEl) priceEl.textContent = price ? fmtVnd(price) : "Sắp mở bán";
+    const perEl = card.querySelector("[data-per]");
+    if (perEl) perEl.textContent = planPer(key, period);
+    const btn = card.querySelector("[data-buy]");
+    if (btn) { btn.setAttribute("data-buy", `${key}:${period}`); btn.disabled = !price; }
+  });
+}
+document.querySelectorAll(".billing-opt").forEach((b) => b.addEventListener("click", () => setBilling(b.dataset.billing)));
 
 // ----- SePay: huong dan chuyen khoan + tu kiem tra trang thai don -----
 function showSepayPanel(ins) {
