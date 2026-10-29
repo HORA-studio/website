@@ -3,8 +3,8 @@
 
 // GIA TAM — user chot tam 2026-10-29, cho gia that (khong phai gia chinh thuc).
 export const PLANS = {
-  go:   { name: "Go",   month: 250000, year: 2500000 },
-  plus: { name: "Plus", month: 400000, year: 4000000 },
+  go:   { name: "Go",   month: 249000, year: 2490000 },
+  plus: { name: "Plus", month: 399000, year: 3490000 },
 };
 
 // Gia chinh thuc nam trong PLANS o tren (dong bo tay voi PLANS trong index.html;
