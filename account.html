@@ -615,7 +615,17 @@ html[data-theme="dark"] .plan-plus:before{color:#04211c}
 .purchase-hero p{margin-inline:auto}
 .purchase-trust{justify-content:center}
 .purchase-panel .plan-section-head,.purchase-panel .plan-grid{width:100%;max-width:880px;margin-inline:auto}
-.view-panel[data-view="orders"]>h2{display:block}
+.view-panel[data-view="orders"]{padding:0}
+.orders-welcome{display:flex;align-items:center;justify-content:center;text-align:center;gap:20px;padding:30px 30px 24px;background:linear-gradient(115deg,var(--accent-soft),transparent 72%)}
+.orders-welcome h2{font-size:23px;letter-spacing:-.045em;margin:0 0 5px}
+.orders-welcome p{font-size:13px;margin:0;color:var(--muted)}
+.orders-body{padding:22px 26px 26px}
+.purchase-hero{background:linear-gradient(115deg,var(--accent-soft),transparent 72%);min-height:0}
+.purchase-hero:before,.purchase-hero:after{display:none}
+.purchase-hero h2{color:var(--text);font-size:23px;letter-spacing:-.045em}
+.purchase-hero p{color:var(--muted)}
+.purchase-hero .eyebrow{color:var(--gold)}
+.purchase-trust{color:var(--text)}
 @media(max-width:860px){
   .shell{height:auto !important;min-height:calc(100vh - 64px);min-height:calc(100dvh - 64px);overflow:visible}
   .side{overflow:visible}
@@ -680,7 +690,8 @@ html[data-theme="dark"] .plan-plus:before{color:#04211c}
       </div>
       <p class="muted" style="margin:6px 0 0">Hệ thống sẽ gửi link đặt lại mật khẩu vào email (nếu email có trong hệ thống). Link có hiệu lực 1 giờ.</p>
     </div>
-  </section>
+  </div>
+    </section>
 
   <!-- Dat lai mat khau (mo tu link ?reset=<token> trong email) -->
   <section id="reset-card" class="card hidden">
@@ -790,7 +801,8 @@ html[data-theme="dark"] .plan-plus:before{color:#04211c}
     </section>
 
     <section class="card view-panel hidden" data-view="orders">
-      <h2>Lịch sử giao dịch</h2>
+      <div class="orders-welcome"><div><h2>Lịch sử giao dịch</h2><p>Đơn mua, license và số ngày còn lại của bạn.</p></div></div>
+      <div class="orders-body">
       <table>
         <thead><tr><th>Mã đơn</th><th>Gói</th><th>Số tiền</th><th>Trạng thái</th><th>License</th><th>Hạn dùng</th></tr></thead>
         <tbody id="ord-body"><tr><td colspan="6" class="muted">Chưa có giao dịch nào.</td></tr></tbody>
