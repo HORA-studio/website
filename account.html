@@ -632,7 +632,7 @@ html[data-theme="dark"] .plan-plus:before{color:#04211c}
 .stat-card{background:var(--panel2)}
 .stat-card>strong{font-size:19px !important;letter-spacing:-.035em}
 .stat-card-accent>strong{font-size:19px !important}
-.side{height:100%;border-radius:22px}
+.side{height:100% !important;border-radius:22px}
 .view-panel{border-radius:22px;overflow:hidden}
 @media(max-width:860px){
   .side{height:auto}
@@ -728,13 +728,13 @@ html[data-theme="dark"] .plan-plus:before{color:#04211c}
         <div class="stat-card">
           <span class="stat-icon">⌘</span>
           <span class="stat-label">License của tôi</span>
-          <strong id="account-license-count">—</strong>
+          <strong id="account-license-count">0</strong>
           <span class="stat-note">License đã gắn với tài khoản</span>
         </div>
         <div class="stat-card">
           <span class="stat-icon">↗</span>
           <span class="stat-label">Giao dịch</span>
-          <strong id="account-order-count">—</strong>
+          <strong id="account-order-count">0</strong>
           <span class="stat-note">Đơn hàng trong lịch sử</span>
         </div>
         <div class="stat-card stat-card-accent">
@@ -1019,7 +1019,7 @@ async function loadLicenses() {
   const { data } = await api("/api/licenses");
   LICENSES_CACHE = (data && data.licenses) || [];
   const licenseCount = $("account-license-count");
-  if (licenseCount) licenseCount.textContent = String(LICENSES_CACHE.length).padStart(2, "0");
+  if (licenseCount) licenseCount.textContent = String(LICENSES_CACHE.length);
   renderHistory();
 }
 
@@ -1028,7 +1028,7 @@ async function loadOrders() {
   const { data } = await api("/api/orders");
   ORDERS_CACHE = (data && data.orders) || [];
   const orderCount = $("account-order-count");
-  if (orderCount) orderCount.textContent = String(ORDERS_CACHE.length).padStart(2, "0");
+  if (orderCount) orderCount.textContent = String(ORDERS_CACHE.length);
   renderHistory();
   return ORDERS_CACHE;
 }
