@@ -1,8 +1,10 @@
 // POST /api/auth/register — dang ky tai khoan khach (email + mat khau >= 8 ky tu).
 // Sau khi tao tai khoan: phat token xac thuc email + gui mail qua Resend.
+// KHONG tao session/cookie — tai khoan chua xac thuc email thi khong dang nhap
+// duoc (xem login.js). Khach phai bam link trong email roi dang nhap lai.
 // Chua cau hinh mail (RESEND_API_KEY de trong) thi buoc gui bi bo qua —
-// dang ky van thanh cong binh thuong (xem functions/api/_mail.js).
-import { json, errorJson, readJson, hashPassword, createSession, issueAuthToken, siteUrl } from "../_lib.js";
+// dang ky van thanh cong nhung khong the dang nhap (xem functions/api/_mail.js).
+import { json, errorJson, readJson, hashPassword, issueAuthToken, siteUrl } from "../_lib.js";
 import { logEvent, clientIp } from "../_log.js";
 import { isMailConfigured, sendVerificationEmail } from "../_mail.js";
 
@@ -28,7 +30,6 @@ export async function onRequestPost({ request, env }) {
     "INSERT INTO customers (id, email, password_hash, salt, iterations, display_name, created_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)"
   ).bind(id, email, hash, salt, iterations, displayName, new Date().toISOString()).run();
 
-  const session = await createSession(env, id);
   await logEvent(env, { eventType: "auth.register", customerId: id, ip: clientIp(request) });
 
   // Gui email xac thuc (token 24h, dung 1 lan). Moi loi o buoc nay deu bi
@@ -44,9 +45,8 @@ export async function onRequestPost({ request, env }) {
   }
 
   return json(
-    { customer: { id, email, displayName, emailVerified: false }, mailConfigured },
-    201,
-    { "Set-Cookie": session.cookie }
+    { registered: true, customer: { id, email, displayName, emailVerified: false }, mailConfigured },
+    201
   );
 }
 

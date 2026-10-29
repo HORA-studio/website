@@ -278,13 +278,16 @@ lại được.
 | `POST /api/auth/reset-password {token, password}` | Mật khẩu ≥ 8 ký tự (`422 WEAK_PASSWORD`). Thành công → đổi hash + **xóa toàn bộ `sessions` của khách** (thu hồi mọi phiên đăng nhập), trả `{ok:true}` |
 
 **Đăng ký:** sau khi tạo tài khoản, `POST /api/auth/register` tự phát
-token verify + gửi mail; response thêm `customer.emailVerified:false` và
-`mailConfigured` (boolean). `GET /api/auth/me` trả thêm
-`customer.emailVerified`. **Đăng nhập KHÔNG bị chặn khi chưa xác thực
-email** — xác thực hiện là mềm: dashboard hiện banner "Email của bạn
-chưa được xác thực" + nút gửi lại; trang tài khoản tự xử lý link
-`?verify=<token>` (xác thực + xóa param khỏi URL) và `?reset=<token>`
-(hiện form đặt mật khẩu mới).
+token verify + gửi mail; response `201 {registered:true, customer:{...,
+emailVerified:false}, mailConfigured}` và **KHÔNG set session/cookie** —
+đăng ký xong chưa vào được tài khoản. `GET /api/auth/me` trả thêm
+`customer.emailVerified`. **Đăng nhập bị CHẶN khi chưa xác thực email**:
+`POST /api/auth/login` trả `403 EMAIL_NOT_VERIFIED` nếu
+`customers.email_verified_at` còn NULL. Khách phải bấm link xác thực
+(`?verify=<token>`) rồi đăng nhập lại. Banner "Email của bạn chưa được xác
+thực" + nút gửi lại vẫn còn cho trường hợp tài khoản cũ đã đăng nhập trước
+đó; trang tài khoản tự xử lý link `?verify=<token>` (xác thực + xóa param
+khỏi URL) và `?reset=<token>` (hiện form đặt mật khẩu mới).
 
 **Gửi mail (`functions/api/_mail.js` → Resend API):**
 - `isMailConfigured(env)`: có `RESEND_API_KEY` hay không. **Giai đoạn này

@@ -904,14 +904,26 @@ $("auth-form").addEventListener("submit", async (e) => {
   const payload = { email: $("f-email").value.trim(), password: $("f-password").value };
   if (mode === "register") payload.displayName = $("f-name").value.trim();
   const { res, data } = await api("/api/auth/" + mode, { method: "POST", body: JSON.stringify(payload) });
-  if (!res.ok) { showMsg("err", errText(data, "Không thực hiện được, thử lại sau.")); return; }
+  if (!res.ok) {
+    if (mode === "login" && data && data.error && data.error.code === "EMAIL_NOT_VERIFIED") {
+      showMsg("err", errText(data, "Email chưa được xác thực. Hãy mở link trong hộp thư của bạn."));
+      return;
+    }
+    showMsg("err", errText(data, "Không thực hiện được, thử lại sau.")); return;
+  }
   if (mode === "login") {
     $("notice").classList.add("hidden");
     $("notice").textContent = "";
-  } else if (data && data.mailConfigured === false) {
-    showMsg("info", "Đăng ký thành công. Hệ thống gửi email chưa được cấu hình — tính năng xác thực email sẽ hoạt động khi quản trị viên kết nối dịch vụ gửi mail.");
   } else {
-    showMsg("ok", "Đăng ký thành công. Đã gửi email xác thực, hãy kiểm tra hộp thư.");
+    // Dang ky KHONG tao phien — phai xac thuc email roi dang nhap lai.
+    setMode("login");
+    $("f-password").value = "";
+    if (data && data.mailConfigured === false) {
+      showMsg("info", "Đã tạo tài khoản. Hệ thống gửi email chưa được cấu hình — liên hệ quản trị viên để được xác thực email trước khi đăng nhập.");
+    } else {
+      showMsg("ok", "Đăng ký thành công. Đã gửi email xác thực — hãy mở hộp thư, bấm link xác thực rồi đăng nhập.");
+    }
+    return;
   }
   await loadDash();
 });
@@ -1213,8 +1225,13 @@ let resetToken = null;
   if (verifyParam) {
     (async () => {
       const { res, data } = await api("/api/auth/verify-email", { method: "POST", body: JSON.stringify({ token: verifyParam }) });
-      if (res.ok) showMsg("ok", "Đã xác thực email thành công. Cảm ơn bạn!");
-      else showMsg("err", errText(data, "Link xác thực không hợp lệ hoặc đã hết hạn."));
+      if (res.ok) {
+        showMsg("ok", "Đã xác thực email thành công. Hãy đăng nhập để vào tài khoản.");
+        setMode("login");
+        await loadDash();
+      } else {
+        showMsg("err", errText(data, "Link xác thực không hợp lệ hoặc đã hết hạn."));
+      }
     })();
   }
   if (resetParam) {

@@ -10,13 +10,18 @@ export async function onRequestPost({ request, env }) {
   const password = String(body.password || "");
 
   const row = await env.DB.prepare(
-    "SELECT id, email, password_hash, salt, iterations, display_name FROM customers WHERE email = ?1"
+    "SELECT id, email, password_hash, salt, iterations, display_name, email_verified_at FROM customers WHERE email = ?1"
   ).bind(email).first();
 
   // Thong bao chung cho ca email khong ton tai lan sai mat khau.
   if (!row) return errorJson("INVALID_CREDENTIALS", "Email hoặc mật khẩu không đúng.", 401);
   const ok = await verifyPassword(password, row.password_hash, row.salt, row.iterations);
   if (!ok) return errorJson("INVALID_CREDENTIALS", "Email hoặc mật khẩu không đúng.", 401);
+
+  // Chan dang nhap khi email chua xac thuc email — phai bam link trong mail truoc.
+  if (!row.email_verified_at) {
+    return errorJson("EMAIL_NOT_VERIFIED", "Email chưa được xác thực. Hãy mở link xác thực đã gửi tới hộp thư của bạn.", 403);
+  }
 
   const session = await createSession(env, row.id);
   await logEvent(env, { eventType: "auth.login", customerId: row.id, ip: clientIp(request) });
