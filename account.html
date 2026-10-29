@@ -949,7 +949,6 @@ body{padding-top:0 !important}
         <h3>Go</h3>
         <p class="plan-desc">Cho người bắt đầu làm video bán hàng bằng AI</p>
         <div class="price"><span data-price>250.000đ</span></div>
-        <div class="per" data-per>/ tháng · linh hoạt, gia hạn bất cứ lúc nào</div>
         <ul>
           <li>Tạo ảnh và video bằng AI — đầy đủ tính năng, không khóa</li>
           <li>Workflow video quảng cáo dựng sẵn, chỉ cần thay sản phẩm của bạn</li>
@@ -964,7 +963,6 @@ body{padding-top:0 !important}
         <h3>Plus</h3>
         <p class="plan-desc">Cho người làm nghiêm túc — thêm trợ lý AI đồng hành</p>
         <div class="price"><span data-price>400.000đ</span></div>
-        <div class="per" data-per>/ tháng · linh hoạt, gia hạn bất cứ lúc nào</div>
         <ul>
           <li class="hl">Mọi quyền lợi của gói Go</li>
           <li class="hl">✦ Trợ lý AI hỗ trợ lên ý tưởng, viết kịch bản và tối ưu video trong suốt quá trình sử dụng</li>
@@ -1267,11 +1265,6 @@ function syncPlanCopy() {
   });
 }
 let BILLING = "month";
-function planPer(key, period) {
-  const p = PLANS[key] || {};
-  if (period === "year") { if (!p.year) return "/ năm · thanh toán theo năm"; const save = p.month ? Math.round((1 - p.year / (p.month * 12)) * 100) : 0; return `≈ ${fmtVnd(Math.round(p.year / 12))}/tháng · tiết kiệm ${save}% so với theo tháng`; }
-  return "/ tháng · linh hoạt, gia hạn bất cứ lúc nào";
-}
 function bindBuyButtons() {
   document.querySelectorAll("[data-buy-plan]").forEach((b) => b.addEventListener("click", async () => {
     const plan = b.dataset.buyPlan;
@@ -1315,8 +1308,6 @@ function setBilling(period) {
     const price = period === "year" ? p.year : p.month;
     const priceEl = card.querySelector("[data-price]");
     if (priceEl) priceEl.textContent = price ? fmtVnd(price) : "Sắp mở bán";
-    const perEl = card.querySelector("[data-per]");
-    if (perEl) perEl.textContent = planPer(key, period);
     const btn = card.querySelector("[data-buy-plan]");
     if (btn) btn.disabled = !price;
   });
