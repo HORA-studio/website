@@ -778,6 +778,14 @@ html[data-theme="dark"] .plan-plus:before{color:#04211c}
 
 /* Cum nut pin sat header: rut khoang cach con ~16px */
 .pricing-wrap{margin-top:8px;padding-top:8px}
+
+/* Ban chot tab Mua goi: body cach header 20px, cum noi dung sat phia tren va luon hien thi */
+#dash .purchase-panel .pricing-wrap{margin-top:20px !important;padding-top:0 !important}
+#dash .purchase-panel .pricing-toggle-row{margin:0 !important;padding:0 !important}
+#dash .purchase-panel .pricing-grid{margin-top:20px !important}
+#dash .purchase-panel .price-card .plan-desc{display:block !important;visibility:visible !important;opacity:1 !important}
+#dash .purchase-panel .price-card ul{display:grid !important;visibility:visible !important;opacity:1 !important}
+#dash .purchase-panel .price-card li{display:list-item !important;visibility:visible !important;opacity:1 !important}
 </style>
 </head>
 <body>
@@ -1209,11 +1217,22 @@ function applyPreselect() {
   btn.scrollIntoView({ behavior: "smooth", block: "center" });
 }
 
-const PLAN_DESCS = { go: "Đầy đủ tính năng — bắt đầu làm video ngay", plus: "Tất cả của Go — thêm trợ lý AI đồng hành" };
+const PLAN_DESCS = { go: "Cho người bắt đầu làm video bán hàng bằng AI", plus: "Cho người làm nghiêm túc — thêm trợ lý AI đồng hành" };
 const PLAN_FEATURES = {
-  go: ["Toàn bộ tính năng hiện có, không khóa tính năng nào", "Cập nhật miễn phí mọi phiên bản mới trong thời hạn", "Được hỗ trợ cài đặt & kích hoạt", "License theo máy — 1 license dùng trên 1 máy"],
-  plus: ["Mọi quyền lợi của gói Go", "✦ Trợ lý AI hỗ trợ trong suốt quá trình sử dụng", "Cập nhật miễn phí mọi phiên bản mới trong thời hạn", "Được hỗ trợ cài đặt & kích hoạt", "License theo máy — 1 license dùng trên 1 máy"],
+  go: ["Tạo ảnh và video bằng AI — đầy đủ tính năng, không khóa", "Workflow video quảng cáo dựng sẵn, chỉ cần thay sản phẩm của bạn", "Chạy đa luồng — làm nhiều video cùng lúc", "Cập nhật miễn phí mọi phiên bản mới trong thời hạn", "License theo máy — 1 license dùng trên 1 máy"],
+  plus: ["Mọi quyền lợi của gói Go", "✦ Trợ lý AI hỗ trợ lên ý tưởng, viết kịch bản và tối ưu video trong suốt quá trình sử dụng", "Quản lý nhiều tài khoản trong cùng một nơi", "Cập nhật miễn phí mọi phiên bản mới trong thời hạn", "License theo máy — 1 license dùng trên 1 máy"],
 };
+function syncPlanCopy() {
+  document.querySelectorAll("[data-plan-card]").forEach((card) => {
+    const key = card.dataset.planCard;
+    const desc = card.querySelector(".plan-desc");
+    if (desc && PLAN_DESCS[key]) desc.textContent = PLAN_DESCS[key];
+    const list = card.querySelector("ul");
+    if (list && PLAN_FEATURES[key]) {
+      list.innerHTML = PLAN_FEATURES[key].map((text, i) => `<li class="${key === "plus" && i < 2 ? "hl" : ""}">${esc(text)}</li>`).join("");
+    }
+  });
+}
 let BILLING = "month";
 function planPer(key, period) {
   const p = PLANS[key] || {};
@@ -1271,6 +1290,7 @@ function setBilling(period) {
 
 }
 document.querySelectorAll(".billing-opt").forEach((b) => b.addEventListener("click", () => setBilling(b.dataset.billing)));
+syncPlanCopy();
 bindBuyButtons();
 
 // ----- SePay: huong dan chuyen khoan + tu kiem tra trang thai don -----
