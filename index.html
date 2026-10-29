@@ -420,7 +420,7 @@ footer{border-top:1px solid #14161a;background:#101216;color:#c9cdc9;padding:36p
   <nav class="navlinks" aria-label="Điều hướng chính">
    <a href="#workflow" data-home-link>Tính năng</a><a href="#demos" data-home-link>Thư viện mẫu</a><a href="#pricing" data-home-link>Bảng giá</a>
   </nav>
-  <div class="actions"><a class="btn small" href="/account.html?mode=register">Đăng ký</a><a class="btn small primary" id="nav-account-link" href="/account.html">Đăng nhập</a></div>
+  <div class="actions"><a class="btn small" id="nav-register-link" href="/account.html?mode=register">Đăng ký</a><a class="btn small primary" id="nav-account-link" href="/account.html">Đăng nhập</a><a class="btn small" id="nav-user-email" href="/account.html" style="display:none" aria-label="Mở trang quản lý tài khoản"></a></div>
  </div>
 </header>
 <div class="main-content" id="main-content">
@@ -721,7 +721,8 @@ function showDemo(d,i){document.getElementById("modal-title").textContent=`DEMO 
 function closeModal(){modal.classList.remove("open");const v=modal.querySelector("video");if(v)v.pause();}
 document.getElementById("modal-close").addEventListener("click",closeModal);modal.addEventListener("click",e=>{if(e.target===modal)closeModal()});document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal()});
 </script>
-<script>fetch("/api/auth/me",{credentials:"same-origin"}).then(function(r){return r.ok?r.json():null}).then(function(d){if(d&&d.customer){var a=document.getElementById("nav-account-link");if(a){a.textContent="Tài khoản";}}}).catch(function(){});</script>
+<script>/* Trang thai dang nhap o header: da dang nhap thi an nut Dang ky + Dang nhap, hien email (bam -> trang quan ly tai khoan). */
+fetch("/api/auth/me",{credentials:"same-origin"}).then(function(r){return r.ok?r.json():null}).then(function(d){if(!d||!d.customer)return;var reg=document.getElementById("nav-register-link");var login=document.getElementById("nav-account-link");var chip=document.getElementById("nav-user-email");if(reg)reg.style.display="none";if(login)login.style.display="none";if(chip){chip.textContent=d.customer.email||"Tài khoản";chip.style.display="";}}).catch(function(){});</script>
 </body>
 </html>
 <style>
