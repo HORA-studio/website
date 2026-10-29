@@ -8,7 +8,8 @@ export async function onRequestGet({ request, env }) {
   const { results } = await env.DB.prepare(
     `SELECT l.id, l.license_key, l.app, l.product_id, l.tier, l.status, l.organization,
             l.expiry_utc, l.validity_days, l.activated_at, l.revoked_at, l.source, l.order_id, l.created_at,
-            (SELECT d.device_id FROM devices d WHERE d.license_id = l.id LIMIT 1) AS device_id
+            (SELECT d.device_id FROM devices d WHERE d.license_id = l.id LIMIT 1) AS device_id,
+            (SELECT d.bound_at FROM devices d WHERE d.license_id = l.id LIMIT 1) AS bound_at
        FROM licenses l WHERE l.customer_id = ?1 ORDER BY l.created_at DESC`
   ).bind(a.customer.id).all();
 
@@ -25,6 +26,8 @@ export async function onRequestGet({ request, env }) {
     source: r.source,
     orderId: r.order_id,
     deviceBound: Boolean(r.device_id),
+    deviceId: r.device_id || null,
+    deviceBoundAt: r.bound_at || null,
     createdAt: r.created_at,
   }));
   return json({ licenses });
