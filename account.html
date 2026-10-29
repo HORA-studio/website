@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0040)https://hora.works/account?mode=register -->
+<!-- saved from url=(0026)https://hora.works/account -->
 <html lang="vi"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -7,7 +7,7 @@
 <link rel="icon" href="https://hora.works/favicon.ico">
 <link rel="preconnect" href="https://fonts.googleapis.com/">
 <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">
-<link href="./Tài khoản — HORA_files/css2" rel="stylesheet">
+<link href="./Tài khoản — HORA Media_files/css2" rel="stylesheet">
 <style>
 /* HORA — trang tai khoan, dong bo thiet ke v10 cua trang chu (2026-10-29).
    Dung chung tokens voi index.html v10: nen giay #f6f5f1, teal #0a9787,
@@ -107,139 +107,6 @@ code{background:var(--panel2);padding:2px 7px;border-radius:7px;word-break:break
 .pay-panel .qr{display:block;max-width:260px;width:100%;margin:0 auto 12px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:8px}
 .pay-panel table td:first-child{color:var(--muted);width:150px}
 .hidden{display:none}
-
-
-/* Viewport-fit auth and full-panel password recovery */
-html,body{min-height:100%;height:100%;overflow:hidden}
-body{padding-top:72px}
-.shell.solo{height:calc(100dvh - 72px);min-height:0;overflow:hidden;padding-top:14px;padding-bottom:14px;align-items:center}
-.shell.solo .content{height:100%;display:flex;flex-direction:column;justify-content:center;min-height:0}
-.auth-layout{height:min(680px,calc(100dvh - 100px));min-height:0;margin:0 auto;width:100%}
-.auth-visual{min-height:0}
-.auth-form-panel{min-height:0;overflow:hidden;scrollbar-width:none}
-.auth-form-panel::-webkit-scrollbar{display:none}
-#forgot-wrap{display:none!important}
-.auth-layout.forgot-mode .auth-visual-copy h1{font-size:clamp(30px,3.5vw,42px)}
-.auth-layout.forgot-mode .auth-form-head{margin-bottom:20px}
-.auth-layout.forgot-mode .tabs{display:none}
-.auth-layout.forgot-mode #auth-form{display:none}
-.auth-layout.forgot-mode #forgot-wrap{display:block!important;border-top:0!important;margin-top:0!important;padding-top:0!important}
-.auth-layout.forgot-mode .auth-terms{margin-top:24px}
-.forgot-back{display:inline-flex;align-items:center;gap:7px;margin:0 0 16px;border:0;background:transparent;color:var(--muted);font:inherit;font-size:12px;font-weight:650;cursor:pointer;padding:0}
-.forgot-back:hover{color:var(--text)}
-#forgot-wrap label{margin-top:8px}
-#forgot-wrap .row{display:flex;flex-direction:column;align-items:stretch;width:100%;gap:10px}
-#forgot-wrap input#forgot-email{display:block;box-sizing:border-box;width:100%;min-width:0!important;height:46px!important;min-height:46px;padding:0 14px;border:1px solid var(--line2);border-radius:12px;background:var(--input-bg);color:var(--text);font-family:inherit;font-size:13.5px;line-height:normal}
-#forgot-submit{width:100%;min-height:48px;border-radius:12px;background:var(--gold);color:white;border-color:transparent;font-size:13px;font-weight:700}
-#forgot-wrap>p{font-size:11.5px;line-height:1.65;margin-top:12px!important}
-@media(max-width:760px){
-  html,body{height:100%;overflow:hidden}
-  .shell.solo{height:calc(100dvh - 72px);padding:10px 12px 14px;overflow:hidden}
-  .auth-layout{height:100%;max-height:680px;min-height:0;margin:0 auto}
-  .auth-form-panel{overflow-y:auto}
-  .auth-layout.forgot-mode{height:auto;max-height:560px}
-}
-@media(max-height:780px){
-  .auth-form-panel{padding-top:18px;padding-bottom:18px}
-  .auth-mobile-logo{margin-bottom:18px}
-  .auth-form-head{margin-bottom:12px}
-  .auth-form-head h2{font-size:26px}
-  .auth-form-panel label{margin-top:9px}
-  .auth-actions{margin-top:10px}
-  .auth-terms{margin-top:10px}
-}
-@media(max-height:720px) and (min-width:761px){
-  .auth-layout{height:calc(100dvh - 92px)}
-  .auth-form-panel{padding-top:24px;padding-bottom:24px}
-  .auth-form-head{margin-bottom:14px}
-  .auth-form-head h2{font-size:26px}
-  .auth-form-panel label{margin-top:11px}
-  .auth-actions{margin-top:16px}
-  .auth-perks{gap:12px}
-  .auth-visual-copy{margin:20px 0}
-}
-
-/* ----- Auth refresh: polished, responsive account experience ----- */
-#shell.solo .content{max-width:100%;width:100%}
-#shell.solo .content>h1,#shell.solo .content>.sub{display:none}
-#notice:empty{display:none}
-.auth-layout{display:grid;grid-template-columns:minmax(300px,.92fr) minmax(360px,1.08fr);max-width:1000px;min-height:620px;margin:22px auto 0;overflow:hidden;border:1px solid var(--line);border-radius:28px;background:var(--panel);box-shadow:var(--shadow-lg)}
-.auth-visual{position:relative;isolation:isolate;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;min-height:620px;padding:32px;color:#f4fffc;background:#092d2b}
-.auth-visual:before{content:"";position:absolute;z-index:-2;inset:0;background:radial-gradient(ellipse at 90% 15%,#0a978766,transparent 42%),radial-gradient(ellipse at 5% 90%,#0a978755,transparent 48%),linear-gradient(145deg,#092d2b,#071c20)}
-.auth-logo,.auth-mobile-logo{font-weight:850;letter-spacing:-.04em;font-size:20px;text-decoration:none;color:inherit}
-.auth-logo span,.auth-mobile-logo span{color:#53dfc9}
-.auth-visual-copy{position:relative;z-index:2;margin:46px 0 30px}
-.eyebrow{display:inline-flex;align-items:center;gap:8px;color:var(--gold2);font-size:10px;font-weight:800;letter-spacing:.16em}
-.auth-visual .eyebrow{color:#6ce7d5}
-.eyebrow-dot{width:7px;height:7px;border-radius:50%;background:#53dfc9;box-shadow:0 0 0 5px #53dfc91c}
-.auth-visual h1{font-size:clamp(32px,3.8vw,46px);line-height:1.12;letter-spacing:-.055em;margin:22px 0 16px;color:#fff}
-.auth-visual h1 em{font-style:normal;color:#62e2ce}
-.auth-visual-copy p{max-width:340px;margin:0;color:#c1d8d5;font-size:14px;line-height:1.8}
-.auth-perks{display:grid;gap:18px;position:relative;z-index:2}
-.auth-perk{display:flex;align-items:center;gap:12px}
-.perk-icon{display:grid;place-items:center;width:34px;height:34px;border:1px solid #ffffff25;border-radius:11px;color:#70e7d4;background:#ffffff0a;font-weight:800}
-.auth-perk strong,.auth-perk small{display:block}
-.auth-perk strong{font-size:12.5px;color:#f3fffd}
-.auth-perk small{font-size:11px;color:#a9c6c2;margin-top:2px}
-.auth-visual-foot{position:relative;z-index:2;margin-top:34px;padding-top:18px;border-top:1px solid #ffffff20;color:#8eb2ad;font-size:9px;letter-spacing:.15em;font-weight:700}
-.auth-visual-foot span{padding:0 6px;color:#54ddc8}
-.auth-orbit{position:absolute;z-index:-1;border:1px solid #73e6d51c;border-radius:50%;pointer-events:none}
-.orbit-one{width:390px;height:390px;right:-220px;top:110px}
-.orbit-two{width:300px;height:300px;right:-175px;top:155px;border-color:#73e6d51a}
-.auth-form-panel{padding:clamp(22px,3.5vw,48px);display:flex;flex-direction:column;justify-content:center;min-width:0;overflow:hidden}
-.auth-mobile-logo{display:none;color:var(--text);margin-bottom:32px}
-.auth-form-head{margin-bottom:18px}
-.auth-form-head .eyebrow{margin-bottom:10px}
-.auth-form-head h2{font-size:30px;letter-spacing:-.045em;margin:0 0 7px;font-weight:800}
-.auth-form-head p{font-size:13.5px;color:var(--muted);margin:0;line-height:1.7}
-.auth-form-panel .tabs{display:grid;grid-template-columns:1fr 1fr;width:100%;margin:0 0 10px;border-radius:13px;padding:4px}
-.auth-form-panel .tabs button{border-radius:10px;padding:10px 12px;font-size:13px}
-.auth-form-panel .tabs button.on{background:var(--panel);color:var(--text);box-shadow:0 1px 5px #00000013}
-.auth-form-panel label{font-size:12px;color:var(--text);font-weight:700;margin:12px 0 6px}
-.auth-form-panel .optional{font-weight:500;color:var(--muted)}
-.auth-form-panel input{height:46px;border-radius:12px;padding:0 14px;font-size:13.5px;transition:border-color .15s,box-shadow .15s}
-.auth-form-panel input::placeholder{color:var(--muted);opacity:.72}
-.auth-form-panel input:focus{border-color:var(--gold);box-shadow:0 0 0 3px var(--accent-soft)}
-.password-label{display:flex;justify-content:space-between;align-items:center}
-.password-label label{margin-bottom:7px}
-#password-hint{font-size:10.5px;color:var(--muted)}
-.password-field{position:relative}
-.password-field input{padding-right:14px}
-
-#confirm-password-wrap{margin-top:2px}
-#confirm-password-wrap label{margin-top:17px}
-.auth-actions{display:flex;flex-direction:column;gap:10px;margin-top:12px}
-.auth-actions #forgot-link{align-self:flex-end;font-size:12px;text-decoration:none}
-.auth-submit{width:100%;min-height:49px;justify-content:center;position:relative;padding:0 44px;border-radius:12px;font-size:13.5px;text-align:center}
-.auth-submit span:first-child{flex:1;text-align:center}
-.auth-submit span:last-child{position:absolute;right:18px}
-.auth-submit span:last-child{font-size:20px;transition:transform .15s}
-.auth-submit:hover span:last-child{transform:translateX(3px)}
-.auth-terms{font-size:10.5px;line-height:1.55;color:var(--muted);text-align:center;margin:14px 0 0}
-#forgot-wrap{border-top:1px solid var(--line);margin-top:20px!important;padding-top:8px!important}
-#forgot-wrap .row{align-items:stretch}
-#forgot-wrap input{min-width:0!important;flex:1}
-#forgot-submit{font-size:12px;padding:10px 13px}
-#reset-card{max-width:560px;margin:24px auto}
-#reset-card h2{font-size:24px}
-@media(max-width:760px){
-  .auth-layout{grid-template-columns:1fr;max-width:500px;min-height:0;margin:8px auto 24px;border-radius:22px}
-  .auth-visual{display:none}
-  .auth-form-panel{padding:28px 24px 24px}
-  .auth-mobile-logo{display:block}
-  .auth-form-head{margin-bottom:22px}
-  .auth-form-head h2{font-size:27px}
-  .auth-terms{margin-top:20px}
-  #forgot-wrap .row{flex-direction:column}
-  #forgot-submit{width:100%}
-}
-@media(max-width:420px){
-  .shell.solo{padding:12px 12px 36px}
-  .auth-form-panel{padding:23px 18px 20px}
-  .auth-form-head h2{font-size:25px}
-}
-@media(prefers-reduced-motion:reduce){.auth-submit span:last-child,.btn{transition:none}}
-
 @media(max-width:860px){
   .shell{flex-direction:column;gap:16px;padding-top:18px}
   .side{width:100%;position:static;padding:10px}
@@ -254,15 +121,496 @@ body{padding-top:72px}
 }
 
 
-/* Keep password-recovery email input identical to standard auth fields */
-.auth-form-panel #forgot-wrap input#forgot-email{
-  height:46px!important;
-  min-height:46px!important;
-  box-sizing:border-box;
-  padding:0 14px;
-  line-height:normal;
-  font-family:inherit;
-  font-size:13.5px;
+/* ===== HORA Account — premium SaaS refresh ===== */
+:root{
+  --bg:#f5f7f8;--panel:#fff;--panel2:#f2f6f6;--line:#e4eaec;--line2:#d6e0e3;
+  --text:#17252b;--muted:#6b7b82;--gold:#078b7d;--gold2:#06796e;--green:#078b7d;
+  --accent-soft:#078b7d12;--accent-softer:#078b7d08;
+  --shadow:0 2px 5px #17252b06,0 12px 32px -20px #17252b20;
+  --shadow-lg:0 18px 50px -24px #17252b30;
+  --header-bg:#f5f7f8ed;--input-bg:#fff;
+  --danger:#c43f46;--ok:#087b59;
+  color-scheme:light;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#101719;--panel:#171f22;--panel2:#1d292c;--line:#2b393d;--line2:#3a4a4f;
+    --text:#edf5f5;--muted:#a2b3b8;--gold:#2ac8b4;--gold2:#48dbc9;--green:#2ac8b4;
+    --accent-soft:#2ac8b41b;--accent-softer:#2ac8b40d;
+    --shadow:0 2px 5px #0002,0 14px 34px -20px #0008;--shadow-lg:0 18px 50px -24px #0009;
+    --header-bg:#101719e8;--input-bg:#121a1d;
+    color-scheme:dark;
+  }
+}
+html{scroll-behavior:smooth}
+body{font-size:14.5px;line-height:1.65;letter-spacing:-.01em}
+body:before{background:radial-gradient(900px 480px at 90% -12%,var(--accent-soft),transparent 67%)}
+.wrap{max-width:1320px}
+header{border-bottom:1px solid var(--line)}
+.nav{height:70px}
+.brand{font-size:17px;letter-spacing:-.045em}
+.brand span,.side-brand span{color:var(--gold)}
+header .nav>a:last-child{padding:9px 14px;border:1px solid var(--line);border-radius:999px;background:var(--panel);transition:all .18s}
+header .nav>a:last-child:hover{border-color:var(--gold);color:var(--gold)}
+.shell{max-width:1320px;gap:28px;padding:32px 24px 72px}
+.side{width:258px;top:94px;border-radius:18px;padding:15px 11px;box-shadow:0 4px 22px #17252b08}
+.side-brand{font-size:14px;letter-spacing:.04em;padding:7px 12px 16px;margin-bottom:12px}
+.side-nav{gap:5px}
+.side-item{position:relative;gap:12px;border-radius:10px;padding:11px 13px;font-size:13.5px;font-weight:600;transition:background .18s,color .18s,transform .18s}
+.side-item svg{width:17px;height:17px}
+.side-item:hover{background:var(--accent-soft);color:var(--gold);transform:translateX(2px)}
+.side-item.active{background:var(--accent-soft);color:var(--gold);box-shadow:inset 3px 0 0 var(--gold);font-weight:750}
+.side-foot{margin-top:18px;padding:15px 10px 4px}
+.side-email{font-size:11.5px;line-height:1.5}
+.content{min-width:0}
+.content>h1{font-size:clamp(28px,3vw,36px);letter-spacing:-.055em;line-height:1.18;margin:4px 0 9px}
+.sub{font-size:14px;margin-bottom:24px;max-width:650px}
+.content-head{margin:0 0 16px;padding:0 2px}
+.content-head h2{font-size:25px;letter-spacing:-.045em}
+.card{border:1px solid var(--line);border-radius:16px;padding:28px;margin-bottom:18px;box-shadow:0 4px 22px #17252b06}
+.view-panel>h2{font-size:20px;margin-bottom:20px;letter-spacing:-.035em}
+.btn{font-size:13.5px;font-weight:700;padding:10px 17px;border-radius:10px;transition:transform .16s,box-shadow .16s,background .16s,border-color .16s}
+.btn:hover{transform:translateY(-1px);box-shadow:0 6px 16px #17252b12}
+.btn.primary{background:var(--gold);box-shadow:0 5px 14px #078b7d22}
+.btn.primary:hover{background:var(--gold2)}
+.btn.small{padding:7px 11px;font-size:12px;border-radius:8px}
+input,select{border-radius:10px;padding:11px 13px;font-size:14px;min-height:44px}
+input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px var(--accent-soft)}
+label{font-size:12px;letter-spacing:.015em;margin:16px 0 7px}
+.msg{border-radius:10px;padding:12px 14px;font-size:13px}
+.tabs{border-radius:11px;padding:4px;gap:3px;background:var(--panel2);margin-bottom:20px}
+.tabs button{border-radius:8px;padding:9px 17px;font-size:13px}
+.tabs button.on{background:var(--panel);color:var(--text);box-shadow:0 1px 4px #17252b14}
+table{font-size:13px}
+th,td{padding:13px 12px}
+th{font-size:10.5px;letter-spacing:.09em}
+tbody tr:hover{background:var(--accent-softer)}
+.view-panel table{display:block;max-width:100%;overflow-x:auto;white-space:nowrap;border-bottom:1px solid var(--line)}
+.view-panel table tbody tr:last-child td{border-bottom:0}
+code{display:inline-block;font-size:11.5px;border:1px solid var(--line);padding:4px 7px;max-width:240px;overflow-wrap:anywhere}
+.plan-grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr));gap:16px}
+.plan{position:relative;border:1px solid var(--line);border-radius:15px;padding:24px;background:var(--panel);box-shadow:0 3px 14px #17252b05}
+.plan h3{font-size:18px;letter-spacing:-.035em}
+.plan p{padding:14px 0 4px;margin:0!important;border-top:1px solid var(--line)}
+.plan p:first-of-type{margin-top:14px!important}
+.price{font-size:23px;letter-spacing:-.05em;white-space:nowrap}
+.plan .btn{width:100%;margin-top:12px!important}
+.pay-panel{border:1px solid #078b7d55;border-radius:16px;padding:24px;background:var(--accent-softer)}
+.pay-panel h3{font-size:18px;letter-spacing:-.03em}
+.pay-panel table{display:table;white-space:normal;border:0}
+.pay-panel table td:first-child{min-width:140px}
+.pay-panel .qr{box-shadow:0 4px 16px #17252b0c}
+#claim-form{padding-top:18px;border-top:1px solid var(--line)}
+#claim-form .row{align-items:stretch}
+#claim-form input{min-width:0}
+#link-result{padding:18px;border:1px solid var(--line);border-radius:12px;background:var(--panel2)}
+#link-code{font-weight:750;color:var(--gold);letter-spacing:.18em!important}
+#link-exp{font-size:12px}
+#logout-btn{width:100%;margin-top:3px}
+.hidden{display:none!important}
+/* Account overview */
+.account-panel{padding:0;overflow:hidden}
+.account-welcome{display:flex;align-items:center;justify-content:center;text-align:center;gap:20px;padding:30px 30px 24px;background:linear-gradient(115deg,var(--accent-soft),transparent 72%)}
+.eyebrow{display:block;font-size:10px;font-weight:800;letter-spacing:.15em;color:var(--gold);margin-bottom:8px}
+.account-welcome h2{font-size:23px;letter-spacing:-.045em;margin:0 0 5px}
+.account-welcome p{font-size:13px;margin:0}
+.account-avatar{display:none}
+.account-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;padding:0 26px 24px}
+.stat-card{display:flex;flex-direction:column;align-items:flex-start;min-width:0;padding:17px;border:1px solid var(--line);border-radius:13px;background:var(--panel)}
+.stat-icon{display:grid;place-items:center;width:30px;height:30px;border-radius:9px;background:var(--accent-soft);color:var(--gold);font-size:17px;font-weight:800;margin-bottom:13px}
+.stat-label{font-size:11.5px;color:var(--muted);font-weight:650}
+.stat-card>strong{font-size:23px;line-height:1.35;letter-spacing:-.05em;margin:4px 0}
+.stat-note{font-size:10.5px;color:var(--muted);line-height:1.5}
+.stat-card-accent{background:var(--panel2)}
+.stat-card-accent>strong{font-size:18px;letter-spacing:-.035em}
+.account-profile{display:flex;align-items:center;gap:13px;padding:20px 28px;border-top:1px solid var(--line);background:var(--panel)}
+.profile-symbol{display:grid;place-items:center;width:38px;height:38px;border-radius:11px;background:var(--panel2);color:var(--gold);font-size:18px}
+.profile-copy{flex:1;min-width:0}
+.profile-label{font-size:11px;color:var(--muted);font-weight:650}
+.profile-copy p{overflow-wrap:anywhere;font-size:13px}
+.profile-pill{border:1px solid var(--line);border-radius:999px;padding:5px 9px;font-size:10px;color:var(--muted);white-space:nowrap}
+#verify-banner{margin:16px 26px 24px}
+#verify-banner .btn{margin:8px 0 0}
+@media(max-width:980px){
+ .shell{gap:18px;padding:24px 18px 52px}
+ .side{width:224px}
+ .card{padding:22px}
+ .account-panel{padding:0}
+ .account-welcome{padding:24px 22px 20px}
+ .account-stats{padding:0 20px 20px;gap:9px}
+ .stat-card{padding:13px}
+ .account-profile{padding:17px 22px}
+}
+@media(max-width:760px){
+ body{padding-top:65px}
+ .nav{height:64px}
+ .shell{padding:18px 14px 42px;gap:15px}
+ .side{width:100%;position:static;border-radius:14px;padding:9px}
+ .side-brand{display:none}
+ .side-nav{flex-direction:row;overflow-x:auto;scrollbar-width:thin;padding:1px 1px 7px;gap:5px}
+ .side-item{flex:0 0 auto;width:auto;white-space:nowrap;padding:10px 12px;font-size:12px}
+ .side-item:hover{transform:none}
+ .side-item.active{box-shadow:inset 0 -2px 0 var(--gold)}
+ .side-item svg{width:15px;height:15px}
+ .side-foot{display:flex;align-items:center;gap:10px;margin-top:6px;padding:10px 5px 2px}
+ .side-email{flex:1;min-width:0;overflow-wrap:anywhere}
+ #logout-btn{width:auto;flex-shrink:0}
+ .content>h1{font-size:28px}
+ .sub{font-size:13px;margin-bottom:19px}
+ .content-head h2{font-size:22px}
+ .card{padding:18px;border-radius:13px}
+ .account-panel{padding:0}
+ .account-welcome{padding:21px 18px 18px}
+ .account-welcome h2{font-size:20px}
+ .account-avatar{width:42px;height:42px;flex-basis:42px;border-radius:13px}
+ .account-stats{grid-template-columns:repeat(2,minmax(0,1fr));padding:0 14px 16px}
+ .stat-card{padding:13px}
+ .stat-card-accent{grid-column:1/-1}
+ .account-profile{padding:15px 18px;align-items:flex-start}
+ .profile-pill{display:none}
+ #verify-banner{margin:12px 14px 16px}
+ .plan-grid{grid-template-columns:1fr}
+ .plan{padding:20px}
+ .view-panel table{font-size:12px}
+ th,td{padding:10px 9px}
+ .row{gap:8px}
+ #claim-form .row{flex-direction:column}
+ #claim-form .row .btn{width:100%}
+ .pay-panel{padding:16px}
+ .pay-panel table{display:block;overflow-x:auto}
+}
+@media(max-width:420px){
+ .wrap{padding:0 14px}
+ header .nav>a:last-child{font-size:12px;padding:7px 10px}
+ .side-item{padding:9px 10px}
+ .side-item svg{display:none}
+ .account-welcome{gap:10px}
+ .account-welcome p{max-width:245px}
+ .stat-note{font-size:10px}
+ .tabs{display:flex;width:100%}
+ .tabs button{flex:1;padding:9px 10px}
+}
+@media(prefers-reduced-motion:reduce){
+ *,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}
+}
+
+
+/* ===== Premium pricing and checkout ===== */
+.purchase-panel{padding:0;overflow:hidden}
+.purchase-hero{position:relative;display:flex;align-items:center;justify-content:space-between;gap:24px;padding:32px 34px 30px;background:linear-gradient(112deg,#082f2c 0%,#0b6258 56%,#0b9787 100%);color:#f2fffc;overflow:hidden}
+.purchase-hero:before,.purchase-hero:after{content:"";position:absolute;border:1px solid #ffffff20;border-radius:50%;pointer-events:none}
+.purchase-hero:before{width:330px;height:330px;right:-72px;top:-205px}
+.purchase-hero:after{width:230px;height:230px;right:18px;bottom:-178px}
+.purchase-hero .eyebrow{color:#9af0e2;letter-spacing:.17em}
+.purchase-hero h2{font-size:clamp(24px,3vw,32px);line-height:1.2;letter-spacing:-.055em;margin:0 0 10px;color:#fff}
+.purchase-hero p{max-width:520px;color:#d1e9e5;font-size:13px;margin:0}
+.purchase-hero-copy{position:relative;z-index:1}
+.purchase-trust{display:flex;flex-wrap:wrap;gap:10px 18px;margin-top:20px;color:#e0f7f2;font-size:11px;font-weight:600}
+.purchase-trust span{display:flex;align-items:center;gap:6px}
+.purchase-trust b{display:inline-grid;place-items:center;width:17px;height:17px;border-radius:50%;background:#ffffff20;color:#b4fff1;font-size:11px}
+.purchase-orbit{position:relative;z-index:1;display:grid;place-items:center;flex:0 0 112px;width:112px;height:112px;border:1px solid #ffffff35;border-radius:32px;background:linear-gradient(145deg,#ffffff22,#ffffff05);box-shadow:inset 0 1px #ffffff20,0 18px 35px #002b271f;transform:rotate(7deg)}
+.purchase-orbit span{font-size:55px;font-weight:850;letter-spacing:-.1em;color:#fff;transform:rotate(-7deg)}
+.purchase-orbit i{position:absolute;right:12px;top:8px;color:#a5fff1;font-style:normal;font-size:19px}
+.plan-section-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;padding:27px 30px 16px}
+.plan-section-head h3,.gateway-heading h3{font-size:17px;letter-spacing:-.035em;margin:0 0 3px}
+.plan-section-head p,.gateway-heading p{font-size:12px;margin:0}
+.billing-note{font-size:10px;font-weight:650;color:var(--muted);border:1px solid var(--line);padding:6px 9px;border-radius:999px;white-space:nowrap}
+.plan-grid{padding:0 30px 30px;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:stretch}
+.plan{display:flex;flex-direction:column;padding:22px;border-radius:16px;box-shadow:0 4px 18px #122b2b06;transition:transform .2s,border-color .2s,box-shadow .2s}
+.plan:hover{transform:translateY(-3px);box-shadow:0 16px 34px -22px #123b382c}
+.plan-topline{display:flex;align-items:center;gap:8px;margin-bottom:15px}
+.plan-mark{display:grid;place-items:center;width:31px;height:31px;border-radius:10px;background:var(--accent-soft);color:var(--gold);font-size:17px}
+.plan-kicker{font-size:10px;letter-spacing:.13em;font-weight:800;color:var(--muted)}
+.plan-recommended{margin-left:auto;border-radius:999px;background:var(--gold);color:#fff;padding:5px 9px;font-size:9px;font-weight:800;letter-spacing:.08em}
+.plan h3{font-size:25px;letter-spacing:-.055em;margin:0 0 4px}
+.plan-description{font-size:12px;color:var(--muted);line-height:1.6;min-height:38px;margin:0 0 12px!important;padding:0!important;border:0!important}
+.plan-benefit{font-size:10.5px;color:var(--gold);font-weight:750;margin:0 0 18px}
+.plan-periods{display:flex;flex-direction:column;gap:9px;margin-top:auto}
+.plan-period{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px;border:1px solid var(--line);border-radius:12px;background:var(--panel)}
+.plan-period-year{background:var(--panel2);border-color:transparent}
+.period-copy{display:flex;flex-direction:column;min-width:0;gap:2px}
+.period-name{font-size:10.5px;color:var(--muted);font-weight:650;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.period-price{font-size:19px;letter-spacing:-.045em;font-weight:800;line-height:1.45;color:var(--text);overflow-wrap:anywhere}
+.period-note{font-size:10px;color:var(--muted)}
+.saving-tag{font-size:9px;color:#087354;background:#dff6eb;border-radius:5px;padding:3px 5px;font-weight:800;white-space:nowrap}
+.plan-buy{flex-shrink:0;white-space:nowrap;padding:9px 11px!important;font-size:11px!important}
+.plan-buy.primary{background:var(--gold);color:#fff}
+.plan-plus{border-color:#078b7d70;box-shadow:0 0 0 1px #078b7d0c,0 10px 30px -22px #078b7d80}
+.plan-plus .plan-mark{background:var(--gold);color:#fff}
+.gateway-section{margin:0 30px 30px;padding:22px;border:1px solid var(--line);border-radius:15px;background:var(--panel2)}
+.gateway-heading{display:flex;align-items:center;gap:12px}
+.gateway-icon{display:grid;place-items:center;flex:0 0 38px;width:38px;height:38px;border-radius:11px;background:var(--panel);border:1px solid var(--line);color:var(--gold);font-size:22px}
+.gateway-section label{margin-top:18px}
+.gateway-section select{background:var(--panel)}
+.gateway-footnote{font-size:11px;color:var(--muted);margin:10px 0 0}
+.gateway-footnote span{color:var(--gold);font-size:9px;margin-right:6px}
+.purchase-panel .pay-panel{margin:0 30px 30px}
+.purchase-panel #notice{margin:18px 30px}
+.plan-buy:disabled{opacity:.6}
+.button-spinner{width:12px;height:12px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;display:inline-block;animation:hora-spin .7s linear infinite;vertical-align:-2px}
+@keyframes hora-spin{to{transform:rotate(360deg)}}
+@media(max-width:760px){
+ .purchase-hero{padding:25px 21px}
+ .purchase-orbit{width:72px;height:72px;flex-basis:72px;border-radius:22px}
+ .purchase-orbit span{font-size:39px}
+ .purchase-trust{gap:8px 12px}
+ .plan-section-head{padding:22px 18px 14px;align-items:flex-start}
+ .plan-grid{grid-template-columns:1fr;padding:0 18px 22px}
+ .plan{padding:19px}
+ .plan-description{min-height:0}
+ .gateway-section{margin:0 18px 22px;padding:17px}
+ .purchase-panel .pay-panel{margin:0 18px 22px}
+ .purchase-panel #notice{margin:16px 18px}
+}
+@media(max-width:430px){
+ .purchase-hero{padding:22px 18px}
+ .purchase-orbit{display:none}
+ .purchase-hero h2{font-size:25px}
+ .purchase-trust{flex-direction:column}
+ .plan-section-head{flex-direction:column;gap:9px}
+ .plan-period{align-items:flex-start;padding:11px;gap:8px}
+ .period-price{font-size:17px}
+ .plan-buy{padding:9px 10px!important}
+}
+@media(prefers-color-scheme:dark){
+ .purchase-hero{background:linear-gradient(112deg,#092d2a 0%,#104b45 56%,#08776c 100%)}
+ .saving-tag{background:#123d31;color:#8de9c1}
+ .plan-plus{border-color:#2ac8b470}
+}
+
+
+/* Pricing refresh — visual language aligned with the HORA product landing page */
+.purchase-panel{border-radius:26px}
+.purchase-hero{padding:38px 38px 35px;min-height:205px}
+.purchase-hero h2{font-size:clamp(28px,3.1vw,38px);max-width:620px}
+.purchase-hero p{font-size:14px;line-height:1.75}
+.purchase-orbit{width:124px;height:124px;flex-basis:124px;border-radius:34px}
+.plan-section-head{padding:32px 34px 18px}
+.plan-section-head h3{font-size:21px;letter-spacing:-.04em}
+.plan-section-head p{font-size:13px;margin-top:4px}
+.billing-note{font-size:11px;padding:7px 11px}
+.plan-grid{padding:0 34px 34px;gap:20px}
+.plan{position:relative;padding:27px;border-radius:22px;border-color:var(--line);background:var(--panel);box-shadow:0 1px 2px #14161a05,0 16px 40px -25px #14161a26}
+.plan:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg)}
+.plan-plus{border-color:var(--gold)!important;box-shadow:0 0 0 1px var(--gold),var(--shadow-lg)!important}
+.plan-plus:before{content:"ĐƯỢC ĐỀ XUẤT";position:absolute;top:-12px;left:24px;padding:5px 11px;border-radius:999px;background:var(--gold);color:#fff;font-size:9px;font-weight:850;letter-spacing:.08em}
+html[data-theme="dark"] .plan-plus:before{color:#04211c}
+.plan-topline{margin-bottom:18px}
+.plan-mark{width:38px;height:38px;border-radius:12px;font-size:19px}
+.plan-kicker{font-size:10px;letter-spacing:.15em}
+.plan h3{font-size:30px;line-height:1.1;margin-bottom:8px}
+.plan-description{font-size:13px;min-height:42px;line-height:1.7}
+.plan-benefit{font-size:11px;margin:2px 0 20px}
+.plan-periods{gap:11px}
+.plan-period{padding:15px 14px;border-radius:14px;gap:10px}
+.plan-period-year{background:var(--accent-softer);border:1px solid var(--line)}
+.period-name{font-size:11px;gap:6px}
+.period-price{font-size:21px;line-height:1.35}
+.period-note{font-size:10.5px;margin-top:2px}
+.saving-tag{font-size:9px;padding:4px 7px;border-radius:999px}
+.plan-buy{padding:10px 14px!important;font-size:12px!important;border-radius:999px!important}
+.plan-buy.primary{box-shadow:0 5px 12px #078b7d1c}
+.plan-plus .plan-mark{background:var(--gold);color:#fff}
+.gateway-section{border-radius:18px;padding:25px;background:var(--panel2)}
+.gateway-heading h3{font-size:18px}
+.gateway-heading p{font-size:12px}
+.gateway-section select{min-height:46px;border-radius:12px}
+.purchase-panel .pay-panel{border-radius:18px}
+@media(max-width:760px){
+ .purchase-hero{padding:27px 23px;min-height:0}
+ .plan-section-head{padding:26px 22px 16px}
+ .plan-grid{padding:0 22px 26px;gap:20px}
+ .plan{padding:23px}
+ .plan-plus:before{left:20px}
+ .gateway-section{padding:20px}
+}
+@media(max-width:430px){
+ .purchase-hero{padding:23px 19px}
+ .purchase-hero h2{font-size:27px}
+ .plan-section-head{padding:23px 18px 14px}
+ .plan-grid{padding:0 18px 22px}
+ .plan{padding:20px}
+ .plan-period{flex-wrap:wrap}
+ .period-copy{width:100%}
+ .plan-buy{width:100%;justify-content:center}
+ .gateway-section{padding:17px}
+}
+
+
+
+/* ===== Viewport fit: dashboard stays within the screen ===== */
+@media (min-width: 761px){
+  html,body{height:100%;}
+  body{height:100vh;height:100dvh;overflow:hidden;padding-top:70px;}
+  .shell{height:calc(100vh - 70px);height:calc(100dvh - 70px);min-height:0;overflow:hidden;gap:22px;padding:16px 20px 18px;align-items:stretch;}
+  .side{top:86px;align-self:flex-start;max-height:100%;overflow:auto;}
+  .content{height:100%;min-height:0;display:flex;flex-direction:column;overflow:hidden;}
+  .content-head{flex:0 0 auto;margin-bottom:12px;}
+  .content>h1,.content>.sub{display:none!important;}
+  #dash{display:flex;flex:1;flex-direction:column;min-height:0;overflow:hidden;}
+  #dash.hidden{display:none!important;}
+  #dash .content-head{display:none;}
+  .view-panel:not(.hidden){display:block;flex:1;min-height:0;overflow:auto;margin:0;padding:22px;overscroll-behavior:contain;}
+  .account-panel:not(.hidden){padding:0;overflow:hidden;display:flex;flex-direction:column;justify-content:center;}
+  .account-welcome,.account-profile{display:none!important;}
+  .account-stats{width:100%;grid-template-columns:repeat(3,minmax(0,1fr));padding:24px;gap:16px;}
+  .stat-card{min-height:176px;padding:22px;justify-content:center;}
+  .stat-icon{width:38px;height:38px;margin-bottom:14px;}
+  .stat-label{font-size:13px;}
+  .stat-card>strong{font-size:30px;margin:7px 0;}
+  .stat-card-accent>strong{font-size:22px;}
+  .stat-note{font-size:12px;}
+  #verify-banner{margin:0 24px 20px;}
+  .purchase-panel:not(.hidden){padding:0;}
+  .purchase-hero{padding:22px 26px;}
+  .purchase-hero h2{font-size:26px;margin-bottom:6px;}
+  .purchase-trust{margin-top:10px;}
+  .purchase-orbit{transform:scale(.82);transform-origin:right center;}
+  .plan-section-head{padding:18px 24px 10px;}
+  .plan-grid{padding:0 24px 18px;gap:14px;}
+  .plan{padding:18px;}
+  .plan p{padding:9px 0 2px;}
+  .plan .btn{margin-top:7px!important;}
+  .gateway-section{padding:15px 24px 20px;}
+  .gateway-section label{margin-top:9px;}
+  .gateway-footnote{margin-bottom:0;}
+  .pay-panel{margin:0 24px 20px;padding:16px;}
+  .pay-panel .qr{max-width:190px;}
+  .view-panel table th,.view-panel table td{padding:9px 10px;}
+}
+@media (max-width: 760px){
+  body{overflow:auto;min-height:100%;}
+  .shell{height:auto;min-height:calc(100vh - 64px);overflow:visible;padding-bottom:24px;}
+  .content{width:100%;overflow:visible;}
+  #dash{min-height:0;}
+  .view-panel:not(.hidden){max-height:none;overflow:visible;}
+  .account-welcome,.account-profile{display:none!important;}
+  .account-panel{padding:0!important;}
+  .account-stats{grid-template-columns:repeat(3,minmax(0,1fr));padding:14px;gap:8px;}
+  .stat-card{padding:12px;}
+  .stat-card>strong{font-size:21px;}
+  .stat-card-accent>strong{font-size:16px;}
+  .stat-note{font-size:10px;}
+}
+@media (max-width: 520px){
+  .account-stats{grid-template-columns:1fr;}
+  .stat-card{min-height:0;display:grid;grid-template-columns:34px 1fr;column-gap:10px;align-items:center;}
+  .stat-icon{grid-row:1 / span 3;margin:0;}
+  .stat-label,.stat-card>strong,.stat-note{grid-column:2;}
+  .stat-card>strong{margin:0;font-size:20px;}
+}
+
+/* Account tab: restore the requested overview and account email, compact enough for one desktop viewport. */
+@media (min-width: 761px){
+  .account-panel:not(.hidden){justify-content:flex-start!important;}
+  .account-welcome{display:flex!important;flex:0 0 auto;padding:18px 24px 14px!important;}
+  .account-welcome h2{font-size:23px;margin:0 0 4px;}
+  .account-welcome p{font-size:12px;line-height:1.45;}
+  .account-welcome .eyebrow{margin-bottom:5px;}
+  .account-avatar{width:42px;height:42px;flex-basis:42px;font-size:19px;}
+  .account-stats{flex:0 0 auto;padding:0 20px 14px!important;gap:12px!important;}
+  .stat-card{min-height:135px!important;padding:16px!important;}
+  .stat-icon{width:32px;height:32px;margin-bottom:8px!important;}
+  .stat-card>strong{font-size:25px!important;margin:3px 0!important;}
+  .stat-card-accent>strong{font-size:19px!important;}
+  .stat-note{font-size:11px!important;}
+  .account-profile{display:flex!important;flex:0 0 auto;padding:12px 24px!important;}
+  .profile-symbol{width:32px;height:32px;}
+  .profile-copy p{font-size:12.5px;}
+  #verify-banner{margin:0 20px 12px!important;}
+}
+@media (max-width: 760px){
+  .account-welcome{display:flex!important;padding:16px 14px 12px!important;}
+  .account-welcome h2{font-size:19px;}
+  .account-welcome p{font-size:12px;}
+  .account-avatar{display:none;}
+  .account-stats{grid-template-columns:repeat(3,minmax(0,1fr))!important;padding:0 10px 12px!important;gap:7px!important;}
+  .stat-card{display:flex!important;min-height:118px!important;padding:10px 8px!important;align-items:flex-start!important;}
+  .stat-icon{width:27px;height:27px;margin-bottom:6px!important;}
+  .stat-label{font-size:10px!important;line-height:1.35;}
+  .stat-card>strong{font-size:18px!important;margin:3px 0!important;}
+  .stat-card-accent>strong{font-size:14px!important;}
+  .stat-note{font-size:9px!important;line-height:1.35;}
+  .account-profile{display:flex!important;padding:12px 14px!important;}
+}
+@media (max-width: 420px){
+  .account-welcome h2{font-size:17px;}
+  .account-stats{grid-template-columns:1fr!important;}
+  .stat-card{min-height:0!important;display:grid!important;grid-template-columns:30px 1fr!important;column-gap:8px;align-items:center!important;}
+  .stat-icon{grid-row:1 / span 3;margin:0!important;}
+  .stat-label,.stat-card>strong,.stat-note{grid-column:2;}
+  .stat-card>strong{font-size:18px!important;}
+}
+
+/* v6: compact account layout; content height follows content, without success banner residue. */
+#notice:empty, #notice.hidden { display:none !important; }
+.content { min-height:0; }
+.content-head { margin-bottom:12px; }
+.account-panel { height:auto !important; min-height:0 !important; gap:0; }
+.account-welcome { min-height:0 !important; }
+.account-stats { align-items:stretch; }
+.stat-card { height:auto !important; }
+.account-profile { min-height:0 !important; }
+@media (min-width:761px) {
+  .content { padding-bottom:20px; }
+  .account-welcome { padding:14px 22px 10px !important; }
+  .account-stats { padding:0 18px 10px !important; gap:10px !important; }
+  .stat-card { min-height:112px !important; padding:13px !important; }
+  .stat-icon { margin-bottom:6px !important; }
+  .stat-card>strong { margin:2px 0 !important; }
+  .account-profile { padding:10px 22px !important; }
+}
+@media (max-width:760px) {
+  .account-panel { padding-bottom:2px; }
+  .account-welcome { padding-bottom:10px !important; }
+  .account-stats { padding-bottom:10px !important; }
+  .account-profile { padding-top:10px !important; padding-bottom:10px !important; }
+}
+
+
+/* v7: let the account card end immediately after the email row; remove stretched blank space below. */
+@media (min-width:761px) {
+  .account-panel:not(.hidden) {
+    flex: 0 0 auto !important;
+    align-self: flex-start;
+    width: 100%;
+  }
+  .account-profile { margin-bottom: 0 !important; }
+  #verify-banner.hidden { display: none !important; }
+}
+
+/* v10: account panel height matches the left sidebar */
+@media (min-width: 761px) {
+  .shell { align-items: stretch; }
+  .side { align-self: stretch; }
+  .content { align-self: stretch; }
+  .account-panel:not(.hidden) {
+    height: 100% !important;
+    min-height: 0 !important;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+}
+
+
+/* Ensure both columns share the same row height */
+@media (min-width: 761px) {
+  .shell { align-items: stretch !important; }
+  #dash { height: 100%; }
+  .view-panel[data-view="account"]:not(.hidden) { width: 100%; }
+}
+
+/* ===== Chieu cao (yeu cau rieng): menu trai co theo noi dung (fit), panel phai cao bang menu ===== */
+.shell{height:auto !important;min-height:0;overflow:visible;align-items:flex-start !important}
+.side{align-self:flex-start !important;height:fit-content;max-height:none;overflow:visible}
+.content{height:auto;overflow:visible;align-self:stretch}
+#dash{position:relative;flex:1;min-height:0}
+.view-panel:not(.hidden){position:absolute;inset:0;overflow:auto}
+@media(max-width:860px){
+  #dash{position:static}
+  .view-panel:not(.hidden){position:static;overflow:visible}
 }
 </style>
 </head>
@@ -272,75 +620,54 @@ body{padding-top:72px}
   <a href="https://hora.works/">← Trang chủ</a>
 </div></header>
 
-<div class="shell solo" id="shell">
-  <aside id="side" class="side hidden">
+<div class="shell" id="shell">
+  <aside id="side" class="side">
     <div class="side-brand">HORA</div>
     <nav class="side-nav" aria-label="Mục tài khoản">
       <button type="button" class="side-item active" data-view-btn="account"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4.5 20.5c1.4-3.8 4.4-5.5 7.5-5.5s6.1 1.7 7.5 5.5"></path></svg> Thông tin tài khoản</button>
-      <button type="button" class="side-item" data-view-btn="licenses"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="15.5" r="4.5"></circle><path d="M11.3 12.2 20 3.5"></path><path d="M16.5 7l3 3"></path></svg> License của tôi</button>
-      <button type="button" class="side-item" data-view-btn="link"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 14a5 5 0 0 0 7.1 0l2.4-2.4a5 5 0 0 0-7-7.1L11 6"></path><path d="M14 10a5 5 0 0 0-7.1 0L4.5 12.4a5 5 0 0 0 7 7.1L13 18"></path></svg> Kết nối ứng dụng</button>
+      
+      
       <button type="button" class="side-item" data-view-btn="buy"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.6-6.3"></path><path d="M21 3v6h-6"></path></svg> Mua / gia hạn</button>
       <button type="button" class="side-item" data-view-btn="orders"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M8.5 6h12M8.5 12h12M8.5 18h12"></path><path d="M4 6h.01M4 12h.01M4 18h.01"></path></svg> Lịch sử giao dịch</button>
     </nav>
     <div class="side-foot">
-      <div class="side-email" id="side-email"></div>
+      <div class="side-email" id="side-email">ffsortgame@gmail.com</div>
       <button class="btn small" id="logout-btn" type="button">Đăng xuất</button>
     </div>
   </aside>
   <main class="content">
-  <div id="notice" class="msg"></div>
+  <h1>Tài khoản của bạn</h1>
+  <p class="sub">Đăng nhập để mua license, xem gói (tier) và lịch sử giao dịch của bạn.</p>
+
+  <div id="notice" class="msg hidden"></div>
 
   <!-- Chua dang nhap -->
-  <section id="auth-card" class="auth-layout">
-    <div class="auth-visual">
-      <a class="auth-logo" href="https://hora.works/">HORA</a>
-      <div class="auth-visual-copy">
-        <span class="eyebrow"><span class="eyebrow-dot"></span> WORKFLOW SÁNG TẠO</span>
-        <h1>Một tài khoản.<br><em>Toàn bộ</em> HORA.</h1>
-        <p>Quản lý license, kết nối ứng dụng và theo dõi giao dịch của bạn — tất cả tại một nơi.</p>
-      </div>
-      <div class="auth-perks">
-        <div class="auth-perk"><span class="perk-icon">✓</span><span><strong>Quản lý tập trung</strong><small>Một tài khoản cho các ứng dụng HORA</small></span></div>
-        <div class="auth-perk"><span class="perk-icon">↗</span><span><strong>Kích hoạt nhanh chóng</strong><small>Kết nối license trong vài bước</small></span></div>
-      </div>
-      <div class="auth-orbit orbit-one"></div><div class="auth-orbit orbit-two"></div>
-      <div class="auth-visual-foot">HORA <span>•</span> CREATE WITHOUT LIMITS</div>
+  <section id="auth-card" class="card hidden">
+    <div class="tabs">
+      <button type="button" id="tab-login" class="on">Đăng nhập</button>
+      <button type="button" id="tab-register">Đăng ký</button>
     </div>
-    <div class="auth-form-panel">
-      <div class="auth-mobile-logo">HORA</div>
-      <div class="auth-form-head">
-        <span class="eyebrow">CHÀO MỪNG BẠN</span>
-        <h2 id="auth-title">Tạo tài khoản</h2>
-        <p id="auth-description">Bắt đầu trải nghiệm hệ sinh thái HORA ngay hôm nay.</p>
-      </div>
-      <div class="tabs" role="tablist" aria-label="Chọn hình thức tài khoản">
-        <button type="button" id="tab-login" role="tab" aria-selected="false">Đăng nhập</button>
-        <button type="button" id="tab-register" class="on" role="tab" aria-selected="true">Đăng ký</button>
-      </div>
     <form id="auth-form">
-      <label for="f-email">Email</label>
-      <input id="f-email" type="email" required="" autocomplete="email" placeholder="ban@example.com">
-      <div class="password-label"><label for="f-password">Mật khẩu</label><span id="password-hint">Ít nhất 8 ký tự</span></div>
-      <div class="password-field"><input id="f-password" type="password" required="" minlength="8" autocomplete="new-password" placeholder="Nhập mật khẩu"></div>
-      <div id="confirm-password-wrap">
-        <label for="f-confirm-password">Xác nhận mật khẩu</label>
-        <div class="password-field"><input id="f-confirm-password" type="password" minlength="8" autocomplete="new-password" placeholder="Nhập lại mật khẩu"></div>
+      <div id="name-wrap" class="hidden">
+        <label for="f-name">Tên hiển thị (không bắt buộc)</label>
+        <input id="f-name" autocomplete="name">
       </div>
-      <div class="auth-actions">
-        <a href="https://hora.works/account?mode=register#" id="forgot-link" style="display: none;">Quên mật khẩu?</a>
-        <button class="btn primary auth-submit" type="submit" id="auth-submit"><span>Đăng ký</span><span aria-hidden="true">→</span></button>
+      <label for="f-email">Email</label>
+      <input id="f-email" type="email" required="" autocomplete="email">
+      <label for="f-password">Mật khẩu (ít nhất 8 ký tự)</label>
+      <input id="f-password" type="password" required="" minlength="8" autocomplete="current-password">
+      <div class="row" style="margin-top:16px">
+        <button class="btn primary" type="submit" id="auth-submit">Đăng nhập</button>
+        <a href="https://hora.works/account#" id="forgot-link">Quên mật khẩu?</a>
       </div>
     </form>
     <div id="forgot-wrap" class="hidden" style="margin-top:14px;border-top:1px solid var(--line);padding-top:6px">
-      <button type="button" id="forgot-back" class="forgot-back">← Quay lại đăng nhập</button>
       <label for="forgot-email">Email của tài khoản cần đặt lại mật khẩu</label>
       <div class="row">
         <input id="forgot-email" type="email" style="flex:1;min-width:240px" autocomplete="email">
         <button class="btn" type="button" id="forgot-submit">Gửi link đặt lại mật khẩu</button>
       </div>
       <p class="muted" style="margin:6px 0 0">Hệ thống sẽ gửi link đặt lại mật khẩu vào email (nếu email có trong hệ thống). Link có hiệu lực 1 giờ.</p>
-    </div>
-      <p class="auth-terms">Bằng việc tiếp tục, bạn đồng ý với các điều khoản sử dụng và chính sách bảo mật của HORA.</p>
     </div>
   </section>
 
@@ -357,62 +684,83 @@ body{padding-top:72px}
   </section>
 
   <!-- Da dang nhap -->
-  <div id="dash" class="hidden">
+  <div id="dash" class="">
     <div class="content-head"><h2 id="view-title">Thông tin tài khoản</h2></div>
-    <section class="card view-panel" data-view="account">
-      <h2>Thông tin tài khoản</h2>
-      <p style="margin:0">Email: <strong id="acc-email"></strong><span id="acc-name" class="muted"></span></p>
-      <div id="verify-banner" class="msg info hidden" style="display:none">
+    <section class="card view-panel account-panel" data-view="account">
+      <div class="account-welcome">
+        <div>
+          <span class="eyebrow">ACCOUNT OVERVIEW</span>
+          <h2>Tài khoản của bạn<span id="acc-name"></span></h2>
+          <p class="muted">Đăng nhập để mua license, xem gói (tier) và lịch sử giao dịch của bạn.</p>
+        </div>
+      </div>
+      <div class="account-stats" aria-label="Tổng quan tài khoản">
+        <div class="stat-card">
+          <span class="stat-icon">⌘</span>
+          <span class="stat-label">License của tôi</span>
+          <strong id="account-license-count">—</strong>
+          <span class="stat-note">License đã gắn với tài khoản</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-icon">↗</span>
+          <span class="stat-label">Giao dịch</span>
+          <strong id="account-order-count">—</strong>
+          <span class="stat-note">Đơn hàng trong lịch sử</span>
+        </div>
+        <div class="stat-card stat-card-accent">
+          <span class="stat-icon">✳</span>
+          <span class="stat-label">Hệ sinh thái HORA</span>
+          <strong>2 ứng dụng</strong>
+          <span class="stat-note">Video Builder &amp; Facebook Builder</span>
+        </div>
+      </div>
+      <div class="account-profile">
+        <div class="profile-symbol" aria-hidden="true">✉</div>
+        <div class="profile-copy">
+          <div class="profile-label">Email tài khoản</div>
+          <p id="acc-email" style="margin:3px 0 0;font-weight:650">—</p>
+        </div>
+      </div>
+      <div id="verify-banner" class="msg info hidden" style="display: block;">
         <span>Email của bạn chưa được xác thực.</span>
         <button class="btn small" type="button" id="resend-verify-btn" style="margin-left:8px">Gửi lại email xác thực</button>
       </div>
     </section>
 
-    <section class="card view-panel" data-view="licenses">
-      <h2>License của tôi</h2>
-      <table>
-        <thead><tr><th>Sản phẩm</th><th>Gói (tier)</th><th>Hạn dùng</th><th>Nguồn</th><th>License key</th></tr></thead>
-        <tbody id="lic-body"><tr><td colspan="5" class="muted">Đang tải…</td></tr></tbody>
-      </table>
-      <form id="claim-form" style="margin-top:16px">
-        <label for="claim-key">Nhận license đã có — dán license key bạn đã được cấp:</label>
-        <div class="row">
-          <input id="claim-key" style="flex:1;min-width:260px" placeholder="HORA_0123ABCD…" autocomplete="off">
-          <button class="btn" type="submit">Nhận license</button>
-        </div>
-        <p class="muted" style="margin:6px 0 0">Dán key để gắn license vào tài khoản, sau đó mở ứng dụng và bấm “Kết nối tài khoản”.</p>
-      </form>
-    </section>
+    
 
-    <section class="card view-panel" data-view="link">
-      <h2>Kết nối ứng dụng</h2>
-      <p class="muted" style="margin:0 0 12px">Mở ứng dụng HORA trên máy, chọn <strong>Kết nối tài khoản</strong>, rồi tạo mã dưới đây và dán vào ứng dụng. Một tài khoản dùng cho mọi ứng dụng HORA.</p>
-      <div class="row">
-        <select id="link-app" style="max-width:240px">
-          <option value="video-builder" selected="">HORA Video Builder</option>
-          <option value="facebook-builder">HORA Facebook Builder</option>
-        </select>
-        <button class="btn" type="button" id="link-create-btn">Tạo mã kết nối</button>
-      </div>
-      <div id="link-result" class="hidden" style="margin-top:14px">
-        <div style="font-family:ui-monospace,monospace;font-size:24px;letter-spacing:2px;background:var(--panel2);border:1px dashed var(--line);border-radius:10px;padding:16px;text-align:center;user-select:all" id="link-code"></div>
-        <div class="row" style="margin-top:10px">
-          <button class="btn small" type="button" id="link-copy-btn">Copy mã</button>
-          <button class="btn small" type="button" id="link-open-btn">Mở trang kết nối</button>
-        </div>
-        <p class="muted" style="margin:8px 0 0" id="link-exp"></p>
-      </div>
-    </section>
+    
 
-    <section class="card view-panel" data-view="buy">
-      <h2>Mua / gia hạn</h2>
-      <div class="plan-grid" id="plan-grid"></div>
-      <label for="gateway">Cổng thanh toán</label>
-      <select id="gateway" style="max-width:340px">
-        <option value="sepay" selected="">SePay — chuyển khoản ngân hàng (tự xác nhận)</option>
-        <option value="momo">MoMo</option>
-        <option value="vnpay">VNPay</option>
-      </select>
+    <section class="card view-panel hidden purchase-panel" data-view="buy">
+      <div class="purchase-hero">
+        <div class="purchase-hero-copy">
+          <span class="eyebrow">HORA MEMBERSHIP</span>
+          <h2>Chọn gói phù hợp với bạn</h2>
+          <p class="muted">Mở khóa công cụ HORA và quản lý license của bạn trong cùng một tài khoản.</p>
+          <div class="purchase-trust">
+            <span><b aria-hidden="true">✓</b> Thanh toán bảo mật</span>
+            <span><b aria-hidden="true">✓</b> Quản lý license tập trung</span>
+          </div>
+        </div>
+      </div>
+      <div class="plan-section-head">
+        <div><h3>Các gói thành viên</h3><p class="muted">Chọn thời hạn thanh toán phù hợp.</p></div>
+        <span class="billing-note">Giá hiển thị bằng VNĐ</span>
+      </div>
+      <div class="plan-grid" id="plan-grid">
+    <div class="plan">
+      <h3>Go</h3>
+      <p style="margin:8px 0">1 tháng: <span class="price">250.000đ</span><br>
+        <button class="btn primary" type="button" style="margin-top:6px" data-buy="go:month">Mua ngay</button></p><p style="margin:8px 0">1 năm: <span class="price">2.500.000đ</span><br>
+        <button class="btn primary" type="button" style="margin-top:6px" data-buy="go:year">Mua ngay</button></p>
+    </div>
+    <div class="plan">
+      <h3>Plus</h3>
+      <p style="margin:8px 0">1 tháng: <span class="price">400.000đ</span><br>
+        <button class="btn primary" type="button" style="margin-top:6px" data-buy="plus:month">Mua ngay</button></p><p style="margin:8px 0">1 năm: <span class="price">4.000.000đ</span><br>
+        <button class="btn primary" type="button" style="margin-top:6px" data-buy="plus:year">Mua ngay</button></p>
+    </div></div>
+      
 
       <!-- Huong dan chuyen khoan SePay — chi hien sau khi tao don SePay -->
       <div id="sepay-panel" class="pay-panel hidden">
@@ -430,12 +778,20 @@ body{padding-top:72px}
       </div>
     </section>
 
-    <section class="card view-panel" data-view="orders">
+    <section class="card view-panel hidden" data-view="orders">
       <h2>Lịch sử giao dịch</h2>
       <table>
-        <thead><tr><th>Mã đơn</th><th>Gói</th><th>Số tiền</th><th>Cổng</th><th>Trạng thái</th><th>Ngày tạo</th></tr></thead>
-        <tbody id="ord-body"><tr><td colspan="6" class="muted">Đang tải…</td></tr></tbody>
+        <thead><tr><th>Mã đơn</th><th>Gói</th><th>Số tiền</th><th>Trạng thái</th><th>License</th><th>Hạn dùng</th></tr></thead>
+        <tbody id="ord-body"><tr><td colspan="6" class="muted">Chưa có giao dịch nào.</td></tr></tbody>
       </table>
+<form id="claim-form" style="margin-top:16px">
+        <label for="claim-key">Nhận license đã có — dán license key bạn đã được cấp:</label>
+        <div class="row">
+          <input id="claim-key" style="flex:1;min-width:260px" placeholder="HORA_0123ABCD…" autocomplete="off">
+          <button class="btn" type="submit">Nhận license</button>
+        </div>
+        <p class="muted" style="margin:6px 0 0">Dán key để gắn license vào tài khoản — license sẽ hiện ngay trong bảng lịch sử phía trên.</p>
+      </form>
     </section>
   </div>
 </main>
@@ -478,7 +834,7 @@ async function api(path, opts = {}) {
   return { res, data };
 }
 // ----- Dieu huong app shell (sidebar) -----
-const VIEW_TITLES = { account: "Thông tin tài khoản", licenses: "License của tôi", link: "Kết nối ứng dụng", buy: "Mua / gia hạn", orders: "Lịch sử giao dịch" };
+const VIEW_TITLES = { account: "Thông tin tài khoản", buy: "Mua / gia hạn", orders: "Lịch sử giao dịch" };
 let currentView = "account";
 try { currentView = sessionStorage.getItem("hora-view") || "account"; } catch { /* sessionStorage bi chan */ }
 if (!VIEW_TITLES[currentView]) currentView = "account";
@@ -503,87 +859,38 @@ function setMode(m) {
   mode = m;
   $("tab-login").classList.toggle("on", m === "login");
   $("tab-register").classList.toggle("on", m === "register");
-  $("confirm-password-wrap").classList.toggle("hidden", m === "login");
-  $("f-confirm-password").required = m === "register";
-  if (m === "login") {
-    $("f-confirm-password").value = "";
-  }
-  $("auth-submit").innerHTML = `<span>${m === "login" ? "Đăng nhập" : "Tạo tài khoản"}</span><span aria-hidden="true">→</span>`;
-  $("auth-title").textContent = m === "login" ? "Chào mừng trở lại" : "Tạo tài khoản";
-  $("auth-description").textContent = m === "login" ? "Đăng nhập để tiếp tục với không gian HORA của bạn." : "Bắt đầu trải nghiệm hệ sinh thái HORA ngay hôm nay.";
-  $("password-hint").textContent = m === "login" ? "Mật khẩu của bạn" : "Ít nhất 8 ký tự";
-  $("tab-login").setAttribute("aria-selected", String(m === "login"));
-  $("tab-register").setAttribute("aria-selected", String(m === "register"));
+  $("name-wrap").classList.toggle("hidden", m === "login");
+  $("auth-submit").textContent = m === "login" ? "Đăng nhập" : "Đăng ký";
   $("f-password").autocomplete = m === "login" ? "current-password" : "new-password";
   $("forgot-link").style.display = m === "login" ? "" : "none";
   if (m !== "login") $("forgot-wrap").classList.add("hidden");
 }
-$("tab-login").addEventListener("click", () => { $("auth-card").classList.remove("forgot-mode"); $("forgot-wrap").classList.add("hidden"); setMode("login"); });
-$("tab-register").addEventListener("click", () => { $("auth-card").classList.remove("forgot-mode"); $("forgot-wrap").classList.add("hidden"); setMode("register"); });
-function checkPasswordMatch() {
-  const confirm = $("f-confirm-password");
-  if (mode !== "register" || !confirm.value) {
-    hint.textContent = "";
-    hint.className = "password-match-hint";
-    confirm.setCustomValidity("");
-    return true;
-  }
-  const match = $("f-password").value === confirm.value;
-  confirm.setCustomValidity(match ? "" : "Mật khẩu xác nhận không khớp.");
-  return match;
-}
-$("f-password").addEventListener("input", checkPasswordMatch);
-$("f-confirm-password").addEventListener("input", checkPasswordMatch);
+$("tab-login").addEventListener("click", () => setMode("login"));
+$("tab-register").addEventListener("click", () => setMode("register"));
 
 $("auth-form").addEventListener("submit", async (e) => {
   e.preventDefault();
-  if (mode === "register" && !checkPasswordMatch()) {
-    $("f-confirm-password").reportValidity();
-    return;
-  }
   const payload = { email: $("f-email").value.trim(), password: $("f-password").value };
-  const submit = $("auth-submit");
-  const originalLabel = mode === "login" ? "Đăng nhập" : "Tạo tài khoản";
-  submit.disabled = true;
-  submit.innerHTML = '<span>Đang xử lý…</span><span aria-hidden="true">…</span>';
-  try {
+  if (mode === "register") payload.displayName = $("f-name").value.trim();
   const { res, data } = await api("/api/auth/" + mode, { method: "POST", body: JSON.stringify(payload) });
   if (!res.ok) { showMsg("err", errText(data, "Không thực hiện được, thử lại sau.")); return; }
   if (mode === "login") {
-    showMsg("ok", "Đăng nhập thành công.");
+    $("notice").classList.add("hidden");
+    $("notice").textContent = "";
   } else if (data && data.mailConfigured === false) {
     showMsg("info", "Đăng ký thành công. Hệ thống gửi email chưa được cấu hình — tính năng xác thực email sẽ hoạt động khi quản trị viên kết nối dịch vụ gửi mail.");
   } else {
     showMsg("ok", "Đăng ký thành công. Đã gửi email xác thực, hãy kiểm tra hộp thư.");
   }
   await loadDash();
-  } catch {
-    showMsg("err", "Không thể kết nối máy chủ. Vui lòng kiểm tra mạng và thử lại.");
-  } finally {
-    submit.disabled = false;
-    submit.innerHTML = `<span>${originalLabel}</span><span aria-hidden="true">→</span>`;
-  }
 });
 
 // ----- Quen mat khau -----
-function showForgotMode() {
-  $("auth-card").classList.add("forgot-mode");
-  $("auth-title").textContent = "Quên mật khẩu?";
-  $("auth-description").textContent = "Nhập email tài khoản, HORA sẽ gửi cho bạn liên kết đặt lại mật khẩu.";
-  $("forgot-wrap").classList.remove("hidden");
-  if (!$("forgot-email").value) $("forgot-email").value = $("f-email").value.trim();
-  $("forgot-email").focus();
-}
-function hideForgotMode() {
-  $("auth-card").classList.remove("forgot-mode");
-  $("forgot-wrap").classList.add("hidden");
-  setMode("login");
-}
 $("forgot-link").addEventListener("click", (e) => {
   e.preventDefault();
-  showForgotMode();
+  $("forgot-wrap").classList.toggle("hidden");
+  if (!$("forgot-email").value) $("forgot-email").value = $("f-email").value.trim();
 });
-$("forgot-back").addEventListener("click", hideForgotMode);
 $("forgot-submit").addEventListener("click", async () => {
   const email = $("forgot-email").value.trim();
   if (!email) { showMsg("err", "Hãy nhập email của bạn."); return; }
@@ -618,38 +925,76 @@ async function loadDash() {
   await Promise.all([loadLicenses(), loadOrders()]);
 }
 
-async function loadLicenses() {
-  const { data } = await api("/api/licenses");
-  const rows = (data && data.licenses) || [];
-  $("lic-body").innerHTML = rows.length ? rows.map((l) => `
-    <tr>
-      <td>${esc(APP_VI[l.app] || l.app || "—")}</td>
-      <td>${esc(l.tier || "—")}${l.deviceBound ? ' <span class="muted" title="Đã gắn 1 thiết bị">· 1 máy</span>' : ""}</td>
-      <td>${l.expiresAt ? esc(fmtDate(l.expiresAt)) : "Chưa kích hoạt"}</td>
-      <td>${l.source === "purchase" ? "Mua trên web" : l.source === "claim" ? "Nhận key có sẵn" : "Cấp tay"}</td>
-      <td>${l.licenseKey ? `<code>${esc(l.licenseKey)}</code> <button class="btn small" type="button" data-copy="${esc(l.licenseKey)}">Copy</button>` : '<span class="muted">—</span>'}</td>
-    </tr>`).join("")
-    : '<tr><td colspan="5" class="muted">Chưa có license nào.</td></tr>';
+let ORDERS_CACHE = [];
+let LICENSES_CACHE = [];
+
+function tierName(t) { return t ? t.charAt(0).toUpperCase() + t.slice(1) : ""; }
+function licenseCell(l) {
+  if (!l || !l.licenseKey) return '<span class="muted">—</span>';
+  return `<code>${esc(l.licenseKey)}</code> <button class="btn small" type="button" data-copy="${esc(l.licenseKey)}">Copy</button>`;
+}
+function expiryCell(l) {
+  if (!l) return '<span class="muted">—</span>';
+  if (l.status === "revoked") return "Đã bị thu hồi";
+  if (!l.expiresAt) return "Chưa kích hoạt";
+  const days = Math.ceil((new Date(l.expiresAt).getTime() - Date.now()) / 86400000);
+  if (days < 0) return `Đã hết hạn (${esc(fmtDate(l.expiresAt))})`;
+  return `${esc(fmtDate(l.expiresAt))} · còn ${days} ngày`;
+}
+// Lich su giao dich = noi xem license luon: don mua gan license cua don do;
+// license nhan bang key (khong co don) hien thanh dong rieng trong cung bang.
+function renderHistory() {
+  const body = $("ord-body");
+  if (!body) return;
+  const byId = new Map(), byOrder = new Map();
+  for (const l of LICENSES_CACHE) { byId.set(l.id, l); if (l.orderId) byOrder.set(l.orderId, l); }
+  const used = new Set();
+  const html = [];
+  for (const o of ORDERS_CACHE) {
+    const l = (o.licenseId && byId.get(o.licenseId)) || byOrder.get(o.id) || null;
+    if (l) used.add(l.id);
+    html.push(`<tr>
+      <td><code>${esc(o.id)}</code></td>
+      <td>${esc((PLANS[o.plan] || {}).name || o.plan)} — ${esc(PERIODS[o.period] || o.period)}${l && l.tier ? ` · tier ${esc(tierName(l.tier))}` : ""}</td>
+      <td>${esc(fmtVnd(o.amountVnd))}</td>
+      <td>${esc(STATUS_VI[o.status] || o.status)}</td>
+      <td>${licenseCell(l)}</td>
+      <td>${expiryCell(l)}</td>
+    </tr>`);
+  }
+  for (const l of LICENSES_CACHE) {
+    if (used.has(l.id)) continue;
+    html.push(`<tr>
+      <td><span class="muted">License đã nhận</span></td>
+      <td>${l.tier ? "Gói " + esc(tierName(l.tier)) : "—"}${l.deviceBound ? ' <span class="muted">· 1 máy</span>' : ""}</td>
+      <td><span class="muted">—</span></td>
+      <td>${l.source === "claim" ? "Nhận key có sẵn" : "Được cấp"}</td>
+      <td>${licenseCell(l)}</td>
+      <td>${expiryCell(l)}</td>
+    </tr>`);
+  }
+  body.innerHTML = html.length ? html.join("") : '<tr><td colspan="6" class="muted">Chưa có giao dịch nào.</td></tr>';
   document.querySelectorAll("[data-copy]").forEach((b) => b.addEventListener("click", async () => {
     try { await navigator.clipboard.writeText(b.dataset.copy); b.textContent = "Đã copy"; } catch { /* clipboard bi chan */ }
   }));
 }
 
+async function loadLicenses() {
+  const { data } = await api("/api/licenses");
+  LICENSES_CACHE = (data && data.licenses) || [];
+  const licenseCount = $("account-license-count");
+  if (licenseCount) licenseCount.textContent = String(LICENSES_CACHE.length).padStart(2, "0");
+  renderHistory();
+}
+
 const GATEWAY_VI = { sepay: "SePay", momo: "MoMo", vnpay: "VNPay" };
 async function loadOrders() {
   const { data } = await api("/api/orders");
-  const rows = (data && data.orders) || [];
-  $("ord-body").innerHTML = rows.length ? rows.map((o) => `
-    <tr>
-      <td><code>${esc(o.id)}</code></td>
-      <td>${esc((PLANS[o.plan] || {}).name || o.plan)} — ${esc(PERIODS[o.period] || o.period)}</td>
-      <td>${esc(fmtVnd(o.amountVnd))}</td>
-      <td>${esc(GATEWAY_VI[o.gateway] || o.gateway || "—")}</td>
-      <td>${esc(STATUS_VI[o.status] || o.status)}</td>
-      <td>${esc(fmtDate(o.createdAt))}</td>
-    </tr>`).join("")
-    : '<tr><td colspan="6" class="muted">Chưa có giao dịch nào.</td></tr>';
-  return rows;
+  ORDERS_CACHE = (data && data.orders) || [];
+  const orderCount = $("account-order-count");
+  if (orderCount) orderCount.textContent = String(ORDERS_CACHE.length).padStart(2, "0");
+  renderHistory();
+  return ORDERS_CACHE;
 }
 
 // Chon san goi/ky tu link trang chu: /account.html?plan=go|plus&period=month|year
@@ -668,22 +1013,57 @@ function applyPreselect() {
 }
 
 function renderPlans() {
-  $("plan-grid").innerHTML = Object.entries(PLANS).map(([key, p]) => `
-    <div class="plan">
-      <h3>${esc(p.name)}</h3>
-      ${["month", "year"].map((per) => {
-        const price = p[per];
-        return `<p style="margin:8px 0">${PERIODS[per]}: <span class="price">${price ? fmtVnd(price) : "Sắp mở bán"}</span><br>
-        <button class="btn primary" type="button" style="margin-top:6px" data-buy="${key}:${per}" ${price ? "" : "disabled"}>${price ? "Mua ngay" : "Sắp mở bán"}</button></p>`;
-      }).join("")}
-    </div>`).join("");
+  $("plan-grid").innerHTML = Object.entries(PLANS).map(([key, p], index) => {
+    const isPlus = key === "plus";
+    const planLabel = isPlus ? "Dành cho creator phát triển" : "Bắt đầu đơn giản";
+    const planDescription = isPlus
+      ? "Mở rộng quy trình làm nội dung với bộ công cụ HORA."
+      : "Đủ gọn để bắt đầu làm việc với HORA.";
+    const monthly = p.month;
+    const yearly = p.year;
+    const saving = monthly && yearly ? Math.max(0, Math.round((monthly * 12 - yearly) / (monthly * 12) * 100)) : 0;
+    return `
+      <article class="plan plan-${esc(key)} ${isPlus ? "plan-featured" : ""}">
+        <div class="plan-topline">
+          <span class="plan-mark">${isPlus ? "✦" : "◈"}</span>
+          <span class="plan-kicker">${isPlus ? "HORA PLUS" : "HORA GO"}</span>
+          ${isPlus ? '<span class="plan-recommended">PLUS</span>' : ""}
+        </div>
+        <h3>${esc(p.name)}</h3>
+        <p class="plan-description">${planDescription}</p>
+        <div class="plan-benefit">${isPlus ? "Dành cho nhu cầu sử dụng nâng cao" : "Lựa chọn linh hoạt để bắt đầu"}</div>
+        <div class="plan-periods">
+          <div class="plan-period">
+            <div class="period-copy">
+              <span class="period-name">Thanh toán hàng tháng</span>
+              <span class="period-price">${monthly ? fmtVnd(monthly) : "Sắp mở bán"}</span>
+              <span class="period-note">Gia hạn mỗi tháng</span>
+            </div>
+            <button class="btn ${monthly ? "primary" : ""} plan-buy" type="button" data-buy="${key}:month" ${monthly ? "" : "disabled"} aria-label="Mua gói ${esc(p.name)} theo tháng">${monthly ? "Chọn gói" : "Sắp mở bán"} <span aria-hidden="true">↗</span></button>
+          </div>
+          <div class="plan-period plan-period-year">
+            <div class="period-copy">
+              <span class="period-name">Thanh toán hàng năm ${saving ? `<span class="saving-tag">Tiết kiệm ${saving}%</span>` : ""}</span>
+              <span class="period-price">${yearly ? fmtVnd(yearly) : "Sắp mở bán"}</span>
+              <span class="period-note">${yearly && monthly ? `Tương đương ${fmtVnd(Math.round(yearly / 12))}/tháng` : "Thanh toán theo năm"}</span>
+            </div>
+            <button class="btn ${yearly ? "primary" : ""} plan-buy" type="button" data-buy="${key}:year" ${yearly ? "" : "disabled"} aria-label="Mua gói ${esc(p.name)} theo năm">${yearly ? "Chọn gói" : "Sắp mở bán"} <span aria-hidden="true">↗</span></button>
+          </div>
+        </div>
+      </article>`;
+  }).join("");
   document.querySelectorAll("[data-buy]").forEach((b) => b.addEventListener("click", async () => {
     const [plan, period] = b.dataset.buy.split(":");
-    const gateway = $("gateway").value;
+    const gateway = "sepay"; // Chi con SePay — da go bo chon cong thanh toan.
     b.disabled = true;
+    b.classList.add("is-loading");
+    const originalText = b.innerHTML;
+    b.innerHTML = '<span class="button-spinner" aria-hidden="true"></span> Đang tạo đơn…';
     const { res, data } = await api("/api/orders", { method: "POST", body: JSON.stringify({ plan, period, gateway }) });
     if (res.ok && data.paymentUrl) { window.location.href = data.paymentUrl; return; }
     b.disabled = false;
+    b.classList.remove("is-loading");
+    b.innerHTML = originalText;
     if (res.ok && data.payment_instructions) {
       showSepayPanel(data.payment_instructions);
       showMsg("ok", "Đã tạo đơn. Chuyển khoản theo hướng dẫn bên dưới — đúng số tiền và đúng nội dung, hệ thống sẽ tự xác nhận.");
@@ -748,23 +1128,6 @@ $("claim-form").addEventListener("submit", async (e) => {
   await loadLicenses();
 });
 
-// ----- Ket noi ung dung -----
-let _linkUrl = "";
-$("link-create-btn").addEventListener("click", async () => {
-  const app = $("link-app").value;
-  const { res, data } = await api("/api/identity/link-create", { method: "POST", body: JSON.stringify({ app }) });
-  if (!res.ok) { showMsg("err", errText(data, "Không tạo được mã kết nối.")); return; }
-  _linkUrl = data.linkUrl;
-  $("link-code").textContent = data.code;
-  $("link-exp").textContent = "Mã hết hạn lúc " + fmtDate(data.expiresAt) + " và chỉ dùng được một lần.";
-  $("link-result").classList.remove("hidden");
-});
-$("link-copy-btn").addEventListener("click", async () => {
-  try { await navigator.clipboard.writeText($("link-code").textContent); $("link-copy-btn").textContent = "Đã copy"; }
-  catch { /* clipboard bi chan */ }
-});
-$("link-open-btn").addEventListener("click", () => { if (_linkUrl) window.open(_linkUrl, "_blank", "noopener"); });
-
 $("logout-btn").addEventListener("click", async () => {
   await api("/api/auth/logout", { method: "POST", body: "{}" });
   location.reload();
@@ -792,7 +1155,7 @@ $("resend-verify-btn").addEventListener("click", async () => {
 let resetToken = null;
 {
   const qs = new URLSearchParams(location.search);
-  setMode(qs.get("mode") === "register" ? "register" : "login");
+  if (qs.get("mode") === "register") setMode("register");
   const verifyParam = qs.get("verify");
   const resetParam = qs.get("reset");
   if (verifyParam || resetParam) {
@@ -811,6 +1174,7 @@ let resetToken = null;
   if (resetParam) {
     resetToken = resetParam;
     $("reset-card").classList.remove("hidden");
+    $("reset-card").scrollIntoView({ behavior: "smooth", block: "center" });
   }
 }
 $("reset-form").addEventListener("submit", async (e) => {
@@ -833,7 +1197,7 @@ else if (payParam === "pending") showMsg("info", "Đang chờ cổng thanh toán
 
 loadDash();
 </script>
-<script type="module" src="./Tài khoản — HORA_files/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon="{&quot;version&quot;:&quot;2024.11.0&quot;,&quot;token&quot;:&quot;b0e20c7e34864117982785ed2cc48b14&quot;,&quot;r&quot;:1,&quot;spa&quot;:2}" crossorigin="anonymous"></script>
+<script type="module" src="./Tài khoản — HORA Media_files/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon="{&quot;version&quot;:&quot;2024.11.0&quot;,&quot;token&quot;:&quot;b0e20c7e34864117982785ed2cc48b14&quot;,&quot;r&quot;:1,&quot;spa&quot;:2}" crossorigin="anonymous"></script>
 
 
 </body></html>
