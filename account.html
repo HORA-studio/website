@@ -654,6 +654,12 @@ html[data-theme="dark"] .plan-plus:before{color:#04211c}
 .lic-chip{font-size:12px;font-weight:700;background:var(--accent-soft);color:var(--gold);border-radius:999px;padding:4px 10px;white-space:nowrap}
 .lic-meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px 18px;font-size:13px}
 .lic-meta-label{display:block;font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
+.account-profile{display:block !important;margin:0 18px 18px;border:1px solid var(--line);border-radius:14px;background:var(--panel);padding:16px 18px}
+.profile-head{font-size:13px;font-weight:800;margin-bottom:8px}
+.pi-row{display:flex;align-items:center;gap:14px;padding:7px 0;font-size:13.5px}
+.pi-row + .pi-row{border-top:1px dashed var(--line)}
+.pi-label{flex:0 0 70px;color:var(--muted);font-weight:650}
+.pi-value{font-weight:650;word-break:break-all}
 .account-stats{padding:18px !important}
 .stat-card{background:var(--panel2)}
 .stat-card>strong{font-size:19px !important;letter-spacing:-.035em}
@@ -771,11 +777,9 @@ html[data-theme="dark"] .plan-plus:before{color:#04211c}
         </div>
       </div>
       <div class="account-profile">
-        <div class="profile-symbol" aria-hidden="true">✉</div>
-        <div class="profile-copy">
-          <div class="profile-label">Email tài khoản</div>
-          <p id="acc-email" style="margin:3px 0 0;font-weight:650">—</p>
-        </div>
+        <div class="profile-head">Thông tin cá nhân</div>
+        <div class="pi-row"><span class="pi-label">Email</span><span class="pi-value" id="acc-email">—</span></div>
+        <div class="pi-row"><span class="pi-label">Phone</span><span class="pi-value muted" id="acc-phone">Chưa cập nhật</span></div>
       </div>
       <div id="verify-banner" class="msg info hidden" style="display: block;">
         <span>Email của bạn chưa được xác thực.</span>
