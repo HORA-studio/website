@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tài khoản — HORA Media</title>
+<link rel="icon" href="/favicon.ico">
+<style>
+:root{--bg:#0b1417;--panel:#122024;--panel2:#17282d;--line:#244046;--text:#e9f2f3;--muted:#93a8ad;--gold:#e2b33c;--gold2:#f2cd63;--danger:#ff7a72;--ok:#43d68a}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:960px;margin:0 auto;padding:0 20px}
+header{border-bottom:1px solid var(--line)}
+.nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+.brand{color:var(--text);text-decoration:none;font-weight:800;letter-spacing:.4px}
+.brand span{color:var(--gold)}
+a{color:var(--gold2)}
+main{padding:28px 0 60px}
+h1{font-size:26px;margin:6px 0 4px}
+h2{font-size:19px;margin:0 0 12px}
+.sub{color:var(--muted);margin:0 0 20px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px;margin:0 0 18px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+label{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px}
+input,select{width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:9px;color:var(--text);padding:10px 12px;font-size:15px}
+.btn{background:transparent;border:1px solid var(--gold);color:var(--gold2);border-radius:9px;padding:9px 16px;font-weight:600;cursor:pointer}
+.btn.primary{background:var(--gold);color:#1d1603}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.small{padding:5px 10px;font-size:13px}
+.tabs{display:flex;gap:8px;margin-bottom:14px}
+.tabs button{background:var(--panel2);border:1px solid var(--line);color:var(--muted);border-radius:9px;padding:8px 14px;cursor:pointer}
+.tabs button.on{color:var(--gold2);border-color:var(--gold)}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:600;font-size:13px}
+.msg{border-radius:9px;padding:10px 12px;margin:12px 0;display:none}
+.msg.err{display:block;background:#3a1714;border:1px solid var(--danger);color:#ffc9c4}
+.msg.ok{display:block;background:#123324;border:1px solid var(--ok);color:#c9f5dc}
+.msg.info{display:block;background:#2a2410;border:1px solid var(--gold);color:#f5e3ae}
+.muted{color:var(--muted)}
+.plan-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}
+.plan{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:16px}
+.plan h3{margin:0 0 4px}
+.price{font-size:20px;font-weight:800;color:var(--gold2)}
+code{background:var(--panel2);padding:1px 6px;border-radius:6px;word-break:break-all}
+.hidden{display:none}
+</style>
+</head>
+<body>
+<header><div class="wrap nav">
+  <a class="brand" href="/">HORA <span>Media</span></a>
+  <a href="/">← Trang chủ</a>
+</div></header>
+
+<main class="wrap">
+  <h1>Tài khoản của bạn</h1>
+  <p class="sub">Đăng nhập để mua license, xem gói (tier) và lịch sử giao dịch của bạn.</p>
+
+  <div id="notice" class="msg"></div>
+
+  <!-- Chua dang nhap -->
+  <section id="auth-card" class="card hidden">
+    <div class="tabs">
+      <button type="button" id="tab-login" class="on">Đăng nhập</button>
+      <button type="button" id="tab-register">Đăng ký</button>
+    </div>
+    <form id="auth-form">
+      <div id="name-wrap" class="hidden">
+        <label for="f-name">Tên hiển thị (không bắt buộc)</label>
+        <input id="f-name" autocomplete="name">
+      </div>
+      <label for="f-email">Email</label>
+      <input id="f-email" type="email" required autocomplete="email">
+      <label for="f-password">Mật khẩu (ít nhất 8 ký tự)</label>
+      <input id="f-password" type="password" required minlength="8" autocomplete="current-password">
+      <div class="row" style="margin-top:16px">
+        <button class="btn primary" type="submit" id="auth-submit">Đăng nhập</button>
+      </div>
+    </form>
+  </section>
+
+  <!-- Da dang nhap -->
+  <div id="dash" class="hidden">
+    <section class="card">
+      <h2>Thông tin tài khoản</h2>
+      <p style="margin:0">Email: <strong id="acc-email"></strong><span id="acc-name" class="muted"></span></p>
+      <div class="row" style="margin-top:12px"><button class="btn" id="logout-btn" type="button">Đăng xuất</button></div>
+    </section>
+
+    <section class="card">
+      <h2>License của tôi</h2>
+      <table>
+        <thead><tr><th>Sản phẩm</th><th>Gói (tier)</th><th>Hạn dùng</th><th>Nguồn</th><th>License key</th></tr></thead>
+        <tbody id="lic-body"><tr><td colspan="5" class="muted">Đang tải…</td></tr></tbody>
+      </table>
+      <form id="claim-form" style="margin-top:16px">
+        <label for="claim-key">Nhận license đã có — dán license key bạn đã được cấp:</label>
+        <div class="row">
+          <input id="claim-key" style="flex:1;min-width:260px" placeholder="HORA_0123ABCD…" autocomplete="off">
+          <button class="btn" type="submit">Nhận license</button>
+        </div>
+        <p class="muted" style="margin:6px 0 0">License nhận bằng cách này hiển thị gói là “Chưa đồng bộ” cho tới khi hệ thống đối soát được key.</p>
+      </form>
+    </section>
+
+    <section class="card">
+      <h2>Mua / gia hạn</h2>
+      <div class="plan-grid" id="plan-grid"></div>
+      <label for="gateway">Cổng thanh toán</label>
+      <select id="gateway" style="max-width:260px">
+        <option value="momo">MoMo</option>
+        <option value="vnpay">VNPay</option>
+      </select>
+    </section>
+
+    <section class="card">
+      <h2>Lịch sử giao dịch</h2>
+      <table>
+        <thead><tr><th>Mã đơn</th><th>Gói</th><th>Số tiền</th><th>Cổng</th><th>Trạng thái</th><th>Ngày tạo</th></tr></thead>
+        <tbody id="ord-body"><tr><td colspan="6" class="muted">Đang tải…</td></tr></tbody>
+      </table>
+    </section>
+  </div>
+</main>
+
+<script>
+// Ban sao PLANS phia client — PHAI khop PLANS trong index.html va functions/api/_lib.js.
+// Gia chua chot -> null -> hien "Sap mo ban" va khoa nut mua, giong het trang chu.
+const PLANS = {
+  go:   { name: "Go",   month: null, year: null },
+  plus: { name: "Plus", month: null, year: null }
+};
+const PERIODS = { month: "1 tháng", year: "1 năm" };
+const STATUS_VI = {
+  created: "Vừa tạo", awaiting_payment: "Chờ thanh toán",
+  paid: "Đã thanh toán", paid_pending_issue: "Đã thanh toán — đang cấp license",
+  payment_failed: "Thanh toán thất bại"
+};
+
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const fmtVnd = (n) => n == null ? "—" : Math.round(n).toLocaleString("vi-VN") + "đ";
+const fmtDate = (iso) => iso ? new Date(iso).toLocaleString("vi-VN") : "—";
+
+function showMsg(kind, text) {
+  const el = $("notice");
+  el.className = "msg " + kind;
+  el.textContent = text;
+}
+async function api(path, opts = {}) {
+  const res = await fetch(path, { credentials: "same-origin", headers: { "Content-Type": "application/json" }, ...opts });
+  const data = await res.json().catch(() => null);
+  return { res, data };
+}
+function errText(data, fallback) {
+  return (data && data.error && data.error.message) || fallback;
+}
+
+// ----- Che do dang nhap / dang ky -----
+let mode = "login";
+function setMode(m) {
+  mode = m;
+  $("tab-login").classList.toggle("on", m === "login");
+  $("tab-register").classList.toggle("on", m === "register");
+  $("name-wrap").classList.toggle("hidden", m === "login");
+  $("auth-submit").textContent = m === "login" ? "Đăng nhập" : "Đăng ký";
+  $("f-password").autocomplete = m === "login" ? "current-password" : "new-password";
+}
+$("tab-login").addEventListener("click", () => setMode("login"));
+$("tab-register").addEventListener("click", () => setMode("register"));
+
+$("auth-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const payload = { email: $("f-email").value.trim(), password: $("f-password").value };
+  if (mode === "register") payload.displayName = $("f-name").value.trim();
+  const { res, data } = await api("/api/auth/" + mode, { method: "POST", body: JSON.stringify(payload) });
+  if (!res.ok) { showMsg("err", errText(data, "Không thực hiện được, thử lại sau.")); return; }
+  showMsg("ok", mode === "login" ? "Đăng nhập thành công." : "Đăng ký thành công.");
+  await loadDash();
+});
+
+// ----- Dashboard -----
+async function loadDash() {
+  const { res, data } = await api("/api/auth/me");
+  if (!res.ok) {
+    $("auth-card").classList.remove("hidden");
+    $("dash").classList.add("hidden");
+    return;
+  }
+  $("auth-card").classList.add("hidden");
+  $("dash").classList.remove("hidden");
+  $("acc-email").textContent = data.customer.email;
+  $("acc-name").textContent = data.customer.displayName ? " — " + data.customer.displayName : "";
+  renderPlans();
+  await Promise.all([loadLicenses(), loadOrders()]);
+}
+
+async function loadLicenses() {
+  const { data } = await api("/api/licenses");
+  const rows = (data && data.licenses) || [];
+  $("lic-body").innerHTML = rows.length ? rows.map((l) => `
+    <tr>
+      <td>${esc(l.product || "Chưa đồng bộ")}</td>
+      <td>${esc(l.tier || "Chưa đồng bộ")}</td>
+      <td>${l.expiresAt ? esc(fmtDate(l.expiresAt)) : "Chưa đồng bộ"}</td>
+      <td>${l.source === "purchase" ? "Mua trên web" : "Nhận key có sẵn"}</td>
+      <td>${l.licenseKeyPlain ? `<code>${esc(l.licenseKeyPlain)}</code> <button class="btn small" type="button" data-copy="${esc(l.licenseKeyPlain)}">Copy</button>` : '<span class="muted">—</span>'}</td>
+    </tr>`).join("")
+    : '<tr><td colspan="5" class="muted">Chưa có license nào.</td></tr>';
+  document.querySelectorAll("[data-copy]").forEach((b) => b.addEventListener("click", async () => {
+    try { await navigator.clipboard.writeText(b.dataset.copy); b.textContent = "Đã copy"; } catch { /* clipboard bi chan */ }
+  }));
+}
+
+async function loadOrders() {
+  const { data } = await api("/api/orders");
+  const rows = (data && data.orders) || [];
+  $("ord-body").innerHTML = rows.length ? rows.map((o) => `
+    <tr>
+      <td><code>${esc(o.id)}</code></td>
+      <td>${esc((PLANS[o.plan] || {}).name || o.plan)} — ${esc(PERIODS[o.period] || o.period)}</td>
+      <td>${esc(fmtVnd(o.amountVnd))}</td>
+      <td>${esc(o.gateway === "momo" ? "MoMo" : o.gateway === "vnpay" ? "VNPay" : (o.gateway || "—"))}</td>
+      <td>${esc(STATUS_VI[o.status] || o.status)}</td>
+      <td>${esc(fmtDate(o.createdAt))}</td>
+    </tr>`).join("")
+    : '<tr><td colspan="6" class="muted">Chưa có giao dịch nào.</td></tr>';
+}
+
+function renderPlans() {
+  $("plan-grid").innerHTML = Object.entries(PLANS).map(([key, p]) => `
+    <div class="plan">
+      <h3>${esc(p.name)}</h3>
+      ${["month", "year"].map((per) => {
+        const price = p[per];
+        return `<p style="margin:8px 0">${PERIODS[per]}: <span class="price">${price ? fmtVnd(price) : "Sắp mở bán"}</span><br>
+        <button class="btn primary" type="button" style="margin-top:6px" data-buy="${key}:${per}" ${price ? "" : "disabled"}>${price ? "Mua ngay" : "Sắp mở bán"}</button></p>`;
+      }).join("")}
+    </div>`).join("");
+  document.querySelectorAll("[data-buy]").forEach((b) => b.addEventListener("click", async () => {
+    const [plan, period] = b.dataset.buy.split(":");
+    const gateway = $("gateway").value;
+    b.disabled = true;
+    const { res, data } = await api("/api/orders", { method: "POST", body: JSON.stringify({ plan, period, gateway }) });
+    if (res.ok && data.paymentUrl) { window.location.href = data.paymentUrl; return; }
+    b.disabled = false;
+    showMsg("err", errText(data, "Chưa tạo được đơn, thử lại sau."));
+    await loadOrders();
+  }));
+}
+
+$("claim-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const key = $("claim-key").value.trim();
+  if (!key) return;
+  const { res, data } = await api("/api/licenses/claim", { method: "POST", body: JSON.stringify({ key }) });
+  if (!res.ok) { showMsg("err", errText(data, "Không nhận được license.")); return; }
+  $("claim-key").value = "";
+  showMsg("ok", "Đã nhận license vào tài khoản của bạn.");
+  await loadLicenses();
+});
+
+$("logout-btn").addEventListener("click", async () => {
+  await api("/api/auth/logout", { method: "POST", body: "{}" });
+  location.reload();
+});
+
+// Thong bao sau khi quay ve tu cong thanh toan (chi IPN moi xac nhan da tra tien).
+const payParam = new URLSearchParams(location.search).get("payment");
+if (payParam === "success") showMsg("info", "Đã quay về từ cổng thanh toán. Trạng thái đơn sẽ cập nhật sau khi cổng xác nhận (IPN) — tải lại trang sau ít phút nếu chưa thấy.");
+else if (payParam === "failed") showMsg("err", "Thanh toán chưa thành công hoặc đã bị hủy. Bạn có thể thử lại.");
+else if (payParam === "pending") showMsg("info", "Đang chờ cổng thanh toán xác nhận giao dịch.");
+
+loadDash();
+</script>
+</body>
+</html>
