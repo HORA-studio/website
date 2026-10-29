@@ -1170,7 +1170,7 @@ function applyPreselect() {
   if (!PLANS[plan] || !["month", "year"].includes(period)) return;
   showView("buy");
   setBilling(period);
-  const btn = document.querySelector(`[data-buy="${plan}:${period}"]`);
+  const btn = document.querySelector(`[data-buy-plan="${plan}"]`);
   if (!btn) return;
   btn.style.outline = "2px solid var(--gold2)";
   btn.style.outlineOffset = "2px";
