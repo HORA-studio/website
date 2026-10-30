@@ -695,7 +695,10 @@ document.querySelectorAll(".navlinks a[data-home-link]").forEach(a=>a.addEventLi
   const wasPurchasing=purchase.classList.contains("active");
   if(wasPurchasing) showHome();
   requestAnimationFrame(()=>requestAnimationFrame(()=>{
-    scrollToSection(target);
+    if(targetId==="#pricing"){
+      const ctop=target.getBoundingClientRect().top+window.scrollY-(window.innerHeight-target.offsetHeight)/2;
+      window.scrollTo({top:Math.max(0,ctop),behavior:"smooth"});
+    } else scrollToSection(target);
     history.replaceState(null,"",targetId);
   }));
 }));
