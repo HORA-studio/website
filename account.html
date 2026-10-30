@@ -986,7 +986,7 @@ html,body{min-height:100%;height:100%;overflow:hidden}
 .auth-form-head p{font-size:13.5px;color:var(--muted);margin:0;line-height:1.7}
 .auth-form-panel .tabs{display:grid;grid-template-columns:1fr 1fr;width:100%;margin:0 0 10px;border-radius:13px;padding:4px}
 .auth-form-panel .tabs button{border-radius:10px;padding:10px 12px;font-size:13px}
-.auth-form-panel .tabs button.on{background:var(--panel);color:var(--text);box-shadow:0 1px 5px #00000013}
+.auth-form-panel .tabs button.on{background:var(--text);color:var(--bg);box-shadow:0 2px 10px #0000002e;font-weight:700}
 .auth-form-panel label{font-size:12px;color:var(--text);font-weight:700;margin:12px 0 6px}
 .auth-form-panel .optional{font-weight:500;color:var(--muted)}
 .auth-form-panel input{height:46px;border-radius:12px;padding:0 14px;font-size:13.5px;transition:border-color .15s,box-shadow .15s}
@@ -1032,6 +1032,12 @@ html,body{min-height:100%;height:100%;overflow:hidden}
 @media(prefers-reduced-motion:reduce){
 .auth-submit span:last-child,.btn{transition:none}
 }
+/* Hop thong bao ket qua ngay trong form quen mat khau (thay cho banner #notice o dau trang) */
+.forgot-msg{display:none;margin-top:12px;border-radius:12px;padding:12px 14px;font-size:13px;line-height:1.55;border:1px solid}
+.forgot-msg.show{display:block}
+.forgot-msg strong{display:block;font-size:13.5px;margin-bottom:2px}
+.forgot-msg.info{background:var(--msg-info-bg);border-color:var(--msg-info-line);color:var(--msg-info-text)}
+.forgot-msg.err{background:var(--msg-err-bg);border-color:var(--msg-err-line);color:var(--msg-err-text)}
 /* Keep password-recovery email input identical to standard auth fields */
 .auth-form-panel #forgot-wrap input#forgot-email{
   height:46px!important;
@@ -1117,6 +1123,7 @@ html,body{min-height:100%;height:100%;overflow:hidden}
         <input id="forgot-email" type="email" style="width:100%" autocomplete="email">
         <button class="btn" type="button" id="forgot-submit" style="margin-top:10px">Gửi link đặt lại mật khẩu</button>
       </div>
+      <div id="forgot-msg" class="forgot-msg" role="status" aria-live="polite"></div>
       <p class="muted" style="margin:6px 0 0">Hệ thống sẽ gửi link đặt lại mật khẩu vào email (nếu email có trong hệ thống). Link có hiệu lực 1 giờ.</p>
     </div>
       <p class="auth-terms">Bằng việc tiếp tục, bạn đồng ý với các điều khoản sử dụng và chính sách bảo mật của HORA.</p>
@@ -1426,6 +1433,8 @@ function showForgotMode() {
   $("auth-title").textContent = "Quên mật khẩu?";
   $("auth-description").textContent = "Nhập email tài khoản, HORA sẽ gửi cho bạn liên kết đặt lại mật khẩu.";
   $("forgot-wrap").classList.remove("hidden");
+  $("forgot-msg").className = "forgot-msg";
+  $("forgot-msg").replaceChildren();
   if (!$("forgot-email").value) $("forgot-email").value = $("f-email").value.trim();
   $("forgot-email").focus();
 }
@@ -1439,13 +1448,26 @@ $("forgot-link").addEventListener("click", (e) => {
   showForgotMode();
 });
 $("forgot-back").addEventListener("click", hideForgotMode);
+function showForgotMsg(kind, title, text) {
+  const el = $("forgot-msg");
+  el.className = "forgot-msg show " + kind;
+  el.replaceChildren();
+  const strong = document.createElement("strong");
+  strong.textContent = title;
+  el.append(strong, document.createTextNode(text));
+}
 $("forgot-submit").addEventListener("click", async () => {
   const email = $("forgot-email").value.trim();
-  if (!email) { showMsg("err", "Hãy nhập email của bạn."); return; }
-  const { res } = await api("/api/auth/forgot-password", { method: "POST", body: JSON.stringify({ email }) });
+  if (!email) { showForgotMsg("err", "Chưa nhập email", "Hãy nhập email của bạn rồi bấm gửi lại."); return; }
+  const { res, data } = await api("/api/auth/forgot-password", { method: "POST", body: JSON.stringify({ email }) });
+  if (!res.ok) { showForgotMsg("err", "Không gửi được yêu cầu", "Có lỗi xảy ra — bạn thử lại sau ít phút nhé."); return; }
+  // mailConfigured la co cau hinh he thong (giong dang ky), khong lo email co ton tai hay khong.
+  if (data && data.mailConfigured === false) {
+    showForgotMsg("info", "Hệ thống email chưa được cấu hình", "Tính năng gửi mail đang được thiết lập — hãy liên hệ quản trị viên HORA để được hỗ trợ đặt lại mật khẩu.");
+    return;
+  }
   // Endpoint luon tra ok (chong do email) — thong bao chuan cho moi truong hop.
-  if (res.ok) showMsg("info", "Nếu email tồn tại trong hệ thống, link đặt lại mật khẩu đã được gửi. Link có hiệu lực 1 giờ.");
-  else showMsg("err", "Không gửi được yêu cầu, thử lại sau.");
+  showForgotMsg("info", "Đã gửi link đặt lại mật khẩu", "Nếu email này có tài khoản HORA, link sẽ tới trong vài phút và có hiệu lực 1 giờ. Chưa thấy mail? Kiểm tra cả hộp thư rác (Spam).");
 });
 
 // ----- Dashboard -----
