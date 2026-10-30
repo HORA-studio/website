@@ -268,6 +268,19 @@ export async function consumeAuthToken(env, rawToken, purpose) {
   return { ok: true, customerId: row.customer_id };
 }
 
+// Doc token (KHONG tieu thu): hop le -> customerId; sai/da dung -> TOKEN_INVALID;
+// het han -> TOKEN_EXPIRED. Dung de man dat lai mat khau lay email dien san.
+export async function peekAuthToken(env, rawToken, purpose) {
+  if (!rawToken) return { ok: false, code: "TOKEN_INVALID" };
+  const tokenHash = await sha256Hex(String(rawToken));
+  const row = await env.DB.prepare(
+    "SELECT id, customer_id, expires_at, used_at FROM auth_tokens WHERE token_hash = ?1 AND purpose = ?2"
+  ).bind(tokenHash, purpose).first();
+  if (!row || row.used_at) return { ok: false, code: "TOKEN_INVALID" };
+  if (new Date(row.expires_at).getTime() <= Date.now()) return { ok: false, code: "TOKEN_EXPIRED" };
+  return { ok: true, customerId: row.customer_id };
+}
+
 // Doc email_verified_at cua khach (null = chua xac thuc). Fail-soft: DB chua
 // ap migration (thieu cot) thi tra null thay vi nem loi lam vo /api/auth/me.
 export async function getEmailVerifiedAt(env, customerId) {
