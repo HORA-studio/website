@@ -1050,6 +1050,13 @@ html,body{min-height:100%;height:100%;overflow:hidden}
 }
 #shell.solo .content{max-width:1120px}
 .side.hidden{display:none!important}
+/* Tang space + can deu khoi gia (toggle + luoi the) — override dat cuoi file
+   de thang cac override pricing-wrap/pricing-grid truoc do: phia tren thoang
+   hon, toggle cach the xa hon, chieu cao thua cua panel chia deu tren/duoi luoi the */
+#dash .purchase-panel .pricing-wrap{padding-top:34px !important}
+#dash .purchase-panel .pricing-toggle-row{margin:0 0 30px !important}
+#dash .purchase-panel .pricing-grid{gap:28px;margin-top:auto !important;margin-bottom:auto}
+@media (max-width:760px){#dash .purchase-panel .pricing-wrap{padding-top:24px !important}}
 </style>
 </head>
 <body>
