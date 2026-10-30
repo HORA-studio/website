@@ -464,7 +464,7 @@ footer{border-top:1px solid #14161a;background:#101216;color:#c9cdc9;padding:36p
       <h3>Go</h3>
       <p class="plan-desc">Cho người bắt đầu làm video bán hàng bằng AI</p>
       <div class="price"><span data-price>Sắp mở bán</span></div>
-      <div class="per" data-per>Giá sẽ công bố khi mở bán</div>
+      
       <ul>
        <li>Tạo ảnh và video bằng AI — đầy đủ tính năng, không khóa</li>
        <li>Workflow tạo video quảng cáo</li>
@@ -472,20 +472,20 @@ footer{border-top:1px solid #14161a;background:#101216;color:#c9cdc9;padding:36p
        <li>Cập nhật miễn phí mọi phiên bản mới trong thời hạn</li>
        <li>License theo máy — 1 license dùng trên 1 máy</li>
       </ul>
-      <button class="btn" data-buy-plan="go">Chọn gói</button>
+      <button class="btn" data-buy-plan="go">Mua ngay</button>
      </article>
      <article class="price-card featured" data-plan-card="plus">
       <span class="popular">ĐƯỢC CHỌN NHIỀU</span>
       <h3>Plus</h3>
       <p class="plan-desc">Cho người làm nghiêm túc — thêm trợ lý AI đồng hành</p>
       <div class="price"><span data-price>Sắp mở bán</span></div>
-      <div class="per" data-per>Giá sẽ công bố khi mở bán</div>
+      
       <ul>
        <li class="hl">Mọi quyền lợi của gói Go</li>
        <li class="hl">✦ Trợ lý AI hỗ trợ lên ý tưởng, viết kịch bản và tối ưu video trong suốt quá trình sử dụng</li>
        <li>30 luồng chạy song song - làm nhiều ảnh, video cùng lúc</li>
       </ul>
-      <button class="btn primary" data-buy-plan="plus">Chọn gói</button>
+      <button class="btn primary" data-buy-plan="plus">Mua ngay</button>
      </article>
     </div>
     
@@ -545,7 +545,7 @@ function setBilling(period){
   document.querySelectorAll("[data-plan-card]").forEach(card=>{
     const p=PLANS[card.dataset.planCard]; if(!p) return;
     const priceEl=card.querySelector("[data-price]");
-    const perEl=card.querySelector("[data-per]");
+    const perEl=card.querySelector("[data-per]")||document.createElement("span");
     if(!p.month && !p.year){ priceEl.textContent="Sắp mở bán"; perEl.textContent="Giá sẽ công bố khi mở bán"; return; }
     if(period==="year"){
       const save=Math.round((1-p.year/(p.month*12))*100);
@@ -984,4 +984,19 @@ fetch("/api/auth/me",{credentials:"same-origin"}).then(function(r){return r.ok?r
 @media(max-width:520px){#demos{padding-top:36px;padding-bottom:36px;}#demos .demo-grid,#demos .demo-grid[data-ratio="masonry"],#demos .demo-grid[data-ratio="9/16"],#demos .demo-grid[data-ratio="16/9"],#demos .demo-grid[data-ratio="1/1"]{grid-template-columns:1fr;gap:18px;}#demos .demo-toolbar{gap:10px;}#demos .demo-info p{font-size:12px;}}
 
 @media (min-width:901px){.pricing-grid{grid-template-columns:repeat(2,1fr);max-width:742px;margin-left:auto;margin-right:auto}}
+
+/* The goi Go/Plus o trang chu theo dung the o tab Mua goi (account): gia teal 60px, the 386px, tag phai, nut 44px */
+#pricing .pricing-grid{max-width:795px;gap:24px;margin-inline:auto;align-items:start}
+#pricing .price-card{padding:22px;height:auto}
+#pricing .price-card h3{font-size:20px}
+#pricing .plan-desc{color:#6b7b82}
+#pricing .price-card .price{color:#06796e;font-size:60px}
+@media(max-width:1250px){#pricing .price-card .price{font-size:56px}}
+@media(max-width:1080px){#pricing .price-card .price{font-size:48px}}
+@media(max-height:920px){#pricing .price-card .price{font-size:58px}}
+@media(max-height:830px){#pricing .price-card .price{font-size:54px}}
+#pricing .price-card ul{gap:20px;margin:14px 0 12px;font-size:13px;color:#17252b;border-top:none;padding-top:0}
+#pricing .price-card .btn{height:44px;padding-top:0;padding-bottom:0;border-radius:10px;color:#17252b}
+#pricing .price-card .btn.primary{color:#fff}
+#pricing .popular{left:auto;right:30px}
 </style>
