@@ -49,6 +49,7 @@ Cách 2 — sửa trực tiếp bảng `demo_videos` trong D1 Console (Cloudflar
 
 ## Cần làm khi lên production lần đầu
 
-1. Chạy migration `db/migrate-demo-videos-2026-10-30.sql` trên D1 `hora-website` (tạo bảng + seed 4 mẫu hiện tại, `video_url` đang trống).
+1. Chạy migration `db/migrate-demo-videos-2026-10-30.sql` trên D1 `hora-website` (tạo bảng + seed sẵn 8 mẫu kèm link video).
 2. Deploy code như bình thường.
-3. Điền `video_url` thật cho từng mẫu (upload file MP4 lên host tĩnh như `releases.hora.works`/R2 rồi dán link, hoặc dán link YouTube/Vimeo).
+
+Danh sách seed hiện tại: **8 mẫu kèm sẵn link video stock Pexels đã kiểm chứng** — 4 ngang 16:9 cho 4 mẫu gốc (Mỹ phẩm 9697928, Đồ gia dụng 7578540, Thời trang 8328501, Nước hoa 6802240) và 4 dọc 9:16 (Mỹ phẩm 6951174, Café tại nhà 3753718, Thời trang 16093155, Nước hoa 5758891); poster cũng là khung hình thật từ Pexels. Nếu đã chạy bản migration seed cũ (4 mẫu, `video_url` trống) thì chạy thêm `db/update-demo-videos-links-2026-10-30.sql` — file này upsert cả 8 mẫu, chạy lại nhiều lần an toàn. Muốn thay bằng video của mình sau này: sửa `video_url` theo mục "Đổi video" ở trên (link MP4/WebM tự host, YouTube hoặc Vimeo đều được).
