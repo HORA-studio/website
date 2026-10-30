@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS demo_videos (
   description TEXT,
   video_url   TEXT NOT NULL DEFAULT '',
   poster_url  TEXT,
+  meta        TEXT,
   sort_order  INTEGER NOT NULL DEFAULT 0,
   enabled     INTEGER NOT NULL DEFAULT 1,
   created_at  TEXT NOT NULL,

@@ -164,6 +164,7 @@ CREATE TABLE IF NOT EXISTS demo_videos (
   description TEXT,
   video_url   TEXT NOT NULL DEFAULT '',
   poster_url  TEXT,                     -- anh thumbnail/poster cua the
+  meta        TEXT,                     -- JSON tuy y, vd {"size":"16:9"} (khung hien thi the)
   sort_order  INTEGER NOT NULL DEFAULT 0,
   enabled     INTEGER NOT NULL DEFAULT 1,  -- 0 = an khoi trang chu
   created_at  TEXT NOT NULL,            -- ISO 8601 UTC

@@ -6,9 +6,11 @@
 // POST   -> ghi DE toan bo danh sach. Chap nhan:
 //             { demos: [ {...}, ... ] }  hoac  [ {...}, ... ]
 //           Moi video: { id?, title (bat buoc), type, desc, videoUrl, image,
-//             sortOrder, enabled }
+//             sortOrder, enabled, meta, size }
 //           videoUrl: link MP4/WebM truc tiep hoac link YouTube/Vimeo,
 //             de trong = chua co video. image: URL anh poster/thumbnail.
+//           meta: object JSON tuy y (luu cot meta), hoac viet tat `size`
+//             o ngoai cung -> duoc gop vao meta.size (vd "16:9", "9:16").
 // DELETE ?id=<id> -> xoa 1 video khoi danh sach.
 import { json, errorJson, readJson } from "../_lib.js";
 import { getDemoVideos, normalizeDemos, replaceDemoVideos, isHttpUrl } from "../_demos.js";
