@@ -153,6 +153,24 @@ CREATE TABLE IF NOT EXISTS plans (
 -- Blocklist version (LicenseStore doc/ghi khi revoke/restore license).
 CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
 
+-- Video mau trang chu (muc "Thu vien y tuong" / Demo): trang chu doc qua
+-- GET /api/demos, quan tri qua /api/internal/demos — doi video KHONG can
+-- sua code/deploy lai. video_url: MP4/WebM truc tiep hoac link YouTube/Vimeo;
+-- rong = chua co video (the hien anh poster + bao dang cap nhat).
+CREATE TABLE IF NOT EXISTS demo_videos (
+  id          TEXT PRIMARY KEY,         -- slug duy nhat, vd 'my-pham-cao-cap'
+  title       TEXT NOT NULL,
+  category    TEXT,                     -- nhom phan loai, vd 'Beauty / Skincare'
+  description TEXT,
+  video_url   TEXT NOT NULL DEFAULT '',
+  poster_url  TEXT,                     -- anh thumbnail/poster cua the
+  sort_order  INTEGER NOT NULL DEFAULT 0,
+  enabled     INTEGER NOT NULL DEFAULT 1,  -- 0 = an khoi trang chu
+  created_at  TEXT NOT NULL,            -- ISO 8601 UTC
+  updated_at  TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_demo_videos_order ON demo_videos(enabled, sort_order);
+
 -- Nhat ky doi may (cooldown 7 ngay) — dung boi API web /api/app/device-change.
 CREATE TABLE IF NOT EXISTS device_changes (
   id          TEXT PRIMARY KEY,

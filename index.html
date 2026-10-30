@@ -244,6 +244,8 @@ footer{border-top:1px solid #14161a;background:#101216;color:#c9cdc9;padding:36p
 .video-placeholder{aspect-ratio:16/9;display:grid;place-items:center;text-align:center;padding:25px;background:radial-gradient(ellipse at center,var(--panel2),var(--bg) 72%)}
 .video-placeholder .playbig{width:62px;height:62px;border-radius:50%;display:grid;place-items:center;background:var(--gold);color:#fff;margin:0 auto 15px;font-size:19px}
 .video-placeholder p{font-size:12.5px;color:var(--muted);max-width:430px}
+.video-placeholder.has-video{aspect-ratio:auto;display:block;padding:0;background:#000}
+.video-placeholder video,.video-placeholder iframe{width:100%;aspect-ratio:16/9;max-height:75vh;display:block;background:#000;border:0;object-fit:contain}
 
 
 /* ----- HORA Media refresh: hierarchy, workflow and responsive polish ----- */
@@ -513,7 +515,7 @@ body.ticker-on{padding-top:111px}
  </div>
 </section>
 <div class="social"><a class="zalo" id="zalo-float" href="#" aria-label="Zalo">Zalo</a><a class="fb" id="fb-float" href="#" aria-label="Facebook">f</a></div>
-<div class="modal" id="demo-modal" role="dialog" aria-modal="true" aria-label="Xem video demo"><div class="modal-box"><div class="modal-head"><strong id="modal-title">Video demo</strong><button class="close" id="modal-close" aria-label="Đóng">✕</button></div><div class="video-placeholder" id="video-area"><div><div class="playbig">▶</div><strong>Thêm video demo của bạn tại đây</strong><p>Đặt file MP4/WebM hoặc URL video vào cấu hình DEMOS trong mã nguồn. Khi có URL, cửa sổ này sẽ phát video thật.</p></div></div></div></div>
+<div class="modal" id="demo-modal" role="dialog" aria-modal="true" aria-label="Xem video demo"><div class="modal-box"><div class="modal-head"><strong id="modal-title">Video demo</strong><button class="close" id="modal-close" aria-label="Đóng">✕</button></div><div class="video-placeholder" id="video-area"><div><div class="playbig">▶</div><strong>Video demo</strong><p>Danh sách video mẫu được tải từ database — bấm vào một mẫu để xem video thật.</p></div></div></div></div>
 <script>
 /* Cấu hình các liên kết và video trước khi đưa website lên mạng. */
 /* Giao dien luon theo he thong (system) — da bo nut chon theme theo yeu cau. */
@@ -526,6 +528,7 @@ const CONFIG = {
   downloadLinuxUrl: "#",
   zaloUrl: "#",
   facebookUrl: "https://www.facebook.com/profile.php?id=61595500034185",
+  /* Danh sach THAT nam o D1 (bang demo_videos) — trang tu tai qua /api/demos va ghi de len danh sach nay. Day chi la ban du phong khi API chua san sang. */
   demos: [
     {title:"Mỹ phẩm cao cấp",type:"Beauty / Skincare",desc:"Phong cách quảng cáo tinh tế",videoUrl:"",image:"https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?auto=format&fit=crop&w=900&q=85"},
     {title:"Đồ gia dụng",type:"Home & Living",desc:"Sản phẩm trong không gian sống",videoUrl:"",image:"https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=900&q=85"},
@@ -568,11 +571,36 @@ function setBilling(period){
   });
 }
 const grid=document.getElementById("demo-grid");
-CONFIG.demos.forEach((d,i)=>{
- const card=document.createElement("article");card.className="demo-card";card.tabIndex=0;card.setAttribute("role","button");card.setAttribute("aria-label","Xem demo: "+d.title);
- card.innerHTML=`<div class="demo-thumb t${i+1}"><img src="${d.image}" alt="Ảnh concept ${d.title}" loading="lazy" onerror="this.style.display='none'"><span class="demo-no">DEMO ${String(i+1).padStart(2,"0")}</span><span class="demo-play">▶</span><span class="demo-name">${d.title}</span></div><div class="demo-info"><div class="demo-caption"><span class="tag">${d.type}</span><span style="font-size:10px;color:var(--muted)">▶ Xem</span></div><p>${d.desc}</p></div>`;
- const open=()=>showDemo(d,i);card.addEventListener("click",open);card.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();open()}});grid.appendChild(card);
-});
+function renderDemos(list){
+ grid.innerHTML="";
+ if(!list.length){
+  const empty=document.createElement("p");
+  empty.style.cssText="color:var(--muted);font-size:14px";
+  empty.textContent="Chưa có video mẫu nào — quay lại sau nhé!";
+  grid.appendChild(empty);
+  return;
+ }
+ list.forEach((d,i)=>{
+  const card=document.createElement("article");card.className="demo-card";card.tabIndex=0;card.setAttribute("role","button");card.setAttribute("aria-label","Xem demo: "+d.title);
+  const thumb=document.createElement("div");thumb.className="demo-thumb t"+((i%8)+1);
+  if(d.image){const img=document.createElement("img");img.src=d.image;img.alt="Ảnh concept "+d.title;img.loading="lazy";img.addEventListener("error",()=>{img.style.display="none";});thumb.appendChild(img);}
+  const no=document.createElement("span");no.className="demo-no";no.textContent="DEMO "+String(i+1).padStart(2,"0");thumb.appendChild(no);
+  const play=document.createElement("span");play.className="demo-play";play.textContent="▶";thumb.appendChild(play);
+  const name=document.createElement("span");name.className="demo-name";name.textContent=d.title;thumb.appendChild(name);
+  card.appendChild(thumb);
+  const info=document.createElement("div");info.className="demo-info";
+  const cap=document.createElement("div");cap.className="demo-caption";
+  const tag=document.createElement("span");tag.className="tag";tag.textContent=d.type||"";cap.appendChild(tag);
+  const hint=document.createElement("span");hint.style.cssText="font-size:10px;color:var(--muted)";hint.textContent=d.videoUrl?"▶ Xem video":"Đang cập nhật";cap.appendChild(hint);
+  info.appendChild(cap);
+  const desc=document.createElement("p");desc.textContent=d.desc||"";info.appendChild(desc);
+  card.appendChild(info);
+  const open=()=>showDemo(d,i);card.addEventListener("click",open);card.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();open()}});grid.appendChild(card);
+ });
+}
+renderDemos(CONFIG.demos);
+/* Video mau THAT load tu database qua /api/demos — doi video trong DB la trang cap nhat, khong can sua code. API loi/khong san sang thi giu ban du phong CONFIG.demos o tren. */
+fetch("/api/demos",{cache:"no-cache"}).then(r=>r.ok?r.json():null).then(data=>{if(data&&Array.isArray(data.demos))renderDemos(data.demos);}).catch(()=>{});
 // Aspect-ratio templates: one compact selector updates every preview consistently.
 const ratioGrid=document.getElementById("demo-grid");
 ratioGrid.dataset.ratio="16/9";
@@ -722,11 +750,35 @@ document.querySelectorAll(".navlinks a[data-home-link]").forEach(a=>a.addEventLi
 }));
 document.getElementById("buy-form").addEventListener("submit",e=>{e.preventDefault();document.getElementById("form-success").style.display="block";});
 const modal=document.getElementById("demo-modal");
-function showDemo(d,i){document.getElementById("modal-title").textContent=`DEMO ${String(i+1).padStart(2,"0")} · ${d.title}`;const area=document.getElementById("video-area");area.innerHTML="";
- if(d.videoUrl){const v=document.createElement("video");v.src=d.videoUrl;v.controls=true;v.autoplay=true;v.playsInline=true;v.style.cssText="width:100%;max-height:75vh;background:#000";area.appendChild(v);}
- else{area.innerHTML=`<div><div class="playbig">▶</div><strong>${d.title}</strong><p>Chưa gắn file video cho mẫu này. Cập nhật <code>videoUrl</code> trong mảng <code>CONFIG.demos</code> để phát video thật.</p></div>`;}
- modal.classList.add("open");}
-function closeModal(){modal.classList.remove("open");const v=modal.querySelector("video");if(v)v.pause();}
+function embedUrlFor(url){
+ const yt=String(url).match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([\w-]{6,})/);
+ if(yt)return "https://www.youtube.com/embed/"+yt[1]+"?autoplay=1&rel=0";
+ const vm=String(url).match(/vimeo\.com\/(\d+)/);
+ if(vm)return "https://player.vimeo.com/video/"+vm[1]+"?autoplay=1";
+ return null;
+}
+function showDemo(d,i){
+ document.getElementById("modal-title").textContent=`DEMO ${String(i+1).padStart(2,"0")} · ${d.title}`;
+ const area=document.getElementById("video-area");area.innerHTML="";area.classList.remove("has-video");
+ const url=(d.videoUrl||"").trim();
+ const embed=url?embedUrlFor(url):null;
+ if(embed){
+  area.classList.add("has-video");
+  const f=document.createElement("iframe");f.src=embed;f.allow="autoplay; fullscreen; encrypted-media; picture-in-picture";f.allowFullscreen=true;f.title=d.title;area.appendChild(f);
+ } else if(url){
+  area.classList.add("has-video");
+  const v=document.createElement("video");v.src=url;v.controls=true;v.autoplay=true;v.playsInline=true;v.preload="auto";if(d.image)v.poster=d.image;area.appendChild(v);
+  const p=v.play&&v.play();if(p&&p.catch)p.catch(()=>{});
+ } else {
+  const wrap=document.createElement("div");
+  const big=document.createElement("div");big.className="playbig";big.textContent="▶";wrap.appendChild(big);
+  const st=document.createElement("strong");st.textContent=d.title;wrap.appendChild(st);
+  const tx=document.createElement("p");tx.textContent="Video mẫu này đang được cập nhật. Danh sách video nằm trong database — gắn link video là phát được ngay, không cần sửa trang.";wrap.appendChild(tx);
+  area.appendChild(wrap);
+ }
+ modal.classList.add("open");
+}
+function closeModal(){modal.classList.remove("open");const v=modal.querySelector("video");if(v)v.pause();const area=document.getElementById("video-area");area.innerHTML="";area.classList.remove("has-video");}
 document.getElementById("modal-close").addEventListener("click",closeModal);modal.addEventListener("click",e=>{if(e.target===modal)closeModal()});document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal()});
 </script>
 <script>/* Trang thai dang nhap o header: da dang nhap thi an nut Dang ky + Dang nhap, hien email (bam -> trang quan ly tai khoan). */
