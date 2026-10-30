@@ -701,7 +701,7 @@ document.querySelectorAll(".navlinks a[data-home-link]").forEach(a=>a.addEventLi
     if(targetId==="#pricing"){
       const ctop=target.getBoundingClientRect().top+window.scrollY-(window.innerHeight-target.offsetHeight)/2;
       window.scrollTo({top:Math.max(0,ctop),behavior:"smooth"});
-    } else if(targetId==="#demos"){
+    } else if(targetId==="#demos" || targetId==="#workflow"){
       const dtop=target.getBoundingClientRect().top+window.scrollY-(document.querySelector("header")?.offsetHeight||0);
       window.scrollTo({top:Math.max(0,dtop),behavior:"smooth"});
     } else scrollToSection(target);
