@@ -13,7 +13,7 @@
 // Validate: type hop le, startsAt < endsAt (ISO), trialDays 1..90,
 //   countFrom hop le, purchaseBonusPercent 0..200, trialTier go|plus.
 import { json, errorJson, readJson } from "../_lib.js";
-import { getPromotions, normalizePromotions, PROMO_TYPES, PROMO_COUNT_FROM, PROMOS_META_KEY } from "../_promo.js";
+import { getPromotions, normalizePromotions, PROMO_TYPES, PROMO_COUNT_FROM, HAS_TRIAL, HAS_BONUS, PROMOS_META_KEY } from "../_promo.js";
 
 function secretOk(request, env) {
   const expected = env.IDENTITY_INTERNAL_SECRET;
@@ -39,19 +39,28 @@ export async function onRequestPost({ request, env }) {
   if (!rawList.length) return errorJson("INVALID_CONFIG", "Danh sách khuyến mãi rỗng.", 422);
   const list = normalizePromotions(rawList);
 
-  for (const p of list) {
-    if (!PROMO_TYPES.includes(p.type))
-      return errorJson("INVALID_CONFIG", `type không hợp lệ ở đợt ${p.id} (chỉ nhận ${PROMO_TYPES.join("|")}).`, 422);
+  // Validate THEO TUNG DOT va theo TYPE: chi kiem tra field ma type do thuc su
+  // dung (announcement khong can trialDays/purchaseBonusPercent).
+  for (let i = 0; i < list.length; i++) {
+    const p = list[i];
+    const src = rawList[i] && typeof rawList[i] === "object" ? rawList[i] : {};
+    const where = `đợt ${p.id}`;
+    if (!PROMO_TYPES.includes(src.type))
+      return errorJson("INVALID_CONFIG", `type không hợp lệ ở ${where} (chỉ nhận ${PROMO_TYPES.join("|")}).`, 422);
     const s = Date.parse(p.startsAt);
     const e = Date.parse(p.endsAt);
     if (!Number.isFinite(s) || !Number.isFinite(e) || s >= e)
-      return errorJson("INVALID_CONFIG", `startsAt/endsAt không hợp lệ ở đợt ${p.id}.`, 422);
-    if (!Number.isInteger(p.trialDays) || p.trialDays < 1 || p.trialDays > 90)
-      return errorJson("INVALID_CONFIG", `trialDays phải là số nguyên 1..90 ở đợt ${p.id}.`, 422);
-    if (!PROMO_COUNT_FROM.includes(p.countFrom))
-      return errorJson("INVALID_CONFIG", `countFrom không hợp lệ ở đợt ${p.id} (chỉ nhận ${PROMO_COUNT_FROM.join("|")}).`, 422);
-    if (!(p.purchaseBonusPercent >= 0 && p.purchaseBonusPercent <= 200))
-      return errorJson("INVALID_CONFIG", `purchaseBonusPercent phải trong 0..200 ở đợt ${p.id}.`, 422);
+      return errorJson("INVALID_CONFIG", `startsAt/endsAt không hợp lệ ở ${where}.`, 422);
+    if (HAS_TRIAL(p.type)) {
+      if (!Number.isInteger(src.trialDays) || src.trialDays < 1 || src.trialDays > 90)
+        return errorJson("INVALID_CONFIG", `trialDays phải là số nguyên 1..90 ở ${where}.`, 422);
+      if (!PROMO_COUNT_FROM.includes(src.countFrom))
+        return errorJson("INVALID_CONFIG", `countFrom không hợp lệ ở ${where} (chỉ nhận ${PROMO_COUNT_FROM.join("|")}).`, 422);
+    }
+    if (HAS_BONUS(p.type)) {
+      if (!(src.purchaseBonusPercent >= 0 && src.purchaseBonusPercent <= 200))
+        return errorJson("INVALID_CONFIG", `purchaseBonusPercent phải trong 0..200 ở ${where}.`, 422);
+    }
   }
 
   await env.DB.prepare(

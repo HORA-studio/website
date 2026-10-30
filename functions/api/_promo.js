@@ -32,6 +32,7 @@ export const PROMO_TYPES = ["bundle", "trial", "purchase_bonus", "announcement"]
 // Moc bat dau dem han cua license dung thu.
 export const PROMO_COUNT_FROM = ["registration", "activation"];
 
+// Field CHUNG cho moi dot: chi hien thi + cua so hieu luc.
 const BASE_PROMO = {
   id: "promo",
   enabled: true,
@@ -41,11 +42,12 @@ const BASE_PROMO = {
   link: "",
   startsAt: "2026-11-01T00:00:00+07:00",
   endsAt: "2026-12-01T00:00:00+07:00",
-  trialTier: "plus",
-  trialDays: 7,
-  countFrom: "registration",
-  purchaseBonusPercent: 50,
 };
+
+// Field rieng theo type — chi dot nao cho quyen loi do moi co, tranh nhoi
+// field cua loai nay sang loai khac (announcement khong co trial/bonus nao).
+export const HAS_TRIAL = (type) => type === "bundle" || type === "trial";
+export const HAS_BONUS = (type) => type === "bundle" || type === "purchase_bonus";
 
 export const DEFAULT_PROMOTIONS = [
   {
@@ -58,7 +60,10 @@ export const DEFAULT_PROMOTIONS = [
     // Thang 11 chi co 30 ngay: cua so [01/11 00:00, 01/12 00:00) gio VN.
     startsAt: "2026-11-01T00:00:00+07:00",
     endsAt: "2026-12-01T00:00:00+07:00",
+    trialTier: "plus",
+    trialDays: 7,
     countFrom: "registration",
+    purchaseBonusPercent: 50,
   },
   // Thong bao ra mat ban dung thu 0.1.0 — chay o ticker trang chu, khong
   // quyen loi (type 'announcement'). Cung cua so voi dot KM thang 11.
@@ -75,14 +80,26 @@ export const DEFAULT_PROMOTIONS = [
 ];
 
 function normalizePromo(raw, idx) {
-  const p = { ...BASE_PROMO, ...(raw && typeof raw === "object" ? raw : {}) };
+  const src = raw && typeof raw === "object" ? raw : {};
+  const p = { ...BASE_PROMO, ...src };
   p.id = String(p.id || `promo-${idx + 1}`).slice(0, 64);
   if (!PROMO_TYPES.includes(p.type)) p.type = "announcement";
   p.enabled = p.enabled !== false;
-  p.trialDays = Number.isInteger(p.trialDays) ? p.trialDays : 7;
-  p.purchaseBonusPercent = Number(p.purchaseBonusPercent) || 0;
-  if (!["go", "plus"].includes(p.trialTier)) p.trialTier = "plus";
-  if (!PROMO_COUNT_FROM.includes(p.countFrom)) p.countFrom = "registration";
+  // Chi giu field rieng khi type thuc su dung quyen loi tuong ung.
+  if (HAS_TRIAL(p.type)) {
+    p.trialDays = Number.isInteger(src.trialDays) ? src.trialDays : 7;
+    p.trialTier = ["go", "plus"].includes(src.trialTier) ? src.trialTier : "plus";
+    p.countFrom = PROMO_COUNT_FROM.includes(src.countFrom) ? src.countFrom : "registration";
+  } else {
+    delete p.trialDays;
+    delete p.trialTier;
+    delete p.countFrom;
+  }
+  if (HAS_BONUS(p.type)) {
+    p.purchaseBonusPercent = Number(src.purchaseBonusPercent) || 0;
+  } else {
+    delete p.purchaseBonusPercent;
+  }
   return p;
 }
 
@@ -179,9 +196,10 @@ export function promoBonusDays(baseDays, percent) {
   return Math.round((baseDays * pct) / 100);
 }
 
-// Ban rut gon 1 dot cho frontend.
+// Ban rut gon 1 dot cho frontend. Chi tra field rieng khi type co quyen loi
+// tuong ung (announcement khong tra trial/bonus) — giu payload gon, dung y nghia.
 export function publicPromo(promo) {
-  return {
+  const out = {
     id: promo.id,
     type: promo.type,
     name: promo.name,
@@ -189,11 +207,14 @@ export function publicPromo(promo) {
     link: promo.link || "",
     startsAt: promo.startsAt,
     endsAt: promo.endsAt,
-    trialTier: promo.trialTier,
-    trialDays: promo.trialDays,
-    countFrom: promo.countFrom,
-    purchaseBonusPercent: promo.purchaseBonusPercent,
   };
+  if (HAS_TRIAL(promo.type)) {
+    out.trialTier = promo.trialTier;
+    out.trialDays = promo.trialDays;
+    out.countFrom = promo.countFrom;
+  }
+  if (HAS_BONUS(promo.type)) out.purchaseBonusPercent = promo.purchaseBonusPercent;
+  return out;
 }
 
 // Chuan hoa danh sach dot (dung boi internal endpoint khi ghi cau hinh).
