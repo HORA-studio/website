@@ -1,6 +1,7 @@
 // POST /api/auth/reset-password { token, password } — dat mat khau moi bang
-// reset token (han 1 gio, dung 1 lan). Thanh cong: doi hash mat khau va THU
-// HOI toan bo session cua khach (dang xuat moi thiet bi/trinh duyet).
+// reset token (han 1 gio, dung 1 lan). Thanh cong: doi hash mat khau, danh dau
+// email da xac thuc (click duoc link reset = da so huu hop thu) va THU HOI toan
+// bo session cua khach (dang xuat moi thiet bi/trinh duyet).
 import { json, errorJson, readJson, consumeAuthToken, peekAuthToken, hashPassword } from "../_lib.js";
 import { logEvent, clientIp } from "../_log.js";
 
@@ -36,10 +37,13 @@ export async function onRequestPost({ request, env }) {
     return errorJson(result.code, message, 400);
   }
 
+  // Click duoc link reset gui toi email = da chung minh so huu hop thu, nen
+  // danh dau email da xac thuc luon (COALESCE giu nguyen moc cu neu da verify).
+  const now = new Date().toISOString();
   const { hash, salt, iterations } = await hashPassword(password);
   await env.DB.prepare(
-    "UPDATE customers SET password_hash = ?1, salt = ?2, iterations = ?3 WHERE id = ?4"
-  ).bind(hash, salt, iterations, result.customerId).run();
+    "UPDATE customers SET password_hash = ?1, salt = ?2, iterations = ?3, email_verified_at = COALESCE(email_verified_at, ?5) WHERE id = ?4"
+  ).bind(hash, salt, iterations, result.customerId, now).run();
 
   // Thu hoi moi session dang con cua khach.
   await env.DB.prepare("DELETE FROM sessions WHERE customer_id = ?1").bind(result.customerId).run();

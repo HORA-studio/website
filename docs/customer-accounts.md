@@ -279,7 +279,7 @@ lại được.
 | `POST /api/auth/verify-email {token}` | Dùng token `verify_email` → đặt `customers.email_verified_at`. Sai/đã dùng → `400 TOKEN_INVALID`; hết hạn → `400 TOKEN_EXPIRED` |
 | `POST /api/auth/resend-verification` (cần đăng nhập) | Gửi lại email xác thực. Đã xác thực → `{ok:true, alreadyVerified:true}`; chưa → `{ok:true, mailConfigured, mailSent}` |
 | `POST /api/auth/forgot-password {email}` | **Luôn** trả `200 {ok:true}` dù email có tồn tại hay không (chống dò email). Tồn tại → phát token `reset_password` + gửi mail |
-| `POST /api/auth/reset-password {token, password}` | Mật khẩu ≥ 8 ký tự (`422 WEAK_PASSWORD`). Thành công → đổi hash + **xóa toàn bộ `sessions` của khách** (thu hồi mọi phiên đăng nhập), trả `{ok:true}` |
+| `POST /api/auth/reset-password {token, password}` | Mật khẩu ≥ 8 ký tự (`422 WEAK_PASSWORD`). Thành công → đổi hash + **đặt `email_verified_at` nếu còn NULL** (click link reset = đã sở hữu hộp thư, nên coi như xác thực email luôn) + **xóa toàn bộ `sessions` của khách** (thu hồi mọi phiên đăng nhập), trả `{ok:true}` |
 
 **Đăng ký:** sau khi tạo tài khoản, `POST /api/auth/register` tự phát
 token verify + gửi mail; response `201 {registered:true, customer:{...,
@@ -287,8 +287,10 @@ emailVerified:false}, mailConfigured}` và **KHÔNG set session/cookie** —
 đăng ký xong chưa vào được tài khoản. `GET /api/auth/me` trả thêm
 `customer.emailVerified`. **Đăng nhập bị CHẶN khi chưa xác thực email**:
 `POST /api/auth/login` trả `403 EMAIL_NOT_VERIFIED` nếu
-`customers.email_verified_at` còn NULL. Khách phải bấm link xác thực
-(`?verify=<token>`) rồi đăng nhập lại. Banner "Email của bạn chưa được xác
+`customers.email_verified_at` còn NULL. Khách bấm link xác thực
+(`?verify=<token>`) rồi đăng nhập lại — **hoặc** đi qua luồng quên mật khẩu
+(click link `?reset=<token>` + đặt mật khẩu mới cũng tự xác thực email, vì
+link reset gửi tới chính hộp thư đó). Banner "Email của bạn chưa được xác
 thực" + nút gửi lại vẫn còn cho trường hợp tài khoản cũ đã đăng nhập trước
 đó; trang tài khoản tự xử lý link `?verify=<token>` (xác thực + xóa param
 khỏi URL) và `?reset=<token>` (hiện form đặt mật khẩu mới).
