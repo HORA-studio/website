@@ -1,8 +1,24 @@
 // POST /api/auth/reset-password { token, password } — dat mat khau moi bang
 // reset token (han 1 gio, dung 1 lan). Thanh cong: doi hash mat khau va THU
 // HOI toan bo session cua khach (dang xuat moi thiet bi/trinh duyet).
-import { json, errorJson, readJson, consumeAuthToken, hashPassword } from "../_lib.js";
+import { json, errorJson, readJson, consumeAuthToken, peekAuthToken, hashPassword } from "../_lib.js";
 import { logEvent, clientIp } from "../_log.js";
+
+// GET /api/auth/reset-password?token=... — man dat lai mat khau lay email
+// cua tai khoan de dien san (o email bi khoa). Chi doc, KHONG tieu thu token.
+export async function onRequestGet({ request, env }) {
+  const token = new URL(request.url).searchParams.get("token") || "";
+  const peek = await peekAuthToken(env, token, "reset_password");
+  if (!peek.ok) {
+    const message = peek.code === "TOKEN_EXPIRED"
+      ? "Link đặt lại mật khẩu đã hết hạn. Hãy yêu cầu link mới."
+      : "Link đặt lại mật khẩu không hợp lệ hoặc đã được dùng.";
+    return errorJson(peek.code, message, 400);
+  }
+  const row = await env.DB.prepare("SELECT email FROM customers WHERE id = ?1").bind(peek.customerId).first();
+  if (!row) return errorJson("TOKEN_INVALID", "Link đặt lại mật khẩu không hợp lệ hoặc đã được dùng.", 400);
+  return json({ email: row.email });
+}
 
 export async function onRequestPost({ request, env }) {
   const body = await readJson(request);

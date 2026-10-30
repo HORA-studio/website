@@ -1014,8 +1014,8 @@ html,body{min-height:100%;height:100%;overflow:hidden}
 .auth-submit span:last-child{font-size:20px;transition:transform .15s}
 .auth-submit:hover span:last-child{transform:translateX(3px)}
 .auth-terms{font-size:10.5px;line-height:1.55;color:var(--muted);text-align:center;margin:14px 0 0}
-#reset-card{max-width:560px;margin:24px auto}
-#reset-card h2{font-size:24px}
+#f-email:disabled{opacity:.55;cursor:not-allowed}
+#reset-back{margin-bottom:14px}
 @media(max-width:760px){
 .auth-layout{grid-template-columns:1fr;max-width:500px;min-height:0;margin:8px auto 24px;border-radius:22px}
 .auth-visual{display:none}
@@ -1098,14 +1098,15 @@ html,body{min-height:100%;height:100%;overflow:hidden}
         <h2 id="auth-title">Tạo tài khoản</h2>
         <p id="auth-description">Bắt đầu trải nghiệm hệ sinh thái HORA ngay hôm nay.</p>
       </div>
-      <div class="tabs" role="tablist" aria-label="Chọn hình thức tài khoản">
+      <div class="tabs" id="auth-tabs" role="tablist" aria-label="Chọn hình thức tài khoản">
         <button type="button" id="tab-login" role="tab" aria-selected="false">Đăng nhập</button>
         <button type="button" id="tab-register" class="on" role="tab" aria-selected="true">Đăng ký</button>
       </div>
+      <button type="button" id="reset-back" class="forgot-back hidden">← Quay lại đăng nhập</button>
     <form id="auth-form">
       <label for="f-email">Email</label>
       <input id="f-email" type="email" required="" autocomplete="email" placeholder="ban@example.com">
-      <div class="password-label"><label for="f-password">Mật khẩu</label><span id="password-hint">Ít nhất 8 ký tự</span></div>
+      <div class="password-label"><label for="f-password" id="password-label">Mật khẩu</label><span id="password-hint">Ít nhất 8 ký tự</span></div>
       <div class="password-field"><input id="f-password" type="password" required="" minlength="8" autocomplete="new-password" placeholder="Nhập mật khẩu"><button type="button" class="pw-toggle" aria-label="Hiện mật khẩu" aria-pressed="false"><svg class="pw-icon-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg><svg class="pw-icon-eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg></button></div>
       <div id="confirm-password-wrap">
         <label for="f-confirm-password">Xác nhận mật khẩu</label>
@@ -1130,17 +1131,6 @@ html,body{min-height:100%;height:100%;overflow:hidden}
     </div>
   </section>
 
-  <!-- Dat lai mat khau (mo tu link ?reset=<token> trong email) -->
-  <section id="reset-card" class="card hidden">
-    <h2>Đặt mật khẩu mới</h2>
-    <form id="reset-form">
-      <label for="reset-password">Mật khẩu mới (ít nhất 8 ký tự)</label>
-      <div class="password-field"><input id="reset-password" type="password" required="" minlength="8" autocomplete="new-password"><button type="button" class="pw-toggle" aria-label="Hiện mật khẩu" aria-pressed="false"><svg class="pw-icon-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg><svg class="pw-icon-eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg></button></div>
-      <div class="row" style="margin-top:16px">
-        <button class="btn primary" type="submit">Đặt lại mật khẩu</button>
-      </div>
-    </form>
-  </section>
 
   <!-- Da dang nhap -->
   <div id="dash" class="hidden">
@@ -1342,25 +1332,29 @@ function setMode(m) {
   $("tab-login").classList.toggle("on", m === "login");
   $("tab-register").classList.toggle("on", m === "register");
   $("confirm-password-wrap").classList.toggle("hidden", m === "login");
-  $("f-confirm-password").required = m === "register";
+  $("f-confirm-password").required = m === "register" || m === "reset";
   if (m === "login") {
     $("f-confirm-password").value = "";
   }
-  $("auth-submit").innerHTML = `<span>${m === "login" ? "Đăng nhập" : "Tạo tài khoản"}</span><span aria-hidden="true">→</span>`;
-  $("auth-title").textContent = m === "login" ? "Chào mừng trở lại" : "Tạo tài khoản";
-  $("auth-description").textContent = m === "login" ? "Đăng nhập để tiếp tục với không gian HORA của bạn." : "Bắt đầu trải nghiệm hệ sinh thái HORA ngay hôm nay.";
+  $("auth-submit").innerHTML = `<span>${m === "login" ? "Đăng nhập" : m === "register" ? "Tạo tài khoản" : "Đặt lại mật khẩu"}</span><span aria-hidden="true">→</span>`;
+  $("auth-title").textContent = m === "login" ? "Chào mừng trở lại" : m === "register" ? "Tạo tài khoản" : "Đặt mật khẩu mới";
+  $("auth-description").textContent = m === "login" ? "Đăng nhập để tiếp tục với không gian HORA của bạn." : m === "register" ? "Bắt đầu trải nghiệm hệ sinh thái HORA ngay hôm nay." : "Nhập mật khẩu mới cho tài khoản của bạn, rồi đăng nhập lại bằng mật khẩu mới.";
   $("password-hint").textContent = m === "login" ? "Mật khẩu của bạn" : "Ít nhất 8 ký tự";
   $("tab-login").setAttribute("aria-selected", String(m === "login"));
   $("tab-register").setAttribute("aria-selected", String(m === "register"));
   $("f-password").autocomplete = m === "login" ? "current-password" : "new-password";
   $("forgot-link").style.display = m === "login" ? "" : "none";
   if (m !== "login") $("forgot-wrap").classList.add("hidden");
+  $("auth-tabs").classList.toggle("hidden", m === "reset");
+  $("reset-back").classList.toggle("hidden", m !== "reset");
+  $("f-email").disabled = m === "reset";
+  $("password-label").textContent = m === "reset" ? "Mật khẩu mới" : "Mật khẩu";
 }
 $("tab-login").addEventListener("click", () => { $("auth-card").classList.remove("forgot-mode"); $("forgot-wrap").classList.add("hidden"); setMode("login"); });
 $("tab-register").addEventListener("click", () => { $("auth-card").classList.remove("forgot-mode"); $("forgot-wrap").classList.add("hidden"); setMode("register"); });
 function checkPasswordMatch() {
   const confirm = $("f-confirm-password");
-  if (mode !== "register" || !confirm.value) {
+  if ((mode !== "register" && mode !== "reset") || !confirm.value) {
     confirm.setCustomValidity("");
     return true;
   }
@@ -1387,16 +1381,29 @@ document.querySelectorAll(".pw-toggle").forEach((btn) => {
 
 $("auth-form").addEventListener("submit", async (e) => {
   e.preventDefault();
-  if (mode === "register" && !checkPasswordMatch()) {
+  if (mode !== "login" && !checkPasswordMatch()) {
     $("f-confirm-password").reportValidity();
     return;
   }
   const payload = { email: $("f-email").value.trim(), password: $("f-password").value };
   const submit = $("auth-submit");
-  const originalLabel = mode === "login" ? "Đăng nhập" : "Tạo tài khoản";
+  const originalLabel = mode === "login" ? "Đăng nhập" : mode === "register" ? "Tạo tài khoản" : "Đặt lại mật khẩu";
   submit.disabled = true;
   submit.innerHTML = '<span>Đang xử lý…</span><span aria-hidden="true">…</span>';
   try {
+    if (mode === "reset") {
+      if (!resetToken) { showMsg("err", "Thiếu token đặt lại mật khẩu. Hãy mở lại link trong email."); return; }
+      const rr = await api("/api/auth/reset-password", { method: "POST", body: JSON.stringify({ token: resetToken, password: $("f-password").value }) });
+      if (!rr.res.ok) { showMsg("err", errText(rr.data, "Không đặt lại được mật khẩu. Link có thể đã hết hạn.")); return; }
+      resetToken = null;
+      const em = $("f-email").value;
+      $("f-password").value = "";
+      $("f-confirm-password").value = "";
+      setMode("login");
+      $("f-email").value = em;
+      showMsg("ok", "Đặt lại mật khẩu thành công. Hãy đăng nhập bằng mật khẩu mới.");
+      return;
+    }
     const { res, data } = await api("/api/auth/" + mode, { method: "POST", body: JSON.stringify(payload) });
     if (!res.ok) {
       if (mode === "login" && data && data.error && data.error.code === "EMAIL_NOT_VERIFIED") {
@@ -1423,7 +1430,7 @@ $("auth-form").addEventListener("submit", async (e) => {
     showMsg("err", "Không thể kết nối máy chủ. Vui lòng kiểm tra mạng và thử lại.");
   } finally {
     submit.disabled = false;
-    submit.innerHTML = `<span>${originalLabel}</span><span aria-hidden="true">→</span>`;
+    submit.innerHTML = `<span>${mode === "login" ? "Đăng nhập" : mode === "register" ? "Tạo tài khoản" : "Đặt lại mật khẩu"}</span><span aria-hidden="true">→</span>`;
   }
 });
 
@@ -1443,6 +1450,37 @@ function hideForgotMode() {
   $("forgot-wrap").classList.add("hidden");
   setMode("login");
 }
+
+// ----- Dat lai mat khau (mo tu link ?reset=<token> trong email) -----
+// Dung lai form cua auth-card nhu dang ky: email dien san + bi khoa, 2 o
+// mat khau (moi + xac nhan). Email lay tu server theo token (GET chi doc,
+// khong tieu thu token — token chi bi dung khi dat mat khau thanh cong).
+async function enterResetMode(token) {
+  resetToken = token;
+  setMode("reset");
+  $("f-email").value = "";
+  try {
+    const { res, data } = await api("/api/auth/reset-password?token=" + encodeURIComponent(token), { method: "GET" });
+    if (res.ok && data && data.email) {
+      $("f-email").value = data.email;
+      $("f-password").focus();
+    } else {
+      showMsg("err", errText(data, "Link đặt lại mật khẩu không hợp lệ hoặc đã hết hạn. Hãy yêu cầu link mới qua mục Quên mật khẩu."));
+      $("f-password").disabled = true;
+      $("f-confirm-password").disabled = true;
+      $("auth-submit").disabled = true;
+    }
+  } catch {
+    showMsg("err", "Không kiểm tra được link đặt lại mật khẩu. Hãy kiểm tra mạng rồi tải lại trang.");
+  }
+}
+$("reset-back").addEventListener("click", () => {
+  resetToken = null;
+  $("f-password").disabled = false;
+  $("f-confirm-password").disabled = false;
+  $("auth-submit").disabled = false;
+  setMode("login");
+});
 $("forgot-link").addEventListener("click", (e) => {
   e.preventDefault();
   showForgotMode();
@@ -1869,22 +1907,9 @@ let resetToken = null;
     })();
   }
   if (resetParam) {
-    resetToken = resetParam;
-    $("reset-card").classList.remove("hidden");
-    $("reset-card").scrollIntoView({ behavior: "smooth", block: "center" });
+    enterResetMode(resetParam);
   }
 }
-$("reset-form").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  if (!resetToken) { showMsg("err", "Thiếu token đặt lại mật khẩu. Hãy mở lại link trong email."); return; }
-  const { res, data } = await api("/api/auth/reset-password", { method: "POST", body: JSON.stringify({ token: resetToken, password: $("reset-password").value }) });
-  if (!res.ok) { showMsg("err", errText(data, "Không đặt lại được mật khẩu.")); return; }
-  resetToken = null;
-  $("reset-card").classList.add("hidden");
-  setMode("login");
-  showMsg("ok", "Đã đặt lại mật khẩu, hãy đăng nhập lại.");
-  await loadDash();
-});
 
 // Thong bao sau khi quay ve tu cong thanh toan (chi IPN moi xac nhan da tra tien).
 const payParam = new URLSearchParams(location.search).get("payment");
