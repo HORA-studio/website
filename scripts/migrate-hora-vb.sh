@@ -3,7 +3,7 @@
 # Chay SAU khi da apply website/db/schema.sql len hora-website (ca local + remote).
 #
 # Yeu cau: CLOUDFLARE_API_TOKEN (quyen D1 Edit) + CLOUDFLARE_ACCOUNT_ID trong env,
-# hoac dat san trong ~/.hora_cloudflare_token.
+# hoac dat san trong vault ~/HORA/.secrets/cloudflare/api_token (fallback: ~/.hora_cloudflare_token).
 #
 # Dung:
 #   ./scripts/migrate-hora-vb.sh --remote     # migrate production
@@ -18,8 +18,15 @@ MODE="${1:---remote}"
 WRANGLER_CWD="${WRANGLER_CWD:-.}"
 run_here() { (cd "$WRANGLER_CWD" && npx -y wrangler@4 "$@"); }
 
-: "${CLOUDFLARE_ACCOUNT_ID:?can CLOUDFLARE_ACCOUNT_ID}"
-: "${CLOUDFLARE_API_TOKEN:?can CLOUDFLARE_API_TOKEN (dat trong env hoac ~/.hora_cloudflare_token)}"
+# Secret doc tu vault tap trung; fallback ve cho cu neu vault chua co.
+_VAULT_TOKEN="${HOME}/HORA/.secrets/cloudflare/api_token"
+if [ -z "${CLOUDFLARE_API_TOKEN:-}" ]; then
+  if [ -f "$_VAULT_TOKEN" ]; then CLOUDFLARE_API_TOKEN="$(cat "$_VAULT_TOKEN")"
+  elif [ -f "$HOME/.hora_cloudflare_token" ]; then CLOUDFLARE_API_TOKEN="$(cat "$HOME/.hora_cloudflare_token")"
+  fi
+fi
+: "${CLOUDFLARE_ACCOUNT_ID:?can CLOUDFLARE_ACCOUNT_ID (vd b3e97e07d1bd4fc1614a9626accc52f0)}"
+: "${CLOUDFLARE_API_TOKEN:?can CLOUDFLARE_API_TOKEN (env, hoac ~/HORA/.secrets/cloudflare/api_token, hoac ~/.hora_cloudflare_token)}"
 
 WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT

@@ -211,32 +211,35 @@ Thiếu biến của cổng nào thì tạo đơn qua cổng đó trả
 `503 GATEWAY_NOT_CONFIGURED` và đơn nằm ở trạng thái `created` — hệ thống
 không tạo URL thanh toán giả.
 
-## File credential trên máy Muse (quy ước đặt tên)
+## File credential — VAULT TẬP TRUNG `~/HORA/.secrets`
 
-Mọi file bí mật dùng cho dự án đều nằm ở thư mục home của máy Muse, tên bắt
-đầu bằng `~/.hora_`, quyền `0600`. Tài liệu này chỉ ghi **tên file + công
-dụng** — **giá trị bí mật không bao giờ ghi vào repo, chat hay log**.
+**2026-10-30:** mọi secret của hệ HORA đã gom về **một nơi: `~/HORA/.secrets/`**
+(mỗi file `0600`; thư mục này KHÔNG phải git repo nên không bị commit). Xem
+`~/HORA/.secrets/README.md` để có bảng tra đầy đủ (secret nào ở đâu, dùng làm gì,
+script khôi phục). Tài liệu này chỉ ghi **tên file + công dụng** — **giá trị bí
+mật không bao giờ ghi vào repo, chat hay log**.
 
-| File | Chứa gì | Dùng để làm gì | Trạng thái |
-| --- | --- | --- | --- |
-| `~/.hora_github_token` | GitHub fine-grained PAT (Contents R+W) | Muse push/pull các repo `HORA-studio` | ĐÃ CÓ |
-| `~/.hora_cloudflare_token` | Cloudflare API token (Account: D1 Edit + Pages Edit) | Muse áp schema D1 + nạp secret cho Pages khi deploy | CHƯA TẠO |
-| `~/.hora_sepay_key` | API key webhook SePay (dãy user tự đặt trong cấu hình webhook ở SePay) | Muse nạp vào biến `SEPAY_WEBHOOK_API_KEY` của Pages | CHƯA TẠO |
+Các file cũ ở `~/.hora_*` đã được **copy nguyên giá trị** vào vault (giữ lại file cũ
+để tương thích script chưa cập nhật). Vị trí mới:
 
-Cách user tạo 2 file chưa có (chạy trên máy Muse, thay phần trong `<>` bằng
-giá trị thật, xong nhắn Muse "done"):
+| Secret | Vault | Trước đây |
+| --- | --- | --- |
+| Cloudflare API token | `~/HORA/.secrets/cloudflare/api_token` | `~/.hora_cloudflare_token` |
+| Identity internal secret | `~/HORA/.secrets/cloudflare/identity_internal_secret` | `~/.hora_identity_secret` |
+| SePay webhook API key | `~/HORA/.secrets/cloudflare/sepay_webhook_api_key` | `~/.hora_sepay_key` |
+| Secret Pages (Resend, EMAIL_FROM, ...) | `~/HORA/.secrets/website/pages.secrets` | (chưa lưu file) |
+| `.dev.vars` + signing keys + admin creds | `~/HORA/.secrets/hora-worker/` | `hora-worker/{.dev.vars,secrets/}` |
 
+Khôi phục:
 ```bash
-cat > ~/.hora_cloudflare_token <<'EOF'
-<token Cloudflare>
-EOF
-chmod 600 ~/.hora_cloudflare_token
+# .dev.vars / secrets/ bị xoá:
+~/HORA/.secrets/hora-worker/restore-dev-vars.sh
 
-cat > ~/.hora_sepay_key <<'EOF'
-<API key SePay>
-EOF
-chmod 600 ~/.hora_sepay_key
+# nạp lại secret Pages lên Cloudflare (máy mới):
+export CLOUDFLARE_ACCOUNT_ID=b3e97e07d1bd4fc1614a9626accc52f0
+~/HORA/.secrets/website/load-pages-secrets.sh
 ```
+
 
 URL cần đăng ký với từng cổng (khi có merchant):
 
