@@ -17,6 +17,7 @@ function orderOut(r) {
     licenseId: r.license_id,
     createdAt: r.created_at,
     paidAt: r.paid_at,
+    bonusDays: r.bonus_days || 0,
   };
 }
 

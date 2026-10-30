@@ -411,6 +411,11 @@ footer{border-top:1px solid #14161a;background:#101216;color:#c9cdc9;padding:36p
   .nav .navlinks{position:static;transform:none;}
 }
 
+#promo-bar{display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap;background:linear-gradient(90deg,#0b6258,#0b9787);color:#eafffb;font-size:13.5px;line-height:1.5;padding:10px 18px;text-align:center}
+#promo-bar[hidden]{display:none}
+#promo-bar a{color:#fff;font-weight:800;text-decoration:underline;text-underline-offset:3px;white-space:nowrap}
+#promo-bar .promo-count{opacity:.85;font-size:12.5px;white-space:nowrap}
+#pricing .promo-tag{margin-top:8px;font-size:12.5px;font-weight:700;color:#06796e}
 </style>
 </head>
 <body>
@@ -423,6 +428,7 @@ footer{border-top:1px solid #14161a;background:#101216;color:#c9cdc9;padding:36p
   <div class="actions"><a class="btn small" id="nav-register-link" href="/account.html?mode=register">Đăng ký</a><a class="btn small primary" id="nav-account-link" href="/account.html">Đăng nhập</a><a class="btn small" id="nav-user-email" href="/account.html" style="display:none" aria-label="Mở trang quản lý tài khoản"></a></div>
  </div>
 </header>
+<div id="promo-bar" hidden><span class="promo-text"></span><a href="/account.html?mode=register">Đăng ký nhận ưu đãi</a><span class="promo-count"></span></div>
 <div class="main-content" id="main-content">
  <main id="top" class="wrap">
   <section class="hero">
@@ -719,6 +725,26 @@ document.getElementById("modal-close").addEventListener("click",closeModal);moda
 </script>
 <script>/* Trang thai dang nhap o header: da dang nhap thi an nut Dang ky + Dang nhap, hien email (bam -> trang quan ly tai khoan). */
 fetch("/api/auth/me",{credentials:"same-origin"}).then(function(r){return r.ok?r.json():null}).then(function(d){if(!d||!d.customer)return;var reg=document.getElementById("nav-register-link");var login=document.getElementById("nav-account-link");var chip=document.getElementById("nav-user-email");if(reg)reg.style.display="none";if(login)login.style.display="none";if(chip){chip.textContent=d.customer.email||"Tài khoản";chip.style.display="";}}).catch(function(){});</script>
+<script>
+fetch("/api/promo").then(function(r){return r.ok?r.json():null;}).then(function(p){
+  if(!p||!p.active) return;
+  var bar=document.getElementById("promo-bar");
+  if(bar){
+    bar.querySelector(".promo-text").textContent="🎉 "+(p.headline||"");
+    var left=Math.max(1,Math.ceil((Date.parse(p.endsAt)-Date.now())/86400000));
+    bar.querySelector(".promo-count").textContent="· Còn "+left+" ngày";
+    bar.hidden=false;
+  }
+  document.querySelectorAll("#pricing .price-card").forEach(function(card){
+    var price=card.querySelector(".price");
+    if(!price) return;
+    var tag=document.createElement("div");
+    tag.className="promo-tag";
+    tag.textContent="Khuyến mãi: +"+p.purchaseBonusPercent+"% thời gian sử dụng";
+    price.after(tag);
+  });
+}).catch(function(){});
+</script>
 </body>
 </html>
 <style>
