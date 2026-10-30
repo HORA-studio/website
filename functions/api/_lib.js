@@ -1,4 +1,4 @@
-import { getPromotion, isPromoActive, isCustomerEligible, promoBonusDays } from "./_promo.js";
+import { getPromotions, resolveBonusBenefit, isRegisteredInWindow, promoBonusDays } from "./_promo.js";
 // Thu vien dung chung cho cac Pages Function /api/* cua website HORA.
 // Chay tren Cloudflare Workers runtime (WebCrypto, fetch, D1 qua env.DB).
 
@@ -216,19 +216,19 @@ export async function tryIssueLicense(env, order) {
   // bonus = 0 (fail-soft, khong duoc lam ket cap license).
   let bonusDaysGranted = 0;
   try {
-    const cfg = await getPromotion(env);
-    const nowMs = Date.now();
-    if (isPromoActive(cfg, nowMs)) {
+    const bb = resolveBonusBenefit(await getPromotions(env), Date.now());
+    if (bb) {
       const cust = await env.DB.prepare("SELECT created_at FROM customers WHERE id = ?1")
         .bind(order.customer_id).first();
-      if (cust && isCustomerEligible(cfg, cust.created_at, nowMs)) {
-        bonusDaysGranted = promoBonusDays(validityDays, cfg);
+      if (cust && isRegisteredInWindow(bb.promo, cust.created_at)) {
+        bonusDaysGranted = promoBonusDays(validityDays, bb.percent);
         validityDays += bonusDaysGranted;
       }
     }
   } catch {
     bonusDaysGranted = 0;
   }
+
   const licenseId = newLicenseId();
   const licenseKey = newLicenseKey("HORA");
 

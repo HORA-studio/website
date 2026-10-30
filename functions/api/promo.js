@@ -1,13 +1,28 @@
-// GET /api/promo — thong tin khuyen mai cho frontend (trang chu + account).
-// Cong khai khi chua dang nhap; neu co session thi kem trang thai ca nhan
-// (you.eligible / you.hasTrial) de account hien thong bao dung nguoi.
+// GET /api/promo — du lieu khuyen mai cho frontend:
+//   promos: danh sach dot DANG CHAY (trang chu chay banner tuan tu theo list nay)
+//   trial / purchaseBonusPercent: quyen loi dang hieu luc (de khoi mua hang
+//   chon dung banner theo "type" cua dot)
+//   you (khi co session): trang thai ca nhan cua khach.
 import { json, errorJson, getSessionCustomer } from "./_lib.js";
-import { getPromotion, publicPromotion, isCustomerEligible } from "./_promo.js";
+import {
+  getPromotions, activePromotions, publicPromo,
+  resolveTrialBenefit, resolveBonusBenefit, isRegisteredInWindow,
+} from "./_promo.js";
 
 export async function onRequestGet({ request, env }) {
-  const cfg = await getPromotion(env);
+  const list = await getPromotions(env);
   const nowMs = Date.now();
-  const out = publicPromotion(cfg, nowMs);
+  const actives = activePromotions(list, nowMs);
+  const trial = resolveTrialBenefit(list, nowMs);
+  const bonus = resolveBonusBenefit(list, nowMs);
+
+  const out = {
+    active: actives.length > 0,
+    promos: actives.map(publicPromo),
+    trial: trial ? { promoId: trial.promo.id, tier: trial.tier, days: trial.days } : null,
+    purchaseBonusPercent: bonus ? bonus.percent : 0,
+    bonusPromoId: bonus ? bonus.promo.id : null,
+  };
 
   let customer = null;
   try {
@@ -16,21 +31,25 @@ export async function onRequestGet({ request, env }) {
     customer = null;
   }
   if (customer) {
-    const eligible = isCustomerEligible(cfg, customer.createdAt || customer.created_at, nowMs);
+    const createdIso = customer.createdAt || customer.created_at;
     let hasTrial = false;
-    if (eligible) {
-      try {
-        const t = await env.DB.prepare(
-          "SELECT id FROM licenses WHERE customer_id = ?1 AND organization = 'promo' LIMIT 1"
-        )
-          .bind(customer.id)
-          .first();
-        hasTrial = !!t;
-      } catch {
-        hasTrial = false;
-      }
+    try {
+      const t = await env.DB.prepare(
+        "SELECT id FROM licenses WHERE customer_id = ?1 AND organization = 'promo' LIMIT 1"
+      )
+        .bind(customer.id)
+        .first();
+      hasTrial = !!t;
+    } catch {
+      hasTrial = false;
     }
-    out.you = { eligible, hasTrial };
+    const bonusEligible = !!(bonus && isRegisteredInWindow(bonus.promo, createdIso));
+    out.you = {
+      bonusEligible,
+      trialEligible: !!(trial && isRegisteredInWindow(trial.promo, createdIso)),
+      hasTrial,
+      eligible: bonusEligible, // tuong thich voi frontend ban truoc
+    };
   }
   return json(out);
 }

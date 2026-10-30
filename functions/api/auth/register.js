@@ -5,7 +5,7 @@
 // Chua cau hinh mail (RESEND_API_KEY de trong) thi buoc gui bi bo qua —
 // dang ky van thanh cong nhung khong the dang nhap (xem functions/api/_mail.js).
 import { json, errorJson, readJson, hashPassword, issueAuthToken, siteUrl, newLicenseId, newLicenseKey, appForPlan } from "../_lib.js";
-import { getPromotion, isPromoActive } from "../_promo.js";
+import { getPromotions, resolveTrialBenefit } from "../_promo.js";
 import { logEvent, clientIp } from "../_log.js";
 import { isMailConfigured, sendVerificationEmail } from "../_mail.js";
 
@@ -40,12 +40,12 @@ export async function onRequestPost({ request, env }) {
   // Moi loi o buoc nay deu bi nuot — khong duoc lam hong dang ky.
   let trial = null;
   try {
-    const cfg = await getPromotion(env);
-    const nowMs = Date.now();
-    if (isPromoActive(cfg, nowMs)) {
+    const benefit = resolveTrialBenefit(await getPromotions(env), Date.now());
+    if (benefit) {
+      const marker = `promo:${benefit.promo.id}`;
       const dup = await env.DB.prepare(
-        "SELECT id FROM licenses WHERE customer_id = ?1 AND organization = 'promo' AND created_at >= ?2 LIMIT 1"
-      ).bind(id, cfg.startsAt).first();
+        "SELECT id FROM licenses WHERE customer_id = ?1 AND organization = 'promo' AND notes LIKE ?2 LIMIT 1"
+      ).bind(id, marker + "%").first();
       if (!dup) {
         const trialId = newLicenseId();
         await env.DB.prepare(
@@ -54,11 +54,11 @@ export async function onRequestPost({ request, env }) {
               expiry_utc, validity_days, activated_at, revoked_at, source, order_id, created_at, notes)
            VALUES (?1, ?2, ?3, ?4, ?5, ?6, 'active', 'promo', NULL, ?7, NULL, NULL, 'manual', NULL, ?8, ?9)`
         ).bind(
-          trialId, newLicenseKey("HORA"), id, appForPlan(cfg.trialTier), appForPlan(cfg.trialTier),
-          cfg.trialTier, cfg.trialDays, new Date(nowMs).toISOString(),
-          `Khuyen mai "${cfg.name}": dung thu ${cfg.trialDays} ngay khi dang ky`
+          trialId, newLicenseKey("HORA"), id, appForPlan(benefit.tier), appForPlan(benefit.tier),
+          benefit.tier, benefit.days, new Date().toISOString(),
+          `${marker}; Khuyen mai "${benefit.promo.name}": dung thu ${benefit.days} ngay khi dang ky`
         ).run();
-        trial = { tier: cfg.trialTier, days: cfg.trialDays };
+        trial = { tier: benefit.tier, days: benefit.days };
         await logEvent(env, { eventType: "promo.trial_granted", customerId: id, ip: clientIp(request) });
       }
     }
@@ -66,9 +66,6 @@ export async function onRequestPost({ request, env }) {
     console.warn("register: grant trial failed:", err && err.message ? err.message : String(err));
   }
 
-  // Gui email xac thuc (token 24h, dung 1 lan). Moi loi o buoc nay deu bi
-  // nuot — dang ky da thanh cong thi khong duoc vo chi vi mail/token loi
-  // (vd DB chua ap migration auth_tokens).
   const mailConfigured = isMailConfigured(env);
   try {
     const verifyToken = await issueAuthToken(env, id, "verify_email", 24 * 3600 * 1000);
