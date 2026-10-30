@@ -1934,27 +1934,35 @@ if (payParam === "success") showMsg("info", "Đã quay về từ cổng thanh to
 else if (payParam === "failed") showMsg("err", "Thanh toán chưa thành công hoặc đã bị hủy. Bạn có thể thử lại.");
 else if (payParam === "pending") showMsg("info", "Đang chờ cổng thanh toán xác nhận giao dịch.");
 
-// ----- Khuyen mai: dai thong bao o tab Mua goi + dong +50% duoi gia -----
+// ----- Khuyen mai: dai thong bao o tab Mua goi — noi dung theo TYPE dot -----
 (async () => {
   try {
     const r = await fetch("/api/promo", { credentials: "same-origin" });
     if (!r.ok) return;
     const p = await r.json();
-    if (!p || !p.active) return;
+    if (!p || !p.active || !p.promos || !p.promos.length) return;
     const strip = $("promo-strip");
     if (!strip) return;
     const pct = Number(p.purchaseBonusPercent) || 0;
-    const mDays = 30 + Math.round((30 * pct) / 100);
-    const yDays = 365 + Math.round((365 * pct) / 100);
-    const daysLeft = Math.max(1, Math.ceil((Date.parse(p.endsAt) - Date.now()) / 86400000));
-    if (p.you && p.you.eligible) {
-      strip.innerHTML = `🎉 <strong>Khuyến mãi dành cho bạn:</strong> mua gói trong đợt này được <strong>+${pct}% thời gian sử dụng</strong> (gói tháng 30 → ${mDays} ngày, gói năm 365 → ${yDays} ngày).${p.you.hasTrial ? ` Bạn đang có <strong>${p.trialTier === "plus" ? "Plus" : "Go"} dùng thử ${p.trialDays} ngày</strong> — key ở tab Lịch sử giao dịch.` : ""} Còn ${daysLeft} ngày.`;
+    const first = p.promos[0];
+    const bonusPromo = p.promos.find((x) => x.id === p.bonusPromoId) || first;
+    const fmtDay = (iso) => new Date(iso).toLocaleDateString("vi-VN");
+    if (pct > 0 && p.you && p.you.bonusEligible) {
+      const mDays = 30 + Math.round((30 * pct) / 100);
+      const yDays = 365 + Math.round((365 * pct) / 100);
+      const daysLeft = Math.max(1, Math.ceil((Date.parse(bonusPromo.endsAt) - Date.now()) / 86400000));
+      strip.innerHTML = `🎉 <strong>Khuyến mãi dành cho bạn:</strong> mua gói trong đợt này được <strong>+${pct}% thời gian sử dụng</strong> (gói tháng 30 → ${mDays} ngày, gói năm 365 → ${yDays} ngày).${p.you.hasTrial && p.trial ? ` Bạn đang có <strong>${p.trial.tier === "plus" ? "Plus" : "Go"} dùng thử ${p.trial.days} ngày</strong> — key ở tab Lịch sử giao dịch.` : ""} Còn ${daysLeft} ngày.`;
       document.querySelectorAll(".promo-bonus-line").forEach((el) => {
         el.textContent = `Khuyến mãi +${pct}% thời gian: tháng ${mDays} ngày · năm ${yDays} ngày`;
         el.classList.remove("hidden");
       });
+    } else if (pct > 0) {
+      strip.innerHTML = `🎉 <strong>${esc(bonusPromo.name || "Khuyến mãi")}:</strong> tài khoản đăng ký trong đợt này được <strong>+${pct}% thời gian sử dụng</strong> khi mua gói (áp dụng đến hết ${fmtDay(bonusPromo.endsAt)}).`;
+    } else if (p.trial) {
+      const tp = p.promos.find((x) => x.id === p.trial.promoId) || first;
+      strip.innerHTML = `🎉 <strong>${esc(tp.name || "Khuyến mãi")}:</strong> tài khoản đăng ký mới trong đợt này được tặng <strong>${p.trial.tier === "plus" ? "Plus" : "Go"} dùng thử ${p.trial.days} ngày</strong> (đến hết ${fmtDay(tp.endsAt)}).${p.you && p.you.hasTrial ? " Bạn đang có key dùng thử — xem ở tab Lịch sử giao dịch." : ""}`;
     } else {
-      strip.innerHTML = `🎉 <strong>${esc(p.name || "Khuyến mãi")}:</strong> ${esc(p.headline || "")} (đến hết ${new Date(p.endsAt).toLocaleDateString("vi-VN")}).`;
+      strip.innerHTML = `🎉 <strong>${esc(first.name || "Khuyến mãi")}:</strong> ${esc(first.headline || "")}`;
     }
     strip.classList.remove("hidden");
   } catch { /* khong co khuyen mai thi im lang */ }

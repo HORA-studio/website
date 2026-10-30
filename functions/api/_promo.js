@@ -1,93 +1,163 @@
 // ============================================================================
-// KHUYEN MAI — cau hinh doc tu bang meta (key 'promotion', JSON) trong D1.
-// Sua cau hinh KHONG can deploy lai code:
-//   - POST /api/internal/promo (header X-Identity-Secret) de ghi cau hinh moi
-//   - GET  /api/internal/promo (cung secret) de xem cau hinh dang dung
-//   - hoac sua truc tiep dong meta nay trong D1 console.
-// Thieu dong meta / JSON hong -> dung DEFAULT_PROMOTION ben duoi (fail-soft:
-// loi doc cau hinh khong bao gio duoc lam hong dang ky / cap license).
+// KHUYEN MAI — danh sach cac dot khuyen mai, doc tu bang meta trong D1:
+//   key 'promotions' = JSON mang cac dot (moi dot mot object, xem duoi).
+//   key 'promotion'  = dang cu (1 dot don) — van doc duoc de tuong thich.
+// Sua cau hinh KHONG can deploy lai code: POST /api/internal/promo
+// (header X-Identity-Secret) hoac sua truc tiep trong D1 console.
+// Loi doc/parse cau hinh -> dung DEFAULT_PROMOTIONS (fail-soft).
 //
-// LUAT AP DUNG (mot cua so thoi gian duy nhat [startsAt, endsAt)):
-//   - Tai khoan dang ky TRONG cua so -> duoc ca 2 quyen loi.
-//   - Dung thu: cap ngay khi dang ky (license Plus, dem han tu luc kich hoat
-//     nhu moi license khac).
-//   - Mua goi +bonus%: chi khi mua TRONG cua so (va tai khoan dang ky trong
-//     cua so). Tang ngay cong vao validity_days cua license khi cap.
+// MOI DOT CO MOT "type" quyet dinh quyen loi + cach hien banner:
+//   - 'bundle'         : ca dung thu khi dang ky LAN + % thoi gian khi mua.
+//   - 'trial'          : chi dung thu khi dang ky.
+//   - 'purchase_bonus' : chi + % thoi gian khi mua.
+//   - 'announcement'   : chi thong bao (chay o banner trang chu), khong quyen loi.
+//
+// LUAT QUYEN LOI (theo tung dot):
+//   - Dung thu: dang ky TRONG cua so cua dot co trial -> cap ngay luc dang ky
+//     (moi tai khoan 1 lan / 1 dot, danh dau qua notes 'promo:<id>').
+//   - + % mua goi: tai khoan dang ky trong cua so cua dot co bonus VA mua
+//     trong cua so -> cong % vao validity_days luc cap license.
 // ============================================================================
 
-export const PROMO_META_KEY = "promotion";
+export const PROMOS_META_KEY = "promotions";
+export const PROMO_META_KEY = "promotion"; // legacy
 
-export const DEFAULT_PROMOTION = {
+export const PROMO_TYPES = ["bundle", "trial", "purchase_bonus", "announcement"];
+
+const BASE_PROMO = {
+  id: "promo",
   enabled: true,
-  name: "Ưu đãi tháng 11",
-  // Thang 11 chi co 30 ngay: cua so [01/11 00:00, 01/12 00:00) gio VN.
+  type: "bundle",
+  name: "Khuyến mãi",
+  headline: "",
+  link: "",
   startsAt: "2026-11-01T00:00:00+07:00",
   endsAt: "2026-12-01T00:00:00+07:00",
   trialTier: "plus",
   trialDays: 7,
   purchaseBonusPercent: 50,
-  headline:
-    "Tháng 11: đăng ký tài khoản mới được dùng thử Plus miễn phí 7 ngày + mua gói Go/Plus tặng thêm 50% thời gian sử dụng",
 };
 
-export async function getPromotion(env) {
+export const DEFAULT_PROMOTIONS = [
+  {
+    ...BASE_PROMO,
+    id: "thang-11-2026",
+    name: "Ưu đãi tháng 11",
+    headline:
+      "Tháng 11: đăng ký tài khoản mới được dùng thử Plus miễn phí 7 ngày + mua gói Go/Plus tặng thêm 50% thời gian sử dụng",
+    link: "/account.html?mode=register",
+    // Thang 11 chi co 30 ngay: cua so [01/11 00:00, 01/12 00:00) gio VN.
+    startsAt: "2026-11-01T00:00:00+07:00",
+    endsAt: "2026-12-01T00:00:00+07:00",
+  },
+];
+
+function normalizePromo(raw, idx) {
+  const p = { ...BASE_PROMO, ...(raw && typeof raw === "object" ? raw : {}) };
+  p.id = String(p.id || `promo-${idx + 1}`).slice(0, 64);
+  if (!PROMO_TYPES.includes(p.type)) p.type = "announcement";
+  p.enabled = p.enabled !== false;
+  p.trialDays = Number.isInteger(p.trialDays) ? p.trialDays : 7;
+  p.purchaseBonusPercent = Number(p.purchaseBonusPercent) || 0;
+  if (!["go", "plus"].includes(p.trialTier)) p.trialTier = "plus";
+  return p;
+}
+
+export async function getPromotions(env) {
+  try {
+    const row = await env.DB.prepare("SELECT value FROM meta WHERE key = ?1")
+      .bind(PROMOS_META_KEY)
+      .first();
+    if (row && row.value) {
+      const arr = JSON.parse(row.value);
+      if (Array.isArray(arr) && arr.length) return arr.map(normalizePromo);
+    }
+  } catch { /* qua fallback */ }
   try {
     const row = await env.DB.prepare("SELECT value FROM meta WHERE key = ?1")
       .bind(PROMO_META_KEY)
       .first();
     if (row && row.value) {
-      const cfg = JSON.parse(row.value);
-      if (cfg && typeof cfg === "object") return { ...DEFAULT_PROMOTION, ...cfg };
+      const one = JSON.parse(row.value);
+      if (one && typeof one === "object") return [normalizePromo({ id: "default", ...one }, 0)];
     }
-  } catch {
-    // DB chua co bang meta / JSON hong -> dung mac dinh.
-  }
-  return { ...DEFAULT_PROMOTION };
+  } catch { /* qua mac dinh */ }
+  return DEFAULT_PROMOTIONS.map((p) => ({ ...p }));
 }
 
-export function promoStartsMs(cfg) {
-  return Date.parse(cfg.startsAt);
+// ---- Tuong thich nguoc: mot so noi cu doc 1 cau hinh don ----
+export async function getPromotion(env) {
+  const list = await getPromotions(env);
+  return list[0] || { ...BASE_PROMO };
 }
 
-export function promoEndsMs(cfg) {
-  return Date.parse(cfg.endsAt);
+export function promoWindow(promo) {
+  return { s: Date.parse(promo.startsAt), e: Date.parse(promo.endsAt) };
 }
 
-// Dang trong thoi gian khuyen mai hay khong (tai thoi diem nowMs).
-export function isPromoActive(cfg, nowMs) {
-  if (!cfg.enabled) return false;
-  const s = promoStartsMs(cfg);
-  const e = promoEndsMs(cfg);
+export function isPromoActive(promo, nowMs) {
+  if (!promo || !promo.enabled) return false;
+  const { s, e } = promoWindow(promo);
   if (!Number.isFinite(s) || !Number.isFinite(e)) return false;
   return nowMs >= s && nowMs < e;
 }
 
-// Khach co thuoc doi tuong khuyen mai khong: dang ky trong cua so VA
-// thoi diem xet (nowMs) cung trong cua so.
-export function isCustomerEligible(cfg, customerCreatedAtIso, nowMs) {
-  if (!isPromoActive(cfg, nowMs)) return false;
-  const created = Date.parse(customerCreatedAtIso || "");
-  if (!Number.isFinite(created)) return false;
-  return created >= promoStartsMs(cfg) && created < promoEndsMs(cfg);
+export function activePromotions(list, nowMs) {
+  return (list || []).filter((p) => isPromoActive(p, nowMs));
 }
 
-// So ngay duoc cong them cho mot goi co baseDays ngay (lam tron).
-export function promoBonusDays(baseDays, cfg) {
-  const pct = Number(cfg.purchaseBonusPercent) || 0;
+// Dot dang cho quyen loi "dung thu khi dang ky" (dang chay, co trial).
+export function resolveTrialBenefit(list, nowMs) {
+  const p = activePromotions(list, nowMs).find(
+    (x) => (x.type === "bundle" || x.type === "trial") && x.trialDays > 0
+  );
+  return p ? { promo: p, tier: p.trialTier, days: p.trialDays } : null;
+}
+
+// Dot dang cho quyen loi "+ % thoi gian khi mua" (dang chay, % > 0).
+export function resolveBonusBenefit(list, nowMs) {
+  const p = activePromotions(list, nowMs).find(
+    (x) => (x.type === "bundle" || x.type === "purchase_bonus") && x.purchaseBonusPercent > 0
+  );
+  return p ? { promo: p, percent: p.purchaseBonusPercent } : null;
+}
+
+// Khach dang ky co nam trong cua so cua dot nay khong.
+export function isRegisteredInWindow(promo, customerCreatedAtIso) {
+  const created = Date.parse(customerCreatedAtIso || "");
+  if (!Number.isFinite(created)) return false;
+  const { s, e } = promoWindow(promo);
+  return created >= s && created < e;
+}
+
+// Giu lai ten cu cho code da dung (kiem tra theo 1 dot + thoi diem).
+export function isCustomerEligible(promo, customerCreatedAtIso, nowMs) {
+  return isPromoActive(promo, nowMs) && isRegisteredInWindow(promo, customerCreatedAtIso);
+}
+
+export function promoBonusDays(baseDays, percent) {
+  const pct = Number(percent) || 0;
   if (pct <= 0) return 0;
   return Math.round((baseDays * pct) / 100);
 }
 
-// Ban rut gon cho frontend (khong lo chi tiet noi bo).
-export function publicPromotion(cfg, nowMs) {
+// Ban rut gon 1 dot cho frontend.
+export function publicPromo(promo) {
   return {
-    active: isPromoActive(cfg, nowMs),
-    name: cfg.name,
-    headline: cfg.headline,
-    startsAt: cfg.startsAt,
-    endsAt: cfg.endsAt,
-    trialTier: cfg.trialTier,
-    trialDays: cfg.trialDays,
-    purchaseBonusPercent: cfg.purchaseBonusPercent,
+    id: promo.id,
+    type: promo.type,
+    name: promo.name,
+    headline: promo.headline,
+    link: promo.link || "",
+    startsAt: promo.startsAt,
+    endsAt: promo.endsAt,
+    trialTier: promo.trialTier,
+    trialDays: promo.trialDays,
+    purchaseBonusPercent: promo.purchaseBonusPercent,
   };
+}
+
+// Chuan hoa danh sach dot (dung boi internal endpoint khi ghi cau hinh).
+export function normalizePromotions(arr) {
+  return (Array.isArray(arr) ? arr : []).map(normalizePromo);
 }
