@@ -13,6 +13,7 @@
 // - KHONG bao gio log API key.
 import { json, readJson, tryIssueLicense } from "../_lib.js";
 import { normalizePaymentText, findPaymentCodeInText } from "./_gateway.js";
+import { notifyPurchaseSuccess } from "./_notify.js";
 import { logEvent, clientIp } from "../_log.js";
 
 const ok = (extra = {}) => json({ success: true, ...extra }, 200);
@@ -95,6 +96,8 @@ export async function onRequestPost({ request, env }) {
   const cust = await env.DB.prepare("SELECT email FROM customers WHERE id = ?1").bind(order.customer_id).first();
   try {
     await tryIssueLicense(env, { ...order, email: cust ? cust.email : null });
+    // Chi bao thanh cong khi license da cap xong (khong gui khi pending issue).
+    await notifyPurchaseSuccess(env, { ...order, email: cust ? cust.email : null });
   } catch (e) {
     await env.DB.prepare("UPDATE orders SET status = 'paid_pending_issue' WHERE id = ?1").bind(order.id).run();
     await logEvent(env, { eventType: "license.issue_failed", customerId: order.customer_id, actor: "sepay", ip: clientIp(request), details: { orderId: order.id, error: String((e && e.message) || e) } });

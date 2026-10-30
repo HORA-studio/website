@@ -105,6 +105,26 @@ ${actionButton(link, "Xác thực email")}`);
   return sendEmail(env, { to, subject, html, text, customerId, kind: "verify_email", actionLink: link });
 }
 
+// Email xac nhan da thanh toan (mua hang thanh cong). CHI thong bao + link
+// toi trang tai khoan de khach xem license — KHONG kem license key trong email
+// (key chi hien trong dashboard, user chot 2026-10-30).
+export function sendPurchaseSuccessEmail(env, { to, customerId, planName, periodLabel, amountVnd, accountUrl }) {
+  const subject = "Thanh toán thành công — HORA";
+  const amountText = amountVnd != null ? `${Math.round(amountVnd).toLocaleString("vi-VN")}đ` : "";
+  const summary =
+    `<table style="width:100%;border-collapse:collapse;font-size:14px;margin:6px 0 4px">` +
+    `<tr><td style="padding:6px 0;color:#5f6a70">Gói</td><td style="padding:6px 0;text-align:right;font-weight:700">${planName || ""}</td></tr>` +
+    `<tr><td style="padding:6px 0;color:#5f6a70">Thời hạn</td><td style="padding:6px 0;text-align:right;font-weight:700">${periodLabel || ""}</td></tr>` +
+    (amountText ? `<tr><td style="padding:6px 0;color:#5f6a70">Số tiền</td><td style="padding:6px 0;text-align:right;font-weight:700">${amountText}</td></tr>` : "") +
+    `</table>`;
+  const html = wrapHtml("Thanh toán thành công",
+    `<p>HORA đã nhận được thanh toán của bạn. License đã được cấp cho tài khoản — mở trang tài khoản để xem và sao chép license key.</p>
+${summary}
+${actionButton(accountUrl, "Xem license của tôi")}`);
+  const text = `HORA đã nhận được thanh toán của bạn.\nGói: ${planName || ""}\nThời hạn: ${periodLabel || ""}${amountText ? `\nSố tiền: ${amountText}` : ""}\n\nMở trang tài khoản để xem license key: ${accountUrl}`;
+  return sendEmail(env, { to, subject, html, text, customerId, kind: "purchase_success", actionLink: accountUrl });
+}
+
 // Email dat lai mat khau (link het han sau 1 gio, dung 1 lan).
 export function sendPasswordResetEmail(env, { to, customerId, link }) {
   const subject = "Đặt lại mật khẩu — HORA";

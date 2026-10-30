@@ -1,5 +1,6 @@
 Trạng thái: ĐÃ implement + ĐÃ deploy web (`hora.works`) — tài khoản khách, license/device, **Identity Provider cho app desktop** (kết nối tài khoản bằng link code), checkout SePay. ĐÃ kiểm chứng local (`wrangler pages dev` + D1 local) cho toàn bộ luồng link + license + bootstrap + device-change + cooldown. GIÁ TẠM đã áp 2026-10-29 (Go 250.000đ/tháng, 2.500.000đ/năm; Plus 400.000đ/tháng, 4.000.000đ/năm — GIÁ TẠM, chờ giá thật). **CHƯA deploy worker VB** (code đã sửa, chờ desktop mới) — xem mục "Chuyển đổi sang Identity Provider".
-**Bổ sung 2026-10-29 (nhánh `feature/auth-email`, CHƯA merge / CHƯA deploy):** quên mật khẩu + xác thực email qua Resend — đã build + kiểm chứng local (xem mục "Quên mật khẩu + xác thực email (Resend)"). `RESEND_API_KEY` đang **ĐỂ TRỐNG** theo quyết định của user: mail ở chế độ bỏ qua (log `mail.skipped`), mọi luồng vẫn chạy bình thường; điền key + áp migration `db/migrate-auth-2026-10-29.sql` lên D1 remote là tính năng hoạt động thật.
+**Bổ sung 2026-10-29 (nhánh `feature/auth-email`, CHƯA merge / CHƯA deploy):** quên mật khẩu + xác thực email qua Resend — đã build + kiểm chứng local (xem mục "Quên mật khẩu + xác thực email (Resend)").
+**Bổ sung 2026-10-30 (ĐÃ deploy production):** đã đặt `RESEND_API_KEY` + `EMAIL_FROM` (`HORA <no-reply@mail.hora.works>`) cho Pages project `hora-website`, áp migration `db/migrate-auth-2026-10-29.sql` lên D1 `hora-website` remote → **mail xác thực + quên mật khẩu hoạt động thật**. THÊM MỚI **mail xác nhận mua hàng thành công** (3 cổng SePay/MoMo/VNPay) — chỉ thông báo + link `/account.html`, KHÔNG kèm license key.
 
 # Tài khoản khách + dashboard + thanh toán + Identity Provider (website)
 
@@ -201,8 +202,8 @@ vào repo:
 | `VNPAY_ENV` | VNPay | `test` (mặc định) hoặc `production` |
 | `LICENSE_ISSUE_URL` | Cấp license tự động | URL endpoint nội bộ — xem bản spec, chưa tồn tại |
 | `LICENSE_ISSUE_SECRET` | Cấp license tự động | Shared secret với hệ license, chưa tồn tại |
-| `RESEND_API_KEY` | Gửi email (xác thực / quên mật khẩu) | Secret của Resend — **ĐỂ TRỐNG ở giai đoạn này** (user chốt 2026-10-29): thiếu key thì mail bị bỏ qua + log `mail.skipped`, không lỗi |
-| `EMAIL_FROM` | Gửi email | Địa chỉ gửi, mặc định `HORA <no-reply@hora.works>` (domain phải đã xác thực trong Resend) |
+| `RESEND_API_KEY` | Gửi email (xác thực / quên mật khẩu / mua hàng) | Secret của Resend — **ĐÃ đặt cho Pages project `hora-website` (production) 2026-10-30** (dùng chung key với account layer `mail.hora.works`). Thiếu key → mail bị bỏ qua + log `mail.skipped`, không lỗi |
+| `EMAIL_FROM` | Gửi email | Địa chỉ gửi — **ĐÃ đặt `HORA <no-reply@mail.hora.works>` 2026-10-30** (domain `mail.hora.works` đã xác thực trong Resend). Mặc định nếu không đặt là `HORA <no-reply@hora.works>` |
 | `SITE_URL` | Link trong email | Mặc định `https://hora.works`; chỉ đặt khi test/staging domain khác |
 | `MAIL_DRY_RUN` | CHỈ test local | Đặt `1`: không gọi Resend, ghi log `mail.dry_run` kèm link hành động để lấy link test từ DB events local. **Không bao giờ bật trên production** (link chứa token tho) |
 
@@ -210,32 +211,35 @@ Thiếu biến của cổng nào thì tạo đơn qua cổng đó trả
 `503 GATEWAY_NOT_CONFIGURED` và đơn nằm ở trạng thái `created` — hệ thống
 không tạo URL thanh toán giả.
 
-## File credential trên máy Muse (quy ước đặt tên)
+## File credential — VAULT TẬP TRUNG `~/HORA/.secrets`
 
-Mọi file bí mật dùng cho dự án đều nằm ở thư mục home của máy Muse, tên bắt
-đầu bằng `~/.hora_`, quyền `0600`. Tài liệu này chỉ ghi **tên file + công
-dụng** — **giá trị bí mật không bao giờ ghi vào repo, chat hay log**.
+**2026-10-30:** mọi secret của hệ HORA đã gom về **một nơi: `~/HORA/.secrets/`**
+(mỗi file `0600`; thư mục này KHÔNG phải git repo nên không bị commit). Xem
+`~/HORA/.secrets/README.md` để có bảng tra đầy đủ (secret nào ở đâu, dùng làm gì,
+script khôi phục). Tài liệu này chỉ ghi **tên file + công dụng** — **giá trị bí
+mật không bao giờ ghi vào repo, chat hay log**.
 
-| File | Chứa gì | Dùng để làm gì | Trạng thái |
-| --- | --- | --- | --- |
-| `~/.hora_github_token` | GitHub fine-grained PAT (Contents R+W) | Muse push/pull các repo `HORA-studio` | ĐÃ CÓ |
-| `~/.hora_cloudflare_token` | Cloudflare API token (Account: D1 Edit + Pages Edit) | Muse áp schema D1 + nạp secret cho Pages khi deploy | CHƯA TẠO |
-| `~/.hora_sepay_key` | API key webhook SePay (dãy user tự đặt trong cấu hình webhook ở SePay) | Muse nạp vào biến `SEPAY_WEBHOOK_API_KEY` của Pages | CHƯA TẠO |
+Các file cũ ở `~/.hora_*` đã được **copy nguyên giá trị** vào vault (giữ lại file cũ
+để tương thích script chưa cập nhật). Vị trí mới:
 
-Cách user tạo 2 file chưa có (chạy trên máy Muse, thay phần trong `<>` bằng
-giá trị thật, xong nhắn Muse "done"):
+| Secret | Vault | Trước đây |
+| --- | --- | --- |
+| Cloudflare API token | `~/HORA/.secrets/cloudflare/api_token` | `~/.hora_cloudflare_token` |
+| Identity internal secret | `~/HORA/.secrets/cloudflare/identity_internal_secret` | `~/.hora_identity_secret` |
+| SePay webhook API key | `~/HORA/.secrets/cloudflare/sepay_webhook_api_key` | `~/.hora_sepay_key` |
+| Secret Pages (Resend, EMAIL_FROM, ...) | `~/HORA/.secrets/website/pages.secrets` | (chưa lưu file) |
+| `.dev.vars` + signing keys + admin creds | `~/HORA/.secrets/hora-worker/` | `hora-worker/{.dev.vars,secrets/}` |
 
+Khôi phục:
 ```bash
-cat > ~/.hora_cloudflare_token <<'EOF'
-<token Cloudflare>
-EOF
-chmod 600 ~/.hora_cloudflare_token
+# .dev.vars / secrets/ bị xoá:
+~/HORA/.secrets/hora-worker/restore-dev-vars.sh
 
-cat > ~/.hora_sepay_key <<'EOF'
-<API key SePay>
-EOF
-chmod 600 ~/.hora_sepay_key
+# nạp lại secret Pages lên Cloudflare (máy mới):
+export CLOUDFLARE_ACCOUNT_ID=b3e97e07d1bd4fc1614a9626accc52f0
+~/HORA/.secrets/website/load-pages-secrets.sh
 ```
+
 
 URL cần đăng ký với từng cổng (khi có merchant):
 
@@ -290,8 +294,8 @@ thực" + nút gửi lại vẫn còn cho trường hợp tài khoản cũ đã 
 khỏi URL) và `?reset=<token>` (hiện form đặt mật khẩu mới).
 
 **Gửi mail (`functions/api/_mail.js` → Resend API):**
-- `isMailConfigured(env)`: có `RESEND_API_KEY` hay không. **Giai đoạn này
-  key ĐỂ TRỐNG** (user chốt 2026-10-29) → `sendEmail` trả
+- `isMailConfigured(env)`: có `RESEND_API_KEY` hay không. **ĐÃ cấu hình trên production
+  2026-10-30** (key dùng chung với account layer `mail.hora.works`). Thiếu key → `sendEmail` trả
   `{sent:false, reason:'MAIL_NOT_CONFIGURED'}` và ghi event
   `mail.skipped` — **không throw, không làm vỡ bất kỳ luồng nào** (đăng
   ký vẫn 201, forgot vẫn 200). Có key → POST `api.resend.com/emails`;
@@ -301,19 +305,24 @@ khỏi URL) và `?reset=<token>` (hiện form đặt mật khẩu mới).
   `mail.dry_run` kèm **link hành động trong details** để test lấy link từ
   DB events local. Production tuyệt đối không bật.
 
+**Mail xác nhận mua hàng thành công (2026-10-30):**
+- `functions/api/payments/_notify.js` → `notifyPurchaseSuccess(env, order)` gọi
+  `sendPurchaseSuccessEmail` (`_mail.js`) — **chỉ thông báo** (gói, thời hạn, số tiền) +
+  link tới `/account.html` để khách xem license; **KHÔNG kèm license key** trong email.
+- Gọi ở cả 3 webhook/IPN (`sepay-webhook.js`, `momo-ipn.js`, `vnpay-ipn.js`) **sau khi
+  `tryIssueLicense` thành công** (không gửi khi đơn rơi vào `paid_pending_issue`).
+  Lỗi gửi mail bị nuốt — không làm hỏng webhook đã ghi nhận tiền. Event: `mail.purchase_success`.
+
 **Schema / migration:** DB mới cài bằng `db/schema.sql` đã gồm cột
-`customers.email_verified_at` + bảng `auth_tokens`. DB remote **đã tồn
-tại** phải áp thêm file riêng trước khi deploy code này:
+`customers.email_verified_at` + bảng `auth_tokens`. DB remote **đã tồn tại** phải áp thêm file riêng trước khi deploy code này:
 `npx wrangler d1 execute hora-website --remote --file db/migrate-auth-2026-10-29.sql`
 (lưu ý tên DB hiện tại là `hora-website`). Lệnh `ALTER TABLE ... ADD
 COLUMN` trong file chỉ chạy được 1 lần — chạy lại sẽ báo lỗi duplicate
-column (đã ghi rõ trong comment đầu file). Chưa áp migration mà deploy
-code: đăng ký/đăng nhập vẫn chạy (phần phát token được bọc lỗi), nhưng
-token không lưu được nên link xác thực/reset sẽ không hoạt động.
+column (đã ghi rõ trong comment đầu file). **ĐÃ ÁP lên D1 remote 2026-10-30.**
 
-**Để bật gửi mail thật:** xác thực domain `hora.works` trong Resend
-(SPF/DKIM), tạo API key, đặt secret `RESEND_API_KEY` cho Pages (và
-`EMAIL_FROM` nếu muốn khác mặc định `HORA <no-reply@hora.works>`).
+**Trạng thái gửi mail:** ĐÃ bật thật trên production 2026-10-30 — đã kiểm chứng end-to-end
+qua `hora.works`: đăng ký → `mail.sent` (verify), forgot-password → `mail.sent` (reset),
+webhook SePay (mô phỏng) → license cấp + `mail.purchase_success` `sent:true`. Dữ liệu test đã dọn.
 
 ## Checklist mở bán (go-live)
 
