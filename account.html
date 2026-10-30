@@ -848,14 +848,14 @@ body{padding-top:0 !important}
 /* Gian space cac item quyen loi theo chieu doc: cach nhau 20px */
 #dash .purchase-panel .price-card ul{gap:20px}
 
-/* View thanh toan so tu duoi len (bottom sheet) khi bam Mua ngay */
+/* View thanh toan hien GIUA man hinh (center ca ngang lan doc) khi bam Mua ngay */
 .pay-sheet{position:fixed;inset:0;z-index:300}
 .pay-sheet.hidden{display:none}
 .pay-sheet-backdrop{position:absolute;inset:0;background:rgba(3,8,10,.62);opacity:0;transition:opacity .32s ease}
 .pay-sheet.open .pay-sheet-backdrop{opacity:1}
-.pay-sheet-box{position:absolute;left:50%;bottom:0;width:min(600px,100%);max-height:92dvh;overflow-y:auto;background:var(--panel);border:1px solid var(--line);border-bottom:0;border-radius:22px 22px 0 0;padding:8px 18px 22px;transform:translate(-50%,106%);transition:transform .38s cubic-bezier(.32,.72,.24,1);box-shadow:0 -16px 48px rgba(0,0,0,.5)}
-.pay-sheet.open .pay-sheet-box{transform:translate(-50%,0)}
-.pay-sheet-handle{width:46px;height:5px;border-radius:99px;background:var(--line);margin:8px auto 6px}
+.pay-sheet-box{position:absolute;left:50%;top:50%;width:min(820px,calc(100vw - 32px));max-height:92dvh;overflow-y:auto;background:var(--panel);border:1px solid var(--line);border-radius:22px;padding:18px;transform:translate(-50%,calc(-50% + 22px)) scale(.98);opacity:0;transition:transform .32s cubic-bezier(.32,.72,.24,1),opacity .32s ease;box-shadow:0 24px 64px rgba(0,0,0,.5)}
+.pay-sheet.open .pay-sheet-box{transform:translate(-50%,-50%) scale(1);opacity:1}
+.pay-sheet-handle{display:none}
 .pay-sheet-close{position:absolute;top:12px;right:12px;width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:transparent;color:var(--text);font-size:17px;line-height:1;cursor:pointer;z-index:2}
 .pay-sheet .pay-panel{margin:0 !important}
 #pay-pending-bar{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin:0 0 16px;padding:11px 16px;border-radius:12px;border:1px solid var(--gold);background:var(--accent-soft);color:var(--text);font:inherit;font-weight:650;cursor:pointer}
@@ -889,13 +889,22 @@ body{padding-top:0 !important}
 #notice{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:600;width:max-content;max-width:min(700px,calc(100vw - 32px));margin:0 !important;text-align:center;box-shadow:0 14px 34px rgba(0,0,0,.35);cursor:pointer;animation:noticeIn .25s ease}
 @keyframes noticeIn{from{opacity:0;margin-top:-8px}to{opacity:1;margin-top:0}}
 /* Dem nguoc cho thanh toan o tab Lich su + nut Mo lai thanh toan */
-.lic-table .countdown{font-weight:700;color:var(--gold2);font-variant-numeric:tabular-nums;white-space:nowrap}
+/* Thoi gian dem nguoc trong danh sach license: MAU VANG (vang dam tren nen sang, vang sang tren nen toi cho de doc) */
+.lic-table .countdown{font-weight:700;color:#c99300;font-variant-numeric:tabular-nums;white-space:nowrap}
+@media (prefers-color-scheme:dark){.lic-table .countdown{color:#facc15}}
+/* Badge cham than trong khung tron do nho o menu Lich su khi co don chua thanh toan */
+.side-badge{flex:0 0 auto;margin-left:auto;display:grid;place-items:center;width:18px;height:18px;border-radius:50%;background:#dc2626;color:#fff;font-size:12px;font-weight:800;line-height:1}
+.side-badge.hidden{display:none}
 .pay-open-btn{border-color:var(--gold) !important;color:var(--gold2) !important;font-weight:700}
-/* Man thanh toan (bottom sheet) vua khung khong can scroll */
-.pay-sheet .pay-panel{padding:16px}
-.pay-sheet .pay-panel .qr{max-width:205px}
-@media (max-height:860px){.pay-sheet .pay-panel .qr{max-width:168px}.pay-sheet .pay-panel{padding:14px}}
-@media (max-height:740px){.pay-sheet .pay-panel .qr{max-width:138px}.pay-sheet .pay-panel{padding:12px}.pay-sheet .pay-panel h3{font-size:16px}.pay-sheet .pay-panel table td{padding:5px 8px}}
+/* Man thanh toan o giua man hinh: QR TO nam BEN TRAI, noi dung nam BEN PHAI */
+.pay-sheet .pay-panel{padding:20px}
+.pay-sheet .pay-body{display:flex;gap:22px;align-items:flex-start}
+.pay-sheet .pay-panel .qr{flex:0 0 auto;width:300px;max-width:300px;margin:0}
+.pay-sheet .pay-info{flex:1 1 auto;min-width:0}
+.pay-sheet .pay-info table{width:100%}
+@media (max-height:860px){.pay-sheet .pay-panel .qr{width:252px;max-width:252px}.pay-sheet .pay-panel{padding:16px}}
+@media (max-height:740px){.pay-sheet .pay-panel .qr{width:204px;max-width:204px}.pay-sheet .pay-panel{padding:14px}.pay-sheet .pay-panel h3{font-size:16px}.pay-sheet .pay-panel table td{padding:5px 8px}}
+@media (max-width:700px){.pay-sheet .pay-body{flex-direction:column;align-items:center}.pay-sheet .pay-panel .qr{width:240px;max-width:240px}.pay-sheet .pay-info{width:100%}}
 
 /* Man hinh rat thap (<=710px): tab Mua goi chuyen sang cuon doc thay vi ep the (tranh noi dung de len nut) */
 @media (max-height:710px){#dash .purchase-panel{overflow-y:auto !important;display:block}}
@@ -911,7 +920,7 @@ body{padding-top:0 !important}
       
       
       <button type="button" class="side-item" data-view-btn="buy"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.6-6.3"></path><path d="M21 3v6h-6"></path></svg> Mua gói</button>
-      <button type="button" class="side-item" data-view-btn="orders"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M8.5 6h12M8.5 12h12M8.5 18h12"></path><path d="M4 6h.01M4 12h.01M4 18h.01"></path></svg> Lịch sử giao dịch</button>
+      <button type="button" class="side-item" data-view-btn="orders"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M8.5 6h12M8.5 12h12M8.5 18h12"></path><path d="M4 6h.01M4 12h.01M4 18h.01"></path></svg> Lịch sử giao dịch <span id="orders-unpaid-badge" class="side-badge hidden" title="Có đơn chưa thanh toán" aria-label="Có đơn chưa thanh toán">!</span></button>
     </nav>
     <div class="side-foot">
       <div class="side-email" id="side-email">ffsortgame@gmail.com</div>
@@ -1054,8 +1063,10 @@ body{padding-top:0 !important}
       </div>
       <!-- Huong dan chuyen khoan SePay — chi hien sau khi tao don SePay -->
       <div id="sepay-panel" class="pay-panel hidden">
-        <h3 style="margin:0 0 10px">Chuyển khoản để thanh toán</h3>
+        <h3 style="margin:0 0 14px">Chuyển khoản để thanh toán</h3>
+        <div class="pay-body">
         <img id="sepay-qr" class="qr" alt="Mã QR VietQR thanh toán">
+        <div class="pay-info">
         <table>
           <tbody><tr><td>Ngân hàng</td><td><strong id="sepay-bank"></strong></td></tr>
           <tr><td>Số tài khoản</td><td><code id="sepay-account"></code> <button class="btn small" type="button" id="sepay-copy-account">Copy</button></td></tr>
@@ -1065,6 +1076,8 @@ body{padding-top:0 !important}
         </tbody></table>
         <p style="margin:12px 0 4px"><strong>Chuyển đúng số tiền và đúng nội dung</strong>, hệ thống tự xác nhận sau khi nhận được tiền (thường vài phút).</p>
         <p class="muted" style="margin:0">Trạng thái: <span id="sepay-status">Đang chờ chuyển khoản… trang sẽ tự kiểm tra lại sau mỗi 15 giây.</span></p>
+        </div>
+        </div>
       </div>
     </section>
 
@@ -1081,7 +1094,7 @@ body{padding-top:0 !important}
 </main>
 </div>
 
-<!-- View thanh toan so tu duoi len -->
+<!-- View thanh toan hien giua man hinh -->
 <div id="pay-sheet" class="pay-sheet hidden" aria-hidden="true">
   <div class="pay-sheet-backdrop" data-close-sheet></div>
   <div class="pay-sheet-box" role="dialog" aria-modal="true" aria-label="Thanh toán">
@@ -1237,8 +1250,12 @@ async function loadDash() {
   $("verify-banner").style.display = data.customer.emailVerified === false ? "block" : "none";
   await loadPlans().catch(() => {});
   setBilling(BILLING);
-  applyPreselect();
+  const preselect = applyPreselect();
   await Promise.all([loadLicenses(), loadOrders()]);
+  // Den tu trang chu voi goi da chon: da dang nhap thi vao thang man mua + hien QR luon.
+  // (Chua dang nhap thi loadDash da dung o man dang nhap; dang nhap xong ham nay chay lai
+  // va preselect tren URL van con nen luong tu dong van dien ra.)
+  if (preselect) await openPreselectPurchase(preselect);
 }
 
 let ORDERS_CACHE = [];
@@ -1326,6 +1343,10 @@ function renderHistory() {
         : `<button type="button" class="export-btn" data-export-kind="order" data-export-id="${esc(o.id || "")}" title="Xuất đơn hàng này"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 11 5 5 5-5"></path><path d="M4 21h16"></path></svg> Xuất</button>`}</td>
     </tr>`);
   }
+  // Badge menu Lich su: con don chua thanh toan (dang cho, con trong cua so 15 phut, chua co license) thi hien cham than do
+  const hasUnpaid = orders.some((o) => ["created", "awaiting_payment"].includes(o.status) && Date.now() <= payDeadline(o) && !licensedOrders.has(o.id) && !(o.licenseId && licensedIds.has(o.licenseId)));
+  const unpaidBadge = $("orders-unpaid-badge");
+  if (unpaidBadge) unpaidBadge.classList.toggle("hidden", !hasUnpaid);
   body.innerHTML = html.length ? html.join("") : '<tr class="empty-row"><td colspan="7"><div class="empty-title">Chưa có dữ liệu</div><div class="empty-sub">Lịch sử đơn hàng sẽ lưu ở đây</div></td></tr>';
   document.querySelectorAll("[data-copy]").forEach((b) => b.addEventListener("click", async () => {
     try { await navigator.clipboard.writeText(b.dataset.copy); b.textContent = "Đã copy"; } catch { /* clipboard bi chan */ }
@@ -1347,7 +1368,7 @@ function fmtCountdown(ms) {
   const sec = Math.max(0, Math.floor(ms / 1000));
   return String(Math.floor(sec / 60)).padStart(2, "0") + ":" + String(sec % 60).padStart(2, "0");
 }
-// Mo lai man thanh toan (bottom sheet) cho 1 don dang cho — nut "Mo" o tab Lich su
+// Mo lai man thanh toan (view giua man hinh) cho 1 don dang cho — nut "Mo" o tab Lich su
 function openPaymentForOrder(o) {
   const ins = o.payment_instructions || o.paymentInstructions;
   if (!ins) { showMsg("err", "Chưa lấy được thông tin thanh toán cho đơn này — cổng thanh toán có thể chưa được cấu hình."); return; }
@@ -1387,19 +1408,40 @@ async function loadOrders() {
 }
 
 // Chon san goi/ky tu link trang chu: /account.html?plan=go|plus&period=month|year
-// (bo qua gia tri khong hop le). Chi to sang + cuon toi nut mua tuong ung.
+// (bo qua gia tri khong hop le). To sang nut mua tuong ung va TRA VE {plan, period}
+// de loadDash tu mo man mua + hien QR ngay sau khi da dang nhap va tai xong don.
 function applyPreselect() {
   const qs = new URLSearchParams(location.search);
   const plan = qs.get("plan"), period = qs.get("period");
-  if (!PLANS[plan] || !["month", "year"].includes(period)) return;
+  if (!PLANS[plan] || !["month", "year"].includes(period)) return null;
   showView("buy");
   setBilling(period);
   const btn = document.querySelector(`[data-buy-plan="${plan}"]`);
-  if (!btn) return;
-  btn.style.outline = "2px solid var(--gold2)";
-  btn.style.outlineOffset = "2px";
-  btn.textContent = "Mua ngay — đã chọn từ trang chủ";
-  btn.scrollIntoView({ behavior: "smooth", block: "center" });
+  if (btn) {
+    btn.style.outline = "2px solid var(--gold2)";
+    btn.style.outlineOffset = "2px";
+    btn.textContent = "Mua ngay — đã chọn từ trang chủ";
+  }
+  return { plan, period };
+}
+
+// Sau dang nhap (hoac da dang nhap san) tu trang chu sang: vao thang man mua goi
+// va HIEN QR LUON, khong can bam them nut Mua ngay.
+// - Co don cung goi/ky dang cho thanh toan thi MO LAI QR cua don do, khong tao don moi.
+// - Xoa plan/period khoi URL ngay khi xu ly de F5 khong tao don trung.
+async function openPreselectPurchase(pre) {
+  try { history.replaceState(null, "", location.pathname); } catch { /* bo qua */ }
+  const licensedOrderIds = new Set(LICENSES_CACHE.map((l) => l.orderId).filter(Boolean));
+  const pending = ORDERS_CACHE.find((o) => o.plan === pre.plan && o.period === pre.period
+    && ["created", "awaiting_payment"].includes(o.status) && Date.now() <= payDeadline(o)
+    && !licensedOrderIds.has(o.id) && (o.payment_instructions || o.paymentInstructions));
+  if (pending) {
+    openPaymentForOrder(pending);
+    showMsg("info", "Bạn đang có đơn gói này chưa thanh toán — đã mở lại mã QR, không tạo đơn mới.");
+    return;
+  }
+  const btn = document.querySelector(`[data-buy-plan="${pre.plan}"]`);
+  await buyPlan(pre.plan, pre.period, btn);
 }
 
 const PLAN_DESCS = { go: "Cho người bắt đầu làm video bán hàng bằng AI", plus: "Cho người làm nghiêm túc — thêm trợ lý AI đồng hành" };
@@ -1419,30 +1461,35 @@ function syncPlanCopy() {
   });
 }
 let BILLING = "month";
-function bindBuyButtons() {
-  document.querySelectorAll("[data-buy-plan]").forEach((b) => b.addEventListener("click", async () => {
-    const plan = b.dataset.buyPlan;
-    const period = BILLING;
-    const gateway = "sepay"; // Chi con SePay — da go bo chon cong thanh toan.
-    b.disabled = true;
-    b.classList.add("is-loading");
-    const originalText = b.innerHTML;
-    b.innerHTML = '<span class="button-spinner" aria-hidden="true"></span> Đang tạo đơn…';
-    const { res, data } = await api("/api/orders", { method: "POST", body: JSON.stringify({ plan, period, gateway }) });
-    if (res.ok && data.paymentUrl) { window.location.href = data.paymentUrl; return; }
-    b.disabled = false;
-    b.classList.remove("is-loading");
-    b.innerHTML = originalText;
-    if (res.ok && data.payment_instructions) {
-      showSepayPanel(data.payment_instructions);
-      showMsg("ok", "Đã tạo đơn. Quét mã QR trong khung thanh toán vừa mở — chuyển đúng số tiền và đúng nội dung, hệ thống sẽ tự xác nhận.");
-      await loadOrders();
-      startSepayPolling(data.order && data.order.id);
-      return;
-    }
-    showMsg("err", errText(data, "Chưa tạo được đơn, thử lại sau."));
+// Tao don + mo man thanh toan QR cho 1 goi/ky. Dung chung cho nut Mua ngay
+// (truyen btn de hien spinner) va luong tu dong tu trang chu (openPreselectPurchase).
+async function buyPlan(plan, period, btn) {
+  const gateway = "sepay"; // Chi con SePay — da go bo chon cong thanh toan.
+  const originalText = btn ? btn.innerHTML : "";
+  if (btn) {
+    btn.disabled = true;
+    btn.classList.add("is-loading");
+    btn.innerHTML = '<span class="button-spinner" aria-hidden="true"></span> Đang tạo đơn…';
+  }
+  const { res, data } = await api("/api/orders", { method: "POST", body: JSON.stringify({ plan, period, gateway }) });
+  if (res.ok && data.paymentUrl) { window.location.href = data.paymentUrl; return; }
+  if (btn) {
+    btn.disabled = false;
+    btn.classList.remove("is-loading");
+    btn.innerHTML = originalText;
+  }
+  if (res.ok && data.payment_instructions) {
+    showSepayPanel(data.payment_instructions);
+    showMsg("ok", "Đã tạo đơn. Quét mã QR trong khung thanh toán vừa mở — chuyển đúng số tiền và đúng nội dung, hệ thống sẽ tự xác nhận.");
     await loadOrders();
-  }));
+    startSepayPolling(data.order && data.order.id);
+    return;
+  }
+  showMsg("err", errText(data, "Chưa tạo được đơn, thử lại sau."));
+  await loadOrders();
+}
+function bindBuyButtons() {
+  document.querySelectorAll("[data-buy-plan]").forEach((b) => b.addEventListener("click", () => buyPlan(b.dataset.buyPlan, BILLING, b)));
   setBilling(BILLING);
 }
 // Doi ky han: cap nhat tai cho (gia, dong /ky, data-buy) — khong render lai de
@@ -1512,7 +1559,7 @@ function startSepayPolling(orderId) {
     }
   }, 15000);
 }
-// ----- View thanh toan so tu duoi len: chuyen panel SePay vao sheet -----
+// ----- View thanh toan hien giua man hinh: chuyen panel SePay vao sheet -----
 const paySheetEl = $("pay-sheet");
 $("pay-sheet-slot").appendChild($("sepay-panel"));
 function openPaySheet() {
