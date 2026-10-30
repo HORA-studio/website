@@ -742,7 +742,8 @@ fetch("/api/promo").then(function(r){return r.ok?r.json():null;}).then(function(
       d.className="ticker-slide"+(i===0?" on":"");
       var txt=document.createElement("span");
       txt.className="ticker-text";
-      txt.textContent="🎉 "+(pr.headline||pr.name||"");
+      var ico=pr.type==="announcement"?"🚀":pr.type==="trial"?"🎁":"🎉";
+      txt.textContent=ico+" "+(pr.headline||pr.name||"");
       d.appendChild(txt);
       if(pr.link){
         var a=document.createElement("a");

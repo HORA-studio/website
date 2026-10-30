@@ -60,6 +60,18 @@ export const DEFAULT_PROMOTIONS = [
     endsAt: "2026-12-01T00:00:00+07:00",
     countFrom: "registration",
   },
+  // Thong bao ra mat ban dung thu 0.1.0 — chay o ticker trang chu, khong
+  // quyen loi (type 'announcement'). Cung cua so voi dot KM thang 11.
+  {
+    id: "release-0-1-0",
+    type: "announcement",
+    name: "Bản dùng thử 0.1.0",
+    headline:
+      "Ra mắt bản dùng thử 0.1.0: quản lý tài khoản, tạo video và ảnh số lượng lớn đa luồng",
+    link: "/index.html#workflow",
+    startsAt: "2026-11-01T00:00:00+07:00",
+    endsAt: "2026-12-01T00:00:00+07:00",
+  },
 ];
 
 function normalizePromo(raw, idx) {
@@ -93,7 +105,7 @@ export async function getPromotions(env) {
       if (one && typeof one === "object") return [normalizePromo({ id: "default", ...one }, 0)];
     }
   } catch { /* qua mac dinh */ }
-  return DEFAULT_PROMOTIONS.map((p) => ({ ...p }));
+  return DEFAULT_PROMOTIONS.map(normalizePromo);
 }
 
 // ---- Tuong thich nguoc: mot so noi cu doc 1 cau hinh don ----
