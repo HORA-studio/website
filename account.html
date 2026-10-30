@@ -858,8 +858,11 @@ body{padding-top:0 !important}
 .pay-sheet-handle{display:none}
 .pay-sheet-close{position:absolute;top:12px;right:12px;width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:transparent;color:var(--text);font-size:17px;line-height:1;cursor:pointer;z-index:2}
 .pay-sheet .pay-panel{margin:0 !important}
-#pay-pending-bar{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin:0 0 16px;padding:11px 16px;border-radius:12px;border:1px solid var(--gold);background:var(--accent-soft);color:var(--text);font:inherit;font-weight:650;cursor:pointer}
-#pay-pending-bar.hidden{display:none}
+.pricing-wrap{position:relative}
+#pay-cart-btn{position:absolute;top:16px;right:16px;width:42px;height:42px;display:flex;align-items:center;justify-content:center;border-radius:12px;border:1px solid var(--gold);background:var(--panel);color:var(--text);cursor:pointer;z-index:3;box-shadow:0 4px 14px rgba(10,40,35,.10)}
+#pay-cart-btn:hover{background:var(--accent-soft)}
+#pay-cart-btn.hidden{display:none}
+#pay-cart-btn .pay-cart-dot{position:absolute;top:-4px;right:-4px;width:11px;height:11px;border-radius:50%;background:#e5484d;border:2px solid var(--panel)}
 
 /* Tab Lich su: dan deu cac cot bang theo toan bo chieu rong */
 .lic-table{table-layout:fixed}
@@ -881,6 +884,7 @@ body{padding-top:0 !important}
 /* Dong don loi trong bang Lich su */
 .lic-table .error-row td{background:rgba(214,69,69,.06)}
 .lic-table .status-fail{color:#e06565;font-weight:650;font-size:12.5px}
+.lic-table .status-wait{display:table;margin:5px auto 0;padding:2px 10px;border-radius:999px;background:#facc15;color:#451a03;font-weight:700;font-size:12.5px;white-space:nowrap}
 
 /* Bang Lich su phai la display:table that (rule .view-panel table{display:block} cua CSS goc pha layout cot) */
 #dash .lic-table{display:table}
@@ -1178,8 +1182,8 @@ html,body{min-height:100%;height:100%;overflow:hidden}
         </div>
       </div>
       <div class="pricing-wrap">
+      <button id="pay-cart-btn" class="hidden" type="button" title="Đơn đang chờ thanh toán — bấm để xem mã QR" aria-label="Đơn đang chờ thanh toán — bấm để xem mã QR"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="20.4" r="1.5"/><circle cx="17" cy="20.4" r="1.5"/><path d="M2.5 3h2.1l2.55 12.1a1.6 1.6 0 0 0 1.57 1.27h7.86a1.6 1.6 0 0 0 1.56-1.28L20.6 6.9H5.9"/></svg><span class="pay-cart-dot"></span></button>
       <div class="pricing-toggle-row"><div class="billing-toggle" role="tablist" aria-label="Chọn thời hạn"><button type="button" class="billing-opt active" data-billing="month" role="tab" aria-selected="true">Theo tháng</button><button type="button" class="billing-opt" data-billing="year" role="tab" aria-selected="false">Theo năm<span class="save-badge">Tiết kiệm 17%</span></button></div></div>
-      <button id="pay-pending-bar" class="hidden" type="button">Đơn đang chờ thanh toán — bấm để xem mã QR</button>
       <div class="pricing-grid" id="plan-grid">
     <article class="price-card" data-plan-card="go">
         <h3>Go</h3>
@@ -1533,7 +1537,7 @@ function renderHistory() {
       <td class="muted">—</td>
       <td>${esc(fmtDay(o.createdAt))}</td>
       ${["created", "awaiting_payment"].includes(o.status) ? `<td><span class="countdown" data-deadline="${payDeadline(o)}">Còn ${fmtCountdown(payDeadline(o) - Date.now())}</span></td>` : '<td class="muted">—</td>'}
-      <td><code title="${esc(o.id)}">${esc(shortId(o.id))}</code><br>${o.status === "payment_failed" ? `<span class="status-fail">${esc(STATUS_VI[o.status])}</span>` : esc(STATUS_VI[o.status] || o.status)}</td>
+      <td><code title="${esc(o.id)}">${esc(shortId(o.id))}</code><br>${o.status === "payment_failed" ? `<span class="status-fail">${esc(STATUS_VI[o.status])}</span>` : ["created", "awaiting_payment"].includes(o.status) ? `<span class="status-wait">${esc(STATUS_VI[o.status])}</span>` : esc(STATUS_VI[o.status] || o.status)}</td>
       <td class="export-cell">${["created", "awaiting_payment"].includes(o.status)
         ? `<button type="button" class="export-btn pay-open-btn" data-pay-open="${esc(o.id)}" title="Mở lại màn thanh toán">Mở</button>`
         : `<button type="button" class="export-btn" data-export-kind="order" data-export-id="${esc(o.id || "")}" title="Xuất đơn hàng này"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 11 5 5 5-5"></path><path d="M4 21h16"></path></svg> Xuất</button>`}</td>
@@ -1598,7 +1602,7 @@ async function loadOrders() {
   const { data } = await api("/api/orders");
   ORDERS_CACHE = (data && data.orders) || [];
   const orderCount = $("account-order-count");
-  if (orderCount) orderCount.textContent = String(ORDERS_CACHE.length);
+  if (orderCount) orderCount.textContent = String(ORDERS_CACHE.filter((o) => !["created", "awaiting_payment"].includes(o.status)).length);
   renderHistory();
   return ORDERS_CACHE;
 }
@@ -1724,7 +1728,7 @@ function showSepayPanel(ins) {
   $("sepay-amount").textContent = fmtVnd(ins.amount);
   $("sepay-content").textContent = ins.content || "";
   $("sepay-status").textContent = "Đang chờ chuyển khoản… trang sẽ tự kiểm tra lại sau mỗi 15 giây.";
-  openPaySheet(); $("pay-pending-bar").classList.remove("hidden");
+  openPaySheet(); $("pay-cart-btn").classList.remove("hidden");
 }
 async function copyText(text, btn) {
   try { await navigator.clipboard.writeText(text); btn.textContent = "Đã copy"; setTimeout(() => { btn.textContent = "Copy"; }, 2000); } catch { /* clipboard bi chan */ }
@@ -1743,7 +1747,7 @@ function startSepayPolling(orderId) {
     const o = rows.find((x) => x.id === orderId);
     if (o && (o.status === "paid" || o.status === "paid_pending_issue")) {
       clearInterval(sepayPollTimer); sepayPollTimer = null;
-      $("pay-pending-bar").classList.add("hidden");
+      $("pay-cart-btn").classList.add("hidden");
       $("sepay-status").textContent = o.status === "paid" ? "Đã nhận được tiền — thanh toán hoàn tất." : "Đã nhận được tiền — đang cấp license cho bạn.";
       showMsg("ok", "Đã nhận được tiền của bạn. " + (o.status === "paid" ? "Thanh toán hoàn tất." : "License đang được cấp, xem mục License của tôi."));
       await loadLicenses();
@@ -1770,7 +1774,7 @@ function closePaySheet() {
 }
 document.querySelectorAll("[data-close-sheet]").forEach((el) => el.addEventListener("click", closePaySheet));
 document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !paySheetEl.classList.contains("hidden")) closePaySheet(); });
-$("pay-pending-bar").addEventListener("click", openPaySheet);
+$("pay-cart-btn").addEventListener("click", openPaySheet);
 
 
 $("logout-btn").addEventListener("click", async () => {
