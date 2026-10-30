@@ -1984,28 +1984,46 @@ else if (payParam === "pending") showMsg("info", "Đang chờ cổng thanh toán
     const pct = Number(p.purchaseBonusPercent) || 0;
     const first = p.promos[0];
     const bonusPromo = p.promos.find((x) => x.id === p.bonusPromoId) || first;
+    const trialPromo = p.trial ? (p.promos.find((x) => x.id === p.trial.promoId) || first) : null;
     const fmtDay = (iso) => new Date(iso).toLocaleDateString("vi-VN");
     const mDays = 30 + Math.round((30 * pct) / 100);
     const yDays = 365 + Math.round((365 * pct) / 100);
     const tierName = p.trial ? (p.trial.tier === "plus" ? "Plus" : "Go") : "";
-    let badgeText = "", title = "", subText = "", mode = "";
-    if (pct > 0 && p.you && p.you.bonusEligible) {
-      mode = "bonus";
-      badgeText = "🔥 KHUYẾN MÃI CHO BẠN";
+    const hasBonus = pct > 0;
+    const hasTrial = !!p.trial;
+    // Cua so den han: lay moc ket thuc som nhat trong cac dot dang ap dung.
+    const endsAt = [hasBonus && bonusPromo.endsAt, hasTrial && trialPromo.endsAt]
+      .filter(Boolean).sort()[0];
+    let badgeText = "", title = "", subText = "", mode = "none";
+    if (hasBonus && hasTrial) mode = "bundle";
+    else if (hasBonus) mode = "bonus";
+    else if (hasTrial) mode = "trial";
+
+    const trialLine = `đăng ký mới tặng ${tierName} dùng thử ${p.trial ? p.trial.days : 0} ngày`;
+    const trialCounting = p.trial && p.trial.countFrom === "activation"
+      ? "hạn đếm từ lúc kích hoạt"
+      : "hạn đếm từ lúc tạo tài khoản";
+    const bonusLine = `mua bất cứ gói nào +${pct}% thời gian (tháng → ${mDays} ngày, năm → ${yDays} ngày)`;
+
+    if (mode === "bundle") {
+      badgeText = (p.you && p.you.bonusEligible) ? "🔥 ƯU ĐÃI CHO BẠN" : "🔥 ƯU ĐÃI ĐẶC BIỆT";
+      title = `Dùng thử ${tierName} ${p.trial.days} ngày + mua gói tặng ${pct}% thời gian`;
+      subText = `Tài khoản ${trialLine} (${trialCounting}) và ${bonusLine} — đến hết ${fmtDay(endsAt)}.${
+        p.you && p.you.hasTrial ? " Bạn đang có key dùng thử — xem ở tab Lịch sử giao dịch." : ""
+      }`;
+    } else if (mode === "bonus") {
+      badgeText = (p.you && p.you.bonusEligible) ? "🔥 KHUYẾN MÃI CHO BẠN" : "🔥 KHUYẾN MÃI";
       title = `+${pct}% thời gian sử dụng khi mua gói`;
-      const daysLeft = Math.max(1, Math.ceil((Date.parse(bonusPromo.endsAt) - Date.now()) / 86400000));
-      subText = `Tài khoản của bạn đủ điều kiện: gói tháng 30 → ${mDays} ngày, gói năm 365 → ${yDays} ngày.${p.you.hasTrial && p.trial ? ` Bạn đang có ${tierName} dùng thử ${p.trial.days} ngày — key ở tab Lịch sử giao dịch.` : ""} Còn ${daysLeft} ngày.`;
-    } else if (pct > 0) {
-      mode = "bonus";
-      badgeText = "🔥 KHUYẾN MÃI";
-      title = bonusPromo.name || "Khuyến mãi mua gói";
-      subText = `Tài khoản đăng ký trong đợt này được +${pct}% thời gian sử dụng khi mua gói (gói tháng → ${mDays} ngày, gói năm → ${yDays} ngày) — đến hết ${fmtDay(bonusPromo.endsAt)}.`;
-    } else if (p.trial) {
-      mode = "trial";
-      const tp = p.promos.find((x) => x.id === p.trial.promoId) || first;
+      if (p.you && p.you.bonusEligible) {
+        const daysLeft = Math.max(1, Math.ceil((Date.parse(bonusPromo.endsAt) - Date.now()) / 86400000));
+        subText = `Tài khoản của bạn đủ điều kiện: gói tháng 30 → ${mDays} ngày, gói năm 365 → ${yDays} ngày. Còn ${daysLeft} ngày.`;
+      } else {
+        subText = `Tài khoản đăng ký trong đợt này được +${pct}% thời gian sử dụng khi mua gói (gói tháng → ${mDays} ngày, gói năm → ${yDays} ngày) — đến hết ${fmtDay(bonusPromo.endsAt)}.`;
+      }
+    } else if (mode === "trial") {
       badgeText = "🎁 DÙNG THỬ MIỄN PHÍ";
       title = `Tặng ${tierName} dùng thử ${p.trial.days} ngày`;
-      subText = `Tài khoản đăng ký mới trong đợt này được tặng ${tierName} dùng thử ${p.trial.days} ngày (đến hết ${fmtDay(tp.endsAt)}).${p.you && p.you.hasTrial ? " Bạn đang có key dùng thử — xem ở tab Lịch sử giao dịch." : ""}`;
+      subText = `Tài khoản đăng ký mới trong đợt này được tặng ${tierName} dùng thử ${p.trial.days} ngày (${trialCounting}, đến hết ${fmtDay(trialPromo.endsAt)}).${p.you && p.you.hasTrial ? " Bạn đang có key dùng thử — xem ở tab Lịch sử giao dịch." : ""}`;
     } else {
       badgeText = "📣 THÔNG BÁO";
       title = first.name || "Khuyến mãi";
@@ -2016,8 +2034,8 @@ else if (payParam === "pending") showMsg("info", "Đang chờ cổng thanh toán
     h2.textContent = title;
     sub.textContent = subText;
     hero.classList.add("promo-on");
-    // Dong thuc nhan duoi gia (chi khi co bonus + du dieu kien)
-    if (mode === "bonus" && p.you && p.you.bonusEligible) {
+    // Dong thuc nhan duoi gia (khi co bonus, va voi bundle thi luon hien)
+    if (hasBonus && (mode === "bundle" || (p.you && p.you.bonusEligible))) {
       document.querySelectorAll(".promo-bonus-line").forEach((el) => {
         el.textContent = `Khuyến mãi +${pct}% thời gian: tháng ${mDays} ngày · năm ${yDays} ngày`;
         el.classList.remove("hidden");
@@ -2025,14 +2043,15 @@ else if (payParam === "pending") showMsg("info", "Đang chờ cổng thanh toán
     }
     // Badge gan tren the gia, ghi ro gia tri; doi theo toggle thang/nam
     const updBadges = (period) => {
-      document.querySelectorAll(".promo-card-badge").forEach((el) => {
+      document.querySelectorAll(".promo-card-badge[data-kind='bonus']").forEach((el) => {
         el.textContent = `🎁 +${pct}% · ${period === "year" ? yDays : mDays} ngày sử dụng`;
       });
     };
-    if (mode === "bonus") {
+    if (hasBonus) {
       document.querySelectorAll(".price-card").forEach((card) => {
         const el = document.createElement("span");
         el.className = "promo-card-badge";
+        el.dataset.kind = "bonus";
         card.appendChild(el);
       });
       const cur = document.querySelector(".billing-opt.active, .billing-opt.on");
@@ -2040,11 +2059,13 @@ else if (payParam === "pending") showMsg("info", "Đang chờ cổng thanh toán
       document.querySelectorAll(".billing-opt").forEach((b) =>
         b.addEventListener("click", () => updBadges(b.dataset.billing))
       );
-    } else if (mode === "trial" && p.trial) {
+    }
+    if (hasTrial && mode !== "bundle") {
       const card = document.querySelector(`.price-card[data-plan-card="${p.trial.tier}"]`);
-      if (card) {
+      if (card && !card.querySelector(".promo-card-badge[data-kind='trial']")) {
         const el = document.createElement("span");
         el.className = "promo-card-badge";
+        el.dataset.kind = "trial";
         el.textContent = `🎁 DÙNG THỬ ${p.trial.days} NGÀY`;
         card.appendChild(el);
       }

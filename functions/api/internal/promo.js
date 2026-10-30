@@ -9,10 +9,11 @@
 //   - { ... } mot dot don (se duoc boc vao mang)
 // Moi dot: { id?, enabled, type: bundle|trial|purchase_bonus|announcement,
 //   name, headline, link, startsAt, endsAt, trialTier, trialDays,
-//   purchaseBonusPercent }. Validate: type hop le, startsAt < endsAt (ISO),
-//   trialDays 1..90, purchaseBonusPercent 0..200, trialTier go|plus.
+//   countFrom: registration|activation, purchaseBonusPercent }.
+// Validate: type hop le, startsAt < endsAt (ISO), trialDays 1..90,
+//   countFrom hop le, purchaseBonusPercent 0..200, trialTier go|plus.
 import { json, errorJson, readJson } from "../_lib.js";
-import { getPromotions, normalizePromotions, PROMO_TYPES, PROMOS_META_KEY } from "../_promo.js";
+import { getPromotions, normalizePromotions, PROMO_TYPES, PROMO_COUNT_FROM, PROMOS_META_KEY } from "../_promo.js";
 
 function secretOk(request, env) {
   const expected = env.IDENTITY_INTERNAL_SECRET;
@@ -47,6 +48,8 @@ export async function onRequestPost({ request, env }) {
       return errorJson("INVALID_CONFIG", `startsAt/endsAt không hợp lệ ở đợt ${p.id}.`, 422);
     if (!Number.isInteger(p.trialDays) || p.trialDays < 1 || p.trialDays > 90)
       return errorJson("INVALID_CONFIG", `trialDays phải là số nguyên 1..90 ở đợt ${p.id}.`, 422);
+    if (!PROMO_COUNT_FROM.includes(p.countFrom))
+      return errorJson("INVALID_CONFIG", `countFrom không hợp lệ ở đợt ${p.id} (chỉ nhận ${PROMO_COUNT_FROM.join("|")}).`, 422);
     if (!(p.purchaseBonusPercent >= 0 && p.purchaseBonusPercent <= 200))
       return errorJson("INVALID_CONFIG", `purchaseBonusPercent phải trong 0..200 ở đợt ${p.id}.`, 422);
   }

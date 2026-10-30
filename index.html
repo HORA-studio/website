@@ -775,9 +775,11 @@ fetch("/api/promo").then(function(r){return r.ok?r.json():null;}).then(function(
     if(!price) return;
     var tag=document.createElement("div");
     tag.className="promo-tag";
-    if(pct>0) tag.textContent="Khuyến mãi: +"+pct+"% thời gian sử dụng";
-    else if(p.trial) tag.textContent="Đăng ký mới: tặng dùng thử "+(p.trial.tier==="plus"?"Plus":"Go")+" "+p.trial.days+" ngày";
-    else return;
+    var parts=[];
+    if(p.trial) parts.push("Đăng ký mới: tặng dùng thử "+(p.trial.tier==="plus"?"Plus":"Go")+" "+p.trial.days+" ngày"+(p.trial.countFrom==="activation"?" (đếm từ lúc kích hoạt)":" (đếm từ lúc tạo tài khoản)"));
+    if(pct>0) parts.push("Mua gói: +"+pct+"% thời gian sử dụng");
+    if(!parts.length) return;
+    tag.textContent=parts.join(" · ");
     price.after(tag);
   });
 }).catch(function(){});

@@ -2,7 +2,7 @@
 
 ## Mô hình: NHIỀU đợt chạy song song, mỗi đợt một `type`
 Cấu hình là **một mảng JSON** trong bảng `meta` của D1 `hora-website`, key = `promotions`.
-Mỗi phần tử là một đợt: `{ id, enabled, type, name, headline, link, startsAt, endsAt, trialTier, trialDays, purchaseBonusPercent }`.
+Mỗi phần tử là một đợt: `{ id, enabled, type, name, headline, link, startsAt, endsAt, trialTier, trialDays, countFrom, purchaseBonusPercent }`.
 
 `type` quyết định đợt đó cho quyền lợi gì và banner mua hàng hiện ra sao:
 
@@ -14,8 +14,10 @@ Mỗi phần tử là một đợt: `{ id, enabled, type, name, headline, link, 
 | `announcement` | Không có quyền lợi — chỉ thông báo | Hiện headline thuần |
 
 Luật quyền lợi (theo từng đợt):
-- **Dùng thử:** đăng ký TRONG cửa sổ của đợt có trial (bundle/trial) → cấp ngay license dùng thử (mặc định Plus 7 ngày, hạn đếm từ lúc kích hoạt). Mỗi tài khoản 1 lần/1 đợt (đánh dấu `promo:<id>` trong license).
-- **+% mua gói:** tài khoản đăng ký trong cửa sổ của đợt có bonus (bundle/purchase_bonus) VÀ mua trong cửa sổ → cộng % vào ngày của license (50%: tháng 30→45 ngày, năm 365→548 ngày). Số ngày tặng ghi ở `orders.bonus_days`, Lịch sử hiện "+15 ngày KM".
+- **Dùng thử:** đăng ký TRONG cửa sổ của đợt có trial (bundle/trial) → cấp ngay license dùng thử (mặc định Plus 7 ngày). Mỗi tài khoản 1 lần/1 đợt (đánh dấu `promo:<id>` trong license). `countFrom` quyết định **mốc bắt đầu đếm hạn**:
+  - `registration` (mặc định): hạn tính từ **lúc tạo tài khoản** (`expiry_utc` chốt ngay khi đăng ký, `activated_at = created_at`) — khách phải kích hoạt trước khi hết hạn.
+  - `activation`: hạn tính từ **lúc bind device đầu tiên** (`expiry_utc = NULL`, đếm khi kích hoạt — như license mua).
+- **+% mua gói:** tài khoản đăng ký trong cửa sổ của đợt có bonus (bundle/purchase_bonus) VÀ mua trong cửa sổ → cộng % vào ngày của license. **Áp dụng cho MỌI gói** (Go/Plus, tháng/năm) — không giới hạn gói. 50%: tháng 30→45 ngày, năm 365→548 ngày. Số ngày tặng ghi ở `orders.bonus_days`, Lịch sử hiện "+15 ngày KM".
 
 ## Banner chạy ở trang chủ (ticker)
 - Nằm **trong header cố định, trên cùng của trang** (trên cả menu và phần hero "Từ ảnh sản phẩm đến video quảng cáo.") — luôn ghim ở top khi cuộn.
@@ -33,10 +35,10 @@ curl -X POST https://hora.works/api/internal/promo \
   -H "X-Identity-Secret: <SECRET>" -H "Content-Type: application/json" \
   -d '{"promotions":[
     {"id":"thang-11-2026","type":"bundle","name":"Ưu đãi tháng 11",
-     "headline":"Tháng 11: đăng ký mới dùng thử Plus 7 ngày + mua gói tặng 50% thời gian",
+     "headline":"Tháng 11: đăng ký mới dùng thử Plus 7 ngày (đếm từ lúc tạo tài khoản) + mua bất cứ gói nào tặng 50% thời gian",
      "link":"/account.html?mode=register",
      "startsAt":"2026-11-01T00:00:00+07:00","endsAt":"2026-12-01T00:00:00+07:00",
-     "trialTier":"plus","trialDays":7,"purchaseBonusPercent":50},
+     "trialTier":"plus","trialDays":7,"countFrom":"registration","purchaseBonusPercent":50},
     {"id":"thong-bao-1","type":"announcement","name":"Thông báo",
      "headline":"Thông báo muốn chạy kèm ở banner...",
      "startsAt":"2026-11-01T00:00:00+07:00","endsAt":"2026-12-01T00:00:00+07:00"}

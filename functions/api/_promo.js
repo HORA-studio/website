@@ -15,14 +15,22 @@
 // LUAT QUYEN LOI (theo tung dot):
 //   - Dung thu: dang ky TRONG cua so cua dot co trial -> cap ngay luc dang ky
 //     (moi tai khoan 1 lan / 1 dot, danh dau qua notes 'promo:<id>').
+//     'countFrom' quyet dinh MOC BAT DAU DEM HAN cua license thu:
+//       - 'registration' (mac dinh): dem tu LUC TAO TAI KHOAN (expiry_utc duoc
+//         chot ngay khi dang ky) — khach phai kich hoat truoc khi het han.
+//       - 'activation': dem tu luc bind device dau tien (expiry_utc = NULL).
 //   - + % mua goi: tai khoan dang ky trong cua so cua dot co bonus VA mua
-//     trong cua so -> cong % vao validity_days luc cap license.
+//     trong cua so -> cong % vao validity_days luc cap license. Ap dung cho
+//     MOI goi (go/plus/thang/nam) — khong gioi han goi.
 // ============================================================================
 
 export const PROMOS_META_KEY = "promotions";
 export const PROMO_META_KEY = "promotion"; // legacy
 
 export const PROMO_TYPES = ["bundle", "trial", "purchase_bonus", "announcement"];
+
+// Moc bat dau dem han cua license dung thu.
+export const PROMO_COUNT_FROM = ["registration", "activation"];
 
 const BASE_PROMO = {
   id: "promo",
@@ -35,6 +43,7 @@ const BASE_PROMO = {
   endsAt: "2026-12-01T00:00:00+07:00",
   trialTier: "plus",
   trialDays: 7,
+  countFrom: "registration",
   purchaseBonusPercent: 50,
 };
 
@@ -44,11 +53,12 @@ export const DEFAULT_PROMOTIONS = [
     id: "thang-11-2026",
     name: "Ưu đãi tháng 11",
     headline:
-      "Tháng 11: đăng ký tài khoản mới được dùng thử Plus miễn phí 7 ngày + mua gói Go/Plus tặng thêm 50% thời gian sử dụng",
+      "Tháng 11: đăng ký tài khoản mới được dùng thử Plus miễn phí 7 ngày (hạn đếm từ lúc tạo tài khoản) + mua bất cứ gói nào tặng thêm 50% thời gian sử dụng",
     link: "/account.html?mode=register",
     // Thang 11 chi co 30 ngay: cua so [01/11 00:00, 01/12 00:00) gio VN.
     startsAt: "2026-11-01T00:00:00+07:00",
     endsAt: "2026-12-01T00:00:00+07:00",
+    countFrom: "registration",
   },
 ];
 
@@ -60,6 +70,7 @@ function normalizePromo(raw, idx) {
   p.trialDays = Number.isInteger(p.trialDays) ? p.trialDays : 7;
   p.purchaseBonusPercent = Number(p.purchaseBonusPercent) || 0;
   if (!["go", "plus"].includes(p.trialTier)) p.trialTier = "plus";
+  if (!PROMO_COUNT_FROM.includes(p.countFrom)) p.countFrom = "registration";
   return p;
 }
 
@@ -114,6 +125,21 @@ export function resolveTrialBenefit(list, nowMs) {
   return p ? { promo: p, tier: p.trialTier, days: p.trialDays } : null;
 }
 
+// Tinh moc dem han cho license dung thu theo 'countFrom' cua dot:
+//   - 'registration': chot han ngay (expiry = at + days, activated_at = at).
+//   - 'activation'  : de NULL, dem tu luc bind device dau tien.
+// Tra ve { expiry, activatedAt } (ISO hoac null) de ghi vao licenses.
+export function trialWindow(promo, atMs = Date.now()) {
+  const fromRegistration = !promo || promo.countFrom !== "activation";
+  if (!fromRegistration) return { expiry: null, activatedAt: null };
+  const at = new Date(atMs);
+  const days = Number(promo.trialDays) || 0;
+  return {
+    expiry: new Date(at.getTime() + days * 86400000).toISOString(),
+    activatedAt: at.toISOString(),
+  };
+}
+
 // Dot dang cho quyen loi "+ % thoi gian khi mua" (dang chay, % > 0).
 export function resolveBonusBenefit(list, nowMs) {
   const p = activePromotions(list, nowMs).find(
@@ -153,6 +179,7 @@ export function publicPromo(promo) {
     endsAt: promo.endsAt,
     trialTier: promo.trialTier,
     trialDays: promo.trialDays,
+    countFrom: promo.countFrom,
     purchaseBonusPercent: promo.purchaseBonusPercent,
   };
 }

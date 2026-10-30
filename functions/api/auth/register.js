@@ -5,7 +5,7 @@
 // Chua cau hinh mail (RESEND_API_KEY de trong) thi buoc gui bi bo qua —
 // dang ky van thanh cong nhung khong the dang nhap (xem functions/api/_mail.js).
 import { json, errorJson, readJson, hashPassword, issueAuthToken, siteUrl, newLicenseId, newLicenseKey, appForPlan } from "../_lib.js";
-import { getPromotions, resolveTrialBenefit } from "../_promo.js";
+import { getPromotions, resolveTrialBenefit, trialWindow } from "../_promo.js";
 import { logEvent, clientIp } from "../_log.js";
 import { isMailConfigured, sendVerificationEmail } from "../_mail.js";
 
@@ -34,9 +34,11 @@ export async function onRequestPost({ request, env }) {
   await logEvent(env, { eventType: "auth.register", customerId: id, ip: clientIp(request) });
 
   // KHUYEN MAI: dang ky trong cua so -> cap license dung thu (mac dinh Plus
-  // 7 ngay) ngay lap tuc. License dem han tu luc kich hoat nhu license mua
-  // (expiry_utc NULL, validity_days = so ngay thu). Idempotent theo dot:
-  // da co license 'promo' tao trong cua so nay thi khong cap lai.
+  // 7 ngay) ngay lap tuc. Moc dem han tuy cau hinh 'countFrom' cua dot:
+  //   - 'registration' (mac dinh): han chot ngay luc tao tai khoan
+  //     (expiry_utc = created_at + trialDays, activated_at = created_at).
+  //   - 'activation': de expiry_utc NULL, dem tu luc bind device dau tien.
+  // Idempotent theo dot: da co license 'promo' cua dot nay thi khong cap lai.
   // Moi loi o buoc nay deu bi nuot — khong duoc lam hong dang ky.
   let trial = null;
   try {
@@ -47,18 +49,20 @@ export async function onRequestPost({ request, env }) {
         "SELECT id FROM licenses WHERE customer_id = ?1 AND organization = 'promo' AND notes LIKE ?2 LIMIT 1"
       ).bind(id, marker + "%").first();
       if (!dup) {
+        const nowIso = new Date().toISOString();
+        const { expiry, activatedAt } = trialWindow(benefit.promo);
         const trialId = newLicenseId();
         await env.DB.prepare(
           `INSERT INTO licenses
              (id, license_key, customer_id, app, product_id, tier, status, organization,
               expiry_utc, validity_days, activated_at, revoked_at, source, order_id, created_at, notes)
-           VALUES (?1, ?2, ?3, ?4, ?5, ?6, 'active', 'promo', NULL, ?7, NULL, NULL, 'manual', NULL, ?8, ?9)`
+           VALUES (?1, ?2, ?3, ?4, ?5, ?6, 'active', 'promo', ?7, ?8, ?9, NULL, 'manual', NULL, ?10, ?11)`
         ).bind(
           trialId, newLicenseKey("HORA"), id, appForPlan(benefit.tier), appForPlan(benefit.tier),
-          benefit.tier, benefit.days, new Date().toISOString(),
+          benefit.tier, expiry, benefit.days, activatedAt, nowIso,
           `${marker}; Khuyen mai "${benefit.promo.name}": dung thu ${benefit.days} ngay khi dang ky`
         ).run();
-        trial = { tier: benefit.tier, days: benefit.days };
+        trial = { tier: benefit.tier, days: benefit.days, expiresAt: expiry };
         await logEvent(env, { eventType: "promo.trial_granted", customerId: id, ip: clientIp(request) });
       }
     }
