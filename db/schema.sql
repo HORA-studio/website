@@ -45,7 +45,8 @@ CREATE TABLE IF NOT EXISTS orders (
   gateway     TEXT,                     -- 'sepay' | 'momo' | 'vnpay'
   created_at  TEXT NOT NULL,
   paid_at     TEXT,
-  license_id  TEXT
+  license_id  TEXT,
+  bonus_days  INTEGER NOT NULL DEFAULT 0  -- ngay khuyen mai cong them khi cap license (xem _promo.js)
 );
 CREATE INDEX IF NOT EXISTS idx_orders_customer ON orders(customer_id);
 

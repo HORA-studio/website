@@ -1,3 +1,4 @@
+import { getPromotion, isPromoActive, isCustomerEligible, promoBonusDays } from "./_promo.js";
 // Thu vien dung chung cho cac Pages Function /api/* cua website HORA.
 // Chay tren Cloudflare Workers runtime (WebCrypto, fetch, D1 qua env.DB).
 
@@ -208,7 +209,26 @@ export async function tryIssueLicense(env, order) {
   const now = new Date().toISOString();
   const app = appForPlan(order.plan);
   const productId = app;
-  const validityDays = order.period === "year" ? 365 : 30;
+  let validityDays = order.period === "year" ? 365 : 30;
+
+  // KHUYEN MAI: tai khoan dang ky trong cua so + mua trong cua so ->
+  // cong them % thoi gian vao validity_days. Loi doc cau hinh/khach thi
+  // bonus = 0 (fail-soft, khong duoc lam ket cap license).
+  let bonusDaysGranted = 0;
+  try {
+    const cfg = await getPromotion(env);
+    const nowMs = Date.now();
+    if (isPromoActive(cfg, nowMs)) {
+      const cust = await env.DB.prepare("SELECT created_at FROM customers WHERE id = ?1")
+        .bind(order.customer_id).first();
+      if (cust && isCustomerEligible(cfg, cust.created_at, nowMs)) {
+        bonusDaysGranted = promoBonusDays(validityDays, cfg);
+        validityDays += bonusDaysGranted;
+      }
+    }
+  } catch {
+    bonusDaysGranted = 0;
+  }
   const licenseId = newLicenseId();
   const licenseKey = newLicenseKey("HORA");
 
@@ -221,6 +241,15 @@ export async function tryIssueLicense(env, order) {
 
   await env.DB.prepare("UPDATE orders SET status = 'paid', license_id = ?2 WHERE id = ?1")
     .bind(order.id, licenseId).run();
+
+  // Ghi lai so ngay khuyen mai da cong (cot orders.bonus_days — can migration
+  // migrate-promo-2026-10-30.sql; chua ap thi bo qua, khong lam hong cap).
+  if (bonusDaysGranted > 0) {
+    try {
+      await env.DB.prepare("UPDATE orders SET bonus_days = ?2 WHERE id = ?1")
+        .bind(order.id, bonusDaysGranted).run();
+    } catch { /* cot chua co -> bo qua */ }
+  }
   return true;
 }
 
