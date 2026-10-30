@@ -4,7 +4,7 @@
 // va gui qua Resend; chua cau hinh mail thi buoc gui bi bo qua (van 200).
 import { json, errorJson, readJson, issueAuthToken, siteUrl } from "../_lib.js";
 import { logEvent, clientIp } from "../_log.js";
-import { sendPasswordResetEmail } from "../_mail.js";
+import { sendPasswordResetEmail, isMailConfigured } from "../_mail.js";
 
 export async function onRequestPost({ request, env }) {
   const body = await readJson(request);
@@ -25,7 +25,9 @@ export async function onRequestPost({ request, env }) {
     // Nuot loi: response khong duoc phan biet email ton tai / khong ton tai.
     console.warn("forgot-password failed:", err && err.message ? err.message : String(err));
   }
-  return json({ ok: true });
+  // mailConfigured chi la co cau hinh gui mail cua he thong (giong register),
+  // khong he lo email vua nhap co ton tai hay khong.
+  return json({ ok: true, mailConfigured: isMailConfigured(env) });
 }
 
 export function onRequest() {
