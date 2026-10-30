@@ -1061,10 +1061,15 @@ html,body{min-height:100%;height:100%;overflow:hidden}
 #promo-strip{background:var(--accent-soft);border:1px solid var(--gold);border-radius:14px;padding:12px 16px;font-size:13px;line-height:1.6;margin-bottom:18px}
 #promo-strip strong{color:var(--gold2)}
 .promo-bonus-line{margin-top:8px;font-size:12.5px;font-weight:700;color:var(--gold2)}
-/* Header tab Mua goi khi co khuyen mai: doi noi dung + nen noi bat + badge nhap nhay */
-#dash .purchase-panel .purchase-hero.promo-on{height:auto !important;min-height:96px !important;padding:16px 20px !important;background:linear-gradient(115deg,rgba(11,151,135,.20),rgba(11,98,88,.06) 60%,transparent) !important;border-bottom:2px solid var(--gold)}
-#promo-hero-badge{display:inline-block;background:linear-gradient(90deg,#0b6258,#0b9787);color:#fff;font-size:10.5px;font-weight:900;letter-spacing:.08em;padding:4px 11px;border-radius:999px;margin-bottom:7px;animation:promoPulse 1.8s ease-in-out infinite}
+/* Header tab Mua goi khi co khuyen mai: doi noi dung + nen noi bat + badge nhap nhay.
+   Chieu cao GIU BANG 2 tab kia (dung chung 82px/75px nhu block dong bo header),
+   chi doi nen + vien; badge/chu tu can giua trong khung do. */
+#dash .purchase-panel .purchase-hero.promo-on{background:linear-gradient(115deg,rgba(11,151,135,.20),rgba(11,98,88,.06) 60%,transparent) !important;border-bottom:2px solid var(--gold)}
+#promo-hero-badge{display:inline-block;background:linear-gradient(90deg,#0b6258,#0b9787);color:#fff;font-size:10px;font-weight:900;letter-spacing:.06em;line-height:1;padding:3px 9px;border-radius:999px;margin-bottom:3px;animation:promoPulse 1.8s ease-in-out infinite}
 #promo-hero-badge.hidden{display:none}
+/* Trong khung 82px: badge nho + chu gon de khong day chieu cao */
+#dash .purchase-panel .purchase-hero.promo-on h2{font-size:20px !important;line-height:1.2 !important;margin:0 !important}
+#dash .purchase-panel .purchase-hero.promo-on p{font-size:12.5px !important;line-height:1.35 !important;margin-top:2px !important}
 .promo-card-badge{position:absolute;top:-12px;left:24px;z-index:2;background:linear-gradient(90deg,#0b6258,#0b9787);color:#fff;border-radius:999px;padding:5px 11px;font-size:10.5px;font-weight:900;letter-spacing:.05em;box-shadow:0 6px 16px rgba(11,98,88,.35);animation:promoPulse 1.8s ease-in-out infinite;white-space:nowrap}
 @keyframes promoPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
 /* Man hinh THAP (laptop nho, phong to 125-150%): nen tab Mua goi vua khung, khong phai cuon de bam Mua ngay */
@@ -1089,10 +1094,9 @@ html,body{min-height:100%;height:100%;overflow:hidden}
   #dash .purchase-panel .price-card .plan-desc{font-size:12.5px !important;line-height:1.35 !important}
   #dash .purchase-panel .price-card .btn{height:40px !important;min-height:40px !important}
   .promo-bonus-line{font-size:11.5px !important;margin-top:4px !important;line-height:1.35 !important}
-  #dash .purchase-panel .purchase-hero.promo-on{padding-top:8px !important;padding-bottom:8px !important}
-  #dash .purchase-panel .purchase-hero.promo-on h2{font-size:21px !important;line-height:1.15 !important}
-  #dash .purchase-panel .purchase-hero.promo-on p{line-height:1.35 !important}
-  #dash .purchase-panel .purchase-hero:not(.promo-on){height:76px !important;min-height:76px !important}
+  #dash .purchase-panel .purchase-hero.promo-on h2{font-size:19px !important;line-height:1.15 !important}
+  #dash .purchase-panel .purchase-hero.promo-on p{font-size:12px !important;line-height:1.3 !important}
+  .account-welcome,.purchase-hero,.orders-welcome{height:76px !important;min-height:76px !important}
 }
 /* Bo nen thu hai cua khoi gia: pricing-wrap trong suot — the Go/Plus nam thang tren nen panel (1 nen duy nhat) */
 #dash .purchase-panel .pricing-wrap{background:transparent !important;border:none !important;box-shadow:none !important}
