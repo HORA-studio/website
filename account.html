@@ -1067,6 +1067,33 @@ html,body{min-height:100%;height:100%;overflow:hidden}
 #promo-hero-badge.hidden{display:none}
 .promo-card-badge{position:absolute;top:-12px;left:24px;z-index:2;background:linear-gradient(90deg,#0b6258,#0b9787);color:#fff;border-radius:999px;padding:5px 11px;font-size:10.5px;font-weight:900;letter-spacing:.05em;box-shadow:0 6px 16px rgba(11,98,88,.35);animation:promoPulse 1.8s ease-in-out infinite;white-space:nowrap}
 @keyframes promoPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
+/* Man hinh THAP (laptop nho, phong to 125-150%): nen tab Mua goi vua khung, khong phai cuon de bam Mua ngay */
+@media (max-height:840px){
+  #dash .purchase-panel .purchase-hero.promo-on{padding-top:10px !important;padding-bottom:10px !important}
+  #promo-hero-badge{margin-bottom:4px}
+  #dash .purchase-panel .pricing-wrap{margin-top:12px !important;padding-top:18px !important;padding-bottom:18px !important}
+  #dash .purchase-panel .pricing-toggle-row{margin-bottom:16px !important}
+  #dash .purchase-panel .price-card{padding-top:18px !important;padding-bottom:18px !important}
+  #dash .purchase-panel .price-card .price{font-size:50px !important;margin-top:8px !important}
+  #dash .purchase-panel .price-card ul{gap:11px !important;margin:12px 0 14px !important}
+}
+@media (max-height:680px){
+  .shell{padding-top:14px !important;padding-bottom:14px !important}
+  #dash .purchase-panel .pricing-wrap{padding-top:10px !important;padding-bottom:10px !important}
+  #dash .purchase-panel .pricing-toggle-row{margin-bottom:10px !important}
+  #dash .purchase-panel .billing-opt{padding-top:6px !important;padding-bottom:6px !important}
+  #dash .purchase-panel .price-card{padding-top:14px !important;padding-bottom:14px !important}
+  #dash .purchase-panel .price-card .price{font-size:44px !important;line-height:1 !important;margin-top:4px !important}
+  #dash .purchase-panel .price-card ul{gap:8px !important;margin:10px 0 12px !important;font-size:12.5px !important;line-height:1.35 !important}
+  #dash .purchase-panel .price-card h3{font-size:18px !important}
+  #dash .purchase-panel .price-card .plan-desc{font-size:12.5px !important;line-height:1.35 !important}
+  #dash .purchase-panel .price-card .btn{height:40px !important;min-height:40px !important}
+  .promo-bonus-line{font-size:11.5px !important;margin-top:4px !important;line-height:1.35 !important}
+  #dash .purchase-panel .purchase-hero.promo-on{padding-top:8px !important;padding-bottom:8px !important}
+  #dash .purchase-panel .purchase-hero.promo-on h2{font-size:21px !important;line-height:1.15 !important}
+  #dash .purchase-panel .purchase-hero.promo-on p{line-height:1.35 !important}
+  #dash .purchase-panel .purchase-hero:not(.promo-on){height:76px !important;min-height:76px !important}
+}
 </style>
 </head>
 <body>
