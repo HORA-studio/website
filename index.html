@@ -1007,4 +1007,18 @@ fetch("/api/auth/me",{credentials:"same-origin"}).then(function(r){return r.ok?r
 #pricing .popular{left:auto;right:30px}
 #pricing .pricing-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
 @media(max-width:620px){#pricing .pricing-grid{grid-template-columns:1fr}}
+/* Dark theme: cac mau hard-code sang o tren (#17252b/#06796e/#6b7b82) khong dung duoc tren nen toi -> tra ve bien theme.
+   Ap cho ca dark thu cong va system dang dark, dung mau pattern .btn.primary/.popular o tren. */
+html[data-theme="dark"] #pricing .plan-desc{color:var(--muted)}
+html[data-theme="dark"] #pricing .price-card .price{color:var(--gold2)}
+html[data-theme="dark"] #pricing .price-card ul{color:var(--text)}
+html[data-theme="dark"] #pricing .price-card .btn{color:var(--text)}
+html[data-theme="dark"] #pricing .price-card .btn.primary{color:#04211c}
+@media(prefers-color-scheme:dark){
+html[data-theme="system"] #pricing .plan-desc{color:var(--muted)}
+html[data-theme="system"] #pricing .price-card .price{color:var(--gold2)}
+html[data-theme="system"] #pricing .price-card ul{color:var(--text)}
+html[data-theme="system"] #pricing .price-card .btn{color:var(--text)}
+html[data-theme="system"] #pricing .price-card .btn.primary{color:#04211c}
+}
 </style>
