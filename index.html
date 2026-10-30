@@ -576,8 +576,11 @@ document.querySelectorAll(".ratio-btn").forEach(btn=>{
 const navSections=[...document.querySelectorAll(".navlinks a[data-home-link]")].map(a=>({a,section:document.querySelector(a.getAttribute("href"))})).filter(x=>x.section);
 if("IntersectionObserver" in window){
  const navObserver=new IntersectionObserver(entries=>{
+  if(window.__navLock&&Date.now()<window.__navLock) return;
   entries.forEach(entry=>{if(entry.isIntersecting){navSections.forEach(x=>x.a.classList.toggle("active",x.section===entry.target));}});
  },{rootMargin:"-12% 0px -72% 0px",threshold:0});
+ addEventListener("wheel",()=>{window.__navLock=0;},{passive:true});
+ addEventListener("touchstart",()=>{window.__navLock=0;},{passive:true});
  navSections.forEach(x=>navObserver.observe(x.section));
 }
 function closeDownloadMenus(){document.querySelectorAll(".dl-wrap.open").forEach(w=>{w.classList.remove("open");w.querySelector(".dl-toggle")?.setAttribute("aria-expanded","false");});}
@@ -689,6 +692,8 @@ document.querySelectorAll(".navlinks a[data-home-link]").forEach(a=>a.addEventLi
   const target=document.querySelector(targetId);
   if(!target) return;
   e.preventDefault();
+  document.querySelectorAll(".navlinks a[data-home-link]").forEach(x=>x.classList.toggle("active",x===a));
+  window.__navLock=Date.now()+1200;
   const purchase=document.getElementById("purchase");
   const wasPurchasing=purchase.classList.contains("active");
   if(wasPurchasing) showHome();
@@ -696,6 +701,9 @@ document.querySelectorAll(".navlinks a[data-home-link]").forEach(a=>a.addEventLi
     if(targetId==="#pricing"){
       const ctop=target.getBoundingClientRect().top+window.scrollY-(window.innerHeight-target.offsetHeight)/2;
       window.scrollTo({top:Math.max(0,ctop),behavior:"smooth"});
+    } else if(targetId==="#demos"){
+      const dtop=target.getBoundingClientRect().top+window.scrollY-(document.querySelector("header")?.offsetHeight||0);
+      window.scrollTo({top:Math.max(0,dtop),behavior:"smooth"});
     } else scrollToSection(target);
     history.replaceState(null,"",targetId);
   }));
