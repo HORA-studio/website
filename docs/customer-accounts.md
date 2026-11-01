@@ -27,7 +27,7 @@ một **token định danh** (opaque) từ web và gọi lại web để lấy l
 Trình duyệt ── /account.html, /link (tĩnh, cùng origin)
             └─ /api/* (Cloudflare Pages Functions, repo này)
                  ├─ auth: register / login / logout / me
-                 ├─ identity: link-create / link-claim / verify / revoke
+                 ├─ identity: device/start|poll|info|approve|deny (chinh) + link-create/link-claim (legacy) / verify / revoke
                  ├─ licenses: GET danh sách, POST claim key đã có
                  ├─ app: bootstrap (bind device + plan), device-change
                  ├─ orders: POST tạo đơn, GET lịch sử giao dịch
@@ -59,28 +59,36 @@ App desktop (Video Builder) ── /api/identity/link-claim (lấy token)
   chữ ký/checksum của cổng và (2) đối chiếu số tiền với đơn đã lưu. Trang
   `return` chỉ điều hướng về `/account.html`, không ghi trạng thái gì.
 
-## Identity Provider — một tài khoản cho mọi app (2026-10-29)
+## Identity Provider — một tài khoản cho mọi app
 
 Web phát **token opaque** cho app desktop; app gửi token kèm `deviceId` mỗi lần
 bootstrap. VB worker verify token bằng cách **gọi web** (không giữ password).
 
-**Luồng kết nối (link code):**
-1. Trong `account.html`, khách bấm "Tạo mã kết nối" → `POST /api/identity/link-create`
-   → tạo `app_links` code (`HORA-LINK-XXXXXXXX`, TTL 10 phút, dùng 1 lần).
-2. App desktop bấm "Kết nối tài khoản" → mở `https://hora.works/link?code=...`
-   (hoặc khách tự mở trang, nhập mã).
-3. Khách dán mã vào app → app gọi `POST /api/identity/link-claim {code, deviceId}`
-   → nhận `{userId, token, app}`; app lưu `token` vào keystore.
-4. App bootstrap: `POST api.hora.works/api/video-builder/bootstrap {deviceId, appToken}`.
+**Luồng kết nối hiện tại — device authorization (kiểu GitHub, ĐÃ deploy 2026-11-01):**
+Không còn bước copy-paste mã. App xin phiên, mở browser, user bấm Đồng ý, app tự nhận token.
+1. App bấm "Kết nối" → `POST /api/identity/device/start {app, deviceId}`
+   → `{device_code, user_code, verify_url, interval, expires_in}`. Lưu hàng `device_auth`
+   (`user_code` dạng `ABCD-1234`, TTL 15 phút, `device_code` chỉ lưu SHA-256).
+2. App mở `verify_url` (`/device?code=<user_code>`). Chưa đăng nhập → `account.html?next=/device?...`.
+3. User kiểm mã rồi bấm **Đồng ý** → `POST /api/identity/device/approve {user_code}`
+   (gắn `customer_id` vào phiên). Hoặc **Từ chối** → `/api/identity/device/deny`.
+4. App poll `POST /api/identity/device/poll {device_code}` (interval ~5s) → `pending` /
+   `slow_down` / khi đã duyệt trả `{status:"approved", userId, token, app, deviceId}`.
+   Token phat **1 lan** (guard `token_issued_at`), ghi vào `app_tokens`.
+5. App lưu `token` vào keystore; bootstrap: `POST api.hora.works/.../bootstrap {deviceId, appToken}`.
 
-**Web là nguồn sự thật.** Worker VB (sau khi deploy) gọi server-to-server:
+Trang `/device` + endpoint `device/*` là **đường chính**. Flow cũ (`link-create` /
+`link-claim` / trang `/link`) vẫn giữ nhưng legacy (không còn UI trên màn login desktop).
+
+**Web là nguồn sự thật.** Worker VB gọi server-to-server:
 - `POST /api/identity/verify {token}` (header `X-Identity-Secret`) → `userId`.
 - `POST /api/app/bootstrap {userId, app, deviceId}` → bind device + trả plan/expiry.
 
 **Bảng (D1 `hora-website`):**
 | Bảng | Việc |
 | --- | --- |
-| `app_links` | phiên kết nối (code, TTL, dùng 1 lần) |
+| `device_auth` | phiên device auth (device_code SHA-256, user_code, TTL, dùng 1 lần) |
+| `app_links` | phiên kết nối kiểu cũ (legacy) |
 | `app_tokens` | token app giữ (sha256; revoke bằng `revoked_at`) |
 | `licenses` | license của mọi app (thay `customer_licenses` cũ) |
 | `devices` | 1 license = 1 máy |

@@ -1573,10 +1573,17 @@ async function loadDash() {
     return;
   }
   $("auth-card").classList.add("hidden");
+  $("side-email").textContent = data.customer.email;
+  // Den tu /link, /device... (chua dang nhap): dang nhap xong quay lai dung trang.
+  // Chi nhan path noi bo (bat dau "/", khong phai "//") de tranh open-redirect.
+  const next = new URLSearchParams(location.search).get("next");
+  if (next && next.startsWith("/") && !next.startsWith("//")) {
+    location.href = next;
+    return;
+  }
   $("dash").classList.remove("hidden");
   $("side").classList.remove("hidden");
   $("shell").classList.remove("solo");
-  $("side-email").textContent = data.customer.email;
   showView(currentView);
   $("acc-email").textContent = data.customer.email;
   $("acc-name").textContent = data.customer.displayName ? " — " + data.customer.displayName : "";
