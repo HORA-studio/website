@@ -1112,9 +1112,9 @@ html,body{min-height:100%;height:100%;overflow:hidden}
 #dash .lic-table td{white-space:normal;overflow:visible;text-overflow:clip;padding:14px 12px}
 #dash .lic-table .cell-sub{display:block;margin-top:5px;font-size:12px;color:var(--muted)}
 #dash .lic-table .cell-main{font-weight:650}
-#dash .lic-table .key-wrap{display:flex;align-items:flex-start;gap:8px}
-#dash .lic-table .key-wrap code{flex:1 1 auto;min-width:0;max-width:none}
-#dash .lic-table .key-wrap .btn{flex:0 0 auto}
+#dash .lic-table .key-cell code{display:block;max-width:none}
+#dash .lic-table .cell-actions{display:inline-flex;flex-direction:column;gap:6px}
+#dash .lic-table .cell-actions .export-btn{min-width:76px;justify-content:center}
 #dash .lic-table tbody tr{transition:background .15s ease}
 #dash .lic-table tbody tr:hover{background:rgba(11,98,88,.04)}
 #dash .lic-table .export-cell{padding-right:18px}
@@ -1622,7 +1622,7 @@ let LICENSES_CACHE = [];
 function tierName(t) { return t ? t.charAt(0).toUpperCase() + t.slice(1) : ""; }
 function licenseCell(l) {
   if (!l || !l.licenseKey) return '<span class="muted">—</span>';
-  return `<span class="key-wrap"><code>${esc(l.licenseKey)}</code><button class="btn small" type="button" data-copy="${esc(l.licenseKey)}">Copy</button></span>`;
+  return `<code>${esc(l.licenseKey)}</code>`;
 }
 function expiryCell(l) {
   if (!l) return '<span class="muted">—</span>';
@@ -1681,7 +1681,7 @@ function renderHistory() {
       <td>${esc(fmtDay(l.createdAt))}</td>
       <td class="wrap-cell">${expiryCell(l)}</td>
       <td>${bindingCell(l)}</td>
-      <td class="export-cell"><button type="button" class="export-btn" data-export-kind="license" data-export-id="${esc(l.id || "")}" title="Xuất đơn hàng này"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 11 5 5 5-5"></path><path d="M4 21h16"></path></svg> Xuất</button></td>
+      <td class="export-cell"><span class="cell-actions"><button type="button" class="export-btn" data-export-kind="license" data-export-id="${esc(l.id || "")}" title="Xuất đơn hàng này"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 11 5 5 5-5"></path><path d="M4 21h16"></path></svg> Xuất</button><button type="button" class="export-btn" data-copy="${esc(l.licenseKey || "")}" title="Sao chép license key">Copy</button></span></td>
     </tr>`);
   }
   const licensedOrders = new Set(licenses.map((l) => l.orderId).filter(Boolean));
