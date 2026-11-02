@@ -94,6 +94,27 @@ CREATE TABLE IF NOT EXISTS app_tokens (
 );
 CREATE INDEX IF NOT EXISTS idx_app_tokens_customer ON app_tokens(customer_id);
 
+-- Phien "device authorization" (kieu GitHub): app desktop xin cap device_code +
+-- user_code, user mo browser bam "Dong y", app poll nhan token (khong copy-paste ma).
+-- device_code chi luu SHA-256; user_code la ma ngan doi chieu tren web.
+CREATE TABLE IF NOT EXISTS device_auth (
+  device_code_hash TEXT PRIMARY KEY,    -- sha256(device_code)
+  user_code        TEXT NOT NULL UNIQUE,
+  app              TEXT NOT NULL,       -- 'video-builder' | 'facebook-builder' | ...
+  device_id        TEXT,
+  ip               TEXT,                -- IP luc start (chi de rate limit)
+  status           TEXT NOT NULL DEFAULT 'pending', -- pending | approved | denied | expired
+  customer_id      TEXT REFERENCES customers(id),   -- set khi user dong y tren web
+  created_at       TEXT NOT NULL,
+  expires_at       TEXT NOT NULL,
+  interval_seconds INTEGER NOT NULL DEFAULT 5,
+  last_polled_at   TEXT,
+  approved_at      TEXT,
+  token_issued_at  TEXT                 -- set khi app da lay token (chi phat 1 lan)
+);
+CREATE INDEX IF NOT EXISTS idx_device_auth_user_code ON device_auth(user_code);
+CREATE INDEX IF NOT EXISTS idx_device_auth_expires ON device_auth(expires_at);
+
 -- License (nguon su that duy nhat cho MOI app: video-builder, facebook...).
 -- Schema nay la CHUAN DUNG CHUNG giua web (Pages) va worker app (hora-worker-vb
 -- doc cheo qua binding DB_VB). Cot `id` la ten chuan (worker dung `id`).
@@ -164,6 +185,7 @@ CREATE TABLE IF NOT EXISTS demo_videos (
   description TEXT,
   video_url   TEXT NOT NULL DEFAULT '',
   poster_url  TEXT,                     -- anh thumbnail/poster cua the
+  meta        TEXT,                     -- JSON tuy y, vd {"size":"16:9"} (khung hien thi the)
   sort_order  INTEGER NOT NULL DEFAULT 0,
   enabled     INTEGER NOT NULL DEFAULT 1,  -- 0 = an khoi trang chu
   created_at  TEXT NOT NULL,            -- ISO 8601 UTC

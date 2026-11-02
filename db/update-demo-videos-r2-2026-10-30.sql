@@ -7,6 +7,9 @@
 -- (11 video: 4 ngang 16:9 + 7 doc 9:16, moi video 10 giay; tieu de/nhom
 -- dat theo noi dung tung video). poster_url de trong — the dung nen
 -- gradient + tieu de nhu thiet ke goc.
+-- LUU Y: cau nay ghi 11 dong KHONG kem cot meta (de tranh phu thuoc cot meta co
+-- ton tai hay khong). Sau khi chay, neu bang da co cot meta thi chay them
+-- db/migrate-demo-videos-meta-2026-10-30.sql de gan size cho tung video.
 DELETE FROM demo_videos;
 INSERT INTO demo_videos (id, title, category, description, video_url, poster_url, sort_order, enabled, created_at, updated_at) VALUES
   ('thoi-trang-toi-gian', 'Thời trang tối giản', 'Fashion', 'Nhấn vào chất liệu và kiểu dáng', 'https://releases.hora.works/hora.website/video_demo/900f7adea434407282522a460479cade.mp4', '', 1, 1, '2026-10-30T00:00:00.000Z', '2026-10-30T00:00:00.000Z'),

@@ -606,8 +606,18 @@ function renderDemos(list){
  });
 }
 renderDemos(CONFIG.demos);
+/* Chon khung hien thi theo field `size` trong meta cua video (vd "16:9", "9:16",
+   "1:1"). Chi ap khi MOI video cung mot size — danh sach lan size thi giu
+   mac dinh de luoi khong bi vo. Khong co size -> khong doi. */
+function applyDemoRatio(list){
+ const valid=["16/9","9/16","1/1"];
+ const sizes=(list||[]).map(d=>String(d.size||"").replace(":","/")).filter(s=>valid.includes(s));
+ if(!sizes.length) return;
+ const ratio=sizes[0];
+ if(sizes.every(s=>s===ratio)) document.getElementById("demo-grid").dataset.ratio=ratio;
+}
 /* Video mau THAT load tu database qua /api/demos — doi video trong DB la trang cap nhat, khong can sua code. API loi/khong san sang thi giu ban du phong CONFIG.demos o tren. */
-fetch("/api/demos",{cache:"no-cache"}).then(r=>r.ok?r.json():null).then(data=>{if(data&&Array.isArray(data.demos))renderDemos(data.demos);}).catch(()=>{});
+fetch("/api/demos",{cache:"no-cache"}).then(r=>r.ok?r.json():null).then(data=>{if(data&&Array.isArray(data.demos)){renderDemos(data.demos);applyDemoRatio(data.demos);}}).catch(()=>{});
 // Aspect-ratio templates: one compact selector updates every preview consistently.
 const ratioGrid=document.getElementById("demo-grid");
 ratioGrid.dataset.ratio="16/9";

@@ -10,11 +10,14 @@
 // trang chu khong bao gio trong phan demo).
 //
 // Moi video: { id, title, type (nhom phan loai), desc, videoUrl, image,
-//   sortOrder, enabled }
+//   sortOrder, enabled, meta }
 //   - videoUrl: link MP4/WebM truc tiep, hoac link YouTube/Vimeo (frontend tu
 //     nhung iframe). De trong = chua co video, the van hien anh + tieu de va
 //     cua so xem bao "dang cap nhat".
 //   - image: anh poster/thumbnail cua the (va lam poster khi phat video).
+//   - meta: object JSON tuy y (luu trong cot meta cua DB). Dung cho thong tin
+//     phu cua tung video, vd { size: "16:9" | "9:16" | "1:1" } de frontend chon
+//     khung hien thi. meta.size duoc bom ra ngoai o publicDemo().
 // ============================================================================
 
 export const DEFAULT_DEMOS = [
@@ -27,6 +30,7 @@ export const DEFAULT_DEMOS = [
     image: "",
     sortOrder: 1,
     enabled: true,
+    meta: { size: "16:9" },
   },
   {
     id: "am-dun-nuoc",
@@ -37,6 +41,7 @@ export const DEFAULT_DEMOS = [
     image: "",
     sortOrder: 2,
     enabled: true,
+    meta: { size: "16:9" },
   },
   {
     id: "serum-duong-da",
@@ -47,6 +52,7 @@ export const DEFAULT_DEMOS = [
     image: "",
     sortOrder: 3,
     enabled: true,
+    meta: { size: "16:9" },
   },
   {
     id: "nuoc-hoa-cao-cap",
@@ -57,6 +63,7 @@ export const DEFAULT_DEMOS = [
     image: "",
     sortOrder: 4,
     enabled: true,
+    meta: { size: "16:9" },
   },
   {
     id: "vest-trang-doc",
@@ -67,6 +74,7 @@ export const DEFAULT_DEMOS = [
     image: "",
     sortOrder: 5,
     enabled: true,
+    meta: { size: "9:16" },
   },
   {
     id: "ao-dai-tet-doc",
@@ -77,6 +85,7 @@ export const DEFAULT_DEMOS = [
     image: "",
     sortOrder: 6,
     enabled: true,
+    meta: { size: "9:16" },
   },
   {
     id: "pho-neon-doc",
@@ -87,6 +96,7 @@ export const DEFAULT_DEMOS = [
     image: "",
     sortOrder: 7,
     enabled: true,
+    meta: { size: "9:16" },
   },
   {
     id: "bong-ro-doc",
@@ -97,6 +107,7 @@ export const DEFAULT_DEMOS = [
     image: "",
     sortOrder: 8,
     enabled: true,
+    meta: { size: "9:16" },
   },
   {
     id: "cafe-pour-over-doc",
@@ -107,6 +118,7 @@ export const DEFAULT_DEMOS = [
     image: "",
     sortOrder: 9,
     enabled: true,
+    meta: { size: "9:16" },
   },
   {
     id: "serum-duong-da-doc",
@@ -117,6 +129,7 @@ export const DEFAULT_DEMOS = [
     image: "",
     sortOrder: 10,
     enabled: true,
+    meta: { size: "9:16" },
   },
   {
     id: "nuoc-hoa-doc",
@@ -127,11 +140,35 @@ export const DEFAULT_DEMOS = [
     image: "",
     sortOrder: 11,
     enabled: true,
+    meta: { size: "9:16" },
   }
 ];
 
 export function isHttpUrl(s) {
   return typeof s === "string" && /^https?:\/\/[^\s<>"]+$/i.test(s.trim());
+}
+
+// Chuan hoa meta: chi nhan object, gioi han kich thuoc JSON khi ghi DB.
+export function normalizeMeta(raw) {
+  if (raw && typeof raw === "object" && !Array.isArray(raw)) {
+    try {
+      const s = JSON.stringify(raw);
+      if (s.length <= 2000) return JSON.parse(s);
+    } catch {
+      /* bo qua, tra ve {} */
+    }
+  }
+  return {};
+}
+
+function parseMetaColumn(v) {
+  if (!v) return {};
+  if (typeof v === "object") return normalizeMeta(v);
+  try {
+    return normalizeMeta(JSON.parse(String(v)));
+  } catch {
+    return {};
+  }
 }
 
 // Chuan hoa 1 dong video (tu request ghi cau hinh hoac tu DB).
@@ -156,6 +193,9 @@ export function normalizeDemo(raw, idx = 0) {
     `demo-${idx + 1}`;
   const videoUrl = String(src.videoUrl ?? src.video_url ?? "").trim().slice(0, 1000);
   const image = String(src.image ?? src.poster_url ?? "").trim().slice(0, 1000);
+  // meta: nhan object meta san co; cho phep viet tat { size } o ngoai cung.
+  const meta = normalizeMeta(src.meta ?? src.meta_json);
+  if (!meta.size && src.size) meta.size = String(src.size).trim().slice(0, 40);
   return {
     id: slug,
     title,
@@ -169,6 +209,7 @@ export function normalizeDemo(raw, idx = 0) {
         ? src.sort_order
         : idx + 1,
     enabled: src.enabled === undefined ? true : !!src.enabled && src.enabled !== 0,
+    meta,
   };
 }
 
@@ -189,6 +230,7 @@ function rowToDemo(r, idx) {
       image: r.poster_url,
       sortOrder: r.sort_order,
       enabled: r.enabled === 1 || r.enabled === true,
+      meta: parseMetaColumn(r.meta),
     },
     idx
   );
@@ -199,7 +241,7 @@ function rowToDemo(r, idx) {
 export async function getDemoVideos(env, { includeDisabled = false } = {}) {
   try {
     const { results } = await env.DB.prepare(
-      "SELECT id, title, category, description, video_url, poster_url, sort_order, enabled " +
+      "SELECT id, title, category, description, video_url, poster_url, sort_order, enabled, meta " +
         "FROM demo_videos ORDER BY sort_order ASC, created_at ASC"
     ).all();
     if (results && results.length) {
@@ -217,7 +259,10 @@ export async function getDemoVideos(env, { includeDisabled = false } = {}) {
 }
 
 // Ban rut gon cho frontend trang chu (dung ten field ma index.html dang dung).
+// meta.size duoc bom ra ngoai de the chon khung ngang/doc; van giu nguyen
+// cac field cu nen frontend cu khong bi vo.
 export function publicDemo(d) {
+  const meta = d.meta && typeof d.meta === "object" ? d.meta : {};
   return {
     id: d.id,
     title: d.title,
@@ -225,6 +270,8 @@ export function publicDemo(d) {
     desc: d.desc,
     videoUrl: d.videoUrl,
     image: d.image,
+    size: meta.size || "",
+    meta,
   };
 }
 
@@ -236,8 +283,8 @@ export async function replaceDemoVideos(env, list) {
   for (const d of list) {
     stmts.push(
       env.DB.prepare(
-        "INSERT INTO demo_videos (id, title, category, description, video_url, poster_url, sort_order, enabled, created_at, updated_at) " +
-          "VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?9)"
+        "INSERT INTO demo_videos (id, title, category, description, video_url, poster_url, sort_order, enabled, meta, created_at, updated_at) " +
+          "VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?10)"
       ).bind(
         d.id,
         d.title,
@@ -247,6 +294,7 @@ export async function replaceDemoVideos(env, list) {
         d.image || null,
         d.sortOrder,
         d.enabled ? 1 : 0,
+        d.meta && Object.keys(d.meta).length ? JSON.stringify(d.meta) : null,
         now
       )
     );
