@@ -1100,6 +1100,24 @@ html,body{min-height:100%;height:100%;overflow:hidden}
 }
 /* Bo nen thu hai cua khoi gia: pricing-wrap trong suot — the Go/Plus nam thang tren nen panel (1 nen duy nhat) */
 #dash .purchase-panel .pricing-wrap{background:transparent !important;border:none !important;box-shadow:none !important}
+/* Bang Lich su gon dep: het cat chu ..., o xep tang (chip + dong phu), khoa chieu rong tren man lon */
+#dash [data-view="orders"] .lic-table-wrap{max-width:1180px}
+#dash .lic-table th:nth-child(1){width:24%}
+#dash .lic-table th:nth-child(2){width:14%}
+#dash .lic-table th:nth-child(3){width:15%}
+#dash .lic-table th:nth-child(4){width:10%}
+#dash .lic-table th:nth-child(5){width:13%}
+#dash .lic-table th:nth-child(6){width:14%}
+#dash .lic-table th:nth-child(7){width:10%}
+#dash .lic-table td{white-space:normal;overflow:visible;text-overflow:clip;padding:14px 12px}
+#dash .lic-table .cell-sub{display:block;margin-top:5px;font-size:12px;color:var(--muted)}
+#dash .lic-table .cell-main{font-weight:650}
+#dash .lic-table .key-wrap{display:flex;align-items:flex-start;gap:8px}
+#dash .lic-table .key-wrap code{flex:1 1 auto;min-width:0;max-width:none}
+#dash .lic-table .key-wrap .btn{flex:0 0 auto}
+#dash .lic-table tbody tr{transition:background .15s ease}
+#dash .lic-table tbody tr:hover{background:rgba(11,98,88,.04)}
+#dash .lic-table .export-cell{padding-right:18px}
 </style>
 </head>
 <body>
@@ -1597,7 +1615,7 @@ let LICENSES_CACHE = [];
 function tierName(t) { return t ? t.charAt(0).toUpperCase() + t.slice(1) : ""; }
 function licenseCell(l) {
   if (!l || !l.licenseKey) return '<span class="muted">—</span>';
-  return `<code>${esc(l.licenseKey)}</code> <button class="btn small" type="button" data-copy="${esc(l.licenseKey)}">Copy</button>`;
+  return `<span class="key-wrap"><code>${esc(l.licenseKey)}</code><button class="btn small" type="button" data-copy="${esc(l.licenseKey)}">Copy</button></span>`;
 }
 function expiryCell(l) {
   if (!l) return '<span class="muted">—</span>';
@@ -1605,7 +1623,7 @@ function expiryCell(l) {
   if (!l.expiresAt) return "Chưa kích hoạt";
   const days = Math.ceil((new Date(l.expiresAt).getTime() - Date.now()) / 86400000);
   if (days < 0) return `Đã hết hạn (${esc(fmtDay(l.expiresAt))})`;
-  return `${esc(fmtDay(l.expiresAt))} · còn ${days} ngày`;
+  return `<span class="cell-main">${esc(fmtDay(l.expiresAt))}</span><span class="cell-sub">còn ${days} ngày</span>`;
 }
 // Lich su giao dich = danh sach license da mua: id (key), may da su dung,
 // thoi gian, goi, han dung va binding mua hang (don lien ket / nguon).
@@ -1613,7 +1631,7 @@ function expiryCell(l) {
 function shortId(x) { return x ? (x.length > 14 ? x.slice(0, 14) + "…" : x) : "—"; }
 function deviceCell(l) {
   if (!l.deviceId) return '<span class="muted">Chưa gắn máy</span>';
-  return `<code title="${esc(l.deviceId)}">${esc(shortId(l.deviceId))}</code>${l.deviceBoundAt ? `<br><span class="muted">gắn ${esc(fmtDay(l.deviceBoundAt))}</span>` : ""}`;
+  return `<code title="${esc(l.deviceId)}">${esc(shortId(l.deviceId))}</code>${l.deviceBoundAt ? `<span class="cell-sub">gắn ${esc(fmtDay(l.deviceBoundAt))}</span>` : ""}`;
 }
 function bindingCell(l) {
   if (l.orderId) return `<code title="${esc(l.orderId)}">${esc(shortId(l.orderId))}</code>`;
@@ -1649,10 +1667,9 @@ function renderHistory() {
   const html = [];
   for (const l of licenses) {
     const ordOfLic = l.orderId ? orders.find((x) => x.id === l.orderId) : null;
-    const bonusTag = ordOfLic && ordOfLic.bonusDays > 0 ? ` · +${ordOfLic.bonusDays} ngày KM` : "";
     html.push(`<tr>
       <td class="key-cell">${licenseCell(l)}</td>
-      <td><span class="lic-chip">${l.tier ? esc(tierName(l.tier)) : "—"}${l.app ? ` · ${esc(APP_VI[l.app] || l.app)}` : ""}${l.organization === "promo" ? " · Dùng thử" : ""}${bonusTag}</span></td>
+      <td><span class="lic-chip">${l.tier ? esc(tierName(l.tier)) : "—"}</span>${(() => { const sub = []; if (l.app) sub.push(esc(APP_VI[l.app] || l.app)); if (l.organization === "promo") sub.push("Dùng thử"); if (ordOfLic && ordOfLic.bonusDays > 0) sub.push(`+${ordOfLic.bonusDays} ngày KM`); return sub.length ? `<span class="cell-sub">${sub.join(" · ")}</span>` : ""; })()}</td>
       <td>${deviceCell(l)}</td>
       <td>${esc(fmtDay(l.createdAt))}</td>
       <td class="wrap-cell">${expiryCell(l)}</td>
