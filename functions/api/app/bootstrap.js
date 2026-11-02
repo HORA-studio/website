@@ -23,8 +23,28 @@ function secretOk(request, env) {
   return diff === 0;
 }
 
-// Tier -> so job dong thoi. Giu khop ban cu (VB: plus/pro cao hon go).
-const MAX_CONCURRENT = { go: 2, plus: 5, pro: 10 };
+// Tran job dong thoi mac dinh khi bang plans CHUA seed tier do. Khong phai
+// nguon su that: worker app tra jobPolicy tu plans, con man chon license chi
+// hien thi con so nay. Seed 1 lan bang db/seed-plans-2026-11-02.sql de khop.
+const MAX_CONCURRENT_FALLBACK = { go: 10, plus: 30, pro: 50 };
+
+// Doc plans(app, tier) -> videoConcurrency (giong maxVideoJobs trong worker app:
+// thieu videoConcurrency thi lay imageConcurrency/concurrency; khong co gi -> 0).
+// Doc 1 lan cho ca request (khong ton them request/round-trip nao).
+async function maxConcurrentFor(env, app, tier) {
+  try {
+    const row = await env.DB.prepare(
+      "SELECT quota_json FROM plans WHERE app = ?1 AND tier = ?2 LIMIT 1"
+    ).bind(app, tier).first();
+    const q = row ? JSON.parse(row.quota_json) : null;
+    const n = q && [q.videoConcurrency, q.imageConcurrency, q.concurrency]
+      .find((v) => Number.isFinite(Number(v)) && Number(v) > 0);
+    if (n !== undefined) return Math.round(Number(n));
+  } catch {
+    // Bang plans thieu/JSON loi -> fail-soft ve mac dinh trong code.
+  }
+  return MAX_CONCURRENT_FALLBACK[tier] || 2;
+}
 
 const noLicense = (reason) => json({
   licenseValid: false, plan: "no-license", expiry: null,
@@ -101,7 +121,7 @@ export async function onRequestPost({ request, env }) {
       licenseValid: true,
       plan: tier,
       expiry,
-      maxConcurrentVideoJobs: MAX_CONCURRENT[tier] || 2,
+      maxConcurrentVideoJobs: await maxConcurrentFor(env, app, tier),
       needsActivation: false,
       reason: null,
     }, 200);
