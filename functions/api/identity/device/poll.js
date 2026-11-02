@@ -10,6 +10,7 @@
 import { json, errorJson, readJson, sha256Hex } from "../../_lib.js";
 import { logEvent, clientIp } from "../../_log.js";
 import { expireIfStale, randomHex32 } from "../_device.js";
+import { acquireAccountSession, hashIp, sessionEnforced } from "../../_session.js";
 
 export async function onRequestPost({ request, env }) {
   const body = await readJson(request);
@@ -47,6 +48,32 @@ export async function onRequestPost({ request, env }) {
   // status === "approved"
   if (row.token_issued_at) {
     return errorJson("DEVICE_ALREADY_USED", "Phiên kết nối này đã được sử dụng.", 409);
+  }
+
+  // Phien doc quyen theo tai khoan: neu tai khoan dang duoc may khac giu phien
+  // thi CHAN ngay tai day (khong cap token). May vao sau bam "Dong y" roi van
+  // khong nhan duoc token -> app hien man "dang dung o may khac".
+  // Cong tac session.enforce: mac dinh TAT -> chua chan gi (an toan khi deploy
+  // truoc luc app moi phat hanh).
+  const deviceId = row.device_id || "";
+  if (await sessionEnforced(env)) {
+    const acquired = await acquireAccountSession(
+      env, row.customer_id, row.app, deviceId, await hashIp(clientIp(request))
+    );
+    if (!acquired.acquired) {
+      await logEvent(env, {
+        eventType: "identity.session_blocked", customerId: row.customer_id, actor: "web",
+        ip: clientIp(request), deviceId: deviceId || null, details: { app: row.app },
+      });
+      if (acquired.retryAfterSeconds && acquired.retryAfterSeconds > 0) {
+        return json({ error: {
+          code: "SESSION_RETRY_TOO_SOON",
+          message: `Tài khoản đang được dùng ở máy khác. Thử lại sau ${acquired.retryAfterSeconds}s.`,
+        } }, 429, { "Retry-After": String(acquired.retryAfterSeconds) });
+      }
+      return errorJson("SESSION_TAKEN",
+        "Tài khoản này đang được đăng nhập ở máy khác. Hãy bấm Đăng xuất ở máy đó rồi thử lại.", 503);
+    }
   }
 
   const nowIso = new Date().toISOString();

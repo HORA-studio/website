@@ -94,6 +94,21 @@ CREATE TABLE IF NOT EXISTS app_tokens (
 );
 CREATE INDEX IF NOT EXISTS idx_app_tokens_customer ON app_tokens(customer_id);
 
+-- Phien dang nhap DOC QUYEN theo tai khoan: 1 tai khoan + 1 app = 1 may tai mot
+-- thoi diem. May vao TRUOC giu phien; may vao SAU bi chan ngay o device/poll
+-- (khong cap token). May cu nha phien bang nut Dang xuat -> may sau vao duoc.
+-- Khong co TTL: nha la tuong minh (xem /api/app/session-release).
+CREATE TABLE IF NOT EXISTS account_sessions (
+  customer_id        TEXT NOT NULL REFERENCES customers(id),
+  app                TEXT NOT NULL,       -- 'video-builder' | 'facebook-builder' | ...
+  session_device_id  TEXT,                -- may dang giu phien (NULL = chua ai / da nha)
+  session_started_at TEXT,                -- ISO 8601 UTC luc giu phien
+  session_ip_hash    TEXT,                -- hash IP luc giu phien (chan doan)
+  released_at        TEXT,                -- lan nha gan nhat (audit/debug)
+  last_blocked_at    TEXT,                -- lan bi chan gan nhat (cooldown 60s)
+  PRIMARY KEY (customer_id, app)
+);
+
 -- Phien "device authorization" (kieu GitHub): app desktop xin cap device_code +
 -- user_code, user mo browser bam "Dong y", app poll nhan token (khong copy-paste ma).
 -- device_code chi luu SHA-256; user_code la ma ngan doi chieu tren web.

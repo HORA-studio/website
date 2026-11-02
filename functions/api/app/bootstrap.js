@@ -12,6 +12,7 @@
 // - License het han/thu hoi -> needsActivation:true + reason tuong ung.
 import { json, errorJson, readJson } from "../_lib.js";
 import { logEvent, clientIp } from "../_log.js";
+import { acquireAccountSession, hashIp, sessionEnforced } from "../_session.js";
 
 function secretOk(request, env) {
   const expected = env.IDENTITY_INTERNAL_SECRET;
@@ -65,6 +66,26 @@ export async function onRequestPost({ request, env }) {
   if (!deviceId) return errorJson("INVALID_DEVICE", "Thiếu deviceId.", 422);
 
   try {
+    // Phien doc quyen theo tai khoan: chot thu HAI (sau device/poll). Neu phien
+    // da bi may khac giu giua luc poll va bootstrap thi khong cho vao app —
+    // tra needsActivation + reason "session_taken" de app hien man dang nhap.
+    // Cong tac session.enforce mac dinh TAT.
+    if (await sessionEnforced(env)) {
+      const acquired = await acquireAccountSession(
+        env, userId, app, deviceId, await hashIp(clientIp(request))
+      );
+      if (!acquired.acquired) {
+        await logEvent(env, {
+          eventType: "app.session_blocked", customerId: userId, actor: "app",
+          ip: clientIp(request), deviceId, details: { app },
+        });
+        return json({
+          licenseValid: false, plan: "no-license", expiry: null,
+          maxConcurrentVideoJobs: 0, needsActivation: true, reason: "session_taken",
+        }, 200);
+      }
+    }
+
     // Lay license: uu tien licenseId khach chon; khong thi license moi nhat.
     const lic = licenseId
       ? await env.DB.prepare(
