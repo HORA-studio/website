@@ -1,0 +1,14 @@
+# Không deploy các file/thư mục nội bộ lên Cloudflare Pages
+docs/
+db/
+scripts/
+.commandcode/
+.wrangler/
+.git/
+.github/
+node_modules/
+
+README.md
+LICENSE
+wrangler.toml
+_TODO*

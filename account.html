@@ -2259,12 +2259,12 @@ function remoteConnected(base, token, deviceName) {
   remoteRenderConnected();
   showMsg("ok", "Đã kết nối Remote tới " + (deviceName || "máy của bạn") + ".");
 }
-function remotePollStatus(base, code, deviceName, deadline) {
+function remotePollStatus(base, code, deviceName, requestId, deadline) {
   remoteStopPoll();
   remotePollTimer = setTimeout(async () => {
     let out = null;
     try {
-      out = await remoteFetchJson(base + "/remote/pair/status?account=" + encodeURIComponent(MY_EMAIL) + "&code=" + encodeURIComponent(code));
+      out = await remoteFetchJson(base + "/remote/pair/status?requestId=" + encodeURIComponent(requestId));
     } catch { /* loi tam thoi: cu poll tiep toi deadline */ }
     const d = out && out.data ? out.data : null;
     const token = d && (d.token || (d.session && d.session.token));
@@ -2273,10 +2273,26 @@ function remotePollStatus(base, code, deviceName, deadline) {
     if (["denied", "rejected", "expired"].includes(st)) {
       remoteShowStatus(""); remoteShowErr("Máy tính đã từ chối hoặc mã đã hết hạn. Hãy lấy mã mới trong app rồi thử lại."); return;
     }
+    // Da duoc duyet tren may tinh: app chi phat token o lan ghep LAI
+    // (POST /remote/pair) — poll status mai khong bao gio co token.
+    if (st === "approved") {
+      remoteShowStatus("Máy tính đã duyệt — đang hoàn tất kết nối…");
+      let re = null;
+      try {
+        re = await remoteFetchJson(base + "/remote/pair", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ account: MY_EMAIL, code }),
+        });
+      } catch { /* loi tam thoi: cu poll tiep toi deadline */ }
+      const rd = re && re.data ? re.data : null;
+      const rToken = rd && (rd.token || (rd.session && rd.session.token));
+      if (rToken) { remoteConnected(base, rToken, deviceName); return; }
+    }
     if (Date.now() > deadline) {
       remoteShowStatus(""); remoteShowErr("Quá 2 phút chưa được duyệt trên máy tính. Hãy kiểm tra app rồi thử lại."); return;
     }
-    remotePollStatus(base, code, deviceName, deadline);
+    remotePollStatus(base, code, deviceName, requestId, deadline);
   }, 3000);
 }
 async function remoteConnect() {
@@ -2317,7 +2333,16 @@ async function remoteConnect() {
     const pd = pair.data || {};
     const token = pd.token || (pd.session && pd.session.token);
     if (token) { remoteConnected(base, token, deviceName); return; }
-    remotePollStatus(base, code, deviceName, Date.now() + 2 * 60 * 1000);
+    // 409: dang co phien chay — app cho duyet doi phien tren may tinh va
+    // tra requestId; poll theo requestId do de biet khi nao duoc duyet.
+    const requestId = pd.requestId || "";
+    if (!requestId) {
+      remoteShowStatus("");
+      remoteShowErr("Máy tính chưa kết nối được. Hãy kiểm tra app rồi thử lại.");
+      return;
+    }
+    remoteShowStatus("Đã tìm thấy " + (deviceName || "máy của bạn") + " — đang chờ duyệt trên máy tính…");
+    remotePollStatus(base, code, deviceName, requestId, Date.now() + 2 * 60 * 1000);
   } finally {
     btn.disabled = false;
   }
