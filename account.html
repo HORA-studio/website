@@ -2322,8 +2322,19 @@ async function remoteConnect() {
     btn.disabled = false;
   }
 }
-// O nhap ma: tu nhay o tiep theo, dan ca ma 6 so vao 1 o thi chia ra 6 o.
+// O nhap ma: tu nhay o tiep theo; dan (paste) ca ma vao bat ky o nao thi
+// tu chia ra du 6 o. Phai bat su kien paste rieng: maxlength=1 lam trinh
+// duyet cat noi dung dan xuong 1 ky tu truoc khi su kien input chay nen
+// nhanh xu ly trong "input" khong bao gio thay duoc ca ma.
 document.querySelectorAll("#remote-code input").forEach((inp, idx, all) => {
+  inp.addEventListener("paste", (e) => {
+    e.preventDefault();
+    const text = (e.clipboardData || window.clipboardData).getData("text") || "";
+    const digits = text.replace(/\D/g, "").slice(0, 6);
+    if (!digits) return;
+    remoteSetCode(digits);
+    all[Math.min(digits.length, all.length - 1)].focus();
+  });
   inp.addEventListener("input", () => {
     const digits = inp.value.replace(/\D/g, "");
     if (digits.length > 1) { remoteSetCode(remoteCode().slice(0, idx) + digits); }
