@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>HORA Remote — Demo view điện thoại & máy tính</title>
+<style>
+  :root{
+    --bg:#080d12; --panel:#0e151d; --panel2:#121c26; --line:#1e2c3a;
+    --fg:#eaf2f7; --muted:#8fa3b3; --accent:#10dcc8; --accent-dim:#0b3d38;
+    --warn:#ffb454; --err:#ff6b6b; --ok:#2fe08c;
+    --radius:14px;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+  body{margin:0;background:#04070a;color:var(--fg);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+
+  /* ===== Thanh công cụ DEMO (không thuộc giao diện sản phẩm) ===== */
+  .demo-bar{position:sticky;top:0;z-index:50;background:#0a0f14;border-bottom:1px solid var(--line);
+    padding:10px 14px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  .demo-bar .t{font-weight:700;margin-right:6px}
+  .demo-bar .tag{background:#3a2b05;color:var(--warn);border:1px solid #6b5110;font-size:12px;
+    padding:2px 8px;border-radius:999px;font-weight:600}
+  .demo-bar button{background:var(--panel2);color:var(--fg);border:1px solid var(--line);
+    border-radius:9px;padding:8px 14px;font-size:14px;cursor:pointer;min-height:38px}
+  .demo-bar button.on{background:var(--accent);color:#04231f;border-color:var(--accent);font-weight:700}
+  .demo-bar .sp{flex:1}
+  .demo-note{max-width:1280px;margin:10px auto 0;padding:0 14px;color:var(--muted);font-size:13px}
+
+  /* ===== Sân khấu đổi bề rộng để xem 2 view ===== */
+  .stage{margin:14px auto 40px;transition:width .25s ease}
+  .stage.phone{width:390px;max-width:96vw}
+  .stage.desktop{width:1280px;max-width:97vw}
+  .stage.full{width:100%}
+  .frame{border:1px solid var(--line);border-radius:22px;overflow:hidden;background:var(--bg);
+    box-shadow:0 18px 50px rgba(0,0,0,.55)}
+  .stage.phone .frame{height:800px}
+  .stage.desktop .frame,.stage.full .frame{height:820px}
+
+  /* ===== APP (container để breakpoint theo bề rộng khung, không theo màn hình) ===== */
+  .app{container-type:inline-size;height:100%;display:flex;flex-direction:column;background:var(--bg);position:relative}
+  .app button{font-family:inherit}
+  .btn{background:var(--accent);color:#04231f;border:0;border-radius:10px;padding:0 18px;
+    min-height:44px;font-size:15px;font-weight:700;cursor:pointer}
+  .btn.ghost{background:var(--panel2);color:var(--fg);border:1px solid var(--line);font-weight:600}
+  .btn.small{min-height:36px;padding:0 12px;font-size:13px;border-radius:8px}
+  .btn:disabled{opacity:.45;cursor:not-allowed}
+  .inp{width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:10px;
+    color:var(--fg);font-size:16px;padding:12px 14px;min-height:44px}
+  .inp:focus{outline:2px solid var(--accent-dim);border-color:var(--accent)}
+  label.lbl{display:block;font-size:13px;color:var(--muted);margin:0 0 6px}
+  .err-box{display:none;background:#2b1013;border:1px solid #6e2222;color:#ffb3b3;
+    border-radius:10px;padding:10px 12px;font-size:14px;margin-top:10px}
+  .err-box.show{display:block}
+
+  /* --- Màn W0 / W1 --- */
+  .gate{flex:1;overflow-y:auto;display:flex;align-items:flex-start;justify-content:center;padding:28px 16px}
+  .gate-card{width:100%;max-width:480px;background:var(--panel);border:1px solid var(--line);
+    border-radius:var(--radius);padding:24px 20px}
+  .gate-card h1{font-size:21px;margin:0 0 4px}
+  .gate-card .sub{color:var(--muted);font-size:14px;margin:0 0 18px}
+  .gate-card .row{margin-bottom:14px}
+  .code-row{display:flex;gap:8px}
+  .code-row .inp{text-align:center;font-size:20px;letter-spacing:2px;padding:12px 4px}
+  .wait{display:none;margin-top:14px;background:var(--accent-dim);border-radius:10px;padding:12px;font-size:14px}
+  .wait.show{display:block}
+  .saved-url{margin-top:12px;font-size:13px;color:var(--muted)}
+  .saved-url button{background:none;border:0;color:var(--accent);cursor:pointer;font-size:13px;padding:4px}
+
+  /* --- Shell --- */
+  .shell{flex:1;display:none;min-height:0}
+  .shell.show{display:flex}
+  .sidebar{display:none}
+  .content{flex:1;min-width:0;display:flex;flex-direction:column;min-height:0}
+  .conn-banner{display:none;background:#2b2305;border-bottom:1px solid #6b5110;color:#ffd9a0;
+    padding:10px 16px;font-size:14px}
+  .conn-banner.show{display:block}
+  .conn-banner.ok{background:#06281c;border-color:#0f5132;color:#9df0c8}
+  .page{flex:1;overflow-y:auto;padding:16px;display:none}
+  .page.active{display:block}
+  .page h2{font-size:18px;margin:0 0 12px}
+  .tabbar{display:flex;background:var(--panel);border-top:1px solid var(--line)}
+  .tabbar button{flex:1;background:none;border:0;color:var(--muted);min-height:56px;cursor:pointer;
+    font-size:11px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:6px 2px}
+  .tabbar button .ic{font-size:19px;line-height:1}
+  .tabbar button.on{color:var(--accent)}
+
+  /* Tổng quan */
+  .stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+  .stat{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px}
+  .stat .n{font-size:26px;font-weight:800}
+  .stat .l{color:var(--muted);font-size:13px}
+  .progress{height:10px;background:var(--panel2);border-radius:99px;overflow:hidden;border:1px solid var(--line)}
+  .progress>i{display:block;height:100%;background:var(--accent);border-radius:99px}
+  .job{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    padding:12px 14px;margin-bottom:10px}
+  .job .jt{font-weight:600;font-size:15px}
+  .job .jm{color:var(--muted);font-size:13px;margin:2px 0 8px}
+  .job .ja{display:flex;gap:8px;margin-top:10px}
+  .chip{display:inline-block;font-size:12px;padding:2px 8px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+  .chip.run{color:var(--accent);border-color:var(--accent-dim);background:var(--accent-dim)}
+  .chip.done{color:var(--ok)} .chip.err{color:var(--err)} .chip.wait{color:var(--warn)}
+
+  /* Tạo task */
+  .seg{display:flex;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:4px;gap:4px}
+  .seg button{flex:1;border:0;background:none;color:var(--muted);min-height:40px;border-radius:7px;font-size:15px;cursor:pointer}
+  .seg button.on{background:var(--accent);color:#04231f;font-weight:700}
+  textarea.inp{min-height:110px;resize:vertical}
+  .hint{font-size:13px;color:var(--muted);margin-top:6px}
+
+  /* Workflow */
+  .wf-item{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px;margin-bottom:10px;cursor:pointer;width:100%;text-align:left;color:var(--fg)}
+  .wf-item.on{border-color:var(--accent)}
+  .step{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:1px dashed var(--line);font-size:14px}
+  .step:last-child{border-bottom:0}
+  .dot{width:22px;height:22px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;
+    font-size:12px;border:1px solid var(--line);background:var(--panel2)}
+  .dot.done{background:var(--ok);color:#04240f;border-color:var(--ok)}
+  .dot.run{background:var(--accent);color:#04231f;border-color:var(--accent)}
+  .dot.err{background:var(--err);color:#2b0505;border-color:var(--err)}
+
+  /* Chat */
+  .chat-wrap{display:flex;flex-direction:column;height:100%}
+  .threads{display:none}
+  .msgs{flex:1;overflow-y:auto;padding:4px 2px}
+  .msg{max-width:85%;padding:10px 12px;border-radius:14px;margin-bottom:8px;font-size:14px;line-height:1.45}
+  .msg.me{background:var(--accent-dim);margin-left:auto;border-bottom-right-radius:4px}
+  .msg.ai{background:var(--panel);border:1px solid var(--line);border-bottom-left-radius:4px}
+  .msg .who{font-size:12px;color:var(--muted);margin-bottom:3px}
+  .need-confirm{margin-top:8px;background:#2b2305;border:1px solid #6b5110;color:#ffd9a0;
+    border-radius:8px;padding:7px 9px;font-size:13px}
+  .chat-in{display:flex;gap:8px;padding-top:10px}
+  .chat-in .inp{flex:1}
+
+  /* Kho */
+  .filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+  .filters .chip{cursor:pointer;background:var(--panel);min-height:36px;display:inline-flex;align-items:center;padding:0 14px;font-size:13px}
+  .filters .chip.on{color:#04231f;background:var(--accent);border-color:var(--accent);font-weight:700}
+  .lib-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .lib-item{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;cursor:pointer;text-align:left;color:var(--fg);padding:0}
+  .thumb{aspect-ratio:16/10;display:flex;align-items:center;justify-content:center;font-size:30px}
+  .lib-item .lt{padding:9px 11px;font-size:13px;font-weight:600}
+  .lib-item .lm{padding:0 11px 10px;font-size:12px;color:var(--muted)}
+
+  /* Drive */
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:12px}
+  .file-row{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px dashed var(--line);font-size:14px}
+  .file-row:last-child{border-bottom:0}
+  .file-row .fm{color:var(--muted);font-size:12px}
+
+  /* Modal xác nhận 409 + xem trước */
+  .modal-wrap{position:absolute;inset:0;background:rgba(2,6,9,.72);display:none;align-items:center;justify-content:center;padding:16px;z-index:20}
+  .modal-wrap.show{display:flex}
+  .modal{background:var(--panel);border:1px solid var(--line);border-radius:16px;max-width:520px;width:100%;padding:20px;max-height:92%;overflow-y:auto}
+  .modal h3{margin:0 0 8px;font-size:17px}
+  .modal .ms{color:var(--muted);font-size:14px;line-height:1.5}
+  .modal .ma{display:flex;gap:8px;margin-top:16px;justify-content:flex-end}
+  .preview-big{aspect-ratio:16/9;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:52px;margin-bottom:12px}
+  .share-link{display:none;margin-top:12px;background:#06281c;border:1px solid #0f5132;color:#9df0c8;
+    border-radius:10px;padding:10px 12px;font-size:13px;word-break:break-all}
+  .share-link.show{display:block}
+  .toast{position:absolute;left:50%;transform:translateX(-50%);bottom:76px;background:#eaf2f7;color:#0a141c;
+    padding:10px 16px;border-radius:999px;font-size:14px;font-weight:600;display:none;z-index:30;box-shadow:0 8px 24px rgba(0,0,0,.4)}
+  .toast.show{display:block}
+
+  /* ===== Container ≥900px: sidebar + lưới rộng ===== */
+  @container (min-width:900px){
+    .sidebar{display:flex;flex-direction:column;width:210px;flex:none;background:var(--panel);border-right:1px solid var(--line);padding:16px 10px}
+    .sidebar .brand{font-weight:800;font-size:16px;padding:2px 10px 4px}
+    .sidebar .conn{font-size:12px;color:var(--muted);padding:0 10px 14px;display:flex;gap:6px;align-items:center}
+    .cdot{width:9px;height:9px;border-radius:50%;background:var(--ok);flex:none}
+    .cdot.off{background:var(--err)}
+    .sidebar nav{display:flex;flex-direction:column;gap:4px}
+    .sidebar nav button{display:flex;gap:10px;align-items:center;background:none;border:0;color:var(--muted);
+      min-height:44px;border-radius:9px;padding:0 12px;font-size:14px;cursor:pointer;text-align:left}
+    .sidebar nav button.on{background:var(--accent-dim);color:var(--fg);font-weight:600}
+    .sidebar .foot{margin-top:auto;border-top:1px solid var(--line);padding:12px 10px 0;font-size:13px;color:var(--muted)}
+    .sidebar .foot button{margin-top:8px;width:100%}
+    .tabbar{display:none}
+    .page{padding:22px 24px}
+    .stats{grid-template-columns:repeat(4,1fr)}
+    .job{display:grid;grid-template-columns:1fr 110px 130px 170px;align-items:center;gap:12px}
+    .job .jm{margin:0} .job .ja{margin-top:0;justify-content:flex-end}
+    .split{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
+    .lib-grid{grid-template-columns:repeat(3,1fr)}
+    .chat-wrap{flex-direction:row;gap:0}
+    .threads{display:block;width:280px;flex:none;border-right:1px solid var(--line);padding-right:14px;margin-right:14px}
+    .threads .th{padding:10px;border-radius:10px;cursor:pointer;font-size:14px}
+    .threads .th.on{background:var(--panel);border:1px solid var(--line)}
+    .threads .th .tm{color:var(--muted);font-size:12px}
+    .msg{max-width:70%}
+    .chat-main{flex:1;display:flex;flex-direction:column;min-width:0}
+  }
+  @container (min-width:1200px){
+    .sidebar{width:240px}
+    .page-inner{max-width:1180px;margin:0 auto}
+    .lib-grid{grid-template-columns:repeat(4,1fr)}
+  }
+  /* Chat: cấu trúc lồng cho desktop */
+  .chat-main{display:flex;flex-direction:column;height:100%;min-height:0}
+</style>
+</head>
+<body>
+
+<div class="demo-bar">
+  <span class="t">HORA Remote</span><span class="tag">DEMO — dữ liệu giả</span>
+  <button id="vPhone" class="on">📱 View điện thoại</button>
+  <button id="vDesktop">🖥️ View máy tính</button>
+  <button id="vFull">⛶ Toàn khung</button>
+  <span class="sp"></span>
+  <button id="toggleConn">Giả lập mất kết nối</button>
+  <button id="resetDemo">↺ Chơi lại từ đầu</button>
+</div>
+<p class="demo-note">Bản xem thử giao diện theo spec <b>docs/web-remote.md</b> — bấm qua được các màn: W0 nhập URL Tunnel → W1 ghép mã → 6 mục điều khiển. Chưa nối API thật; bản dựng thật vẫn chờ 3 file WR-10.</p>
+
+<div class="stage phone" id="stage">
+  <div class="frame">
+    <div class="app" id="app">
+
+      <!-- W0: nhập URL Tunnel -->
+      <section class="gate" id="gateConnect">
+        <div class="gate-card">
+          <h1>Kết nối tới máy tính</h1>
+          <p class="sub">Dán URL Tunnel đang hiện trong app HORA Media trên máy tính của bạn. URL đổi mỗi lần mở app.</p>
+          <div class="row">
+            <label class="lbl" for="baseUrl">URL Tunnel</label>
+            <input class="inp" id="baseUrl" value="https://violet-pandas-jump.trycloudflare.com" autocomplete="off">
+          </div>
+          <button class="btn" id="btnCheck" style="width:100%">Kiểm tra &amp; tiếp tục</button>
+          <div class="err-box" id="connectErr">Không tới được máy tính — kiểm tra app đã mở và URL còn đúng.</div>
+          <div class="saved-url">Đã lưu gần nhất: violet-pandas-jump.trycloudflare.com <button type="button">Dùng lại</button></div>
+        </div>
+      </section>
+
+      <!-- W1: ghép mã -->
+      <section class="gate" id="gatePair" style="display:none">
+        <div class="gate-card">
+          <h1>Ghép nối thiết bị</h1>
+          <p class="sub">Nhập tài khoản và mã ghép nối 6 số đang hiện trên máy tính.</p>
+          <div class="row">
+            <label class="lbl" for="account">Tài khoản</label>
+            <input class="inp" id="account" value="demo@hora.works">
+          </div>
+          <div class="row">
+            <label class="lbl">Mã ghép nối</label>
+            <div class="code-row">
+              <input class="inp" maxlength="1" value="4"><input class="inp" maxlength="1" value="8">
+              <input class="inp" maxlength="1" value="2"><input class="inp" maxlength="1" value="9">
+              <input class="inp" maxlength="1" value="1"><input class="inp" maxlength="1" value="6">
+            </div>
+          </div>
+          <button class="btn" id="btnPair" style="width:100%">Ghép nối</button>
+          <div class="wait" id="pairWait">⏳ Đang chờ duyệt trên máy tính… (demo tự duyệt sau vài giây)</div>
+          <div class="saved-url"><button type="button" id="backConnect">← Đổi URL Tunnel / đổi máy</button></div>
+        </div>
+      </section>
+
+      <!-- Shell sau khi ghép -->
+      <div class="shell" id="shell">
+        <aside class="sidebar">
+          <div class="brand">HORA Remote</div>
+          <div class="conn"><span class="cdot" id="sideDot"></span><span id="sideConnText">Đã kết nối — DESKTOP-01</span></div>
+          <nav id="sideNav"></nav>
+          <div class="foot">
+            Phiên: demo@hora.works<br>Máy giữ phiên: DESKTOP-01
+            <button class="btn ghost small" id="btnUnpair">Ghép lại / ngắt phiên</button>
+          </div>
+        </aside>
+
+        <div class="content">
+          <div class="conn-banner" id="connBanner">⚠️ Không kết nối được tới máy tính — kiểm tra app đã mở và URL Tunnel còn đúng. Đang tự nối lại…</div>
+
+          <!-- 1. Tổng quan -->
+          <section class="page active" data-page="dash">
+            <div class="page-inner">
+              <h2>Tổng quan</h2>
+              <div class="stats">
+                <div class="stat"><div class="n">2</div><div class="l">Đang chạy</div></div>
+                <div class="stat"><div class="n" id="statQueue">3</div><div class="l">Đang chờ</div></div>
+                <div class="stat"><div class="n">18</div><div class="l">Đã xong</div></div>
+                <div class="stat"><div class="n">1</div><div class="l">Lỗi</div></div>
+              </div>
+              <label class="lbl">Tiến trình tổng — phiên làm việc hôm nay</label>
+              <div class="progress" style="margin-bottom:16px"><i style="width:62%"></i></div>
+              <div id="jobList"></div>
+            </div>
+          </section>
+
+          <!-- 2. Tạo task -->
+          <section class="page" data-page="create">
+            <div class="page-inner">
+              <h2>Tạo task mới</h2>
+              <div class="split">
+                <div>
+                  <div class="seg" id="kindSeg" style="margin-bottom:14px">
+                    <button class="on" data-kind="image">🖼️ Ảnh</button>
+                    <button data-kind="video">🎬 Video</button>
+                  </div>
+                  <label class="lbl" for="prompt">Prompt</label>
+                  <textarea class="inp" id="prompt">Cô gái và chó golden trong siêu thị, quầy Noel, ánh sáng thật, quay tay UGC — size 9:16</textarea>
+                  <p class="hint">Quy tắc của server: prompt phải ghi rõ <b>size 16:9 / 9:16 / 1:1</b>, thiếu là bị trả lỗi 400. Thử xoá “— size 9:16” rồi bấm Gửi để xem lỗi.</p>
+                  <div class="err-box" id="promptErr"></div>
+                  <button class="btn act" id="btnSendTask" style="width:100%;margin-top:14px">Gửi task</button>
+                </div>
+                <div>
+                  <label class="lbl">Task vừa gửi trong phiên này</label>
+                  <div id="sentList"><p style="color:var(--muted);font-size:14px">Chưa gửi task nào.</p></div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- 3. Workflow -->
+          <section class="page" data-page="flow">
+            <div class="page-inner">
+              <h2>Workflow</h2>
+              <div class="split">
+                <div id="wfList"></div>
+                <div class="card" style="margin:0">
+                  <div style="font-weight:700" id="wfTitle">Video quảng cáo sản phẩm</div>
+                  <p style="color:var(--muted);font-size:13px;margin:4px 0 8px">Trạng thái từng bước — cập nhật live qua WebSocket ở bản thật</p>
+                  <div id="wfSteps"></div>
+                  <button class="btn act" id="btnRunWf" style="margin-top:14px">▶ Chạy workflow</button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- 4. Trợ lý -->
+          <section class="page" data-page="chat">
+            <div class="chat-wrap">
+              <div class="threads">
+                <div class="th on">Video khăn len Noel<div class="tm">Đang mở trên máy tính</div></div>
+                <div class="th">Ý tưởng video chăn Frisco<div class="tm">Hôm qua</div></div>
+                <div class="th">Kịch bản áo len v3<div class="tm">03/11</div></div>
+              </div>
+              <div class="chat-main">
+                <div class="msgs" id="msgs">
+                  <div class="msg ai"><div class="who">Trợ lý</div>Đã phân tích xong 3 ảnh reference. Đề xuất chia video 20s thành 2 đoạn 10s, đoạn B nối từ frame cuối đoạn A.
+                    <div class="need-confirm">⚠️ Hành động AI đề xuất: tạo 2 job video — <b>cần xác nhận trên máy tính, chưa chạy</b>.</div>
+                  </div>
+                  <div class="msg me"><div class="who">Bạn</div>Ok, giữ hướng chó quay mặt về quầy như bản trước nhé.</div>
+                  <div class="msg ai"><div class="who">Trợ lý</div>Đã ghi vào brief. Khi bạn xác nhận trên máy tính, 2 job sẽ vào hàng đợi.</div>
+                </div>
+                <div class="chat-in">
+                  <input class="inp" id="chatInput" placeholder="Nhắn cho trợ lý…">
+                  <button class="btn act" id="btnChat">Gửi</button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- 5. Kho -->
+          <section class="page" data-page="lib">
+            <div class="page-inner">
+              <h2>Kho kết quả</h2>
+              <div class="filters" id="libFilters">
+                <span class="chip on" data-f="all">Tất cả</span><span class="chip" data-f="image">Ảnh</span>
+                <span class="chip" data-f="video">Video</span><span class="chip" data-f="audio">Nhạc</span>
+              </div>
+              <input class="inp" id="libSearch" placeholder="Tìm theo tên…" style="margin-bottom:12px">
+              <div class="lib-grid" id="libGrid"></div>
+            </div>
+          </section>
+
+          <!-- 6. Drive -->
+          <section class="page" data-page="drive">
+            <div class="page-inner">
+              <h2>Google Drive</h2>
+              <div class="card" id="driveState">
+                <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center">
+                  <div><b>Đã kết nối</b> — demo@hora.works<div style="color:var(--muted);font-size:13px">Chỉ xem file app đã up (scope drive.file)</div></div>
+                  <button class="btn ghost small act" id="btnDriveOff">Ngắt kết nối</button>
+                </div>
+              </div>
+              <div class="card">
+                <div style="font-weight:700;margin-bottom:4px">File đã up</div>
+                <div class="file-row"><span>🎬 video-chan-frisco-sieu-thi.mp4</span><span class="fm">24 MB · hôm nay</span></div>
+                <div class="file-row"><span>🎬 video-ao-len-v3.mp4</span><span class="fm">22 MB · 03/11</span></div>
+                <div class="file-row"><span>🖼️ linh-reference-front.png</span><span class="fm">3,1 MB · 03/11</span></div>
+                <div class="file-row"><span>🎵 nhac-nen-noel.mp3</span><span class="fm">4,8 MB · 02/11</span></div>
+              </div>
+            </div>
+          </section>
+
+          <nav class="tabbar" id="tabbar"></nav>
+        </div>
+      </div>
+
+      <!-- Modal dùng chung: xác nhận 409 + xem trước kho -->
+      <div class="modal-wrap" id="modalWrap">
+        <div class="modal" id="modalBox"></div>
+      </div>
+      <div class="toast" id="toast"></div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+
+/* ---------- Đổi view xem thử ---------- */
+const stage = $('#stage');
+function setView(v){
+  stage.className = 'stage ' + v;
+  $('#vPhone').classList.toggle('on', v==='phone');
+  $('#vDesktop').classList.toggle('on', v==='desktop');
+  $('#vFull').classList.toggle('on', v==='full');
+}
+$('#vPhone').onclick = () => setView('phone');
+$('#vDesktop').onclick = () => setView('desktop');
+$('#vFull').onclick = () => setView('full');
+
+/* ---------- Dữ liệu giả ---------- */
+let jobs = [
+  {id:1, title:'Video khăn len — đoạn B (nối frame cuối A)', meta:'Video · 9:16 · đang render', st:'run', pct:62},
+  {id:2, title:'Ảnh bìa sản phẩm khăn len', meta:'Ảnh · 1:1 · đang tạo', st:'run', pct:35},
+  {id:3, title:'Video chăn Frisco — bản dọc lại', meta:'Video · 9:16', st:'wait', pct:0},
+  {id:4, title:'Ảnh golden + áo Peppermint mint', meta:'Ảnh · 9:16', st:'wait', pct:0},
+  {id:5, title:'Nhạc nền Noel 20s', meta:'Nhạc', st:'wait', pct:0},
+];
+const lib = [
+  {t:'video-chan-frisco-sieu-thi.mp4', m:'Video · 20s · 9:16', k:'video', g:'linear-gradient(135deg,#134e4a,#10dcc8)', e:'🎬'},
+  {t:'video-ao-len-v3.mp4', m:'Video · 20s · 9:16', k:'video', g:'linear-gradient(135deg,#4a1030,#e0568b)', e:'🎬'},
+  {t:'linh-front-cafe.png', m:'Ảnh · 1152×2048', k:'image', g:'linear-gradient(135deg,#3a2b05,#ffb454)', e:'🖼️'},
+  {t:'minh-fullbody.png', m:'Ảnh · 1152×2048', k:'image', g:'linear-gradient(135deg,#1e2c3a,#8fa3b3)', e:'🖼️'},
+  {t:'storyboard-short-02.webp', m:'Ảnh · 1920×1280', k:'image', g:'linear-gradient(135deg,#10243e,#4a7de0)', e:'🖼️'},
+  {t:'nhac-nen-noel.mp3', m:'Nhạc · 0:20', k:'audio', g:'linear-gradient(135deg,#23103a,#8b5ce0)', e:'🎵'},
+];
+const wfs = [
+  {name:'Video quảng cáo sản phẩm', desc:'6 bước · dùng nhiều nhất'},
+  {name:'Ảnh sản phẩm → video 20s', desc:'4 bước'},
+  {name:'Reskin video mẫu', desc:'5 bước'},
+];
+let wfSteps = [
+  {t:'Đọc brief + ảnh reference', st:'done'},
+  {t:'Sinh ảnh phân cảnh', st:'done'},
+  {t:'Tạo video đoạn A (10s)', st:'run'},
+  {t:'Tạo video đoạn B (10s)', st:'wait'},
+  {t:'Ghép + kiểm frame điểm cắt', st:'wait'},
+  {t:'Xuất bản + up Drive', st:'wait'},
+];
+
+/* ---------- Điều hướng 6 mục ---------- */
+const NAV = [
+  {id:'dash', ic:'📊', label:'Tổng quan'},
+  {id:'create', ic:'➕', label:'Tạo task'},
+  {id:'flow', ic:'🧩', label:'Workflow'},
+  {id:'chat', ic:'💬', label:'Trợ lý'},
+  {id:'lib', ic:'🗂️', label:'Kho'},
+  {id:'drive', ic:'☁️', label:'Drive'},
+];
+$('#tabbar').innerHTML = NAV.map(n=>`<button data-nav="${n.id}"><span class="ic">${n.ic}</span>${n.label}</button>`).join('');
+$('#sideNav').innerHTML = NAV.map(n=>`<button data-nav="${n.id}"><span>${n.ic}</span>${n.label}</button>`).join('');
+function go(id){
+  $$('.page').forEach(p=>p.classList.toggle('active', p.dataset.page===id));
+  $$('[data-nav]').forEach(b=>b.classList.toggle('on', b.dataset.nav===id));
+}
+$$('[data-nav]').forEach(b=>b.onclick=()=>go(b.dataset.nav));
+go('dash');
+
+/* ---------- Render job / workflow / kho ---------- */
+function jobHtml(j){
+  const chip = j.st==='run' ? '<span class="chip run">Đang chạy</span>'
+    : j.st==='done' ? '<span class="chip done">Xong</span>'
+    : j.st==='err' ? '<span class="chip err">Lỗi</span>' : '<span class="chip wait">Đang chờ</span>';
+  const bar = j.st==='run' ? `<div class="progress"><i style="width:${j.pct}%"></i></div>` : '';
+  const act = j.st==='run' ? `<button class="btn ghost small act" onclick="jobAct(${j.id},'cancel')">Dừng</button>`
+    : j.st==='wait' ? `<button class="btn ghost small act" onclick="jobAct(${j.id},'cancel')">Huỷ</button>`
+    : `<button class="btn ghost small act" onclick="jobAct(${j.id},'retry')">Làm lại</button>`;
+  return `<div class="job"><div><div class="jt">${j.title}</div><div class="jm">${j.meta}</div>${bar}</div><div>${chip}</div><div class="jm">${j.st==='run'?j.pct+'%':''}</div><div class="ja">${act}</div></div>`;
+}
+function renderJobs(){ $('#jobList').innerHTML = jobs.map(jobHtml).join('') || '<p style="color:var(--muted)">Hàng đợi trống.</p>';
+  $('#statQueue').textContent = jobs.filter(j=>j.st==='wait').length; }
+window.jobAct = (id, act) => {
+  const j = jobs.find(x=>x.id===id); if(!j) return;
+  if(act==='cancel'){ j.st='err'; j.meta += ' · đã dừng (demo)'; }
+  else { j.st='wait'; j.pct=0; }
+  renderJobs(); toast(act==='cancel' ? 'Đã gửi lệnh dừng (demo)' : 'Đã xếp lại hàng đợi (demo)');
+};
+function renderWf(){
+  $('#wfList').innerHTML = wfs.map((w,i)=>`<button class="wf-item ${i===0?'on':''}"><b>${w.name}</b><div style="color:var(--muted);font-size:13px">${w.desc}</div></button>`).join('');
+  $('#wfSteps').innerHTML = wfSteps.map(s=>{
+    const d = s.st==='done' ? '<span class="dot done">✓</span>' : s.st==='run' ? '<span class="dot run">▶</span>' : s.st==='err' ? '<span class="dot err">!</span>' : '<span class="dot">·</span>';
+    return `<div class="step">${d}<span>${s.t}</span></div>`;
+  }).join('');
+}
+function renderLib(){
+  const f = $('#libFilters .chip.on').dataset.f, q = $('#libSearch').value.toLowerCase();
+  $('#libGrid').innerHTML = lib.filter(x=>(f==='all'||x.k===f) && x.t.toLowerCase().includes(q))
+    .map((x,i)=>`<button class="lib-item" onclick="openLib(${lib.indexOf(x)})"><span class="thumb" style="background:${x.g}">${x.e}</span><div class="lt">${x.t}</div><div class="lm">${x.m}</div></button>`).join('')
+    || '<p style="color:var(--muted)">Không có item nào khớp.</p>';
+}
+
+/* ---------- Modal ---------- */
+function openModal(html){ $('#modalBox').innerHTML = html; $('#modalWrap').classList.add('show'); }
+function closeModal(){ $('#modalWrap').classList.remove('show'); }
+$('#modalWrap').addEventListener('click', e=>{ if(e.target.id==='modalWrap') closeModal(); });
+function confirm409(summary, onYes){
+  openModal(`<h3>Xác nhận thao tác</h3><p class="ms">${summary}</p>
+    <p class="ms" style="font-size:12px">Server trả 409 — confirmToken dùng 1 lần, hạn 10 phút (demo mô phỏng).</p>
+    <div class="ma"><button class="btn ghost" onclick="closeModal()">Huỷ</button>
+    <button class="btn" id="mYes">Xác nhận chạy</button></div>`);
+  $('#mYes').onclick = ()=>{ closeModal(); onYes(); };
+}
+window.openLib = i => {
+  const x = lib[i];
+  openModal(`<div class="preview-big" style="background:${x.g}">${x.e}</div>
+    <h3>${x.t}</h3><p class="ms">${x.m} · xem trước qua thumbnail, tải file gốc qua ?token= ở bản thật</p>
+    <div class="ma" style="justify-content:flex-start;flex-wrap:wrap">
+      <button class="btn ghost act" onclick="toast('Demo: sẽ tải file gốc')">⬇ Tải file gốc</button>
+      <button class="btn act" id="mUp">☁️ Up Drive</button>
+      <button class="btn ghost" onclick="closeModal()">Đóng</button></div>
+    <div class="share-link" id="shareLink">🔗 https://drive.google.com/file/d/DEMO_${x.t} (link share demo)</div>`);
+  $('#mUp').onclick = ()=>confirm409(`Up file “${x.t}” lên Google Drive của bạn?`, ()=>{
+    openLib(i); setTimeout(()=>{ const s=$('#shareLink'); if(s) s.classList.add('show'); }, 50);
+    toast('Đã up Drive (demo)');
+  });
+};
+function toast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2200); }
+
+/* ---------- Luồng W0 → W1 → Shell ---------- */
+$('#btnCheck').onclick = () => {
+  const b = $('#btnCheck'); b.disabled = true; b.textContent = 'Đang kiểm tra /remote/health…';
+  setTimeout(()=>{ b.disabled=false; b.textContent='Kiểm tra & tiếp tục';
+    $('#gateConnect').style.display='none'; $('#gatePair').style.display='flex'; }, 700);
+};
+$('#backConnect').onclick = () => { $('#gatePair').style.display='none'; $('#gateConnect').style.display='flex'; };
+$('#btnPair').onclick = () => {
+  $('#pairWait').classList.add('show'); $('#btnPair').disabled = true;
+  setTimeout(()=>{ $('#gatePair').style.display='none'; $('#shell').classList.add('show');
+    $('#pairWait').classList.remove('show'); $('#btnPair').disabled=false; toast('Đã ghép nối (demo)'); }, 1400);
+};
+$('#btnUnpair').onclick = () => { $('#shell').classList.remove('show'); $('#gatePair').style.display='flex'; };
+
+/* ---------- Tạo task ---------- */
+$$('#kindSeg button').forEach(b=>b.onclick=()=>{ $$('#kindSeg button').forEach(x=>x.classList.remove('on')); b.classList.add('on'); });
+let sent = 0;
+$('#btnSendTask').onclick = () => {
+  const p = $('#prompt').value, err = $('#promptErr');
+  if(!/size\s*(16:9|9:16|1:1)/i.test(p)){
+    err.textContent = 'Lỗi 400 từ server: prompt thiếu tỉ lệ — hãy ghi rõ “size 16:9”, “size 9:16” hoặc “size 1:1” trong prompt.';
+    err.classList.add('show'); return;
+  }
+  err.classList.remove('show'); sent++;
+  const kind = $('#kindSeg .on').dataset.kind === 'video' ? 'Video' : 'Ảnh';
+  const t = p.split('—')[0].trim().slice(0,52) + '…';
+  jobs.push({id:Date.now(), title:t, meta:`${kind} · vừa gửi từ web`, st:'wait', pct:0}); renderJobs();
+  $('#sentList').innerHTML = `<div class="job"><div class="jt">${t}</div><div class="jm">${kind} · đã vào hàng đợi trên máy tính (demo)</div></div>` + (sent>1?$('#sentList').innerHTML:'');
+  toast('Đã gửi task (demo)');
+};
+
+/* ---------- Workflow ---------- */
+$('#btnRunWf').onclick = () => confirm409('Chạy workflow “Video quảng cáo sản phẩm” — 6 bước, gồm 2 job video?', ()=>{
+  const run = wfSteps.find(s=>s.st==='run'); if(run) run.st='done';
+  const nxt = wfSteps.find(s=>s.st==='wait'); if(nxt) nxt.st='run';
+  renderWf(); toast('Workflow đang chạy (demo)');
+});
+
+/* ---------- Chat ---------- */
+function sendChat(){
+  const v = $('#chatInput').value.trim(); if(!v) return;
+  $('#msgs').insertAdjacentHTML('beforeend', `<div class="msg me"><div class="who">Bạn</div>${v.replace(/</g,'&lt;')}</div>`);
+  $('#chatInput').value=''; $('#msgs').scrollTop = 1e6;
+  setTimeout(()=>{ $('#msgs').insertAdjacentHTML('beforeend', `<div class="msg ai"><div class="who">Trợ lý</div>Đã nhận — bản thật sẽ trả lời qua sự kiện assistant.reply trên WebSocket.</div>`); $('#msgs').scrollTop = 1e6; }, 800);
+}
+$('#btnChat').onclick = sendChat;
+$('#chatInput').addEventListener('keydown', e=>{ if(e.key==='Enter') sendChat(); });
+
+/* ---------- Kho + Drive ---------- */
+$$('#libFilters .chip').forEach(c=>c.onclick=()=>{ $$('#libFilters .chip').forEach(x=>x.classList.remove('on')); c.classList.add('on'); renderLib(); });
+$('#libSearch').addEventListener('input', renderLib);
+$('#btnDriveOff').onclick = () => {
+  $('#driveState').innerHTML = `<b>Chưa kết nối Drive</b><p style="color:var(--muted);font-size:14px;margin:8px 0">Nhập Client ID để connect bằng device-flow — trang sẽ hiện mã + link google.com/device và tự poll (demo chỉ mô phỏng).</p>
+    <input class="inp" placeholder="Google Client ID…" style="margin-bottom:10px"><button class="btn act" onclick="toast('Demo: sẽ mở luồng connect device-flow')">Kết nối Drive</button>`;
+};
+
+/* ---------- Giả lập mất kết nối / chơi lại ---------- */
+let offline = false;
+$('#toggleConn').onclick = () => {
+  offline = !offline;
+  $('#connBanner').classList.toggle('show', offline);
+  $('#sideDot').classList.toggle('off', offline);
+  $('#sideConnText').textContent = offline ? 'Mất kết nối — đang nối lại…' : 'Đã kết nối — DESKTOP-01';
+  $$('.act').forEach(b=>b.disabled = offline);
+  $('#toggleConn').textContent = offline ? 'Bật lại kết nối' : 'Giả lập mất kết nối';
+};
+$('#resetDemo').onclick = () => location.reload();
+
+renderJobs(); renderWf(); renderLib();
+
+/* Deep-link để xem thử nhanh: ?view=phone|desktop|full&screen=shell&page=dash|create|flow|chat|lib|drive */
+const qs = new URLSearchParams(location.search);
+if(qs.get('view')) setView(qs.get('view'));
+if(qs.get('screen')==='shell'){
+  $('#gateConnect').style.display='none'; $('#gatePair').style.display='none';
+  $('#shell').classList.add('show');
+  if(qs.get('page')) go(qs.get('page'));
+}
+</script>
+</body>
+</html>
