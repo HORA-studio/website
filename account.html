@@ -1136,6 +1136,7 @@ html,body{min-height:100%;height:100%;overflow:hidden}
 /* ===== Mobile kieu app (2026-11-04): menu duoi co dinh + gon layout dien thoai ===== */
 .auth-top-row{display:none}
 .auth-home-link{font-size:13px;font-weight:650;color:var(--gold2);text-decoration:none}
+.inapp-hint{margin:0 0 16px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--accent-softer);font-size:12.5px;line-height:1.55;color:var(--text)}
 .account-logout{display:flex;align-items:center;justify-content:space-between;gap:14px;margin:0 18px 20px;padding-top:18px;border-top:1px solid var(--line)}
 .account-logout-copy strong{font-size:14px}
 .account-logout-copy p{margin:3px 0 0;font-size:12.5px}
@@ -1208,6 +1209,7 @@ html,body{min-height:100%;height:100%;overflow:hidden}
     </div>
     <div class="auth-form-panel">
       <div class="auth-top-row"><a class="auth-mobile-logo" href="/" aria-label="Về trang chủ HORA">HORA</a><a class="auth-home-link" href="/">← Trang chủ</a></div>
+      <div id="inapp-browser-hint" class="inapp-hint hidden"><strong>Mẹo để khỏi đăng nhập lại:</strong> bạn đang mở HORA trong trình duyệt của một ứng dụng khác — mỗi ứng dụng lưu đăng nhập riêng nên đổi app là phải đăng nhập lại. Hãy bấm nút ⋯ (hoặc Chia sẻ) → <strong>Mở bằng trình duyệt</strong> (Chrome/Safari) rồi đăng nhập ở đó: phiên sẽ được giữ 30 ngày.</div>
       <div class="auth-form-head">
         <span class="eyebrow">CHÀO MỪNG BẠN</span>
         <h2 id="auth-title">Tạo tài khoản</h2>
@@ -2380,6 +2382,17 @@ async function remoteStartScan() {
 }
 $("remote-scan-btn").addEventListener("click", remoteStartScan);
 $("remote-scan-stop").addEventListener("click", remoteStopScan);
+
+// Mo trang trong trinh duyet nhung cua app khac (Zalo/Facebook...) thi moi app
+// luu cookie dang nhap rieng -> doi app la phai dang nhap lai. Hien meo mo
+// bang trinh duyet chinh de giu phien 30 ngay.
+(function () {
+  const ua = navigator.userAgent || "";
+  if (/Zalo|FBAN|FBAV|FB_IAB|Instagram|TikTok|musical_ly|Line\/|Snapchat|;\s*wv\)/i.test(ua)) {
+    const h = $("inapp-browser-hint");
+    if (h) h.classList.remove("hidden");
+  }
+})();
 
 loadDash();
 </script>
