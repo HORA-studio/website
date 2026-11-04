@@ -1487,6 +1487,20 @@ body.sh-control [data-sh-panel="create"] .sh-prompt-box{flex:1;min-height:180px}
   body.sh-control [data-sh-panel="chat"]{padding-left:50px;padding-right:50px}
   .sh-chat-panel .sh-msgs,.sh-chat-panel .sh-composer,.sh-chat-panel .sh-threads-row{max-width:none}
 }
+/* ===== v6: tong quan gon item + hint pin day; layout dien thoai ===== */
+body.sh-control [data-sh-panel="dash"]:not(.hidden){display:flex;flex-direction:column}
+@media (min-width:761px){ body.sh-control [data-sh-panel="dash"]:not(.hidden){height:calc(100dvh - 84px)} }
+#sh-queue{flex:1;overflow:auto;min-height:0}
+.sh-dash-hint{margin:10px 0 0;font-size:13px}
+@media (max-width:760px){
+  body.sh-control [data-sh-panel="dash"]:not(.hidden){height:calc(100dvh - 190px)}
+  body.sh-control [data-sh-panel="create"]:not(.hidden){display:flex;flex-direction:column;height:calc(100dvh - 190px)}
+  body.sh-control [data-sh-panel="chat"]:not(.hidden){height:calc(100dvh - 190px)}
+  .sh-createbar{padding:12px}
+  .sh-topbar{flex-wrap:wrap}
+  .sh-stats-inline{flex-wrap:wrap}
+  .sh-item{min-height:150px}
+}
 </style>
 </head>
 <body>
@@ -1740,6 +1754,7 @@ body.sh-control [data-sh-panel="create"] .sh-prompt-box{flex:1;min-height:180px}
             </div>
             <div id="sh-queue"><p class="muted">Đang tải hàng đợi…</p></div>
             <div id="sh-job-detail"></div>
+            <p class="muted sh-dash-hint" id="sh-dash-hint">Bấm item đã xong để xem toàn màn hình; bấm item khác để xem chi tiết (Dừng / Làm lại ở trong chi tiết).</p>
           </section>
 
           <section class="sh-panel hidden" data-sh-panel="create">
@@ -3015,10 +3030,8 @@ function shRenderDash(statusData, jobs, raw) {
     return `<article class="sh-item ${state}" data-sh-item="${esc(id || "")}" tabindex="0" role="button" aria-label="${esc(shCleanTitle(SF.titleOf(j)))}">
       <div class="sh-item-mid">${mid}</div>
       <h4 class="sh-item-name">${esc(shCleanTitle(SF.titleOf(j)))}</h4>
-      <p class="sh-item-meta">${esc(SF.kindLabel(kind))}${SF.timeOf(j) ? " · " + esc(fmtDay(SF.timeOf(j))) : ""}${id ? " · " + esc(id) : ""}</p>
     </article>`;
-  }).join("") + `</div>
-  <p class="muted" style="margin:10px 0 0;font-size:13px">Bấm item đã xong để xem toàn màn hình; bấm item khác để xem chi tiết (Dừng / Làm lại ở trong chi tiết).</p>`;
+  }).join("") + `</div>`;
 }
 let shJobsCache = [];
 function shItemOpen(id) {
