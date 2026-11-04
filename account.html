@@ -1409,6 +1409,65 @@ body.sh-control #dash [data-view="remote"] .remote-box{border:0;box-shadow:none;
   .sh-grid-items{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
   .sh-createbar .sh-submit{margin-left:0;flex:1}
 }
+/* ===== v4: giam padding, bo nen chi giu outline (feedback user 2026-11-05) ===== */
+@media (min-width:761px){
+  .shell{padding:8px 12px 12px;gap:14px;max-width:none}
+  .view-panel:not(.hidden){padding:14px}
+}
+body.sh-control .remote-body{padding:6px 2px 10px}
+body.sh-control #dash [data-view="remote"] .remote-body{max-width:none}
+/* Bo background trong shell — chi outline la du */
+.sh-item,.sh-card,.sh-fnode,.sh-composer,.sh-thread,.sh-msgs{background:transparent}
+.sh-createbar{background:transparent}
+.sh-chat-panel .sh-composer{background:transparent;box-shadow:none}
+.sh-item-mid{background:transparent;border:1px solid var(--line)}
+.sh-item.run .sh-item-mid,.sh-item.wait .sh-item-mid,.sh-item.fail .sh-item-mid{background:transparent}
+#sh-shell textarea,#sh-shell input,#sh-shell select{background:transparent}
+/* Tong quan: title item 1 hang duy nhat, cac the deu nhau */
+.sh-item-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sh-grid-items{grid-auto-rows:1fr}
+.sh-item{height:100%}
+/* Hop prompt: chip dinh kem nam trong hop, textarea khong vien rieng */
+.sh-prompt-box{border:1px solid var(--line2);border-radius:14px;padding:10px}
+.sh-prompt-box .sh-prompt-big{border:0;padding:4px;min-height:34vh;background:transparent}
+.sh-prompt-box .sh-prompt-big:focus{outline:none}
+.sh-refs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.sh-refs.hidden{display:none}
+.sh-refchip{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line2);border-radius:10px;padding:4px 6px 4px 4px;font-size:12.5px}
+.sh-refchip img{width:30px;height:30px;border-radius:6px;object-fit:cover}
+.sh-refchip button{border:0;background:none;cursor:pointer;color:var(--muted);font-size:12px;padding:2px;line-height:1}
+/* Dialog chon ref khi go @ */
+.sh-refdlg{position:fixed;inset:0;z-index:210;background:rgba(5,10,12,.55);display:flex;align-items:center;justify-content:center;padding:18px}
+.sh-refdlg.hidden{display:none}
+.sh-refdlg-box{background:var(--panel);border:1px solid var(--line2);border-radius:16px;padding:16px;width:min(580px,94vw);max-height:84vh;display:flex;flex-direction:column;gap:10px}
+.sh-refdlg-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.sh-refdlg-box .sh-refgrid{overflow:auto}
+.sh-refdlg-box input{min-height:40px}
+/* Radio Anh/Video dang pill dep + can xung select/Submit (cung cao 44px) */
+.sh-seg{display:inline-flex;background:transparent;border:1px solid var(--line2);border-radius:999px;padding:3px;gap:2px;margin:0;height:44px;align-items:center;box-sizing:border-box}
+.sh-seg label{position:relative;padding:0 20px;height:36px;display:inline-flex;align-items:center;border-radius:999px;font-weight:650;cursor:pointer;color:var(--muted)}
+.sh-seg label.on{background:var(--gold);color:#fff}
+.sh-seg input{position:absolute;opacity:0;pointer-events:none}
+.sh-size-wrap select{height:44px;min-height:44px;border-radius:999px;padding:0 14px}
+.sh-createbar .sh-submit{height:44px;min-height:44px;border-radius:999px}
+/* Workflows: list moi item 1 hang, chi 1 line ngan cach */
+#sh-workflows{border-top:1px solid var(--line)}
+.sh-wf-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 2px;border-bottom:1px solid var(--line)}
+.sh-wf-main{display:flex;align-items:center;gap:10px;min-width:0;flex-wrap:nowrap;overflow:hidden}
+.sh-wf-main b{white-space:nowrap}
+.sh-wf-row .btn{margin:0}
+.sh-wf-row .sh-row-actions{align-items:center;margin:0}
+.sh-wf-main .meta{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* Tro ly: composer pin day khung chat, bong bong request vua text, nut copy */
+@media (min-width:761px){ body.sh-control [data-sh-panel="chat"]:not(.hidden){height:calc(100dvh - 84px)} }
+.sh-msgrow{display:flex;gap:6px;align-items:flex-start;width:100%}
+.sh-msgrow.me{justify-content:flex-end}
+.sh-msgrow.ai{justify-content:flex-start}
+.sh-msgrow .sh-msg{margin:0}
+.sh-msg.me{width:fit-content;max-width:82%}
+.sh-msg.ai{flex:1;min-width:0}
+.sh-copybtn{flex:0 0 auto;width:28px;height:28px;border-radius:8px;border:1px solid transparent;background:transparent;color:var(--muted);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;opacity:.6;padding:0}
+.sh-copybtn:hover{opacity:1;border-color:var(--line)}
 </style>
 </head>
 <body>
@@ -1663,25 +1722,22 @@ body.sh-control #dash [data-view="remote"] .remote-box{border:0;box-shadow:none;
             </div>
             <div id="sh-queue"><p class="muted">Đang tải hàng đợi…</p></div>
             <div id="sh-job-detail"></div>
-            <details class="sh-raw"><summary>Dữ liệu thô — status + queue (để đối chiếu field khi test)</summary><pre id="sh-raw-dash">—</pre></details>
           </section>
 
           <section class="sh-panel hidden" data-sh-panel="create">
             <label class="lbl" for="sh-prompt" style="display:block;margin-bottom:6px">Prompt</label>
-            <div class="sh-prompt-wrap">
-              <textarea id="sh-prompt" class="sh-prompt-big" placeholder="Mô tả nội dung cần tạo… — gõ @ để chèn ảnh/video tham chiếu từ kho"></textarea>
-              <div class="sh-refpop hidden" id="sh-refpop"></div>
+            <div class="sh-prompt-box">
+              <div class="sh-refs hidden" id="sh-refs"></div>
+              <textarea id="sh-prompt" class="sh-prompt-big" placeholder="Mô tả nội dung cần tạo… — gõ @ để đính kèm ảnh/video tham chiếu"></textarea>
             </div>
             <label class="lbl" for="sh-negative" style="display:block;margin:12px 0 6px">Negative prompt <span class="muted" style="font-weight:400">(những thứ KHÔNG muốn xuất hiện)</span></label>
             <textarea id="sh-negative" class="sh-neg" placeholder="Ví dụ: chữ viết, logo, mặt người lạ, mờ, méo…"></textarea>
-            <p class="sh-err hidden" id="sh-create-err" role="alert"></p>
-            <p class="sh-okmsg hidden" id="sh-create-ok" role="status"></p>
             <div class="sh-createbar">
               <div class="sh-seg" id="sh-kind">
                 <label><input type="radio" name="sh-kind" value="image">Ảnh</label>
                 <label class="on"><input type="radio" name="sh-kind" value="video" checked>Video</label>
               </div>
-              <label class="sh-size-wrap">Size
+              <label class="sh-size-wrap">
                 <select id="sh-size">
                   <option value="9:16">9:16 (dọc)</option>
                   <option value="16:9">16:9 (ngang)</option>
@@ -1691,7 +1747,6 @@ body.sh-control #dash [data-view="remote"] .remote-box{border:0;box-shadow:none;
               </label>
               <button class="btn primary sh-submit" id="sh-send-prompt" type="button">Submit</button>
             </div>
-            <details class="sh-raw"><summary>Dữ liệu thô — phản hồi tạo task</summary><pre id="sh-raw-create">—</pre></details>
           </section>
 
           <section class="sh-panel hidden" data-sh-panel="flow">
@@ -1714,7 +1769,6 @@ body.sh-control #dash [data-view="remote"] .remote-box{border:0;box-shadow:none;
               <button class="btn small" id="sh-flow-addnode" type="button">+ Thêm node</button>
               <p class="muted" style="font-size:13px;margin:10px 0 0">Bấm tiêu đề node để mở/đóng và sửa nội dung. Node sau chỉ mở khi node trước đã đánh dấu xong.</p>
             </div>
-            <details class="sh-raw"><summary>Dữ liệu thô — workflows</summary><pre id="sh-raw-flow">—</pre></details>
           </section>
 
           <section class="sh-panel hidden sh-chat-panel" data-sh-panel="chat">
@@ -1725,7 +1779,6 @@ body.sh-control #dash [data-view="remote"] .remote-box{border:0;box-shadow:none;
               <textarea id="sh-chat-input" rows="1" placeholder="Nhắn cho trợ lý… (Enter để gửi, Shift+Enter xuống dòng)"></textarea>
               <button class="sh-sendbtn" id="sh-chat-send" type="button" aria-label="Gửi tin nhắn">➤</button>
             </div>
-            <details class="sh-raw"><summary>Dữ liệu thô — trợ lý</summary><pre id="sh-raw-chat">—</pre></details>
           </section>
 
           <section class="sh-panel hidden" data-sh-panel="res">
@@ -1738,7 +1791,6 @@ body.sh-control #dash [data-view="remote"] .remote-box{border:0;box-shadow:none;
             </div>
             <div id="sh-library"><p class="muted">Đang tải kho…</p></div>
             <div id="sh-lib-detail"></div>
-            <details class="sh-raw"><summary>Dữ liệu thô — kho</summary><pre id="sh-raw-lib">—</pre></details>
           </section>
 
           </div>
@@ -1747,6 +1799,14 @@ body.sh-control #dash [data-view="remote"] .remote-box{border:0;box-shadow:none;
             <button class="sh-viewer-x" id="sh-viewer-x" type="button" aria-label="Đóng">✕</button>
             <div class="sh-viewer-body" id="sh-viewer-body"></div>
             <div class="sh-viewer-bar" id="sh-viewer-bar"></div>
+          </div>
+
+          <div class="sh-refdlg hidden" id="sh-refdlg" role="dialog" aria-modal="true" aria-label="Chọn file tham chiếu">
+            <div class="sh-refdlg-box">
+              <div class="sh-refdlg-head"><b>Đính kèm ảnh/video tham chiếu</b><button class="sh-iconbtn" id="sh-refdlg-x" type="button" aria-label="Đóng">✕</button></div>
+              <input id="sh-refdlg-search" placeholder="Tìm theo tên…" autocomplete="off">
+              <div class="sh-refgrid" id="sh-refgrid"><p class="muted">Đang tải kho…</p></div>
+            </div>
           </div>
 
           <div class="sh-confirm hidden" id="sh-confirm" role="dialog" aria-modal="true" aria-label="Xác nhận thao tác">
@@ -2967,7 +3027,7 @@ function shOpenViewer(url, name, kind, downloadUrl) {
 }
 function shCloseViewer() { $("sh-viewer").classList.add("hidden"); $("sh-viewer-body").innerHTML = ""; }
 async function shJobAction(act, id, btn) {
-  if (!id) { showMsg("err", "Job này không có id đọc được — xem Dữ liệu thô để đối chiếu field."); return; }
+  if (!id) { showMsg("err", "Job này không có id đọc được — app không trả về id cho mục này."); return; }
   if (btn) btn.disabled = true;
   try {
     if (act === "detail") {
@@ -3011,57 +3071,64 @@ async function shSendPrompt() {
   const promptRaw = $("sh-prompt").value.trim();
   const negative = $("sh-negative").value.trim();
   const size = ($("sh-size") || {}).value || "9:16";
-  const errEl = $("sh-create-err"), okEl = $("sh-create-ok");
-  errEl.classList.add("hidden"); okEl.classList.add("hidden");
-  if (!promptRaw) { errEl.textContent = "Hãy nhập prompt trước."; errEl.classList.remove("hidden"); showMsg("err", "Hãy nhập prompt trước."); return; }
-  // Hop dong app: size nam trong prompt; dong thoi gui kem field rieng.
-  const prompt = promptRaw + " — size " + size;
+  if (!promptRaw) { showMsg("err", "Hãy nhập prompt trước."); return; }
+  // Hop dong app: size + ref nam trong prompt; dong thoi gui kem field rieng.
+  const refTokens = shRefs.map((r) => "@" + r.name).join(" ");
+  const prompt = promptRaw + (refTokens ? " " + refTokens : "") + " — size " + size;
   const btn = $("sh-send-prompt");
   btn.disabled = true;
   try {
-    const { res, data, cancelled } = await shApi("/remote/prompts", { method: "POST", body: { kind, prompt, size, negativePrompt: negative } });
-    shRaw("sh-raw-create", data);
+    const { res, data, cancelled } = await shApi("/remote/prompts", { method: "POST", body: { kind, prompt, size, negativePrompt: negative, refs: shRefs.map((r) => r.id || r.name) } });
     if (cancelled) return;
-    if (!res.ok) { const t = SF.errText(data, "Server từ chối task."); errEl.textContent = t; errEl.classList.remove("hidden"); showMsg("err", t); return; }
-    okEl.textContent = "Đã gửi task thành công — xem tiến trình ở mục Tổng quan.";
-    okEl.classList.remove("hidden");
+    if (!res.ok) { showMsg("err", SF.errText(data, "Server từ chối task.")); return; }
     showMsg("ok", "Đã gửi task thành công.");
     shLoadDash();
-  } catch (e) { errEl.textContent = e.message; errEl.classList.remove("hidden"); showMsg("err", e.message); }
+  } catch (e) { showMsg("err", e.message); }
   finally { btn.disabled = false; }
 }
-// --- Gallery ref khi go @ trong prompt ---
+// --- Dinh kem ref: go @ -> dialog chon item, item da chon thanh chip
+// --- nam ngay trong hop nhap prompt (kieu dinh kem cua cac AI chat) ---
 let shRefItems = null;
+let shRefs = [];
 async function shRefEnsure() {
   if (shRefItems) return shRefItems;
   try { const { res, data } = await shApi("/remote/library"); if (res.ok) { shRefItems = SF.listOf(data, ["library", "files"]); return shRefItems; } } catch { /* im lang */ }
   return [];
 }
-async function shRefPopup() {
+function shPromptInput() {
   const ta = $("sh-prompt");
-  const pop = $("sh-refpop");
-  if (!ta || !pop) return;
-  const upto = ta.value.slice(0, ta.selectionStart || ta.value.length);
-  const m = upto.match(/(^|\s)@([\p{L}\d._-]*)$/u);
-  if (!m) { pop.classList.add("hidden"); return; }
-  const items = (await shRefEnsure()).filter((it) => SF.titleOf(it).toLowerCase().includes((m[2] || "").toLowerCase()));
-  if (!items.length) { pop.innerHTML = `<h5>Không có file khớp trong kho</h5>`; pop.classList.remove("hidden"); return; }
-  pop.innerHTML = `<h5>Chọn ảnh/video tham chiếu — sẽ chèn @tên vào prompt</h5><div class="sh-refgrid">` + items.slice(0, 24).map((it) => {
-    const id = SF.idOf(it);
-    return `<button type="button" class="sh-refitem" data-sh-ref="${esc(SF.titleOf(it))}"><img loading="lazy" src="${esc(shThumbUrl(it, id || ""))}" alt=""><span>${esc(SF.titleOf(it))}</span></button>`;
-  }).join("") + `</div>`;
-  pop.classList.remove("hidden");
+  const pos = ta.selectionStart || 0;
+  if (pos > 0 && ta.value[pos - 1] === "@") {
+    ta.value = ta.value.slice(0, pos - 1) + ta.value.slice(pos);
+    shRefOpenDialog();
+  }
 }
-function shRefPick(name) {
-  const ta = $("sh-prompt");
-  const pos = ta.selectionStart || ta.value.length;
-  const upto = ta.value.slice(0, pos);
-  const rest = ta.value.slice(pos);
-  const replaced = upto.replace(/(^|\s)@([\p{L}\d._-]*)$/u, (mm, pre) => pre + "@" + name + " ");
-  ta.value = replaced + rest;
-  $("sh-refpop").classList.add("hidden");
-  ta.focus();
-  try { ta.setSelectionRange(replaced.length, replaced.length); } catch { /* bo qua */ }
+function shRefOpenDialog() {
+  $("sh-refdlg").classList.remove("hidden");
+  $("sh-refdlg-search").value = "";
+  shRefRenderGrid("");
+  setTimeout(() => { try { $("sh-refdlg-search").focus(); } catch { /* bo qua */ } }, 30);
+}
+function shRefCloseDialog() { $("sh-refdlg").classList.add("hidden"); $("sh-prompt").focus(); }
+async function shRefRenderGrid(q) {
+  const items = (await shRefEnsure()).filter((it) => SF.titleOf(it).toLowerCase().includes((q || "").toLowerCase()));
+  $("sh-refgrid").innerHTML = items.length ? items.slice(0, 36).map((it) => {
+    const id = SF.idOf(it);
+    return `<button type="button" class="sh-refitem" data-sh-ref-id="${esc(id || "")}" data-sh-ref-name="${esc(SF.titleOf(it))}"><img loading="lazy" src="${esc(shThumbUrl(it, id || ""))}" alt=""><span>${esc(SF.titleOf(it))}</span></button>`;
+  }).join("") : `<p class="muted">Không có file khớp trong kho.</p>`;
+}
+function shRefRenderChips() {
+  const box = $("sh-refs");
+  box.classList.toggle("hidden", !shRefs.length);
+  box.innerHTML = shRefs.map((r, i) => `<span class="sh-refchip"><img src="${esc(r.thumb || "")}" alt=""><span>${esc(r.name)}</span><button type="button" data-sh-ref-del="${i}" aria-label="Bỏ đính kèm">✕</button></span>`).join("");
+}
+function shRefAdd(id, name) {
+  if (!shRefs.some((r) => r.name === name)) {
+    const it = (shRefItems || []).find((x) => SF.idOf(x) === id) || {};
+    shRefs.push({ id, name, thumb: shThumbUrl(it, id) });
+    shRefRenderChips();
+  }
+  shRefCloseDialog();
 }
 // --- Workflow ---
 async function shLoadFlow() {
@@ -3084,9 +3151,8 @@ function shRenderWorkflows(list, raw) {
     const n = SF.listOf(w, ["steps", "stages", "nodes", "tasks"]).length;
     const chip = SF.statusChip(SF.statusOf(w));
     const desc = SF.pick(w, ["description", "summary"]);
-    return `<div class="sh-card sh-wf-card"><div class="sh-wf-info"><h4>${esc(SF.titleOf(w))} <span class="sh-chip ${chip.cls}">${esc(chip.label)}</span></h4>
-      <p class="meta">${id ? esc(id) : ""}${n ? " · " + n + " node" : ""}${SF.timeOf(w) ? " · " + esc(fmtDay(SF.timeOf(w))) : ""}</p>
-      ${typeof desc === "string" && desc ? `<p class="meta">${esc(desc)}</p>` : ""}</div>
+    return `<div class="sh-wf-row"><div class="sh-wf-main"><b>${esc(SF.titleOf(w))}</b> <span class="sh-chip ${chip.cls}">${esc(chip.label)}</span>
+      <span class="meta">${id ? esc(id) : ""}${n ? " · " + n + " node" : ""}${SF.timeOf(w) ? " · " + esc(fmtDay(SF.timeOf(w))) : ""}${typeof desc === "string" && desc ? " · " + esc(desc) : ""}</span></div>
       <div class="sh-row-actions">
         <button type="button" class="btn small" data-sh-wf="run" data-id="${esc(id || "")}">Chạy</button>
         <button type="button" class="btn primary small" data-sh-wf="detail" data-id="${esc(id || "")}">Mở →</button>
@@ -3094,7 +3160,7 @@ function shRenderWorkflows(list, raw) {
   }).join("");
 }
 async function shWorkflowAction(act, id, btn) {
-  if (!id) { showMsg("err", "Workflow này không có id đọc được — xem Dữ liệu thô để đối chiếu field."); return; }
+  if (!id) { showMsg("err", "Workflow này không có id đọc được — app không trả về id cho mục này."); return; }
   if (btn) btn.disabled = true;
   try {
     if (act === "detail") { await shOpenFlowEditor(id); return; }
@@ -3185,11 +3251,19 @@ async function shFlowSave() {
   finally { btn.disabled = false; }
 }
 // --- Tro ly ---
+let shMsgSeq = 0;
+const shMsgTexts = {};
 function shAppendMsg(role, text, who) {
   const box = $("sh-msgs");
   if (!box) return;
   if (box.querySelector(".muted")) box.innerHTML = "";
-  box.insertAdjacentHTML("beforeend", `<div class="sh-msg ${role === "me" ? "me" : "ai"}"><span class="who">${esc(who || (role === "me" ? "Bạn" : "Trợ lý"))}</span>${esc(text)}</div>`);
+  const mid = ++shMsgSeq;
+  shMsgTexts[mid] = text;
+  const copyBtn = `<button type="button" class="sh-copybtn" data-sh-copy="${mid}" title="Sao chép" aria-label="Sao chép tin nhắn"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg></button>`;
+  const bubble = `<div class="sh-msg ${role === "me" ? "me" : "ai"}"><span class="who">${esc(who || (role === "me" ? "Bạn" : "Trợ lý"))}</span>${esc(text)}</div>`;
+  box.insertAdjacentHTML("beforeend", role === "me"
+    ? `<div class="sh-msgrow me">${copyBtn}${bubble}</div>`
+    : `<div class="sh-msgrow ai">${bubble}${copyBtn}</div>`);
   box.scrollTop = box.scrollHeight;
 }
 async function shLoadChat() {
@@ -3295,7 +3369,7 @@ function shRenderLib() {
   <p class="muted" style="margin:10px 0 0;font-size:13px">Bấm vào file để xem toàn màn hình (có nút Tải về trong màn xem).</p>`;
 }
 async function shLibDetail(id) {
-  if (!id) { showMsg("err", "Mục này không có id đọc được — xem Dữ liệu thô để đối chiếu field."); return; }
+  if (!id) { showMsg("err", "Mục này không có id đọc được — app không trả về id cho mục này."); return; }
   const box = $("sh-lib-detail");
   box.innerHTML = `<p class="muted">Đang tải chi tiết…</p>`;
   try {
@@ -3371,10 +3445,25 @@ function shBind() {
   // Tao task: size nho lua chon (localStorage), mac dinh 9:16
   try { const sz = localStorage.getItem("hora.remote.size"); if (sz) $("sh-size").value = sz; } catch { /* bo qua */ }
   $("sh-size").addEventListener("change", () => { try { localStorage.setItem("hora.remote.size", $("sh-size").value); } catch { /* bo qua */ } });
-  $("sh-prompt").addEventListener("input", shRefPopup);
-  $("sh-refpop").addEventListener("click", (e) => {
-    const item = e.target.closest("[data-sh-ref]");
-    if (item) shRefPick(item.dataset.shRef);
+  $("sh-prompt").addEventListener("input", shPromptInput);
+  $("sh-refdlg-x").addEventListener("click", shRefCloseDialog);
+  $("sh-refdlg").addEventListener("click", (e) => { if (e.target === $("sh-refdlg")) shRefCloseDialog(); });
+  $("sh-refdlg-search").addEventListener("input", (e) => shRefRenderGrid(e.target.value));
+  $("sh-refgrid").addEventListener("click", (e) => {
+    const item = e.target.closest("[data-sh-ref-id]");
+    if (item) shRefAdd(item.dataset.shRefId, item.dataset.shRefName);
+  });
+  $("sh-refs").addEventListener("click", (e) => {
+    const del = e.target.closest("[data-sh-ref-del]");
+    if (del) { shRefs.splice(Number(del.dataset.shRefDel), 1); shRefRenderChips(); }
+  });
+  $("sh-msgs").addEventListener("click", async (e) => {
+    const b = e.target.closest("[data-sh-copy]");
+    if (!b) return;
+    const t = shMsgTexts[b.dataset.shCopy];
+    if (t === undefined) return;
+    try { await navigator.clipboard.writeText(t); showMsg("ok", "Đã sao chép tin nhắn."); }
+    catch { showMsg("err", "Trình duyệt không cho sao chép tự động."); }
   });
   // Workflows: view tao/sua chung
   $("sh-flow-new").addEventListener("click", () => shOpenFlowEditor(null));
