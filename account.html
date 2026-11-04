@@ -1207,6 +1207,75 @@ body.sh-control [data-view="remote"]{overflow-y:auto;-webkit-overflow-scrolling:
      dieu khien cho panel Remote thanh hop cuon rieng, chua thanh duoi. */
   body.sh-control [data-view="remote"]{max-height:calc(100dvh - 104px);overflow-y:auto}
 }
+/* ===== Lam lai giao dien 5 tab shell (user chot 2026-11-05) ===== */
+/* Tong quan: danh sach item, moi item thay trang thai + tien trinh + anh ket qua */
+.sh-joblist{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--panel)}
+.sh-job{display:grid;grid-template-columns:56px minmax(0,1fr) auto;gap:12px;align-items:center;width:100%;padding:10px 14px;background:none;border:0;border-bottom:1px solid var(--line);font:inherit;color:var(--text);text-align:left;cursor:pointer}
+.sh-job:last-child{border-bottom:0}
+.sh-job:hover{background:var(--panel2)}
+.sh-job .th{width:56px;height:56px;border-radius:10px;background:var(--panel2);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.sh-job .th img{width:100%;height:100%;object-fit:cover}
+.sh-job-ic{font-size:24px}
+.sh-job .mid{min-width:0;display:flex;flex-direction:column;gap:2px}
+.sh-job .nm{font-weight:650;font-size:15px;word-break:break-word}
+.sh-job .meta{font-size:12.5px;color:var(--muted)}
+.sh-job-bar{height:6px;border-radius:99px;background:var(--panel2);overflow:hidden;margin-top:5px}
+.sh-job-bar>span{display:block;height:100%;background:var(--gold)}
+.sh-job .end{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.sh-chip{display:inline-block;padding:2px 9px;border-radius:999px;font-size:11.5px;font-weight:700;border:1px solid var(--line);background:var(--panel2);color:var(--muted);white-space:nowrap}
+.sh-chip.run{background:rgba(11,151,135,.13);color:var(--gold2)}
+.sh-chip.done{background:rgba(26,158,84,.13);color:#15803d}
+.sh-chip.fail{background:rgba(201,58,50,.09);color:var(--danger)}
+/* Tao task: khung prompt lon + thanh Gui dinh day, bam duoc ngay ca khi dang nhap */
+.sh-prompt-big{width:100%;min-height:38vh;font-size:16px;line-height:1.55;padding:14px;border-radius:14px;resize:vertical}
+.sh-sendbar{position:sticky;bottom:0;z-index:5;display:flex;gap:10px;align-items:center;justify-content:space-between;background:var(--panel);border-top:1px solid var(--line);padding:10px 2px;margin-top:8px}
+.sh-sendbar .btn{min-height:48px;padding:0 26px;font-size:15px}
+@media (max-width:760px){.sh-sendhint{display:none}.sh-sendbar .btn{flex:1}}
+/* Workflows: cac node noi tiep nhau, moi node la 1 the noi dung */
+.sh-nodes{margin-top:10px}
+.sh-node{display:flex;gap:12px;position:relative;padding-bottom:16px}
+.sh-node::before{content:"";position:absolute;left:15px;top:34px;bottom:0;width:2px;background:var(--line)}
+.sh-node:last-child{padding-bottom:2px}
+.sh-node:last-child::before{display:none}
+.sh-node-dot{width:32px;height:32px;border-radius:50%;background:var(--panel);border:2px solid var(--line2);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;flex:0 0 auto;z-index:1}
+.sh-node-dot.done{border-color:#1a9e54;color:#15803d}
+.sh-node-dot.run{border-color:var(--gold);color:var(--gold2)}
+.sh-node-dot.fail{border-color:var(--danger);color:var(--danger)}
+.sh-node-body{flex:1;min-width:0;border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--panel)}
+.sh-node-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.sh-node-text{font-size:13.5px;color:var(--muted);margin:6px 0 0;white-space:pre-wrap;word-break:break-word}
+/* Tro ly: khung chat nhu cac AI chat pho bien — tin nhan chay day, o nhap dinh day */
+[data-sh-panel="chat"]:not(.hidden){display:flex;flex-direction:column;min-height:52vh}
+.sh-threads-row{display:flex;gap:8px;overflow-x:auto;padding-bottom:8px}
+.sh-threads-row .sh-thread{width:auto;flex:0 0 auto;margin:0;border-radius:999px;padding:8px 14px}
+.sh-threads-row .muted{margin:2px 0}
+.sh-chat-panel .sh-msgs{flex:1;max-height:none;min-height:220px}
+.sh-composer{position:sticky;bottom:0;display:flex;gap:8px;align-items:flex-end;background:var(--panel);border:1px solid var(--line2);border-radius:24px;padding:6px 6px 6px 16px;margin-top:10px;box-shadow:0 4px 18px rgba(10,30,35,.07)}
+.sh-composer textarea{flex:1;border:0;background:transparent;resize:none;max-height:120px;padding:8px 0;font:inherit;color:var(--text)}
+.sh-composer textarea:focus{outline:none}
+.sh-sendbtn{width:42px;height:42px;border-radius:50%;background:var(--gold);color:#fff;border:0;font-size:16px;cursor:pointer;flex:0 0 auto}
+.sh-sendbtn:disabled{opacity:.5}
+/* Tai nguyen: may tinh = danh sach nhu Explorer (ten/loai/kich thuoc/ngay),
+   dien thoai = gallery luoi anh */
+.sh-reslist{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--panel)}
+.sh-reshead,.sh-res-row{display:grid;grid-template-columns:44px minmax(0,1fr) 84px 104px 118px;gap:12px;align-items:center;padding:8px 12px}
+.sh-reshead{font-size:11.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);background:var(--panel2);border-bottom:1px solid var(--line)}
+.sh-res-row{width:100%;background:none;border:0;border-bottom:1px solid var(--line);font:inherit;color:var(--text);text-align:left;cursor:pointer}
+.sh-res-row:last-child{border-bottom:0}
+.sh-res-row:hover{background:var(--panel2)}
+.sh-res-row .th{width:44px;height:44px;border-radius:8px;overflow:hidden;background:var(--panel2);display:block}
+.sh-res-row .th img{width:100%;height:100%;object-fit:cover;display:block}
+.sh-res-row .nm{font-weight:600;font-size:14px;word-break:break-word}
+.sh-res-row .kd,.sh-res-row .sz,.sh-res-row .dt{font-size:13px;color:var(--muted)}
+@media (max-width:760px){
+  .sh-reslist{display:grid;grid-template-columns:1fr 1fr;gap:10px;border:0;background:none;overflow:visible}
+  .sh-reshead{display:none}
+  .sh-res-row{display:flex;flex-direction:column;align-items:stretch;gap:0;padding:0;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--panel)}
+  .sh-res-row .th{width:100%;height:auto;aspect-ratio:1/1;border-radius:0}
+  .sh-res-row .nm{padding:8px 10px 0;font-size:13.5px}
+  .sh-res-row .kd{padding:2px 10px 9px}
+  .sh-res-row .sz,.sh-res-row .dt{display:none}
+}
 @media (max-width:760px){
   .sh-stats{grid-template-columns:repeat(2,1fr)}
   .sh-chat-grid{grid-template-columns:1fr}
@@ -1513,11 +1582,12 @@ body.sh-control [data-view="remote"]{overflow-y:auto;-webkit-overflow-scrolling:
               <label class="on"><input type="radio" name="sh-kind" value="video" checked>Video</label>
             </div>
             <label class="lbl" for="sh-prompt" style="display:block;margin-bottom:6px">Prompt</label>
-            <textarea id="sh-prompt" rows="5" style="width:100%" placeholder="Mô tả nội dung cần tạo… — size 9:16"></textarea>
-            <p class="muted" style="margin:8px 0 0;font-size:13.5px">Server lấy size từ prompt: phải ghi rõ <b>size 16:9</b>, <b>size 9:16</b> hoặc <b>size 1:1</b> — thiếu là server trả lỗi 400, lỗi hiện nguyên văn ở dưới.</p>
+            <textarea id="sh-prompt" class="sh-prompt-big" placeholder="Mô tả nội dung cần tạo… — size 9:16"></textarea>
+            <p class="muted" style="margin:8px 0 0;font-size:13.5px">Server lấy size từ prompt: phải ghi rõ <b>size 16:9</b>, <b>size 9:16</b> hoặc <b>size 1:1</b> — thiếu là server trả lỗi 400, lỗi hiện nguyên văn ở dưới. Ctrl+Enter để gửi nhanh.</p>
             <p class="sh-err hidden" id="sh-create-err" role="alert"></p>
             <p class="sh-okmsg hidden" id="sh-create-ok" role="status"></p>
-            <div class="sh-row-actions">
+            <div class="sh-sendbar">
+              <span class="muted sh-sendhint">Task gửi xong sẽ hiện ở tab Tổng quan</span>
               <button class="btn primary" id="sh-send-prompt" type="button">Gửi task</button>
             </div>
             <details class="sh-raw"><summary>Dữ liệu thô — phản hồi tạo task</summary><pre id="sh-raw-create">—</pre></details>
@@ -1529,25 +1599,18 @@ body.sh-control [data-view="remote"]{overflow-y:auto;-webkit-overflow-scrolling:
             <details class="sh-raw"><summary>Dữ liệu thô — workflows</summary><pre id="sh-raw-flow">—</pre></details>
           </section>
 
-          <section class="sh-panel hidden" data-sh-panel="chat">
-            <div class="sh-chat-grid">
-              <div>
-                <div id="sh-threads"><p class="muted">Đang tải thread…</p></div>
-              </div>
-              <div>
-                <div class="sh-msgs" id="sh-msgs"><p class="muted">Chưa có tin nhắn.</p></div>
-                <div class="sh-chat-send">
-                  <textarea id="sh-chat-input" rows="2" placeholder="Nhắn cho trợ lý…"></textarea>
-                  <button class="btn primary" id="sh-chat-send" type="button">Gửi</button>
-                </div>
-                <p class="sh-err hidden" id="sh-chat-err" role="alert"></p>
-              </div>
+          <section class="sh-panel hidden sh-chat-panel" data-sh-panel="chat">
+            <div class="sh-threads-row" id="sh-threads"><p class="muted">Đang tải thread…</p></div>
+            <div class="sh-msgs" id="sh-msgs"><p class="muted">Chưa có tin nhắn.</p></div>
+            <p class="sh-err hidden" id="sh-chat-err" role="alert"></p>
+            <div class="sh-composer">
+              <textarea id="sh-chat-input" rows="1" placeholder="Nhắn cho trợ lý… (Enter để gửi, Shift+Enter xuống dòng)"></textarea>
+              <button class="sh-sendbtn" id="sh-chat-send" type="button" aria-label="Gửi tin nhắn">➤</button>
             </div>
             <details class="sh-raw"><summary>Dữ liệu thô — trợ lý</summary><pre id="sh-raw-chat">—</pre></details>
           </section>
 
           <section class="sh-panel hidden" data-sh-panel="res">
-            <h3 class="sh-subhead">Kho</h3>
             <div class="sh-filter">
               <button type="button" class="btn small sh-libf on" data-sh-libf="all">Tất cả</button>
               <button type="button" class="btn small sh-libf" data-sh-libf="image">Ảnh</button>
@@ -1560,22 +1623,6 @@ body.sh-control [data-view="remote"]{overflow-y:auto;-webkit-overflow-scrolling:
             <details class="sh-raw"><summary>Dữ liệu thô — kho</summary><pre id="sh-raw-lib">—</pre></details>
           </section>
 
-          <section class="sh-panel hidden" data-sh-panel="res">
-            <h3 class="sh-subhead">Google Drive</h3>
-            <div id="sh-drive-status"><p class="muted">Đang tải trạng thái Drive…</p></div>
-            <div id="sh-drive-connect-box">
-              <label class="lbl" for="sh-drive-client" style="display:block;margin:12px 0 6px">Client ID (khi cần connect)</label>
-              <input id="sh-drive-client" placeholder="Google OAuth Client ID" autocomplete="off" style="width:100%">
-              <div class="sh-row-actions">
-                <button class="btn primary" id="sh-drive-connect" type="button">Kết nối Drive</button>
-                <button class="btn" id="sh-drive-disconnect" type="button">Ngắt kết nối Drive</button>
-              </div>
-              <div id="sh-drive-connect-info"></div>
-            </div>
-            <h4 style="margin:18px 0 10px">File app đã up Drive</h4>
-            <div id="sh-drive-files"><p class="muted">Đang tải…</p></div>
-            <details class="sh-raw"><summary>Dữ liệu thô — Drive</summary><pre id="sh-raw-drive">—</pre></details>
-          </section>
           </div>
 
           <div class="sh-confirm hidden" id="sh-confirm" role="dialog" aria-modal="true" aria-label="Xác nhận thao tác">
@@ -2492,6 +2539,36 @@ const SF = {
     if (typeof data.message === "string" && data.message) return data.message;
     return fallback;
   },
+  resultUrlOf: (o) => {
+    const u = SF.pick(o, ["resultUrl", "outputUrl", "resultThumbnail", "thumbnailUrl", "thumbnail", "previewUrl", "imageUrl", "coverUrl"]);
+    return typeof u === "string" && /^https?:\/\//.test(u) ? u : null;
+  },
+  sizeOf: (o) => {
+    const v = SF.pick(o, ["size", "fileSize", "sizeBytes", "bytes", "length"]);
+    if (typeof v === "string" && v) return v;
+    if (typeof v !== "number") return "—";
+    if (v < 1024) return v + " B";
+    if (v < 1048576) return (v / 1024).toFixed(1).replace(".", ",") + " KB";
+    if (v < 1073741824) return (v / 1048576).toFixed(1).replace(".", ",") + " MB";
+    return (v / 1073741824).toFixed(2).replace(".", ",") + " GB";
+  },
+  nodeText: (o) => {
+    const t = SF.pick(o, ["prompt", "content", "text", "description", "summary", "detail", "note"]);
+    if (typeof t === "string" && t) return t;
+    const cfg = SF.pick(o, ["config", "params", "input", "settings"]);
+    if (cfg !== undefined) { try { return typeof cfg === "string" ? cfg : JSON.stringify(cfg); } catch { return ""; } }
+    return "";
+  },
+  statusChip: (st) => {
+    const low = String(st || "").toLowerCase();
+    if (["done", "complete", "finish", "success"].some((g) => low.includes(g))) return { cls: "done", label: "Đã xong" };
+    if (["fail", "error"].some((g) => low.includes(g))) return { cls: "fail", label: "Lỗi" };
+    if (["run", "processing", "active"].some((g) => low.includes(g))) return { cls: "run", label: "Đang chạy" };
+    if (low.includes("cancel")) return { cls: "wait", label: "Đã dừng" };
+    if (["queue", "pending", "wait", "idle"].some((g) => low.includes(g))) return { cls: "wait", label: "Chờ" };
+    if (low) return { cls: "wait", label: st };
+    return { cls: "wait", label: "Chờ" };
+  },
 };
 
 let shStarted = false;
@@ -2567,7 +2644,6 @@ function shShowTab(name) {
   else if (name === "chat" && !shLoaded.chat) shLoadChat();
   else if (name === "res") {
     if (!shLoaded.lib) shLoadLib();
-    if (!shLoaded.drive) shLoadDrive();
   }
 }
 function shSyncChrome() {
@@ -2664,7 +2740,7 @@ function shScheduleWs() {
 function shReloadTab() {
   if (shTab === "dash") shLoadDash();
   else if (shTab === "flow") shLoadFlow();
-  else if (shTab === "res") { shLoadLib(); shLoadDrive(); }
+  else if (shTab === "res") { shLoadLib(); }
   else if (shTab === "chat") shLoadChatHistory();
 }
 // --- Tong quan + hang doi ---
@@ -2711,21 +2787,24 @@ function shRenderDash(statusData, jobs, raw) {
   const box = $("sh-queue");
   if (!list) { box.innerHTML = `<p class="muted">Chưa tải được hàng đợi.</p>`; return; }
   if (!list.length) { box.innerHTML = `<p class="muted">Chưa có job nào — tạo task ở mục Tạo task.</p>`; return; }
-  box.innerHTML = list.map((j) => {
+  box.innerHTML = `<div class="sh-joblist">` + list.map((j) => {
     const id = SF.idOf(j);
     const st = SF.statusOf(j);
-    const low = st.toLowerCase();
     const pr = SF.progressOf(j);
-    const terminal = ["done", "complete", "finish", "success", "fail", "error", "cancel"].some((g) => low.includes(g));
-    return `<div class="sh-card"><h4>${esc(SF.titleOf(j))}</h4>
-      <p class="meta">${esc(SF.kindLabel(SF.kindOf(j)))} · ${esc(st || "—")}${id ? " · " + esc(id) : ""}${SF.timeOf(j) ? " · " + esc(fmtDate(SF.timeOf(j))) : ""}</p>
-      ${pr !== null ? `<div class="sh-bar"><div style="width:${pr}%"></div></div><p class="meta" style="margin-top:4px">${pr}%</p>` : ""}
-      <div class="sh-row-actions">
-        <button type="button" class="btn small" data-sh-job="detail" data-id="${esc(id || "")}">Chi tiết</button>
-        ${!terminal ? `<button type="button" class="btn small" data-sh-job="cancel" data-id="${esc(id || "")}">Dừng</button>` : ""}
-        ${terminal ? `<button type="button" class="btn small" data-sh-job="retry" data-id="${esc(id || "")}">Làm lại</button>` : ""}
-      </div></div>`;
-  }).join("");
+    const chip = SF.statusChip(st);
+    const kind = SF.kindOf(j);
+    const rUrl = SF.resultUrlOf(j);
+    const icon = kind === "video" ? "🎬" : kind === "image" ? "🖼" : kind === "audio" ? "🎵" : "📄";
+    const thumb = rUrl ? `<img loading="lazy" src="${esc(rUrl)}" alt="">` : `<span class="sh-job-ic">${icon}</span>`;
+    return `<button type="button" class="sh-job" data-sh-job="detail" data-id="${esc(id || "")}">
+      <span class="th">${thumb}</span>
+      <span class="mid"><span class="nm">${esc(SF.titleOf(j))}</span>
+      <span class="meta">${esc(SF.kindLabel(kind))}${SF.timeOf(j) ? " · " + esc(fmtDate(SF.timeOf(j))) : ""}${id ? " · " + esc(id) : ""}</span>
+      ${pr !== null ? `<span class="sh-job-bar"><span style="width:${pr}%"></span></span>` : ""}</span>
+      <span class="end"><span class="sh-chip ${chip.cls}">${esc(chip.label)}</span>${pr !== null ? `<span class="meta">${pr}%</span>` : ""}</span>
+    </button>`;
+  }).join("") + `</div>
+  <p class="muted" style="margin:10px 0 0;font-size:13px">Bấm vào một dòng để xem kết quả của item đó — Dừng / Làm lại nằm trong phần chi tiết.</p>`;
 }
 async function shJobAction(act, id, btn) {
   if (!id) { showMsg("err", "Job này không có id đọc được — xem Dữ liệu thô để đối chiếu field."); return; }
@@ -2733,9 +2812,29 @@ async function shJobAction(act, id, btn) {
   try {
     if (act === "detail") {
       const { res, data } = await shApi("/remote/queue/" + encodeURIComponent(id));
-      $("sh-job-detail").innerHTML = res.ok
-        ? `<div class="sh-card"><h4>Chi tiết job ${esc(id)}</h4><details class="sh-raw" open><summary>JSON chi tiết</summary><pre>${esc(JSON.stringify(data, null, 2).slice(0, 9000))}</pre></details></div>`
-        : `<p class="sh-err">${esc(SF.errText(data, "Không tải được chi tiết job."))}</p>`;
+      if (!res.ok) { $("sh-job-detail").innerHTML = `<p class="sh-err">${esc(SF.errText(data, "Không tải được chi tiết job."))}</p>`; return; }
+      const j = (data && (data.job || data.item)) || data || {};
+      const st = SF.statusOf(j);
+      const low = st.toLowerCase();
+      const pr = SF.progressOf(j);
+      const kind = SF.kindOf(j);
+      const chip = SF.statusChip(st);
+      const terminal = ["done", "complete", "finish", "success", "fail", "error", "cancel"].some((g) => low.includes(g));
+      const rUrl = SF.resultUrlOf(j);
+      const prompt = SF.pick(j, ["prompt", "input"]);
+      const media = rUrl ? (kind === "video" ? `<video class="sh-detail-media" controls src="${esc(rUrl)}"></video>`
+        : kind === "audio" ? `<audio controls src="${esc(rUrl)}" style="width:100%"></audio>`
+        : `<img class="sh-detail-media" src="${esc(rUrl)}" alt="">`) : "";
+      $("sh-job-detail").innerHTML = `<div class="sh-card"><h4>${esc(SF.titleOf(j) || ("Job " + id))} <span class="sh-chip ${chip.cls}">${esc(chip.label)}</span></h4>
+        <p class="meta">${esc(SF.kindLabel(kind))}${pr !== null ? " · " + pr + "%" : ""}${SF.timeOf(j) ? " · " + esc(fmtDate(SF.timeOf(j))) : ""}</p>
+        ${typeof prompt === "string" && prompt ? `<p style="margin:8px 0 0">${esc(prompt)}</p>` : ""}
+        ${media ? `<div style="margin:12px 0">${media}</div>` : `<p class="muted" style="margin:10px 0 0">Item này chưa có file kết quả trong dữ liệu app trả về — khi job xong, kết quả xem ở tab Tài nguyên.</p>`}
+        <div class="sh-row-actions">
+          ${!terminal ? `<button type="button" class="btn small" data-sh-job="cancel" data-id="${esc(id)}">Dừng</button>` : `<button type="button" class="btn small" data-sh-job="retry" data-id="${esc(id)}">Làm lại</button>`}
+          ${rUrl ? `<a class="btn small" href="${esc(rUrl)}" target="_blank" rel="noopener">Mở kết quả</a>` : ""}
+        </div>
+        <details class="sh-raw"><summary>JSON chi tiết</summary><pre>${esc(JSON.stringify(data, null, 2).slice(0, 9000))}</pre></details></div>`;
+      $("sh-job-detail").scrollIntoView({ behavior: "smooth", block: "nearest" });
       return;
     }
     const { res, data, cancelled } = await shApi("/remote/queue/" + encodeURIComponent(id) + "/" + act, { method: "POST", body: {} });
@@ -2784,10 +2883,12 @@ function shRenderWorkflows(list, raw) {
   if (!list || !list.length) { box.innerHTML = `<p class="muted">Chưa có workflow nào.</p>`; return; }
   box.innerHTML = list.map((w) => {
     const id = SF.idOf(w);
-    return `<div class="sh-card"><h4>${esc(SF.titleOf(w))}</h4>
-      <p class="meta">${esc(SF.statusOf(w) || "—")}${id ? " · " + esc(id) : ""}</p>
+    const n = SF.listOf(w, ["steps", "stages", "nodes", "tasks"]).length;
+    const chip = SF.statusChip(SF.statusOf(w));
+    return `<div class="sh-card"><h4>${esc(SF.titleOf(w))} <span class="sh-chip ${chip.cls}">${esc(chip.label)}</span></h4>
+      <p class="meta">${id ? esc(id) : ""}${n ? " · " + n + " node" : ""}</p>
       <div class="sh-row-actions">
-        <button type="button" class="btn small" data-sh-wf="detail" data-id="${esc(id || "")}">Chi tiết</button>
+        <button type="button" class="btn small" data-sh-wf="detail" data-id="${esc(id || "")}">Xem các node</button>
         <button type="button" class="btn small" data-sh-wf="run" data-id="${esc(id || "")}">Chạy</button>
       </div></div>`;
   }).join("");
@@ -2800,9 +2901,22 @@ async function shWorkflowAction(act, id, btn) {
       const { res, data } = await shApi("/remote/workflows/" + encodeURIComponent(id));
       if (!res.ok) { $("sh-wf-detail").innerHTML = `<p class="sh-err">${esc(SF.errText(data, "Không tải được chi tiết workflow."))}</p>`; return; }
       const stages = SF.listOf(data, ["stages", "steps", "tasks", "nodes"]);
+      const nodesHtml = stages.length ? `<div class="sh-nodes">` + stages.map((s, i) => {
+        const chip = SF.statusChip(SF.statusOf(s));
+        const txt = SF.nodeText(s);
+        const pr = SF.progressOf(s);
+        return `<div class="sh-node"><div class="sh-node-dot ${chip.cls}">${i + 1}</div>
+          <div class="sh-node-body"><div class="sh-node-head"><b>${esc(SF.titleOf(s))}</b><span class="sh-chip ${chip.cls}">${esc(chip.label)}</span></div>
+          ${txt ? `<p class="sh-node-text">${esc(txt)}</p>` : ""}
+          ${pr !== null ? `<div class="sh-bar" style="margin-top:8px"><div style="width:${pr}%"></div></div>` : ""}
+          </div></div>`;
+      }).join("") + `</div>` : `<p class="meta">Không thấy danh sách node trong dữ liệu trả về — xem JSON dưới đây.</p>`;
       $("sh-wf-detail").innerHTML = `<div class="sh-card"><h4>${esc(SF.titleOf(data || {}) || id)}</h4>
-        ${stages.length ? stages.map((s, i) => `<p class="meta" style="margin:6px 0">${i + 1}. ${esc(SF.titleOf(s))} — ${esc(SF.statusOf(s) || "—")}${SF.progressOf(s) !== null ? " · " + SF.progressOf(s) + "%" : ""}</p>`).join("") : `<p class="meta">Không thấy danh sách bước trong dữ liệu trả về — xem JSON dưới đây.</p>`}
+        <p class="meta">${esc(SF.statusOf(data || {}) || "—")}${stages.length ? " · " + stages.length + " node" : ""}</p>
+        ${nodesHtml}
+        <div class="sh-row-actions"><button type="button" class="btn small" data-sh-wf="run" data-id="${esc(id)}">Chạy workflow này</button></div>
         <details class="sh-raw"><summary>JSON chi tiết</summary><pre>${esc(JSON.stringify(data, null, 2).slice(0, 9000))}</pre></details></div>`;
+      $("sh-wf-detail").scrollIntoView({ behavior: "smooth", block: "nearest" });
       return;
     }
     const { res, data, cancelled } = await shApi("/remote/workflows/" + encodeURIComponent(id) + "/run", { method: "POST", body: {} });
@@ -2912,11 +3026,15 @@ function shRenderLib() {
   });
   const box = $("sh-library");
   if (!list.length) { box.innerHTML = `<p class="muted">Kho trống với bộ lọc này — tạo task ở mục Tạo task.</p>`; return; }
-  box.innerHTML = `<div class="sh-grid">` + list.map((it) => {
+  box.innerHTML = `<div class="sh-reslist"><div class="sh-reshead"><span></span><span>Tên</span><span>Loại</span><span>Kích thước</span><span>Ngày tạo</span></div>` + list.map((it) => {
     const id = SF.idOf(it);
-    return `<button type="button" class="sh-lib-item" data-sh-lib="${esc(id || "")}">
-      <img loading="lazy" src="${esc(shThumbUrl(it, id || ""))}" alt="">
-      <span class="nm">${esc(SF.titleOf(it))}</span><span class="kd">${esc(SF.kindLabel(SF.kindOf(it)))}</span></button>`;
+    return `<button type="button" class="sh-res-row" data-sh-lib="${esc(id || "")}">
+      <span class="th"><img loading="lazy" src="${esc(shThumbUrl(it, id || ""))}" alt=""></span>
+      <span class="nm">${esc(SF.titleOf(it))}</span>
+      <span class="kd">${esc(SF.kindLabel(SF.kindOf(it)))}</span>
+      <span class="sz">${esc(SF.sizeOf(it))}</span>
+      <span class="dt">${SF.timeOf(it) ? esc(fmtDay(SF.timeOf(it))) : "—"}</span>
+    </button>`;
   }).join("") + `</div>`;
 }
 async function shLibDetail(id) {
@@ -2935,85 +3053,12 @@ async function shLibDetail(id) {
     box.innerHTML = `<div class="sh-card"><h4>${esc(SF.titleOf(it))}</h4>
       <p class="meta">${esc(SF.kindLabel(kind))}${SF.timeOf(it) ? " · " + esc(fmtDate(SF.timeOf(it))) : ""}</p>
       <div style="margin:12px 0">${media}</div>
+      <p class="meta">${esc(SF.sizeOf(it))}${SF.timeOf(it) ? " · " + esc(fmtDate(SF.timeOf(it))) : ""}</p>
       <div class="sh-row-actions">
         <a class="btn primary" href="${esc(fileUrl)}" download>Tải về</a>
-        <button type="button" class="btn" data-sh-updrive="${esc(id)}">Up Drive</button>
       </div>
-      <div id="sh-lib-up-result"></div>
       <details class="sh-raw"><summary>JSON chi tiết</summary><pre>${esc(JSON.stringify(data, null, 2).slice(0, 9000))}</pre></details></div>`;
   } catch (e) { box.innerHTML = `<p class="sh-err">${esc(e.message)}</p>`; }
-}
-async function shUpDrive(id, btn) {
-  if (btn) btn.disabled = true;
-  try {
-    const { res, data, cancelled } = await shApi("/remote/drive/upload/" + encodeURIComponent(id), { method: "POST", body: {} });
-    const out = $("sh-lib-up-result");
-    if (cancelled) return;
-    if (!res.ok) { if (out) out.innerHTML = `<p class="sh-err">${esc(SF.errText(data, "Up Drive thất bại."))}</p>`; return; }
-    const link = data && SF.pick(data, ["shareUrl", "webViewLink", "link", "url"]);
-    if (out) out.innerHTML = `<p class="sh-okmsg">Đã up Drive.${link ? ` Link share: <a href="${esc(link)}" target="_blank" rel="noopener">${esc(link)}</a>` : ""}</p>`;
-  } catch (e) { showMsg("err", e.message); }
-  finally { if (btn) btn.disabled = false; }
-}
-// --- Drive ---
-async function shLoadDrive() {
-  if (!remoteSaved()) return;
-  shLoaded.drive = true;
-  let statusData = null;
-  try {
-    const { res, data } = await shApi("/remote/drive/status");
-    statusData = data;
-    if (!res.ok) { $("sh-drive-status").innerHTML = `<p class="sh-err">${esc(SF.errText(data, "Không tải được trạng thái Drive."))}</p>`; }
-    else {
-      const connected = SF.pick(data || {}, ["connected", "isConnected", "linked"]);
-      const email = SF.pick(data || {}, ["email", "account", "user"]);
-      $("sh-drive-status").innerHTML = `<div class="sh-card"><h4>${connected ? "✅ Đã kết nối Drive" : "Chưa kết nối Drive"}</h4>
-        <p class="meta">${connected ? esc(email || "") : "Connect bằng device-flow: trang hiện mã + link google.com/device rồi tự poll."} Chỉ xem file app đã up (scope drive.file).</p></div>`;
-    }
-  } catch (e) { $("sh-drive-status").innerHTML = `<p class="sh-err">${esc(e.message)}</p>`; }
-  try {
-    const { res, data } = await shApi("/remote/drive/files");
-    shRaw("sh-raw-drive", { status: statusData, files: data });
-    const files = SF.listOf(data, ["files"]);
-    $("sh-drive-files").innerHTML = !res.ok ? `<p class="muted">Chưa xem được file Drive.</p>`
-      : !files.length ? `<p class="muted">Chưa có file nào được up.</p>`
-      : files.map((f) => {
-        const link = SF.pick(f, ["webViewLink", "url", "link"]);
-        return `<div class="sh-card"><h4>${esc(SF.titleOf(f))}</h4><p class="meta">${SF.timeOf(f) ? esc(fmtDate(SF.timeOf(f))) : ""}</p>
-          ${link ? `<div class="sh-row-actions"><a class="btn small" href="${esc(link)}" target="_blank" rel="noopener">Mở trên Drive</a></div>` : ""}</div>`;
-      }).join("");
-  } catch { $("sh-drive-files").innerHTML = `<p class="muted">Chưa xem được file Drive.</p>`; }
-}
-async function shDriveConnect() {
-  const info = $("sh-drive-connect-info");
-  const btn = $("sh-drive-connect");
-  btn.disabled = true;
-  try {
-    const clientId = $("sh-drive-client").value.trim();
-    if (clientId) {
-      const cfg = await shApi("/remote/drive/config", { method: "POST", body: { clientId } });
-      if (!cfg.res.ok) { info.innerHTML = `<p class="sh-err">${esc(SF.errText(cfg.data, "Không lưu được Client ID."))}</p>`; return; }
-    }
-    const { res, data, cancelled } = await shApi("/remote/drive/connect", { method: "POST", body: {} });
-    if (cancelled) return;
-    if (!res.ok) { info.innerHTML = `<p class="sh-err">${esc(SF.errText(data, "Không bắt đầu được connect Drive."))}</p>`; return; }
-    const code = SF.pick(data || {}, ["userCode", "code"]);
-    const url = SF.pick(data || {}, ["verificationUrl", "verificationUri", "url", "link"]) || "https://www.google.com/device";
-    info.innerHTML = `<p class="sh-okmsg">Mở <a href="${esc(url)}" target="_blank" rel="noopener">google.com/device</a> và nhập mã <b style="font-size:18px">${esc(code || "—")}</b> — trang đang tự chờ xác nhận…</p>`;
-    const deadline = Date.now() + 2 * 60 * 1000;
-    const poll = async () => {
-      if (!remoteSaved() || Date.now() > deadline) return;
-      try {
-        const r = await shApi("/remote/drive/connect/status");
-        const st = String(SF.pick(r.data || {}, ["status", "state"]) || "").toLowerCase();
-        const conn = SF.pick(r.data || {}, ["connected", "isConnected"]);
-        if (conn || ["connected", "done", "ok", "success"].includes(st)) { showMsg("ok", "Đã kết nối Drive."); shLoadDrive(); return; }
-      } catch { /* poll tiep */ }
-      setTimeout(poll, 3000);
-    };
-    setTimeout(poll, 3000);
-  } catch (e) { info.innerHTML = `<p class="sh-err">${esc(e.message)}</p>`; }
-  finally { btn.disabled = false; }
 }
 // --- Gan su kien cho shell (1 lan) ---
 function shBind() {
@@ -3054,19 +3099,15 @@ function shBind() {
     const item = e.target.closest("[data-sh-lib]");
     if (item) shLibDetail(item.dataset.shLib);
   });
-  $("sh-lib-detail").addEventListener("click", (e) => {
-    const btn = e.target.closest("[data-sh-updrive]");
-    if (btn) shUpDrive(btn.dataset.shUpdrive, btn);
+  $("sh-job-detail").addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-sh-job]");
+    if (btn) shJobAction(btn.dataset.shJob, btn.dataset.id, btn);
   });
-  $("sh-drive-connect").addEventListener("click", shDriveConnect);
-  $("sh-drive-disconnect").addEventListener("click", async (btn) => {
-    try {
-      const { res, data } = await shApi("/remote/drive/disconnect", { method: "POST", body: {} });
-      if (!res.ok) { showMsg("err", SF.errText(data, "Không ngắt được Drive.")); return; }
-      showMsg("ok", "Đã ngắt kết nối Drive.");
-      shLoadDrive();
-    } catch (e) { showMsg("err", e.message); }
+  $("sh-wf-detail").addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-sh-wf]");
+    if (btn) shWorkflowAction(btn.dataset.shWf, btn.dataset.id, btn);
   });
+  $("sh-prompt").addEventListener("keydown", (e) => { if ((e.ctrlKey || e.metaKey) && e.key === "Enter") { e.preventDefault(); shSendPrompt(); } });
   $("sh-confirm-yes").addEventListener("click", () => shConfirmDone(true));
   $("sh-confirm-no").addEventListener("click", () => shConfirmDone(false));
   document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("sh-confirm").classList.contains("hidden")) shConfirmDone(false); });
