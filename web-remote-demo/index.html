@@ -66,6 +66,17 @@
   .wait.show{display:block}
   .saved-url{margin-top:12px;font-size:13px;color:var(--muted)}
   .saved-url button{background:none;border:0;color:var(--accent);cursor:pointer;font-size:13px;padding:4px}
+  .acct-strip{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:16px}
+  .acct-strip .who{width:100%;font-size:13px;color:var(--muted);margin-bottom:4px}
+  .acct-strip .m{font-size:12px;padding:5px 10px;border:1px solid var(--line);border-radius:999px;color:var(--muted)}
+  .acct-strip .m.on{background:var(--accent);border-color:var(--accent);color:#04231f;font-weight:700}
+  .scan-box{display:none;border:1.5px dashed var(--accent);border-radius:12px;padding:18px 12px;text-align:center;
+    font-size:14px;color:var(--muted);margin-top:12px;background:#0a2a26}
+  .scan-box.show{display:block}
+  .scan-box .qr{font-size:42px;line-height:1.1}
+  .gate details{margin-top:16px;border-top:1px solid var(--line);padding-top:12px}
+  .gate details summary{cursor:pointer;font-size:13px;color:var(--muted)}
+  .gate details .row{margin-top:12px}
 
   /* --- Shell --- */
   .shell{flex:1;display:none;min-height:0}
@@ -211,47 +222,42 @@
   <button id="toggleConn">Giả lập mất kết nối</button>
   <button id="resetDemo">↺ Chơi lại từ đầu</button>
 </div>
-<p class="demo-note">Bản xem thử giao diện theo spec <b>docs/web-remote.md</b> — bấm qua được các màn: W0 nhập URL Tunnel → W1 ghép mã → 6 mục điều khiển. Chưa nối API thật; bản dựng thật vẫn chờ 3 file WR-10.</p>
+<p class="demo-note">Bản xem thử giao diện theo spec <b>docs/web-remote.md</b> (bản mới: mục <b>Remote trong trang tài khoản</b>) — đăng nhập xong vào mục Remote → quét QR trên app hoặc nhập mã 6 số → mở view điều khiển 6 mục. Chưa nối API thật; bản dựng thật vẫn chờ 3 file WR-10 + app đăng ký mã lên website.</p>
 
 <div class="stage phone" id="stage">
   <div class="frame">
     <div class="app" id="app">
 
-      <!-- W0: nhập URL Tunnel -->
+      <!-- Mục Remote trong trang tài khoản: quét QR / nhập mã -->
       <section class="gate" id="gateConnect">
         <div class="gate-card">
-          <h1>Kết nối tới máy tính</h1>
-          <p class="sub">Dán URL Tunnel đang hiện trong app HORA Media trên máy tính của bạn. URL đổi mỗi lần mở app.</p>
-          <div class="row">
-            <label class="lbl" for="baseUrl">URL Tunnel</label>
-            <input class="inp" id="baseUrl" value="https://violet-pandas-jump.trycloudflare.com" autocomplete="off">
+          <div class="acct-strip">
+            <span class="who">hora.works/tài khoản — đã đăng nhập <b>demo@hora.works</b></span>
+            <span class="m">Thông tin</span><span class="m">Mua gia hạn</span><span class="m">Lịch sử giao dịch</span><span class="m on">Remote</span>
           </div>
-          <button class="btn" id="btnCheck" style="width:100%">Kiểm tra &amp; tiếp tục</button>
-          <div class="err-box" id="connectErr">Không tới được máy tính — kiểm tra app đã mở và URL còn đúng.</div>
-          <div class="saved-url">Đã lưu gần nhất: violet-pandas-jump.trycloudflare.com <button type="button">Dùng lại</button></div>
-        </div>
-      </section>
-
-      <!-- W1: ghép mã -->
-      <section class="gate" id="gatePair" style="display:none">
-        <div class="gate-card">
-          <h1>Ghép nối thiết bị</h1>
-          <p class="sub">Nhập tài khoản và mã ghép nối 6 số đang hiện trên máy tính.</p>
-          <div class="row">
-            <label class="lbl" for="account">Tài khoản</label>
-            <input class="inp" id="account" value="demo@hora.works">
-          </div>
-          <div class="row">
-            <label class="lbl">Mã ghép nối</label>
+          <h1>Remote — điều khiển máy tính</h1>
+          <p class="sub">Mở app HORA Media trên máy tính, app sẽ hiện mã QR + mã kết nối 6 số. Quét mã hoặc nhập mã tại đây để mở view điều khiển — kiểu Chrome Remote Desktop.</p>
+          <button class="btn" id="btnScan" style="width:100%">📷 Quét mã QR trên app</button>
+          <div class="scan-box" id="scanBox"><div class="qr">▦</div>Đang hướng camera vào mã QR trong app…<br>(demo: coi như quét trúng sau vài giây)</div>
+          <div class="row" style="margin-top:18px">
+            <label class="lbl">Hoặc nhập mã kết nối 6 số</label>
             <div class="code-row">
               <input class="inp" maxlength="1" value="4"><input class="inp" maxlength="1" value="8">
               <input class="inp" maxlength="1" value="2"><input class="inp" maxlength="1" value="9">
               <input class="inp" maxlength="1" value="1"><input class="inp" maxlength="1" value="6">
             </div>
           </div>
-          <button class="btn" id="btnPair" style="width:100%">Ghép nối</button>
-          <div class="wait" id="pairWait">⏳ Đang chờ duyệt trên máy tính… (demo tự duyệt sau vài giây)</div>
-          <div class="saved-url"><button type="button" id="backConnect">← Đổi URL Tunnel / đổi máy</button></div>
+          <button class="btn" id="btnPair" style="width:100%">Kết nối bằng mã</button>
+          <div class="wait" id="pairWait">⏳ Đã tìm thấy máy của bạn — đang chờ duyệt trên máy tính… (demo tự duyệt sau vài giây)</div>
+          <div class="err-box" id="connectErr">Không tìm thấy máy nào với mã này — kiểm tra app đã mở, mã còn hạn (10 phút) và đúng tài khoản.</div>
+          <details>
+            <summary>Nâng cao: dán URL Tunnel thủ công (cách cũ / dự phòng)</summary>
+            <div class="row">
+              <label class="lbl" for="baseUrl">URL Tunnel</label>
+              <input class="inp" id="baseUrl" value="https://violet-pandas-jump.trycloudflare.com" autocomplete="off">
+            </div>
+            <button class="btn ghost" id="btnCheck" style="width:100%">Kiểm tra URL &amp; dùng cách thủ công</button>
+          </details>
         </div>
       </section>
 
@@ -521,19 +527,20 @@ window.openLib = i => {
 };
 function toast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2200); }
 
-/* ---------- Luồng W0 → W1 → Shell ---------- */
+/* ---------- Luồng Remote (quét QR / nhập mã) → Shell ---------- */
+function enterShell(){
+  $('#pairWait').classList.add('show'); $('#btnPair').disabled = true; $('#btnScan').disabled = true;
+  setTimeout(()=>{ $('#gateConnect').style.display='none'; $('#shell').classList.add('show');
+    $('#pairWait').classList.remove('show'); $('#scanBox').classList.remove('show');
+    $('#btnPair').disabled=false; $('#btnScan').disabled=false; toast('Đã kết nối (demo)'); }, 1400);
+}
+$('#btnScan').onclick = () => { $('#scanBox').classList.add('show'); setTimeout(enterShell, 1000); };
+$('#btnPair').onclick = enterShell;
 $('#btnCheck').onclick = () => {
   const b = $('#btnCheck'); b.disabled = true; b.textContent = 'Đang kiểm tra /remote/health…';
-  setTimeout(()=>{ b.disabled=false; b.textContent='Kiểm tra & tiếp tục';
-    $('#gateConnect').style.display='none'; $('#gatePair').style.display='flex'; }, 700);
+  setTimeout(()=>{ b.disabled=false; b.textContent='Kiểm tra URL & dùng cách thủ công'; enterShell(); }, 700);
 };
-$('#backConnect').onclick = () => { $('#gatePair').style.display='none'; $('#gateConnect').style.display='flex'; };
-$('#btnPair').onclick = () => {
-  $('#pairWait').classList.add('show'); $('#btnPair').disabled = true;
-  setTimeout(()=>{ $('#gatePair').style.display='none'; $('#shell').classList.add('show');
-    $('#pairWait').classList.remove('show'); $('#btnPair').disabled=false; toast('Đã ghép nối (demo)'); }, 1400);
-};
-$('#btnUnpair').onclick = () => { $('#shell').classList.remove('show'); $('#gatePair').style.display='flex'; };
+$('#btnUnpair').onclick = () => { $('#shell').classList.remove('show'); $('#gateConnect').style.display='flex'; };
 
 /* ---------- Tạo task ---------- */
 $$('#kindSeg button').forEach(b=>b.onclick=()=>{ $$('#kindSeg button').forEach(x=>x.classList.remove('on')); b.classList.add('on'); });
@@ -595,7 +602,7 @@ renderJobs(); renderWf(); renderLib();
 const qs = new URLSearchParams(location.search);
 if(qs.get('view')) setView(qs.get('view'));
 if(qs.get('screen')==='shell'){
-  $('#gateConnect').style.display='none'; $('#gatePair').style.display='none';
+  $('#gateConnect').style.display='none';
   $('#shell').classList.add('show');
   if(qs.get('page')) go(qs.get('page'));
 }

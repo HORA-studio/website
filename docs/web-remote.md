@@ -9,6 +9,47 @@
 > WR-01..WR-16). File nguồn là gốc — spec này không sửa hay thay thế nó,
 > chỉ bổ sung phần web responsive + các hệ quả khi mang trang ra ngoài app.
 
+## 0. Bổ sung 2026-11-04 — lối vào qua trang tài khoản (chốt của user, ưu tiên hơn mục 3–4)
+
+User chốt: **đăng nhập xong phải có mục Remote ngay trong trang tài khoản,
+có chỗ quét mã QR hoặc nhập mã để mở view điều khiển — kiểu Chrome Remote
+Desktop.** Lối vào đứng riêng ở `/remote/` + dán URL Tunnel (W0 cũ) không
+còn là luồng chính; W0 hạ xuống mục "Nâng cao / dự phòng" trong màn kết nối.
+
+- **Vị trí:** `account.html` sau đăng nhập, sidebar thêm mục thứ 4 "Remote"
+  (sau Thông tin / Mua gia hạn / Lịch sử giao dịch). Chưa đăng nhập mà mở
+  link Remote thì đưa về đăng nhập rồi quay lại (mẫu `/link?code=` đã có).
+- **Hai cách kết nối trong mục Remote:**
+  1. **Quét QR:** app hiện QR trên màn hình máy tính; web dùng camera
+     (BarcodeDetector / thư viện quét) đọc QR ngay trong mục Remote.
+  2. **Nhập mã 6 số** hiện cùng chỗ với QR trong app, ô nhập kiểu code-row.
+- **Hệ quả kỹ thuật bắt buộc — registry trên website:** mã 6 số do app tự
+  sinh và tự kiểm (`POST {tunnel}/remote/pair`), website không tự biết mã
+  thuộc máy nào, và URL Tunnel đổi mỗi lần mở app. Muốn "chỉ nhập mã là
+  nối được" như Chrome Remote (họ có server trung tâm tra mã → máy) thì
+  app phải **đăng ký lên website khi mở**, đây là việc mới cả 2 phía:
+  - Phía app (mới): sau khi có Tunnel + mã ghép, app gọi
+    `POST /api/app/remote-register` (xác thực bằng phiên app/license như
+    bootstrap) với `{tunnelUrl, code, deviceName}`; đăng ký lại khi đổi
+    URL/mã; huỷ khi app đóng.
+  - Phía website (mới): bảng D1 `remote_registrations` (`account_id`,
+    `device_name`, `tunnel_url`, `code_hash`, `expires_at`, `created_at`;
+    chỉ lưu hash của mã, mã sống tối đa 10 phút, 1 tài khoản tối đa 1
+    đăng ký đang sống — khớp luật 1 slot) + `POST /api/remote/lookup`
+    (cookie đăng nhập web, rate-limit thử mã, **chỉ trả Tunnel của chính
+    tài khoản đang đăng nhập**).
+  - **QR trong app** = link `https://hora.works/account.html?remote_code=<mã>`
+    (quét bằng camera thường cũng mở đúng mục Remote và tự điền mã; quét
+    trong mục Remote thì đọc mã từ link đó).
+- **Sau khi tra được Tunnel:** giữ nguyên hợp đồng cũ — `POST /remote/pair`
+  → poll `/remote/pair/status` → máy tính duyệt → nhận token → mở shell
+  điều khiển 6 mục (mục 7). Duyệt trên máy tính vẫn là lớp bảo vệ cuối,
+  registry không bỏ qua bước duyệt.
+- **Trạng thái bổ sung này:** SPEC + demo (`web-remote-demo/` đã cập nhật
+  màn kết nối theo đúng luồng tài khoản → Remote → quét/nhập mã, kiểm
+  Chromium 2 view 2026-11-04). Backend registry, mục Remote trong
+  `account.html` thật và đăng ký phía app: **CHƯA CODE**.
+
 ## 1. Mục tiêu và phạm vi
 
 - Dựng lại trang điều khiển remote của app HORA Media thành **một trang web
