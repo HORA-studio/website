@@ -1132,6 +1132,42 @@ html,body{min-height:100%;height:100%;overflow:hidden}
 #dash [data-view="remote"] .remote-advanced summary{cursor:pointer;color:var(--muted);font-size:14px}
 #dash [data-view="remote"] #remote-scan-video{width:100%;border-radius:12px;margin-top:14px;background:#000;aspect-ratio:4/3;object-fit:cover}
 @media (max-width:860px){#dash [data-view="remote"] .orders-welcome{margin-top:38px}}
+
+/* ===== Mobile kieu app (2026-11-04): menu duoi co dinh + gon layout dien thoai ===== */
+.auth-top-row{display:none}
+.auth-home-link{font-size:13px;font-weight:650;color:var(--gold2);text-decoration:none}
+.account-logout{display:flex;align-items:center;justify-content:space-between;gap:14px;margin:0 18px 20px;padding-top:18px;border-top:1px solid var(--line)}
+.account-logout-copy strong{font-size:14px}
+.account-logout-copy p{margin:3px 0 0;font-size:12.5px}
+.account-logout #logout-btn{flex:0 0 auto;width:auto;margin:0}
+@media (max-width:760px){
+  /* Auth: logo la link ve trang chu + link chu ro rang */
+  .auth-top-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+  .auth-top-row .auth-mobile-logo{display:block;margin:0}
+  .auth-home-link{padding:8px 2px}
+  /* Bo khoi tieu de trung nhau khi da dang nhap (moi panel da co hero rieng) */
+  .content>h1,.content>.sub{display:none}
+  .content-head{display:none}
+  /* Menu duoi co dinh kieu app/game: 4 muc bang nhau, khong cuon ngang */
+  .side{position:fixed;left:0;right:0;bottom:0;top:auto;width:100%;height:auto !important;z-index:80;padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px));border-radius:0;border-left:0;border-right:0;border-bottom:0;box-shadow:0 -8px 28px rgba(10,30,35,.13)}
+  .side-nav{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;overflow:visible;padding:0}
+  .side-item{position:relative;flex-direction:column;justify-content:center;align-items:center;gap:4px;width:auto;padding:7px 2px 6px;border-radius:12px;font-size:0;line-height:1;white-space:normal;text-align:center}
+  .side-item svg{display:block;width:21px;height:21px}
+  .side-item::after{content:attr(data-short);font-size:10.5px;font-weight:650;line-height:1.2}
+  .side-item .side-badge{position:absolute;top:3px;right:calc(50% - 19px);margin:0}
+  #dash{padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+  /* Toggle ky han Mua goi: 2 nua bang nhau, khong vo dong */
+  .billing-toggle{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);width:100%}
+  .billing-opt{justify-content:center;white-space:nowrap;padding-left:6px;padding-right:6px;font-size:13px}
+  .save-badge{margin-left:6px;padding:2px 6px;font-size:9.5px}
+  /* Bang Lich su: giu do rong cot chuan, chi cuon ngang trong khung bang */
+  .lic-table{min-width:660px}
+  .lic-table .key-cell code{display:block;max-width:168px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  /* Remote: hero tran vien nhu cac panel khac, than gon 1 cot */
+  #dash [data-view="remote"]{padding:0}
+  #dash [data-view="remote"] .orders-welcome{height:auto !important;min-height:88px;padding:16px 18px !important;margin-top:0}
+  #dash [data-view="remote"] .remote-body{padding:18px 16px 20px;max-width:none}
+}
 </style>
 </head>
 <body>
@@ -1140,17 +1176,13 @@ html,body{min-height:100%;height:100%;overflow:hidden}
 <div class="shell solo" id="shell">
   <aside id="side" class="side hidden">
     <nav class="side-nav" aria-label="Mục tài khoản">
-      <button type="button" class="side-item active" data-view-btn="account"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4.5 20.5c1.4-3.8 4.4-5.5 7.5-5.5s6.1 1.7 7.5 5.5"></path></svg> Thông tin tài khoản</button>
+      <button type="button" class="side-item active" data-view-btn="account" data-short="Tài khoản"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4.5 20.5c1.4-3.8 4.4-5.5 7.5-5.5s6.1 1.7 7.5 5.5"></path></svg> Thông tin tài khoản</button>
       
       
-      <button type="button" class="side-item" data-view-btn="buy"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.6-6.3"></path><path d="M21 3v6h-6"></path></svg> Mua gói</button>
-      <button type="button" class="side-item" data-view-btn="orders"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M8.5 6h12M8.5 12h12M8.5 18h12"></path><path d="M4 6h.01M4 12h.01M4 18h.01"></path></svg> Lịch sử giao dịch <span id="orders-unpaid-badge" class="side-badge hidden" title="Có đơn chưa thanh toán" aria-label="Có đơn chưa thanh toán">!</span></button>
-      <button type="button" class="side-item" data-view-btn="remote"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="4" width="19" height="13" rx="2"></rect><path d="M8.5 21h7M12 17v4"></path></svg> Remote</button>
+      <button type="button" class="side-item" data-view-btn="buy" data-short="Mua gói"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.6-6.3"></path><path d="M21 3v6h-6"></path></svg> Mua gói</button>
+      <button type="button" class="side-item" data-view-btn="orders" data-short="Lịch sử"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M8.5 6h12M8.5 12h12M8.5 18h12"></path><path d="M4 6h.01M4 12h.01M4 18h.01"></path></svg> Lịch sử giao dịch <span id="orders-unpaid-badge" class="side-badge hidden" title="Có đơn chưa thanh toán" aria-label="Có đơn chưa thanh toán">!</span></button>
+      <button type="button" class="side-item" data-view-btn="remote" data-short="Remote"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="4" width="19" height="13" rx="2"></rect><path d="M8.5 21h7M12 17v4"></path></svg> Remote</button>
     </nav>
-    <div class="side-foot">
-      <div class="side-email" id="side-email">ffsortgame@gmail.com</div>
-      <button class="btn small" id="logout-btn" type="button">Đăng xuất</button>
-    </div>
   </aside>
   <main class="content">
   <h1>Tài khoản của bạn</h1>
@@ -1175,7 +1207,7 @@ html,body{min-height:100%;height:100%;overflow:hidden}
       <div class="auth-visual-foot">HORA <span>•</span> CREATE WITHOUT LIMITS</div>
     </div>
     <div class="auth-form-panel">
-      <div class="auth-mobile-logo">HORA</div>
+      <div class="auth-top-row"><a class="auth-mobile-logo" href="/" aria-label="Về trang chủ HORA">HORA</a><a class="auth-home-link" href="/">← Trang chủ</a></div>
       <div class="auth-form-head">
         <span class="eyebrow">CHÀO MỪNG BẠN</span>
         <h2 id="auth-title">Tạo tài khoản</h2>
@@ -1254,6 +1286,10 @@ html,body{min-height:100%;height:100%;overflow:hidden}
       <div id="verify-banner" class="msg info hidden" style="display: block;">
         <span>Email của bạn chưa được xác thực.</span>
         <button class="btn small" type="button" id="resend-verify-btn" style="margin-left:8px">Gửi lại email xác thực</button>
+      </div>
+      <div class="account-logout">
+        <div class="account-logout-copy"><strong>Đăng xuất</strong><p class="muted">Thoát khỏi tài khoản trên trình duyệt này.</p></div>
+        <button class="btn" id="logout-btn" type="button">Đăng xuất</button>
       </div>
     </section>
 
@@ -1641,7 +1677,6 @@ async function loadDash() {
     return;
   }
   $("auth-card").classList.add("hidden");
-  $("side-email").textContent = data.customer.email;
   // Den tu /link, /device... (chua dang nhap): dang nhap xong quay lai dung trang.
   // Chi nhan path noi bo (bat dau "/", khong phai "//") de tranh open-redirect.
   const next = new URLSearchParams(location.search).get("next");
