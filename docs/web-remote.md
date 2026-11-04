@@ -45,10 +45,20 @@ còn là luồng chính; W0 hạ xuống mục "Nâng cao / dự phòng" trong m
   → poll `/remote/pair/status` → máy tính duyệt → nhận token → mở shell
   điều khiển 6 mục (mục 7). Duyệt trên máy tính vẫn là lớp bảo vệ cuối,
   registry không bỏ qua bước duyệt.
-- **Trạng thái bổ sung này:** SPEC + demo (`web-remote-demo/` đã cập nhật
-  màn kết nối theo đúng luồng tài khoản → Remote → quét/nhập mã, kiểm
-  Chromium 2 view 2026-11-04). Backend registry, mục Remote trong
-  `account.html` thật và đăng ký phía app: **CHƯA CODE**.
+- **Trạng thái bổ sung này:** **ĐÃ CODE phần website 2026-11-04** (user
+  duyệt "làm đi"): bảng `remote_registrations` (`db/schema.sql` +
+  `db/migrate-remote-2026-11-04.sql`), `POST /api/app/remote-register` +
+  `POST /api/app/remote-unregister` (xác thực bằng appToken của app hoặc
+  X-Identity-Secret + userId khi worker gọi), `POST /api/remote/lookup`
+  (cookie web, rate-limit 10 lần sai/10 phút, chỉ trả Tunnel của chính
+  tài khoản), mục Remote trong `account.html` (mục sidebar thứ 4: quét QR
+  bằng BarcodeDetector, 6 ô nhập mã, tra mã → `POST {tunnel}/remote/pair`
+  → poll `/remote/pair/status` mỗi 3s → lưu token localStorage; ô URL
+  Tunnel ở mục Nâng cao bỏ qua bước tra mã). Hợp đồng phía app để áp ở
+  local: `docs/remote-registry-app-spec.md`. **Chưa code:** đăng ký + QR +
+  CORS phía app (ở repo app local) và shell điều khiển trên web (chờ
+  WR-10) — sau khi ghép xong, web hiện trạng thái đã kết nối + nút mở
+  trang điều khiển nhúng của app.
 
 ## 1. Mục tiêu và phạm vi
 

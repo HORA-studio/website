@@ -208,6 +208,23 @@ CREATE TABLE IF NOT EXISTS demo_videos (
 );
 CREATE INDEX IF NOT EXISTS idx_demo_videos_order ON demo_videos(enabled, sort_order);
 
+-- Dang ky Web Remote: app desktop khi mo dang ky (tunnel_url + hash ma ghep
+-- 6 so) de muc Remote trong trang tai khoan tra ma -> lay dung Tunnel cua
+-- chinh tai khoan (kieu Chrome Remote Desktop). Xem
+-- db/migrate-remote-2026-11-04.sql + docs/web-remote.md muc 0.
+CREATE TABLE IF NOT EXISTS remote_registrations (
+  customer_id TEXT PRIMARY KEY REFERENCES customers(id), -- 1 tai khoan = 1 dang ky dang song (khop luat 1 slot)
+  app         TEXT NOT NULL DEFAULT 'video-builder',     -- 'video-builder' | 'facebook-builder' | ...
+  device_id   TEXT,                                      -- deviceId cua app (chan doan)
+  device_name TEXT,                                      -- ten may hien cho user, vd DESKTOP-01
+  tunnel_url  TEXT NOT NULL,                             -- URL Tunnel hien tai cua app (doi moi lan mo app)
+  code_hash   TEXT NOT NULL,                             -- SHA-256(customer_id || ':' || ma 6 so); ma tho khong luu
+  created_at  TEXT NOT NULL,                             -- ISO 8601 UTC
+  expires_at  TEXT NOT NULL                              -- ISO 8601 UTC, mac dinh +10 phut
+);
+CREATE INDEX IF NOT EXISTS idx_remote_reg_code ON remote_registrations(code_hash);
+CREATE INDEX IF NOT EXISTS idx_remote_reg_expires ON remote_registrations(expires_at);
+
 -- Nhat ky doi may (cooldown 7 ngay) — dung boi API web /api/app/device-change.
 CREATE TABLE IF NOT EXISTS device_changes (
   id          TEXT PRIMARY KEY,

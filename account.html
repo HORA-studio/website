@@ -1118,6 +1118,20 @@ html,body{min-height:100%;height:100%;overflow:hidden}
 #dash .lic-table tbody tr{transition:background .15s ease}
 #dash .lic-table tbody tr:hover{background:rgba(11,98,88,.04)}
 #dash .lic-table .export-cell{padding-right:18px}
+/* ----- Muc Remote (dieu khien may tinh bang ma/QR) ----- */
+#dash [data-view="remote"] .remote-body{padding:20px;max-width:680px}
+#dash [data-view="remote"] .remote-box{border:1px solid var(--line);border-radius:16px;padding:20px;background:var(--panel)}
+#dash [data-view="remote"] .remote-ok{font-size:16px;margin:0}
+#dash [data-view="remote"] .remote-actions{display:flex;gap:10px;flex-wrap:wrap}
+#dash [data-view="remote"] .remote-or{text-align:center;color:var(--muted);font-size:13.5px;margin:18px 0 10px}
+#dash [data-view="remote"] .remote-code{display:flex;gap:8px;margin-bottom:14px}
+#dash [data-view="remote"] .remote-code input{flex:1;min-width:0;text-align:center;font-size:22px;font-weight:700;letter-spacing:2px;padding:12px 4px}
+#dash [data-view="remote"] .remote-status{margin:14px 0 0;padding:12px 14px;border-radius:12px;background:var(--accent-softer);border:1px solid var(--line);font-size:14.5px}
+#dash [data-view="remote"] .remote-err{margin:14px 0 0;padding:12px 14px;border-radius:12px;background:#c93a3214;border:1px solid #c93a3255;color:var(--danger);font-size:14.5px}
+#dash [data-view="remote"] .remote-advanced{margin-top:18px;border-top:1px solid var(--line);padding-top:12px}
+#dash [data-view="remote"] .remote-advanced summary{cursor:pointer;color:var(--muted);font-size:14px}
+#dash [data-view="remote"] #remote-scan-video{width:100%;border-radius:12px;margin-top:14px;background:#000;aspect-ratio:4/3;object-fit:cover}
+@media (max-width:860px){#dash [data-view="remote"] .orders-welcome{margin-top:38px}}
 </style>
 </head>
 <body>
@@ -1131,6 +1145,7 @@ html,body{min-height:100%;height:100%;overflow:hidden}
       
       <button type="button" class="side-item" data-view-btn="buy"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.6-6.3"></path><path d="M21 3v6h-6"></path></svg> Mua gói</button>
       <button type="button" class="side-item" data-view-btn="orders"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M8.5 6h12M8.5 12h12M8.5 18h12"></path><path d="M4 6h.01M4 12h.01M4 18h.01"></path></svg> Lịch sử giao dịch <span id="orders-unpaid-badge" class="side-badge hidden" title="Có đơn chưa thanh toán" aria-label="Có đơn chưa thanh toán">!</span></button>
+      <button type="button" class="side-item" data-view-btn="remote"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="4" width="19" height="13" rx="2"></rect><path d="M8.5 21h7M12 17v4"></path></svg> Remote</button>
     </nav>
     <div class="side-foot">
       <div class="side-email" id="side-email">ffsortgame@gmail.com</div>
@@ -1316,6 +1331,41 @@ html,body{min-height:100%;height:100%;overflow:hidden}
         </table></div>
     </div>
     </section>
+
+    <section class="card view-panel hidden" data-view="remote">
+      <div class="orders-welcome"><div><h2>Remote — điều khiển máy tính</h2><p>Mở app HORA Media trên máy tính của bạn, app sẽ hiện mã QR + mã kết nối 6 số. Quét mã hoặc nhập mã tại đây để mở view điều khiển.</p></div></div>
+      <div class="remote-body">
+        <div id="remote-connected" class="remote-box hidden">
+          <p class="remote-ok">✅ Đã kết nối tới <strong id="remote-device">máy của bạn</strong></p>
+          <p class="muted" style="margin:6px 0 14px">Phiên điều khiển đang giữ trên trình duyệt này. View điều khiển trên web đang được port từ bản nhúng trong app — trong lúc chờ, bạn có thể mở trang điều khiển nhúng của app.</p>
+          <div class="remote-actions">
+            <a class="btn primary" id="remote-open-app" href="#" target="_blank" rel="noopener">Mở trang điều khiển của app</a>
+            <button class="btn" id="remote-disconnect" type="button">Ngắt kết nối</button>
+          </div>
+        </div>
+        <div id="remote-connect-box" class="remote-box">
+          <button class="btn primary" id="remote-scan-btn" type="button" style="width:100%">📷 Quét mã QR trên app</button>
+          <div id="remote-scan-wrap" class="hidden">
+            <video id="remote-scan-video" playsinline muted></video>
+            <p class="muted" id="remote-scan-status" style="margin:8px 0 0">Đang mở camera… hãy hướng vào mã QR trong app.</p>
+            <button class="btn small" id="remote-scan-stop" type="button" style="margin-top:10px">Dừng quét</button>
+          </div>
+          <div class="remote-or">hoặc nhập mã kết nối 6 số</div>
+          <div class="remote-code" id="remote-code">
+            <input inputmode="numeric" autocomplete="one-time-code" maxlength="1" aria-label="Số 1"><input inputmode="numeric" maxlength="1" aria-label="Số 2"><input inputmode="numeric" maxlength="1" aria-label="Số 3"><input inputmode="numeric" maxlength="1" aria-label="Số 4"><input inputmode="numeric" maxlength="1" aria-label="Số 5"><input inputmode="numeric" maxlength="1" aria-label="Số 6">
+          </div>
+          <button class="btn primary" id="remote-connect-btn" type="button" style="width:100%">Kết nối bằng mã</button>
+          <p id="remote-status" class="remote-status hidden" role="status" aria-live="polite"></p>
+          <p id="remote-err" class="remote-err hidden" role="alert"></p>
+          <details class="remote-advanced">
+            <summary>Nâng cao: dán URL Tunnel thủ công (dự phòng)</summary>
+            <label class="lbl" for="remote-base" style="display:block;margin:12px 0 6px">URL Tunnel</label>
+            <input id="remote-base" placeholder="https://…trycloudflare.com" autocomplete="off">
+            <p class="muted" style="margin:8px 0 0">Điền ô này thì bước tra mã trên website được bỏ qua — web gọi thẳng app theo URL bạn dán (vẫn cần mã 6 số ở trên).</p>
+          </details>
+        </div>
+      </div>
+    </section>
   </div>
 </main>
 </div>
@@ -1377,7 +1427,7 @@ async function api(path, opts = {}) {
   return { res, data };
 }
 // ----- Dieu huong app shell (sidebar) -----
-const VIEW_TITLES = { account: "Thông tin tài khoản", buy: "Mua gói", orders: "Lịch sử giao dịch" };
+const VIEW_TITLES = { account: "Thông tin tài khoản", buy: "Mua gói", orders: "Lịch sử giao dịch", remote: "Remote" };
 let currentView = "account";
 try { currentView = sessionStorage.getItem("hora-view") || "account"; } catch { /* sessionStorage bi chan */ }
 if (!VIEW_TITLES[currentView]) currentView = "account";
@@ -1603,6 +1653,8 @@ async function loadDash() {
   $("side").classList.remove("hidden");
   $("shell").classList.remove("solo");
   showView(currentView);
+  MY_EMAIL = data.customer.email || "";
+  initRemoteFromUrl();
   $("acc-email").textContent = data.customer.email;
   $("acc-name").textContent = data.customer.displayName ? " — " + data.customer.displayName : "";
   $("verify-banner").style.display = data.customer.emailVerified === false ? "block" : "none";
@@ -2084,6 +2136,212 @@ else if (payParam === "pending") showMsg("info", "Đang chờ cổng thanh toán
     }
   } catch { /* khong co khuyen mai thi giu header mac dinh */ }
 })();
+
+// ----- Muc Remote: quet QR / nhap ma -> tra Tunnel -> ghep voi app -----
+// Luong: POST /api/remote/lookup {code} (cookie dang nhap) -> tunnelUrl cua
+// CHINH tai khoan nay; roi goi thang app qua Tunnel theo hop dong cu:
+// POST {base}/remote/pair {account, code} -> poll GET {base}/remote/pair/status
+// moi 3s -> duoc duyet thi nhan token (64 hex), luu localStorage de view dieu
+// khien dung lai. Xem docs/web-remote.md muc 0.
+let MY_EMAIL = "";
+const REMOTE_LS_BASE = "hora.remote.baseUrl";
+const REMOTE_LS_TOKEN = "hora.remote.token";
+const REMOTE_LS_DEVICE = "hora.remote.deviceName";
+let remotePollTimer = null;
+let remoteScanStream = null;
+let remoteScanTimer = null;
+
+function remoteShowErr(text) {
+  const e = $("remote-err");
+  if (!text) { e.classList.add("hidden"); e.textContent = ""; return; }
+  e.textContent = text; e.classList.remove("hidden");
+}
+function remoteShowStatus(text) {
+  const s = $("remote-status");
+  if (!text) { s.classList.add("hidden"); s.textContent = ""; return; }
+  s.textContent = text; s.classList.remove("hidden");
+}
+function remoteCode() {
+  return [...document.querySelectorAll("#remote-code input")].map((i) => i.value.replace(/\D/g, "")).join("");
+}
+function remoteSetCode(code) {
+  const digits = String(code || "").replace(/\D/g, "").slice(0, 6).split("");
+  document.querySelectorAll("#remote-code input").forEach((inp, idx) => { inp.value = digits[idx] || ""; });
+}
+function remoteSaved() {
+  try {
+    const base = localStorage.getItem(REMOTE_LS_BASE);
+    const token = localStorage.getItem(REMOTE_LS_TOKEN);
+    return base && token ? { base, token, device: localStorage.getItem(REMOTE_LS_DEVICE) || "" } : null;
+  } catch { return null; }
+}
+function remoteRenderConnected() {
+  const saved = remoteSaved();
+  $("remote-connected").classList.toggle("hidden", !saved);
+  $("remote-connect-box").classList.toggle("hidden", !!saved);
+  if (saved) {
+    $("remote-device").textContent = saved.device || "máy của bạn";
+    $("remote-open-app").href = saved.base + "/";
+  }
+}
+// QR cua app la link account.html?remote_code=XXXXXX: den tu QR thi dien san
+// ma + mo thang muc Remote, roi xoa ma khoi URL (khong de ma nam tren URL).
+function initRemoteFromUrl() {
+  remoteRenderConnected();
+  const code = new URLSearchParams(location.search).get("remote_code");
+  if (!code) return;
+  remoteSetCode(code);
+  showView("remote");
+  const u = new URL(location.href);
+  u.searchParams.delete("remote_code");
+  history.replaceState(null, "", u.pathname + u.search + u.hash);
+}
+async function remoteFetchJson(url, opts = {}) {
+  const res = await fetch(url, opts);
+  const data = await res.json().catch(() => null);
+  return { res, data };
+}
+function remoteStopPoll() { if (remotePollTimer) { clearTimeout(remotePollTimer); remotePollTimer = null; } }
+function remoteConnected(base, token, deviceName) {
+  try {
+    localStorage.setItem(REMOTE_LS_BASE, base);
+    localStorage.setItem(REMOTE_LS_TOKEN, token);
+    localStorage.setItem(REMOTE_LS_DEVICE, deviceName || "");
+  } catch { /* localStorage bi chan: van bao da ket noi phien nay */ }
+  remoteStopPoll();
+  remoteShowErr("");
+  remoteShowStatus("");
+  remoteRenderConnected();
+  showMsg("ok", "Đã kết nối Remote tới " + (deviceName || "máy của bạn") + ".");
+}
+function remotePollStatus(base, code, deviceName, deadline) {
+  remoteStopPoll();
+  remotePollTimer = setTimeout(async () => {
+    let out = null;
+    try {
+      out = await remoteFetchJson(base + "/remote/pair/status?account=" + encodeURIComponent(MY_EMAIL) + "&code=" + encodeURIComponent(code));
+    } catch { /* loi tam thoi: cu poll tiep toi deadline */ }
+    const d = out && out.data ? out.data : null;
+    const token = d && (d.token || (d.session && d.session.token));
+    const st = d && String(d.status || d.state || "").toLowerCase();
+    if (token) { remoteConnected(base, token, deviceName); return; }
+    if (["denied", "rejected", "expired"].includes(st)) {
+      remoteShowStatus(""); remoteShowErr("Máy tính đã từ chối hoặc mã đã hết hạn. Hãy lấy mã mới trong app rồi thử lại."); return;
+    }
+    if (Date.now() > deadline) {
+      remoteShowStatus(""); remoteShowErr("Quá 2 phút chưa được duyệt trên máy tính. Hãy kiểm tra app rồi thử lại."); return;
+    }
+    remotePollStatus(base, code, deviceName, deadline);
+  }, 3000);
+}
+async function remoteConnect() {
+  remoteShowErr(""); remoteShowStatus("");
+  const code = remoteCode();
+  if (code.length !== 6) { remoteShowErr("Hãy nhập đủ mã kết nối 6 số (hoặc quét mã QR trên app)."); return; }
+  const btn = $("remote-connect-btn");
+  btn.disabled = true;
+  try {
+    // Buoc 1: lay Tunnel — o Nang cao co URL thi dung luon, khong thi tra ma.
+    let base = $("remote-base").value.trim().replace(/\/+$/, "");
+    let deviceName = "";
+    if (!base) {
+      remoteShowStatus("Đang tìm máy của bạn theo mã…");
+      const { res, data } = await api("/api/remote/lookup", { method: "POST", body: JSON.stringify({ code }) });
+      if (!res.ok) { remoteShowStatus(""); remoteShowErr(errText(data, "Không tìm thấy máy nào với mã này.")); return; }
+      base = String(data.tunnelUrl || "").replace(/\/+$/, "");
+      deviceName = data.deviceName || "";
+      if (!base) { remoteShowStatus(""); remoteShowErr("Website trả về địa chỉ máy không hợp lệ."); return; }
+    }
+    // Buoc 2: gui yeu cau ghep toi app qua Tunnel + cho duyet tren may tinh.
+    remoteShowStatus("Đã tìm thấy " + (deviceName || "máy của bạn") + " — đang chờ duyệt trên máy tính…");
+    let pair = null;
+    try {
+      pair = await remoteFetchJson(base + "/remote/pair", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ account: MY_EMAIL, code }),
+      });
+    } catch {
+      remoteShowStatus("");
+      remoteShowErr("Tìm thấy máy nhưng không gọi được app qua Tunnel — app có thể đã tắt, URL đã đổi, hoặc app chưa bật CORS cho hora.works.");
+      return;
+    }
+    if (pair.res.status === 401 || pair.res.status === 403) {
+      remoteShowStatus(""); remoteShowErr("App từ chối ghép nối (sai mã hoặc sai tài khoản)."); return;
+    }
+    const pd = pair.data || {};
+    const token = pd.token || (pd.session && pd.session.token);
+    if (token) { remoteConnected(base, token, deviceName); return; }
+    remotePollStatus(base, code, deviceName, Date.now() + 2 * 60 * 1000);
+  } finally {
+    btn.disabled = false;
+  }
+}
+// O nhap ma: tu nhay o tiep theo, dan ca ma 6 so vao 1 o thi chia ra 6 o.
+document.querySelectorAll("#remote-code input").forEach((inp, idx, all) => {
+  inp.addEventListener("input", () => {
+    const digits = inp.value.replace(/\D/g, "");
+    if (digits.length > 1) { remoteSetCode(remoteCode().slice(0, idx) + digits); }
+    else inp.value = digits;
+    if (digits && idx < all.length - 1) all[idx + 1].focus();
+  });
+  inp.addEventListener("keydown", (e) => {
+    if (e.key === "Backspace" && !inp.value && idx > 0) all[idx - 1].focus();
+    if (e.key === "Enter") remoteConnect();
+  });
+});
+$("remote-connect-btn").addEventListener("click", remoteConnect);
+$("remote-disconnect").addEventListener("click", () => {
+  remoteStopPoll();
+  try {
+    localStorage.removeItem(REMOTE_LS_BASE);
+    localStorage.removeItem(REMOTE_LS_TOKEN);
+    localStorage.removeItem(REMOTE_LS_DEVICE);
+  } catch { /* bo qua */ }
+  remoteRenderConnected();
+});
+// Quet QR ngay trong trang: BarcodeDetector (Chrome/Edge/Android). Trinh duyet
+// khong ho tro thi huong dan quet bang camera thuong (QR la link co san ma).
+function remoteStopScan() {
+  if (remoteScanTimer) { clearInterval(remoteScanTimer); remoteScanTimer = null; }
+  if (remoteScanStream) { remoteScanStream.getTracks().forEach((t) => t.stop()); remoteScanStream = null; }
+  $("remote-scan-wrap").classList.add("hidden");
+}
+async function remoteStartScan() {
+  remoteShowErr("");
+  if (!("BarcodeDetector" in window) || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    remoteShowErr("Trình duyệt này không hỗ trợ quét QR trong trang. Hãy quét mã QR bằng camera thường (mã là link mở sẵn mục này) hoặc nhập mã 6 số.");
+    return;
+  }
+  try {
+    remoteScanStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+  } catch {
+    remoteShowErr("Không mở được camera. Hãy cấp quyền camera cho trang, hoặc nhập mã 6 số.");
+    return;
+  }
+  const video = $("remote-scan-video");
+  video.srcObject = remoteScanStream;
+  $("remote-scan-wrap").classList.remove("hidden");
+  await video.play().catch(() => {});
+  const detector = new BarcodeDetector({ formats: ["qr_code"] });
+  remoteScanTimer = setInterval(async () => {
+    try {
+      const codes = await detector.detect(video);
+      if (!codes || !codes.length) return;
+      const raw = codes[0].rawValue || "";
+      let code = "";
+      try { code = new URL(raw).searchParams.get("remote_code") || ""; } catch { /* QR khong phai URL */ }
+      if (!code) code = (raw.match(/\d{6}/) || [])[0] || "";
+      if (!code) { $("remote-scan-status").textContent = "Đã thấy mã QR nhưng không đọc được mã kết nối trong đó."; return; }
+      remoteStopScan();
+      remoteSetCode(code);
+      remoteShowStatus("Đã quét được mã — đang kết nối…");
+      remoteConnect();
+    } catch { /* frame chua san sang: quet tiep */ }
+  }, 400);
+}
+$("remote-scan-btn").addEventListener("click", remoteStartScan);
+$("remote-scan-stop").addEventListener("click", remoteStopScan);
 
 loadDash();
 </script>
