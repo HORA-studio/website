@@ -1653,6 +1653,9 @@ async function loadDash() {
   $("side").classList.remove("hidden");
   $("shell").classList.remove("solo");
   showView(currentView);
+  // Den tu trang chu / link ngoai voi ?view=<muc>: mo thang muc do sau dang nhap.
+  const wantView = new URLSearchParams(location.search).get("view");
+  if (wantView && VIEW_TITLES[wantView]) showView(wantView);
   MY_EMAIL = data.customer.email || "";
   initRemoteFromUrl();
   $("acc-email").textContent = data.customer.email;
