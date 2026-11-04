@@ -68,3 +68,31 @@ WebSocket cho cùng origin đó. Chưa có CORS thì web báo rõ "không gọi
 5. Web mở view điều khiển (shell port từ WR-10 — đợt sau) bằng
    base + token đã lưu; hiện tại hiện trạng thái đã kết nối + nút mở
    trang điều khiển nhúng của app tại `{tunnelUrl}/`.
+
+## Handoff token cho trang nhúng của app (bổ sung 2026-11-04)
+
+Vấn đề: token ghép nối chỉ nằm trong `localStorage` của origin
+`hora.works`. Trang nhúng của app chạy ở origin Tunnel khác, không đọc
+được — nếu web chỉ mở `{tunnelUrl}/` trần, trang app không biết trình
+duyệt đã ghép nối và lại hiện màn ghép nối (W0/W1) từ đầu: user phải
+ghép 2 lần, thừa một view.
+
+Cách chốt: nút "Mở trang điều khiển của app" trên website mở
+`{tunnelUrl}/#token=<token 64 hex>` (fragment — trình duyệt KHÔNG gửi
+fragment trong HTTP request tới server/Tunnel, không vào log phía
+server). Phía app (trang nhúng) PHẢI làm 4 việc khi tải trang:
+
+1. Đọc `location.hash`, nếu có tham số `token` thì lấy ra và lưu vào
+   `localStorage` của chính origin app (cùng khóa/nơi trang vẫn dùng
+   cho phiên điều khiển).
+2. Xoá fragment khỏi thanh địa chỉ ngay (`history.replaceState` về
+   `/`) để token không nằm lại trong lịch sử/URL.
+3. Kiểm chứng token bằng `GET /remote/status` kèm
+   `Authorization: Bearer <token>`: đạt thì vào thẳng shell điều
+   khiển, BỎ QUA màn W0/W1; nhận 401 thì xoá token và hiện màn ghép
+   nối như cũ.
+4. Không có fragment (mở trực tiếp từ app) thì giữ nguyên luồng cũ.
+
+Khi website port xong shell điều khiển (đợt WR-10), handoff này không
+còn cần cho website nữa nhưng cứ giữ — mở trực tiếp trang app từ
+website vẫn dùng nó.

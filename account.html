@@ -2221,7 +2221,12 @@ function remoteRenderConnected() {
   $("remote-connect-box").classList.toggle("hidden", !!saved);
   if (saved) {
     $("remote-device").textContent = saved.device || "máy của bạn";
-    $("remote-open-app").href = saved.base + "/";
+    // Truyen token qua fragment (#token=) de trang nhung cua app vao thang
+    // man dieu khien, khoi bat ghep noi lai tu dau: token chi nam o
+    // localStorage cua origin hora.works, trang app o origin Tunnel khac
+    // khong doc duoc. Fragment khong duoc gui len server khi tai trang;
+    // phia app doc xong phai xoa khoi URL ngay (xem docs/remote-registry-app-spec.md).
+    $("remote-open-app").href = saved.base + "/#token=" + encodeURIComponent(saved.token);
   }
 }
 // QR cua app la link account.html?remote_code=XXXXXX: den tu QR thi dien san
