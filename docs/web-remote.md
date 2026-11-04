@@ -1,8 +1,10 @@
 # Web Remote — SPEC trang điều khiển responsive (điện thoại + máy tính)
 
-> **Trạng thái: SPEC — CHƯA CODE.** File này là bản soạn spec cho phần web của
-> Web Remote, chưa có trang remote nào trong repo ở thời điểm viết.
-> Khi nào bắt đầu code sẽ ghi rõ ở đầu file này và trong báo cáo.
+> **Trạng thái: SPEC + ĐÃ CODE phần lớn phía website.** Mục Remote trong
+> tài khoản (registry, ghép nối) đã code 2026-11-04; **shell điều khiển
+> native ngay trong mục Remote cũng ĐÃ CODE 2026-11-04 (xem bổ sung ở
+> mục 0)** — phần còn ở dạng spec là trang `/remote/` đứng riêng (mục 3)
+> và các điểm chưa chốt ở mục 14.
 >
 > Nguồn thiết kế: `web-remote-web-todo.md` (trích từ `docs/web-remote-todo.md`,
 > repo video-builder, Job 218; kiến trúc chốt 2026-11-03; trạng thái sau
@@ -56,9 +58,27 @@ còn là luồng chính; W0 hạ xuống mục "Nâng cao / dự phòng" trong m
   → poll `/remote/pair/status` mỗi 3s → lưu token localStorage; ô URL
   Tunnel ở mục Nâng cao bỏ qua bước tra mã). Hợp đồng phía app để áp ở
   local: `docs/remote-registry-app-spec.md`. **Chưa code:** đăng ký + QR +
-  CORS phía app (ở repo app local) và shell điều khiển trên web (chờ
-  WR-10) — sau khi ghép xong, web hiện trạng thái đã kết nối + nút mở
-  trang điều khiển nhúng của app.
+  CORS phía app (ở repo app local).
+
+- **Bổ sung 2026-11-04 ~22:57 — shell native tại chỗ (chốt mới của user,
+  thay hướng "mở trang nhúng của app" và bỏ chờ WR-10):** user chốt làm
+  mức triệt để ngay: ghép xong mở **view điều khiển ngay trong mục
+  Remote**, không mở link Tunnel, không hiện token ở thanh địa chỉ.
+  **ĐÃ CODE trong `account.html`:** shell 6 mục (Tổng quan / Tạo task /
+  Workflow / Trợ lý / Kho / Drive) gọi thẳng các route ở mục 5–6 bằng
+  base + token đã lưu, gồm WebSocket live + poll dự phòng 5s, xử lý 409
+  confirmToken, lỗi 400 thiếu size hiện nguyên văn, 401/4001 → về màn
+  ghép. Nút/link mở trang app ngoài đã gỡ hẳn. Vì shape JSON thật vẫn
+  chưa có (mục 11), mọi cách đọc field nằm trong **1 lớp adapter `SF`**
+  ở đầu phần shell trong `account.html` và mỗi panel có khu **"Dữ liệu
+  thô"** hiện JSON gốc để đối chiếu khi test với app thật — lệch field
+  thì chỉ sửa `SF`. UI đang ở mức tạm đủ test, user tự sửa UI sau.
+  Đã kiểm chứng bằng Chromium thật với mock app đúng hợp đồng:
+  25/25 đạt (ghép sẵn phiên → shell, đủ 6 mục, dừng job, lỗi size,
+  409 workflow, chat, kho + Up Drive, Drive, WS `job.done` tự cập nhật,
+  điện thoại 390px không cuộn ngang, token hết hạn về màn ghép).
+  **Chưa kiểm chứng với app thật** — chờ user test trên máy local và
+  báo lại field lệch nếu có.
 
 ## 1. Mục tiêu và phạm vi
 

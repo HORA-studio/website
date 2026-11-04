@@ -65,9 +65,12 @@ WebSocket cho cùng origin đó. Chưa có CORS thì web báo rõ "không gọi
    trên máy tính → web poll `/remote/pair/status` mỗi 3s → nhận token
    64 hex → lưu localStorage (`hora.remote.baseUrl` / `hora.remote.token`
    / `hora.remote.deviceName`).
-5. Web mở view điều khiển (shell port từ WR-10 — đợt sau) bằng
-   base + token đã lưu; hiện tại hiện trạng thái đã kết nối + nút mở
-   trang điều khiển nhúng của app tại `{tunnelUrl}/`.
+5. Web mở **shell điều khiển native ngay trong mục Remote** bằng
+   base + token đã lưu (ĐÃ CODE 2026-11-04 ~22:57 theo chốt của user:
+   dựng theo hợp đồng API, không chờ WR-10, không mở link Tunnel —
+   xem `docs/web-remote.md` mục 0). Phía app chỉ cần giữ đúng hợp đồng
+   API ở mục 3 (CORS) + các route `/remote/*`; trang nhúng của app
+   không còn nằm trong luồng chính nữa.
 
 ## Handoff token cho trang nhúng của app (bổ sung 2026-11-04)
 
@@ -93,6 +96,7 @@ server). Phía app (trang nhúng) PHẢI làm 4 việc khi tải trang:
    nối như cũ.
 4. Không có fragment (mở trực tiếp từ app) thì giữ nguyên luồng cũ.
 
-Khi website port xong shell điều khiển (đợt WR-10), handoff này không
-còn cần cho website nữa nhưng cứ giữ — mở trực tiếp trang app từ
-website vẫn dùng nó.
+Cập nhật 2026-11-04 ~22:57: website ĐÃ có shell điều khiển native
+(đợt trên) nên handoff này **không còn cần cho luồng website nữa** và
+nút mở trang app đã bị gỡ khỏi website. Mục này chỉ còn giá trị nếu
+user tự mở trực tiếp trang nhúng của app ở ngoài website.

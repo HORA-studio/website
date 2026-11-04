@@ -1131,6 +1131,70 @@ html,body{min-height:100%;height:100%;overflow:hidden}
 #dash [data-view="remote"] .remote-advanced{margin-top:18px;border-top:1px solid var(--line);padding-top:12px}
 #dash [data-view="remote"] .remote-advanced summary{cursor:pointer;color:var(--muted);font-size:14px}
 #dash [data-view="remote"] #remote-scan-video{width:100%;border-radius:12px;margin-top:14px;background:#000;aspect-ratio:4/3;object-fit:cover}
+/* ----- Shell dieu khien native tren web (muc triet de, 2026-11-04) -----
+   Tam ve tinh nang theo hop dong API de test truoc — UI se sua sau. */
+#dash [data-view="remote"] .remote-body{max-width:1180px}
+#dash [data-view="remote"] #remote-connect-box{max-width:680px;margin:0 auto}
+#dash [data-view="remote"] #remote-connected{max-width:none}
+.sh-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.sh-conn{font-size:13px;color:var(--muted);white-space:nowrap}
+.sh-conn.on{color:var(--ok)}
+.sh-conn.off{color:var(--danger)}
+.sh-banner{margin:12px 0 0;padding:10px 14px;border-radius:12px;background:#c93a3214;border:1px solid #c93a3255;color:var(--danger);font-size:14px}
+.sh-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.sh-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0 6px;border-top:1px solid var(--line);padding-top:14px}
+.sh-tab{border:1px solid var(--line2);background:var(--panel);color:var(--text);border-radius:999px;padding:9px 16px;font:inherit;font-size:14px;font-weight:650;cursor:pointer;min-height:44px}
+.sh-tab.on{background:var(--gold);color:#fff;border-color:transparent}
+.sh-panel{padding-top:10px}
+.sh-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+.sh-stat{border:1px solid var(--line);border-radius:14px;padding:14px;background:var(--panel2)}
+.sh-stat b{display:block;font-size:24px;line-height:1.1}
+.sh-stat span{font-size:13px;color:var(--muted)}
+.sh-progress{height:10px;border-radius:99px;background:var(--panel2);border:1px solid var(--line);overflow:hidden}
+.sh-progress>div{height:100%;background:var(--gold);width:0;transition:width .3s}
+.sh-card{border:1px solid var(--line);border-radius:14px;padding:14px;margin:0 0 10px;background:var(--panel)}
+.sh-card h4{margin:0 0 4px;font-size:15px}
+.sh-card .meta{font-size:13px;color:var(--muted)}
+.sh-bar{height:8px;border-radius:99px;background:var(--panel2);overflow:hidden;margin-top:8px}
+.sh-bar>div{height:100%;background:var(--gold)}
+.sh-row-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.sh-err{margin:12px 0 0;padding:12px 14px;border-radius:12px;background:#c93a3214;border:1px solid #c93a3255;color:var(--danger);font-size:14.5px}
+.sh-okmsg{margin:12px 0 0;padding:12px 14px;border-radius:12px;background:var(--accent-softer);border:1px solid var(--line);font-size:14.5px}
+.sh-raw{margin-top:14px}
+.sh-raw summary{cursor:pointer;color:var(--muted);font-size:13px}
+.sh-raw pre{max-height:260px;overflow:auto;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px;font-size:12px;white-space:pre-wrap;word-break:break-word}
+.sh-seg{display:inline-flex;border:1px solid var(--line2);border-radius:999px;overflow:hidden;margin-bottom:12px}
+.sh-seg label{padding:9px 18px;cursor:pointer;font-weight:650;font-size:14px}
+.sh-seg input{position:absolute;opacity:0;pointer-events:none}
+.sh-seg label.on{background:var(--gold);color:#fff}
+.sh-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.sh-lib-item{border:1px solid var(--line);border-radius:14px;padding:10px;background:var(--panel);cursor:pointer;text-align:left;font:inherit;color:var(--text)}
+.sh-lib-item img{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:10px;background:var(--panel2);display:block}
+.sh-lib-item .nm{display:block;margin-top:8px;font-size:13.5px;font-weight:600;word-break:break-word}
+.sh-lib-item .kd{display:block;font-size:12px;color:var(--muted)}
+.sh-msgs{border:1px solid var(--line);border-radius:14px;padding:14px;min-height:180px;max-height:380px;overflow:auto;background:var(--panel)}
+.sh-msg{max-width:78%;padding:10px 12px;border-radius:14px;margin:0 0 10px;font-size:14.5px;white-space:pre-wrap;word-break:break-word}
+.sh-msg.me{margin-left:auto;background:var(--accent-soft)}
+.sh-msg.ai{background:var(--panel2)}
+.sh-msg .who{display:block;font-size:11.5px;color:var(--muted);margin-bottom:3px}
+.sh-chat-grid{display:grid;grid-template-columns:220px 1fr;gap:16px}
+.sh-thread{display:block;width:100%;text-align:left;border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:12px;padding:10px 12px;margin:0 0 8px;cursor:pointer;font:inherit;font-size:14px}
+.sh-thread.on{border-color:var(--gold);background:var(--accent-softer)}
+.sh-chat-send{display:flex;gap:10px;margin-top:10px;align-items:flex-start}
+.sh-chat-send textarea{flex:1}
+.sh-confirm{position:fixed;inset:0;background:rgba(5,15,18,.5);display:flex;align-items:center;justify-content:center;z-index:300;padding:18px}
+.sh-confirm.hidden{display:none}
+.sh-confirm-box{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:22px;max-width:440px;width:100%}
+.sh-confirm-box p{margin:0 0 16px;font-size:15px;line-height:1.55}
+.sh-libf.on{background:var(--gold);color:#fff;border-color:transparent}
+.sh-filter{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.sh-filter input{flex:1;min-width:160px}
+.sh-detail-media{max-width:100%;border-radius:12px;background:#000}
+@media (max-width:760px){
+  .sh-stats{grid-template-columns:repeat(2,1fr)}
+  .sh-chat-grid{grid-template-columns:1fr}
+  .sh-msg{max-width:88%}
+}
 @media (max-width:860px){#dash [data-view="remote"] .orders-welcome{margin-top:38px}}
 
 /* ===== Mobile kieu app (2026-11-04): menu duoi co dinh + gon layout dien thoai ===== */
@@ -1374,11 +1438,116 @@ html,body{min-height:100%;height:100%;overflow:hidden}
       <div class="orders-welcome"><div><h2>Remote — điều khiển máy tính</h2><p>Mở app HORA Media trên máy tính của bạn, app sẽ hiện mã QR + mã kết nối 6 số. Quét mã hoặc nhập mã tại đây để mở view điều khiển.</p></div></div>
       <div class="remote-body">
         <div id="remote-connected" class="remote-box hidden">
-          <p class="remote-ok">✅ Đã kết nối tới <strong id="remote-device">máy của bạn</strong></p>
-          <p class="muted" style="margin:6px 0 14px">Phiên điều khiển đang giữ trên trình duyệt này. View điều khiển trên web đang được port từ bản nhúng trong app — trong lúc chờ, bạn có thể mở trang điều khiển nhúng của app.</p>
-          <div class="remote-actions">
-            <a class="btn primary" id="remote-open-app" href="#" target="_blank" rel="noopener">Mở trang điều khiển của app</a>
-            <button class="btn" id="remote-disconnect" type="button">Ngắt kết nối</button>
+          <div class="sh-head">
+            <p class="remote-ok">✅ Đã kết nối tới <strong id="remote-device">máy của bạn</strong></p>
+            <span class="sh-conn" id="sh-conn">● Chưa nối</span>
+          </div>
+          <p class="sh-banner hidden" id="sh-banner">Không kết nối được tới máy tính — kiểm tra app đã mở và Tunnel còn đúng. Đang tự nối lại…</p>
+          <div class="sh-actions">
+            <button class="btn small" id="sh-refresh" type="button">Làm mới</button>
+            <button class="btn small" id="remote-disconnect" type="button">Ngắt kết nối</button>
+          </div>
+          <nav class="sh-tabs" id="sh-tabs" aria-label="Mục điều khiển">
+            <button type="button" class="sh-tab on" data-sh-tab="dash">Tổng quan</button>
+            <button type="button" class="sh-tab" data-sh-tab="create">Tạo task</button>
+            <button type="button" class="sh-tab" data-sh-tab="flow">Workflow</button>
+            <button type="button" class="sh-tab" data-sh-tab="chat">Trợ lý</button>
+            <button type="button" class="sh-tab" data-sh-tab="lib">Kho</button>
+            <button type="button" class="sh-tab" data-sh-tab="drive">Drive</button>
+          </nav>
+
+          <section class="sh-panel" data-sh-panel="dash">
+            <div class="sh-stats">
+              <div class="sh-stat"><b id="sh-stat-running">–</b><span>Đang chạy</span></div>
+              <div class="sh-stat"><b id="sh-stat-waiting">–</b><span>Đang chờ</span></div>
+              <div class="sh-stat"><b id="sh-stat-done">–</b><span>Đã xong</span></div>
+              <div class="sh-stat"><b id="sh-stat-failed">–</b><span>Lỗi</span></div>
+            </div>
+            <div class="hidden" id="sh-progress-wrap" style="margin-bottom:14px">
+              <div class="sh-progress"><div id="sh-progress-bar"></div></div>
+              <p class="meta muted" id="sh-progress-text" style="margin:6px 0 0;font-size:13px"></p>
+            </div>
+            <div id="sh-queue"><p class="muted">Đang tải hàng đợi…</p></div>
+            <div id="sh-job-detail"></div>
+            <details class="sh-raw"><summary>Dữ liệu thô — status + queue (để đối chiếu field khi test)</summary><pre id="sh-raw-dash">—</pre></details>
+          </section>
+
+          <section class="sh-panel hidden" data-sh-panel="create">
+            <div class="sh-seg" id="sh-kind">
+              <label><input type="radio" name="sh-kind" value="image">Ảnh</label>
+              <label class="on"><input type="radio" name="sh-kind" value="video" checked>Video</label>
+            </div>
+            <label class="lbl" for="sh-prompt" style="display:block;margin-bottom:6px">Prompt</label>
+            <textarea id="sh-prompt" rows="5" style="width:100%" placeholder="Mô tả nội dung cần tạo… — size 9:16"></textarea>
+            <p class="muted" style="margin:8px 0 0;font-size:13.5px">Server lấy size từ prompt: phải ghi rõ <b>size 16:9</b>, <b>size 9:16</b> hoặc <b>size 1:1</b> — thiếu là server trả lỗi 400, lỗi hiện nguyên văn ở dưới.</p>
+            <p class="sh-err hidden" id="sh-create-err" role="alert"></p>
+            <p class="sh-okmsg hidden" id="sh-create-ok" role="status"></p>
+            <div class="sh-row-actions">
+              <button class="btn primary" id="sh-send-prompt" type="button">Gửi task</button>
+            </div>
+            <details class="sh-raw"><summary>Dữ liệu thô — phản hồi tạo task</summary><pre id="sh-raw-create">—</pre></details>
+          </section>
+
+          <section class="sh-panel hidden" data-sh-panel="flow">
+            <div id="sh-workflows"><p class="muted">Đang tải workflow…</p></div>
+            <div id="sh-wf-detail"></div>
+            <details class="sh-raw"><summary>Dữ liệu thô — workflows</summary><pre id="sh-raw-flow">—</pre></details>
+          </section>
+
+          <section class="sh-panel hidden" data-sh-panel="chat">
+            <div class="sh-chat-grid">
+              <div>
+                <div id="sh-threads"><p class="muted">Đang tải thread…</p></div>
+              </div>
+              <div>
+                <div class="sh-msgs" id="sh-msgs"><p class="muted">Chưa có tin nhắn.</p></div>
+                <div class="sh-chat-send">
+                  <textarea id="sh-chat-input" rows="2" placeholder="Nhắn cho trợ lý…"></textarea>
+                  <button class="btn primary" id="sh-chat-send" type="button">Gửi</button>
+                </div>
+                <p class="sh-err hidden" id="sh-chat-err" role="alert"></p>
+              </div>
+            </div>
+            <details class="sh-raw"><summary>Dữ liệu thô — trợ lý</summary><pre id="sh-raw-chat">—</pre></details>
+          </section>
+
+          <section class="sh-panel hidden" data-sh-panel="lib">
+            <div class="sh-filter">
+              <button type="button" class="btn small sh-libf on" data-sh-libf="all">Tất cả</button>
+              <button type="button" class="btn small sh-libf" data-sh-libf="image">Ảnh</button>
+              <button type="button" class="btn small sh-libf" data-sh-libf="video">Video</button>
+              <button type="button" class="btn small sh-libf" data-sh-libf="audio">Nhạc</button>
+              <input id="sh-lib-search" placeholder="Tìm theo tên…" autocomplete="off">
+            </div>
+            <div id="sh-library"><p class="muted">Đang tải kho…</p></div>
+            <div id="sh-lib-detail"></div>
+            <details class="sh-raw"><summary>Dữ liệu thô — kho</summary><pre id="sh-raw-lib">—</pre></details>
+          </section>
+
+          <section class="sh-panel hidden" data-sh-panel="drive">
+            <div id="sh-drive-status"><p class="muted">Đang tải trạng thái Drive…</p></div>
+            <div id="sh-drive-connect-box">
+              <label class="lbl" for="sh-drive-client" style="display:block;margin:12px 0 6px">Client ID (khi cần connect)</label>
+              <input id="sh-drive-client" placeholder="Google OAuth Client ID" autocomplete="off" style="width:100%">
+              <div class="sh-row-actions">
+                <button class="btn primary" id="sh-drive-connect" type="button">Kết nối Drive</button>
+                <button class="btn" id="sh-drive-disconnect" type="button">Ngắt kết nối Drive</button>
+              </div>
+              <div id="sh-drive-connect-info"></div>
+            </div>
+            <h4 style="margin:18px 0 10px">File app đã up Drive</h4>
+            <div id="sh-drive-files"><p class="muted">Đang tải…</p></div>
+            <details class="sh-raw"><summary>Dữ liệu thô — Drive</summary><pre id="sh-raw-drive">—</pre></details>
+          </section>
+
+          <div class="sh-confirm hidden" id="sh-confirm" role="dialog" aria-modal="true" aria-label="Xác nhận thao tác">
+            <div class="sh-confirm-box">
+              <p id="sh-confirm-text"></p>
+              <div class="remote-actions">
+                <button class="btn primary" id="sh-confirm-yes" type="button">Đồng ý</button>
+                <button class="btn" id="sh-confirm-no" type="button">Hủy</button>
+              </div>
+            </div>
           </div>
         </div>
         <div id="remote-connect-box" class="remote-box">
@@ -2221,13 +2390,609 @@ function remoteRenderConnected() {
   $("remote-connect-box").classList.toggle("hidden", !!saved);
   if (saved) {
     $("remote-device").textContent = saved.device || "máy của bạn";
-    // Truyen token qua fragment (#token=) de trang nhung cua app vao thang
-    // man dieu khien, khoi bat ghep noi lai tu dau: token chi nam o
-    // localStorage cua origin hora.works, trang app o origin Tunnel khac
-    // khong doc duoc. Fragment khong duoc gui len server khi tai trang;
-    // phia app doc xong phai xoa khoi URL ngay (xem docs/remote-registry-app-spec.md).
-    $("remote-open-app").href = saved.base + "/#token=" + encodeURIComponent(saved.token);
+    // Muc triet de (chot 2026-11-04): shell dieu khien chay NGAY trong muc
+    // Remote nay — khong mo link Tunnel, khong lo token ra thanh dia chi.
+    shStartShell();
+  } else {
+    shStopShell();
   }
+}
+
+// =====================================================================
+// SHELL DIEU KHIEN NATIVE TREN WEB — goi thang API /remote/* cua app
+// bang base + token da luu (localStorage hora.remote.*), khong qua
+// trang nhung cua app, khong hien link Tunnel/token o bat ky dau.
+//
+// LOP DOC FIELD (adapter) — spec chi ghi route, chua co shape JSON mau
+// that cua app (docs/web-remote.md muc 11). Moi cach doan ten field deu
+// nam trong doi tuong SF duoi day: khi test voi app that thay lech field
+// thi CHI SUA SF, khong sua cac ham render. Moi panel deu co khu "Du
+// lieu tho" hien JSON goc de doi chieu khi test.
+// =====================================================================
+const SF = {
+  pick: (o, keys) => {
+    if (!o || typeof o !== "object") return undefined;
+    for (const k of keys) if (o[k] !== undefined && o[k] !== null) return o[k];
+    return undefined;
+  },
+  listOf: (data, keys) => {
+    if (Array.isArray(data)) return data;
+    if (!data || typeof data !== "object") return [];
+    for (const k of keys) if (Array.isArray(data[k])) return data[k];
+    for (const k of ["items", "list", "results", "data"]) if (Array.isArray(data[k])) return data[k];
+    return [];
+  },
+  idOf: (it) => SF.pick(it, ["id", "jobId", "workflowId", "libraryId", "fileId", "threadId", "uid", "key"]),
+  titleOf: (it) => SF.pick(it, ["name", "title", "fileName", "filename", "label", "prompt", "subject"]) || SF.idOf(it) || "—",
+  kindOf: (it) => {
+    const raw = String(SF.pick(it, ["kind", "type", "mediaType", "category"]) || "").toLowerCase();
+    if (raw.includes("image") || raw.includes("photo") || raw.includes("anh") || raw.includes("ảnh")) return "image";
+    if (raw.includes("video")) return "video";
+    if (raw.includes("audio") || raw.includes("music") || raw.includes("nhac") || raw.includes("nhạc")) return "audio";
+    return raw || "";
+  },
+  kindLabel: (k) => k === "image" ? "Ảnh" : k === "video" ? "Video" : k === "audio" ? "Nhạc" : (k || "—"),
+  statusOf: (it) => String(SF.pick(it, ["status", "state", "phase"]) || ""),
+  progressOf: (it) => {
+    let v = SF.pick(it, ["progress", "percent", "percentage", "progressPercent"]);
+    if (typeof v !== "number") return null;
+    if (v > 0 && v <= 1) v = v * 100; // app co the tra 0..1 thay vi 0..100
+    return Math.max(0, Math.min(100, Math.round(v)));
+  },
+  timeOf: (it) => SF.pick(it, ["createdAt", "updatedAt", "finishedAt", "created", "time"]),
+  errText: (data, fallback) => {
+    if (!data) return fallback;
+    if (typeof data.error === "string" && data.error) return data.error;
+    if (data.error && data.error.message) return data.error.message;
+    if (typeof data.message === "string" && data.message) return data.message;
+    return fallback;
+  },
+};
+
+let shStarted = false;
+let shBound = false;
+let shWs = null;
+let shWsTimer = null;
+let shWsDelay = 1000;
+let shPollTimer = null;
+let shTab = "dash";
+let shLoaded = {};
+let shLibItems = [];
+let shLibFilter = "all";
+let shThreadId = null;
+let shConfirmResolve = null;
+
+function shSetConn(live, text) {
+  const c = $("sh-conn");
+  if (c) {
+    c.textContent = "● " + (text || (live ? "Đang nối live" : "Mất nối"));
+    c.className = "sh-conn " + (live ? "on" : "off");
+  }
+  const b = $("sh-banner");
+  if (b) b.classList.toggle("hidden", !!live);
+}
+function shRaw(id, data) {
+  const el = $(id);
+  if (el) el.textContent = data === undefined ? "—" : JSON.stringify(data, null, 2).slice(0, 9000);
+}
+function shConfirmBox(summary) {
+  return new Promise((resolve) => {
+    shConfirmResolve = resolve;
+    $("sh-confirm-text").textContent = summary || "Xác nhận thao tác này?";
+    $("sh-confirm").classList.remove("hidden");
+  });
+}
+function shConfirmDone(v) {
+  $("sh-confirm").classList.add("hidden");
+  if (shConfirmResolve) { const r = shConfirmResolve; shConfirmResolve = null; r(v); }
+}
+// Goi API cua app: gan Bearer token; 401 -> het phien; 409 kem
+// confirmToken -> hoi xac nhan 1 lan roi gui lai kem confirmToken.
+async function shApi(path, opts = {}, allowConfirm = true) {
+  const saved = remoteSaved();
+  if (!saved) throw new Error("Chưa có phiên Remote.");
+  const headers = { Authorization: "Bearer " + saved.token };
+  let body;
+  if (opts.body !== undefined) { headers["Content-Type"] = "application/json"; body = JSON.stringify(opts.body); }
+  const res = await fetch(saved.base + path, { method: opts.method || "GET", headers, body });
+  const data = await res.json().catch(() => null);
+  if (res.status === 401) { shExpire(); throw new Error("Phiên đã hết, hãy ghép lại."); }
+  if (res.status === 409 && allowConfirm && data && (data.needsConfirmation || data.confirmToken)) {
+    const ok = await shConfirmBox(data.summary || SF.errText(data, "Thao tác này cần xác nhận."));
+    if (!ok) return { res, data, cancelled: true };
+    const merged = { ...(opts.body || {}), confirmToken: data.confirmToken };
+    return shApi(path, { ...opts, body: merged }, false);
+  }
+  return { res, data };
+}
+function shExpire() {
+  try { localStorage.removeItem(REMOTE_LS_TOKEN); } catch { /* bo qua */ }
+  remoteRenderConnected();
+  remoteShowErr("Phiên đã hết, hãy ghép lại.");
+}
+function shShowTab(name) {
+  shTab = name;
+  document.querySelectorAll("#sh-tabs .sh-tab").forEach((b) => b.classList.toggle("on", b.dataset.shTab === name));
+  document.querySelectorAll("[data-sh-panel]").forEach((p) => p.classList.toggle("hidden", p.dataset.shPanel !== name));
+  if (!remoteSaved()) return;
+  if (name === "dash") shLoadDash();
+  else if (name === "flow" && !shLoaded.flow) shLoadFlow();
+  else if (name === "chat" && !shLoaded.chat) shLoadChat();
+  else if (name === "lib" && !shLoaded.lib) shLoadLib();
+  else if (name === "drive" && !shLoaded.drive) shLoadDrive();
+}
+function shStartShell() {
+  if (shStarted || !remoteSaved()) return;
+  shStarted = true;
+  shLoaded = {};
+  if (!shBound) { shBind(); shBound = true; }
+  shShowTab("dash");
+  shConnectWs();
+}
+function shStopShell() {
+  shStarted = false;
+  if (shWsTimer) { clearTimeout(shWsTimer); shWsTimer = null; }
+  if (shPollTimer) { clearInterval(shPollTimer); shPollTimer = null; }
+  if (shWs) { try { shWs.onclose = null; shWs.close(); } catch { /* bo qua */ } shWs = null; }
+  shConfirmDone(false);
+}
+// --- WebSocket live: nhan sync + su kien; dut thi reconnect backoff
+// 1s->2s->5s->10s->30s + poll REST 5s lam du phong (hop dong muc 6). ---
+function shConnectWs() {
+  const saved = remoteSaved();
+  if (!saved || !shStarted || shWs) return;
+  let ws;
+  try {
+    ws = new WebSocket(saved.base.replace(/^http/, "ws") + "/remote/live?token=" + encodeURIComponent(saved.token));
+  } catch { shScheduleWs(); return; }
+  shWs = ws;
+  ws.onopen = () => {
+    shWsDelay = 1000;
+    if (shPollTimer) { clearInterval(shPollTimer); shPollTimer = null; }
+    shSetConn(true);
+  };
+  ws.onmessage = (ev) => {
+    let msg = null;
+    try { msg = JSON.parse(ev.data); } catch { return; }
+    const type = String(SF.pick(msg, ["type", "event", "name"]) || "");
+    const payload = msg.data || msg.payload || msg;
+    if (type === "sync" || payload.queue || payload.status) {
+      const st = payload.status || (type === "sync" ? payload : null);
+      const q = payload.queue || payload.jobs;
+      if (st || q) shRenderDash(st, Array.isArray(q) ? q : undefined, { status: st, queue: q });
+      const wfs = payload.workflows;
+      if (Array.isArray(wfs)) shRenderWorkflows(wfs, payload);
+      return;
+    }
+    if (type.startsWith("job.")) shLoadDash();
+    else if (type === "workflow.stage") { shLoadDash(); if (shLoaded.flow) shLoadFlow(); }
+    else if (type === "assistant.reply") {
+      const text = SF.pick(payload, ["content", "text", "message", "reply"]);
+      if (text) shAppendMsg("ai", String(text));
+      else if (shLoaded.chat) shLoadChatHistory();
+    }
+  };
+  ws.onclose = (ev) => {
+    shWs = null;
+    if (!shStarted) return;
+    if (ev.code === 4001) { shExpire(); return; }
+    shSetConn(false);
+    shScheduleWs();
+    if (!shPollTimer) shPollTimer = setInterval(() => { if (shStarted) shReloadTab(); }, 5000);
+  };
+  ws.onerror = () => { try { ws.close(); } catch { /* bo qua */ } };
+}
+function shScheduleWs() {
+  if (!shStarted || shWsTimer) return;
+  shWsTimer = setTimeout(() => { shWsTimer = null; shConnectWs(); }, shWsDelay);
+  shWsDelay = Math.min(shWsDelay * 2, 30000);
+}
+function shReloadTab() {
+  if (shTab === "dash") shLoadDash();
+  else if (shTab === "flow") shLoadFlow();
+  else if (shTab === "lib") shLoadLib();
+  else if (shTab === "drive") shLoadDrive();
+  else if (shTab === "chat") shLoadChatHistory();
+}
+// --- Tong quan + hang doi ---
+async function shLoadDash() {
+  if (!remoteSaved()) return;
+  let statusData = null, queueData = null, statusErr = "", queueErr = "";
+  try { const r = await shApi("/remote/status"); statusData = r.data; if (!r.res.ok) statusErr = SF.errText(r.data, "Không tải được trạng thái."); }
+  catch (e) { statusErr = e.message; }
+  try { const r = await shApi("/remote/queue"); queueData = r.data; if (!r.res.ok) queueErr = SF.errText(r.data, "Không tải được hàng đợi."); }
+  catch (e) { queueErr = e.message; }
+  if (!remoteSaved()) return;
+  shRenderDash(statusData, SF.listOf(queueData, ["queue", "jobs"]), { status: statusData, queue: queueData });
+  if (statusErr || queueErr) $("sh-queue").insertAdjacentHTML("afterbegin", `<p class="sh-err" style="margin:0 0 10px">${esc(statusErr || queueErr)}</p>`);
+}
+function shCountByStatus(jobs, groups) {
+  return jobs.filter((j) => groups.some((g) => SF.statusOf(j).toLowerCase().includes(g))).length;
+}
+function shRenderDash(statusData, jobs, raw) {
+  if (raw) shRaw("sh-raw-dash", raw);
+  const counts = (statusData && typeof statusData === "object" && (statusData.counts || statusData.stats)) || {};
+  const num = (...vals) => { for (const v of vals) if (typeof v === "number") return v; return null; };
+  let running = num(SF.pick(statusData || {}, ["running", "runningCount", "active", "activeJobs"]), SF.pick(counts, ["running", "active"]));
+  let waiting = num(SF.pick(statusData || {}, ["waiting", "waitingCount", "queued", "queuedCount", "pending", "pendingCount"]), SF.pick(counts, ["waiting", "queued", "pending"]));
+  let done = num(SF.pick(statusData || {}, ["done", "doneCount", "completed", "completedCount", "finished"]), SF.pick(counts, ["done", "completed", "finished"]));
+  let failed = num(SF.pick(statusData || {}, ["failed", "failedCount", "error", "errorCount"]), SF.pick(counts, ["failed", "error"]));
+  const list = Array.isArray(jobs) ? jobs : null;
+  if (list) {
+    if (running === null) running = shCountByStatus(list, ["run", "processing", "active"]);
+    if (waiting === null) waiting = shCountByStatus(list, ["queue", "pending", "wait"]);
+    if (done === null) done = shCountByStatus(list, ["done", "complete", "finish", "success"]);
+    if (failed === null) failed = shCountByStatus(list, ["fail", "error"]);
+  }
+  $("sh-stat-running").textContent = running === null ? "–" : running;
+  $("sh-stat-waiting").textContent = waiting === null ? "–" : waiting;
+  $("sh-stat-done").textContent = done === null ? "–" : done;
+  $("sh-stat-failed").textContent = failed === null ? "–" : failed;
+  let overall = statusData ? SF.progressOf(statusData) : null;
+  if (overall === null && list) {
+    const rs = list.map((j) => SF.progressOf(j)).filter((v) => v !== null);
+    if (rs.length) overall = Math.round(rs.reduce((a, b) => a + b, 0) / rs.length);
+  }
+  $("sh-progress-wrap").classList.toggle("hidden", overall === null);
+  if (overall !== null) { $("sh-progress-bar").style.width = overall + "%"; $("sh-progress-text").textContent = "Tiến trình chung: " + overall + "%"; }
+  const box = $("sh-queue");
+  if (!list) { box.innerHTML = `<p class="muted">Chưa tải được hàng đợi.</p>`; return; }
+  if (!list.length) { box.innerHTML = `<p class="muted">Chưa có job nào — tạo task ở mục Tạo task.</p>`; return; }
+  box.innerHTML = list.map((j) => {
+    const id = SF.idOf(j);
+    const st = SF.statusOf(j);
+    const low = st.toLowerCase();
+    const pr = SF.progressOf(j);
+    const terminal = ["done", "complete", "finish", "success", "fail", "error", "cancel"].some((g) => low.includes(g));
+    return `<div class="sh-card"><h4>${esc(SF.titleOf(j))}</h4>
+      <p class="meta">${esc(SF.kindLabel(SF.kindOf(j)))} · ${esc(st || "—")}${id ? " · " + esc(id) : ""}${SF.timeOf(j) ? " · " + esc(fmtDate(SF.timeOf(j))) : ""}</p>
+      ${pr !== null ? `<div class="sh-bar"><div style="width:${pr}%"></div></div><p class="meta" style="margin-top:4px">${pr}%</p>` : ""}
+      <div class="sh-row-actions">
+        <button type="button" class="btn small" data-sh-job="detail" data-id="${esc(id || "")}">Chi tiết</button>
+        ${!terminal ? `<button type="button" class="btn small" data-sh-job="cancel" data-id="${esc(id || "")}">Dừng</button>` : ""}
+        ${terminal ? `<button type="button" class="btn small" data-sh-job="retry" data-id="${esc(id || "")}">Làm lại</button>` : ""}
+      </div></div>`;
+  }).join("");
+}
+async function shJobAction(act, id, btn) {
+  if (!id) { showMsg("err", "Job này không có id đọc được — xem Dữ liệu thô để đối chiếu field."); return; }
+  if (btn) btn.disabled = true;
+  try {
+    if (act === "detail") {
+      const { res, data } = await shApi("/remote/queue/" + encodeURIComponent(id));
+      $("sh-job-detail").innerHTML = res.ok
+        ? `<div class="sh-card"><h4>Chi tiết job ${esc(id)}</h4><details class="sh-raw" open><summary>JSON chi tiết</summary><pre>${esc(JSON.stringify(data, null, 2).slice(0, 9000))}</pre></details></div>`
+        : `<p class="sh-err">${esc(SF.errText(data, "Không tải được chi tiết job."))}</p>`;
+      return;
+    }
+    const { res, data, cancelled } = await shApi("/remote/queue/" + encodeURIComponent(id) + "/" + act, { method: "POST", body: {} });
+    if (cancelled) return;
+    if (!res.ok) { showMsg("err", SF.errText(data, "Thao tác thất bại.")); return; }
+    showMsg("ok", act === "cancel" ? "Đã gửi lệnh dừng job." : "Đã gửi lệnh làm lại job.");
+    shLoadDash();
+  } catch (e) { showMsg("err", e.message); }
+  finally { if (btn) btn.disabled = false; }
+}
+// --- Tao task ---
+async function shSendPrompt() {
+  const kind = (document.querySelector('input[name="sh-kind"]:checked') || {}).value || "video";
+  const prompt = $("sh-prompt").value.trim();
+  const errEl = $("sh-create-err"), okEl = $("sh-create-ok");
+  errEl.classList.add("hidden"); okEl.classList.add("hidden");
+  if (!prompt) { errEl.textContent = "Hãy nhập prompt trước."; errEl.classList.remove("hidden"); return; }
+  const btn = $("sh-send-prompt");
+  btn.disabled = true;
+  try {
+    const { res, data, cancelled } = await shApi("/remote/prompts", { method: "POST", body: { kind, prompt } });
+    shRaw("sh-raw-create", data);
+    if (cancelled) return;
+    if (!res.ok) { errEl.textContent = SF.errText(data, "Server từ chối task."); errEl.classList.remove("hidden"); return; }
+    okEl.textContent = "Đã gửi task — xem tiến trình ở mục Tổng quan.";
+    okEl.classList.remove("hidden");
+    shLoadDash();
+  } catch (e) { errEl.textContent = e.message; errEl.classList.remove("hidden"); }
+  finally { btn.disabled = false; }
+}
+// --- Workflow ---
+async function shLoadFlow() {
+  if (!remoteSaved()) return;
+  shLoaded.flow = true;
+  try {
+    const { res, data } = await shApi("/remote/workflows");
+    shRaw("sh-raw-flow", data);
+    if (!res.ok) { $("sh-workflows").innerHTML = `<p class="sh-err">${esc(SF.errText(data, "Không tải được workflow."))}</p>`; return; }
+    shRenderWorkflows(SF.listOf(data, ["workflows"]), data);
+  } catch (e) { $("sh-workflows").innerHTML = `<p class="sh-err">${esc(e.message)}</p>`; }
+}
+function shRenderWorkflows(list, raw) {
+  if (raw) shRaw("sh-raw-flow", raw);
+  const box = $("sh-workflows");
+  if (!box) return;
+  if (!list || !list.length) { box.innerHTML = `<p class="muted">Chưa có workflow nào.</p>`; return; }
+  box.innerHTML = list.map((w) => {
+    const id = SF.idOf(w);
+    return `<div class="sh-card"><h4>${esc(SF.titleOf(w))}</h4>
+      <p class="meta">${esc(SF.statusOf(w) || "—")}${id ? " · " + esc(id) : ""}</p>
+      <div class="sh-row-actions">
+        <button type="button" class="btn small" data-sh-wf="detail" data-id="${esc(id || "")}">Chi tiết</button>
+        <button type="button" class="btn small" data-sh-wf="run" data-id="${esc(id || "")}">Chạy</button>
+      </div></div>`;
+  }).join("");
+}
+async function shWorkflowAction(act, id, btn) {
+  if (!id) { showMsg("err", "Workflow này không có id đọc được — xem Dữ liệu thô để đối chiếu field."); return; }
+  if (btn) btn.disabled = true;
+  try {
+    if (act === "detail") {
+      const { res, data } = await shApi("/remote/workflows/" + encodeURIComponent(id));
+      if (!res.ok) { $("sh-wf-detail").innerHTML = `<p class="sh-err">${esc(SF.errText(data, "Không tải được chi tiết workflow."))}</p>`; return; }
+      const stages = SF.listOf(data, ["stages", "steps", "tasks", "nodes"]);
+      $("sh-wf-detail").innerHTML = `<div class="sh-card"><h4>${esc(SF.titleOf(data || {}) || id)}</h4>
+        ${stages.length ? stages.map((s, i) => `<p class="meta" style="margin:6px 0">${i + 1}. ${esc(SF.titleOf(s))} — ${esc(SF.statusOf(s) || "—")}${SF.progressOf(s) !== null ? " · " + SF.progressOf(s) + "%" : ""}</p>`).join("") : `<p class="meta">Không thấy danh sách bước trong dữ liệu trả về — xem JSON dưới đây.</p>`}
+        <details class="sh-raw"><summary>JSON chi tiết</summary><pre>${esc(JSON.stringify(data, null, 2).slice(0, 9000))}</pre></details></div>`;
+      return;
+    }
+    const { res, data, cancelled } = await shApi("/remote/workflows/" + encodeURIComponent(id) + "/run", { method: "POST", body: {} });
+    if (cancelled) return;
+    if (!res.ok) { showMsg("err", SF.errText(data, "Không chạy được workflow.")); return; }
+    showMsg("ok", "Đã gửi lệnh chạy workflow.");
+    shLoadFlow(); shLoadDash();
+  } catch (e) { showMsg("err", e.message); }
+  finally { if (btn) btn.disabled = false; }
+}
+// --- Tro ly ---
+function shAppendMsg(role, text, who) {
+  const box = $("sh-msgs");
+  if (!box) return;
+  if (box.querySelector(".muted")) box.innerHTML = "";
+  box.insertAdjacentHTML("beforeend", `<div class="sh-msg ${role === "me" ? "me" : "ai"}"><span class="who">${esc(who || (role === "me" ? "Bạn" : "Trợ lý"))}</span>${esc(text)}</div>`);
+  box.scrollTop = box.scrollHeight;
+}
+async function shLoadChat() {
+  if (!remoteSaved()) return;
+  shLoaded.chat = true;
+  try {
+    const { data } = await shApi("/remote/assistant/threads");
+    shRaw("sh-raw-chat", data);
+    const threads = SF.listOf(data, ["threads"]);
+    const box = $("sh-threads");
+    if (!threads.length) box.innerHTML = `<p class="muted">Không có danh sách thread — đang dùng thread hiện tại của app.</p>`;
+    else box.innerHTML = threads.map((t) => {
+      const id = SF.idOf(t);
+      if (!shThreadId && id) shThreadId = id;
+      return `<button type="button" class="sh-thread ${id === shThreadId ? "on" : ""}" data-sh-thread="${esc(id || "")}">${esc(SF.titleOf(t))}</button>`;
+    }).join("");
+  } catch { /* thread la phu: khong co danh sach van chat duoc */ }
+  shLoadChatHistory();
+}
+async function shLoadChatHistory() {
+  if (!remoteSaved()) return;
+  try {
+    const path = "/remote/assistant/history" + (shThreadId ? "?threadId=" + encodeURIComponent(shThreadId) : "");
+    const { res, data } = await shApi(path);
+    if (!res.ok) return;
+    const msgs = SF.listOf(data, ["messages", "history"]);
+    const box = $("sh-msgs");
+    box.innerHTML = "";
+    if (!msgs.length) { box.innerHTML = `<p class="muted">Chưa có tin nhắn.</p>`; return; }
+    msgs.forEach((m) => {
+      const roleRaw = String(SF.pick(m, ["role", "sender", "from"]) || "").toLowerCase();
+      const me = ["user", "me", "customer", "human"].some((g) => roleRaw.includes(g));
+      const text = SF.pick(m, ["content", "text", "message", "body"]) || "";
+      const needs = SF.pick(m, ["needsConfirmation", "requiresConfirmation", "pendingAction"]);
+      shAppendMsg(me ? "me" : "ai", String(text) + (needs ? "\n⚠ Đề xuất này cần xác nhận trên máy tính, chưa chạy." : ""));
+    });
+  } catch { /* lich su la phu */ }
+}
+async function shSendChat() {
+  const input = $("sh-chat-input");
+  const text = input.value.trim();
+  const errEl = $("sh-chat-err");
+  errEl.classList.add("hidden");
+  if (!text) return;
+  input.value = "";
+  shAppendMsg("me", text);
+  const btn = $("sh-chat-send");
+  btn.disabled = true;
+  try {
+    const body = { message: text };
+    if (shThreadId) body.threadId = shThreadId;
+    const { res, data, cancelled } = await shApi("/remote/assistant/chat", { method: "POST", body });
+    shRaw("sh-raw-chat", data);
+    if (cancelled) return;
+    if (!res.ok) { errEl.textContent = SF.errText(data, "Trợ lý không trả lời được."); errEl.classList.remove("hidden"); return; }
+    const reply = data && SF.pick(data, ["reply", "content", "text", "message", "answer"]);
+    if (typeof reply === "string" && reply) shAppendMsg("ai", reply);
+    else shLoadChatHistory(); // reply con lai ve qua WebSocket assistant.reply
+  } catch (e) { errEl.textContent = e.message; errEl.classList.remove("hidden"); }
+  finally { btn.disabled = false; }
+}
+// --- Kho ---
+function shFileUrl(id, what) {
+  const saved = remoteSaved();
+  if (!saved) return "#";
+  return saved.base + "/remote/library/" + encodeURIComponent(id) + "/" + what + "?token=" + encodeURIComponent(saved.token);
+}
+function shThumbUrl(it, id) {
+  const u = SF.pick(it, ["thumbnailUrl", "thumbnail", "previewUrl"]);
+  if (typeof u === "string" && /^https?:\/\//.test(u)) return u;
+  return shFileUrl(id, "thumbnail");
+}
+async function shLoadLib() {
+  if (!remoteSaved()) return;
+  shLoaded.lib = true;
+  try {
+    const { res, data } = await shApi("/remote/library");
+    shRaw("sh-raw-lib", data);
+    if (!res.ok) { $("sh-library").innerHTML = `<p class="sh-err">${esc(SF.errText(data, "Không tải được kho."))}</p>`; return; }
+    shLibItems = SF.listOf(data, ["library", "files"]);
+    shRenderLib();
+  } catch (e) { $("sh-library").innerHTML = `<p class="sh-err">${esc(e.message)}</p>`; }
+}
+function shRenderLib() {
+  const q = ($("sh-lib-search").value || "").toLowerCase();
+  const list = shLibItems.filter((it) => {
+    const k = SF.kindOf(it);
+    if (shLibFilter !== "all" && k !== shLibFilter) return false;
+    if (q && !String(SF.titleOf(it)).toLowerCase().includes(q)) return false;
+    return true;
+  });
+  const box = $("sh-library");
+  if (!list.length) { box.innerHTML = `<p class="muted">Kho trống với bộ lọc này — tạo task ở mục Tạo task.</p>`; return; }
+  box.innerHTML = `<div class="sh-grid">` + list.map((it) => {
+    const id = SF.idOf(it);
+    return `<button type="button" class="sh-lib-item" data-sh-lib="${esc(id || "")}">
+      <img loading="lazy" src="${esc(shThumbUrl(it, id || ""))}" alt="">
+      <span class="nm">${esc(SF.titleOf(it))}</span><span class="kd">${esc(SF.kindLabel(SF.kindOf(it)))}</span></button>`;
+  }).join("") + `</div>`;
+}
+async function shLibDetail(id) {
+  if (!id) { showMsg("err", "Mục này không có id đọc được — xem Dữ liệu thô để đối chiếu field."); return; }
+  const box = $("sh-lib-detail");
+  box.innerHTML = `<p class="muted">Đang tải chi tiết…</p>`;
+  try {
+    const { res, data } = await shApi("/remote/library/" + encodeURIComponent(id));
+    if (!res.ok) { box.innerHTML = `<p class="sh-err">${esc(SF.errText(data, "Không tải được chi tiết."))}</p>`; return; }
+    const it = (data && (data.item || data.file || data)) || {};
+    const kind = SF.kindOf(it) || SF.kindOf(shLibItems.find((x) => SF.idOf(x) === id) || {});
+    const fileUrl = shFileUrl(id, "file");
+    const media = kind === "video" ? `<video class="sh-detail-media" controls src="${esc(fileUrl)}"></video>`
+      : kind === "audio" ? `<audio controls src="${esc(fileUrl)}" style="width:100%"></audio>`
+      : `<img class="sh-detail-media" src="${esc(fileUrl)}" alt="">`;
+    box.innerHTML = `<div class="sh-card"><h4>${esc(SF.titleOf(it))}</h4>
+      <p class="meta">${esc(SF.kindLabel(kind))}${SF.timeOf(it) ? " · " + esc(fmtDate(SF.timeOf(it))) : ""}</p>
+      <div style="margin:12px 0">${media}</div>
+      <div class="sh-row-actions">
+        <a class="btn primary" href="${esc(fileUrl)}" download>Tải về</a>
+        <button type="button" class="btn" data-sh-updrive="${esc(id)}">Up Drive</button>
+      </div>
+      <div id="sh-lib-up-result"></div>
+      <details class="sh-raw"><summary>JSON chi tiết</summary><pre>${esc(JSON.stringify(data, null, 2).slice(0, 9000))}</pre></details></div>`;
+  } catch (e) { box.innerHTML = `<p class="sh-err">${esc(e.message)}</p>`; }
+}
+async function shUpDrive(id, btn) {
+  if (btn) btn.disabled = true;
+  try {
+    const { res, data, cancelled } = await shApi("/remote/drive/upload/" + encodeURIComponent(id), { method: "POST", body: {} });
+    const out = $("sh-lib-up-result");
+    if (cancelled) return;
+    if (!res.ok) { if (out) out.innerHTML = `<p class="sh-err">${esc(SF.errText(data, "Up Drive thất bại."))}</p>`; return; }
+    const link = data && SF.pick(data, ["shareUrl", "webViewLink", "link", "url"]);
+    if (out) out.innerHTML = `<p class="sh-okmsg">Đã up Drive.${link ? ` Link share: <a href="${esc(link)}" target="_blank" rel="noopener">${esc(link)}</a>` : ""}</p>`;
+  } catch (e) { showMsg("err", e.message); }
+  finally { if (btn) btn.disabled = false; }
+}
+// --- Drive ---
+async function shLoadDrive() {
+  if (!remoteSaved()) return;
+  shLoaded.drive = true;
+  let statusData = null;
+  try {
+    const { res, data } = await shApi("/remote/drive/status");
+    statusData = data;
+    if (!res.ok) { $("sh-drive-status").innerHTML = `<p class="sh-err">${esc(SF.errText(data, "Không tải được trạng thái Drive."))}</p>`; }
+    else {
+      const connected = SF.pick(data || {}, ["connected", "isConnected", "linked"]);
+      const email = SF.pick(data || {}, ["email", "account", "user"]);
+      $("sh-drive-status").innerHTML = `<div class="sh-card"><h4>${connected ? "✅ Đã kết nối Drive" : "Chưa kết nối Drive"}</h4>
+        <p class="meta">${connected ? esc(email || "") : "Connect bằng device-flow: trang hiện mã + link google.com/device rồi tự poll."} Chỉ xem file app đã up (scope drive.file).</p></div>`;
+    }
+  } catch (e) { $("sh-drive-status").innerHTML = `<p class="sh-err">${esc(e.message)}</p>`; }
+  try {
+    const { res, data } = await shApi("/remote/drive/files");
+    shRaw("sh-raw-drive", { status: statusData, files: data });
+    const files = SF.listOf(data, ["files"]);
+    $("sh-drive-files").innerHTML = !res.ok ? `<p class="muted">Chưa xem được file Drive.</p>`
+      : !files.length ? `<p class="muted">Chưa có file nào được up.</p>`
+      : files.map((f) => {
+        const link = SF.pick(f, ["webViewLink", "url", "link"]);
+        return `<div class="sh-card"><h4>${esc(SF.titleOf(f))}</h4><p class="meta">${SF.timeOf(f) ? esc(fmtDate(SF.timeOf(f))) : ""}</p>
+          ${link ? `<div class="sh-row-actions"><a class="btn small" href="${esc(link)}" target="_blank" rel="noopener">Mở trên Drive</a></div>` : ""}</div>`;
+      }).join("");
+  } catch { $("sh-drive-files").innerHTML = `<p class="muted">Chưa xem được file Drive.</p>`; }
+}
+async function shDriveConnect() {
+  const info = $("sh-drive-connect-info");
+  const btn = $("sh-drive-connect");
+  btn.disabled = true;
+  try {
+    const clientId = $("sh-drive-client").value.trim();
+    if (clientId) {
+      const cfg = await shApi("/remote/drive/config", { method: "POST", body: { clientId } });
+      if (!cfg.res.ok) { info.innerHTML = `<p class="sh-err">${esc(SF.errText(cfg.data, "Không lưu được Client ID."))}</p>`; return; }
+    }
+    const { res, data, cancelled } = await shApi("/remote/drive/connect", { method: "POST", body: {} });
+    if (cancelled) return;
+    if (!res.ok) { info.innerHTML = `<p class="sh-err">${esc(SF.errText(data, "Không bắt đầu được connect Drive."))}</p>`; return; }
+    const code = SF.pick(data || {}, ["userCode", "code"]);
+    const url = SF.pick(data || {}, ["verificationUrl", "verificationUri", "url", "link"]) || "https://www.google.com/device";
+    info.innerHTML = `<p class="sh-okmsg">Mở <a href="${esc(url)}" target="_blank" rel="noopener">google.com/device</a> và nhập mã <b style="font-size:18px">${esc(code || "—")}</b> — trang đang tự chờ xác nhận…</p>`;
+    const deadline = Date.now() + 2 * 60 * 1000;
+    const poll = async () => {
+      if (!remoteSaved() || Date.now() > deadline) return;
+      try {
+        const r = await shApi("/remote/drive/connect/status");
+        const st = String(SF.pick(r.data || {}, ["status", "state"]) || "").toLowerCase();
+        const conn = SF.pick(r.data || {}, ["connected", "isConnected"]);
+        if (conn || ["connected", "done", "ok", "success"].includes(st)) { showMsg("ok", "Đã kết nối Drive."); shLoadDrive(); return; }
+      } catch { /* poll tiep */ }
+      setTimeout(poll, 3000);
+    };
+    setTimeout(poll, 3000);
+  } catch (e) { info.innerHTML = `<p class="sh-err">${esc(e.message)}</p>`; }
+  finally { btn.disabled = false; }
+}
+// --- Gan su kien cho shell (1 lan) ---
+function shBind() {
+  document.querySelectorAll("#sh-tabs .sh-tab").forEach((b) => b.addEventListener("click", () => shShowTab(b.dataset.shTab)));
+  $("sh-refresh").addEventListener("click", () => { shReloadTab(); if (shTab !== "dash") shLoadDash(); });
+  $("sh-queue").addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-sh-job]");
+    if (btn) shJobAction(btn.dataset.shJob, btn.dataset.id, btn);
+  });
+  $("sh-workflows").addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-sh-wf]");
+    if (btn) shWorkflowAction(btn.dataset.shWf, btn.dataset.id, btn);
+  });
+  $("sh-send-prompt").addEventListener("click", shSendPrompt);
+  document.querySelectorAll('input[name="sh-kind"]').forEach((r) => r.addEventListener("change", () => {
+    document.querySelectorAll("#sh-kind label").forEach((l) => l.classList.toggle("on", l.contains(r) && r.checked || l.querySelector("input").checked));
+  }));
+  $("sh-chat-send").addEventListener("click", shSendChat);
+  $("sh-chat-input").addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); shSendChat(); } });
+  $("sh-threads").addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-sh-thread]");
+    if (!btn) return;
+    shThreadId = btn.dataset.shThread || null;
+    document.querySelectorAll("#sh-threads .sh-thread").forEach((t) => t.classList.toggle("on", t === btn));
+    shLoadChatHistory();
+  });
+  document.querySelectorAll(".sh-libf").forEach((b) => b.addEventListener("click", () => {
+    shLibFilter = b.dataset.shLibf;
+    document.querySelectorAll(".sh-libf").forEach((x) => x.classList.toggle("on", x === b));
+    shRenderLib();
+  }));
+  $("sh-lib-search").addEventListener("input", shRenderLib);
+  $("sh-library").addEventListener("click", (e) => {
+    const item = e.target.closest("[data-sh-lib]");
+    if (item) shLibDetail(item.dataset.shLib);
+  });
+  $("sh-lib-detail").addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-sh-updrive]");
+    if (btn) shUpDrive(btn.dataset.shUpdrive, btn);
+  });
+  $("sh-drive-connect").addEventListener("click", shDriveConnect);
+  $("sh-drive-disconnect").addEventListener("click", async (btn) => {
+    try {
+      const { res, data } = await shApi("/remote/drive/disconnect", { method: "POST", body: {} });
+      if (!res.ok) { showMsg("err", SF.errText(data, "Không ngắt được Drive.")); return; }
+      showMsg("ok", "Đã ngắt kết nối Drive.");
+      shLoadDrive();
+    } catch (e) { showMsg("err", e.message); }
+  });
+  $("sh-confirm-yes").addEventListener("click", () => shConfirmDone(true));
+  $("sh-confirm-no").addEventListener("click", () => shConfirmDone(false));
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("sh-confirm").classList.contains("hidden")) shConfirmDone(false); });
 }
 // QR cua app la link account.html?remote_code=XXXXXX: den tu QR thi dien san
 // ma + mo thang muc Remote, roi xoa ma khoi URL (khong de ma nam tren URL).
