@@ -1190,6 +1190,23 @@ html,body{min-height:100%;height:100%;overflow:hidden}
 .sh-filter{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
 .sh-filter input{flex:1;min-width:160px}
 .sh-detail-media{max-width:100%;border-radius:12px;background:#000}
+.sh-subhead{font-size:15.5px;margin:2px 0 12px}
+.sh-conn-block{border:1px solid var(--line);border-radius:14px;padding:14px;background:var(--panel2);margin-bottom:14px}
+.sh-conn-block .sh-actions{margin-top:10px}
+/* Che do dieu khien (body.sh-control, chot 2026-11-05): menu tai khoan o
+   aside (may tinh = sidebar, dien thoai = thanh duoi) duoc thay bang 5 nut
+   chuc nang cua shell; an tieu de + hero thua de tap trung noi dung; thanh
+   tab ngay trong shell khong con can nen an di. Noi dung van cuon duoc. */
+#sh-tabs{display:none}
+body.sh-control .content-head{display:none}
+body.sh-control [data-view="remote"] .orders-welcome{display:none !important}
+body.sh-control [data-view="remote"]{overflow-y:auto;-webkit-overflow-scrolling:touch}
+@media (max-width:760px){
+  body.sh-control #sh-side-nav{grid-template-columns:repeat(5,1fr)}
+  /* Dien thoai: than trang bi khoa cuon o cap body (CSS auth), nen o che do
+     dieu khien cho panel Remote thanh hop cuon rieng, chua thanh duoi. */
+  body.sh-control [data-view="remote"]{max-height:calc(100dvh - 104px);overflow-y:auto}
+}
 @media (max-width:760px){
   .sh-stats{grid-template-columns:repeat(2,1fr)}
   .sh-chat-grid{grid-template-columns:1fr}
@@ -1240,13 +1257,20 @@ html,body{min-height:100%;height:100%;overflow:hidden}
 
 <div class="shell solo" id="shell">
   <aside id="side" class="side hidden">
-    <nav class="side-nav" aria-label="Mục tài khoản">
+    <nav class="side-nav" id="side-nav-account" aria-label="Mục tài khoản">
       <button type="button" class="side-item active" data-view-btn="account" data-short="Tài khoản"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4.5 20.5c1.4-3.8 4.4-5.5 7.5-5.5s6.1 1.7 7.5 5.5"></path></svg> Thông tin tài khoản</button>
       
       
       <button type="button" class="side-item" data-view-btn="buy" data-short="Mua gói"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.6-6.3"></path><path d="M21 3v6h-6"></path></svg> Mua gói</button>
       <button type="button" class="side-item" data-view-btn="orders" data-short="Lịch sử"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M8.5 6h12M8.5 12h12M8.5 18h12"></path><path d="M4 6h.01M4 12h.01M4 18h.01"></path></svg> Lịch sử giao dịch <span id="orders-unpaid-badge" class="side-badge hidden" title="Có đơn chưa thanh toán" aria-label="Có đơn chưa thanh toán">!</span></button>
       <button type="button" class="side-item" data-view-btn="remote" data-short="Remote"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="4" width="19" height="13" rx="2"></rect><path d="M8.5 21h7M12 17v4"></path></svg> Remote</button>
+    </nav>
+    <nav class="side-nav hidden" id="sh-side-nav" aria-label="Mục điều khiển">
+      <button type="button" class="side-item sh-nav-item active" data-sh-nav="dash" data-short="Tổng quan"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="3" width="7" height="7" rx="1.5"></rect><rect x="3" y="14" width="7" height="7" rx="1.5"></rect><rect x="14" y="14" width="7" height="7" rx="1.5"></rect></svg> Tổng quan</button>
+      <button type="button" class="side-item sh-nav-item" data-sh-nav="create" data-short="Tạo task"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v8M8 12h8"></path></svg> Tạo task</button>
+      <button type="button" class="side-item sh-nav-item" data-sh-nav="flow" data-short="Workflows"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="5" cy="6" r="2.5"></circle><circle cx="19" cy="6" r="2.5"></circle><circle cx="12" cy="18" r="2.5"></circle><path d="M7.5 6h9M6 8.2 10.3 16M18 8.2 13.7 16"></path></svg> Workflows</button>
+      <button type="button" class="side-item sh-nav-item" data-sh-nav="chat" data-short="Trợ lý"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.5 8.5 0 0 1-12.4 7.6L3 21l1.9-5.6A8.5 8.5 0 1 1 21 11.5z"></path></svg> Trợ lý</button>
+      <button type="button" class="side-item sh-nav-item" data-sh-nav="res" data-short="Tài nguyên"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg> Tài nguyên</button>
     </nav>
   </aside>
   <main class="content">
@@ -1438,25 +1462,36 @@ html,body{min-height:100%;height:100%;overflow:hidden}
       <div class="orders-welcome"><div><h2>Remote — điều khiển máy tính</h2><p>Mở app HORA Media trên máy tính của bạn, app sẽ hiện mã QR + mã kết nối 6 số. Quét mã hoặc nhập mã tại đây để mở view điều khiển.</p></div></div>
       <div class="remote-body">
         <div id="remote-connected" class="remote-box hidden">
-          <div class="sh-head">
+          <div id="sh-home">
             <p class="remote-ok">✅ Đã kết nối tới <strong id="remote-device">máy của bạn</strong></p>
-            <span class="sh-conn" id="sh-conn">● Chưa nối</span>
+            <p class="muted" style="margin:8px 0 0">Phiên điều khiển đã được lưu trên trình duyệt này.</p>
+            <div class="sh-actions">
+              <button class="btn primary small" id="sh-enter" type="button">Mở view điều khiển</button>
+              <button class="btn small" id="remote-disconnect" type="button">Ngắt kết nối</button>
+            </div>
           </div>
-          <p class="sh-banner hidden" id="sh-banner">Không kết nối được tới máy tính — kiểm tra app đã mở và Tunnel còn đúng. Đang tự nối lại…</p>
-          <div class="sh-actions">
-            <button class="btn small" id="sh-refresh" type="button">Làm mới</button>
-            <button class="btn small" id="remote-disconnect" type="button">Ngắt kết nối</button>
-          </div>
+          <div id="sh-shell" class="hidden">
           <nav class="sh-tabs" id="sh-tabs" aria-label="Mục điều khiển">
             <button type="button" class="sh-tab on" data-sh-tab="dash">Tổng quan</button>
             <button type="button" class="sh-tab" data-sh-tab="create">Tạo task</button>
-            <button type="button" class="sh-tab" data-sh-tab="flow">Workflow</button>
+            <button type="button" class="sh-tab" data-sh-tab="flow">Workflows</button>
             <button type="button" class="sh-tab" data-sh-tab="chat">Trợ lý</button>
-            <button type="button" class="sh-tab" data-sh-tab="lib">Kho</button>
-            <button type="button" class="sh-tab" data-sh-tab="drive">Drive</button>
+            <button type="button" class="sh-tab" data-sh-tab="res">Tài nguyên</button>
           </nav>
 
           <section class="sh-panel" data-sh-panel="dash">
+            <div class="sh-conn-block">
+              <div class="sh-head">
+                <p class="remote-ok">✅ Đã kết nối tới <strong id="sh-device">máy của bạn</strong></p>
+                <span class="sh-conn" id="sh-conn">● Chưa nối</span>
+              </div>
+              <p class="sh-banner hidden" id="sh-banner">Không kết nối được tới máy tính — kiểm tra app đã mở và Tunnel còn đúng. Đang tự nối lại…</p>
+              <div class="sh-actions">
+                <button class="btn small" id="sh-refresh" type="button">Làm mới</button>
+                <button class="btn small" id="sh-exit" type="button">Thoát</button>
+                <button class="btn small" id="sh-disconnect" type="button">Ngắt kết nối</button>
+              </div>
+            </div>
             <div class="sh-stats">
               <div class="sh-stat"><b id="sh-stat-running">–</b><span>Đang chạy</span></div>
               <div class="sh-stat"><b id="sh-stat-waiting">–</b><span>Đang chờ</span></div>
@@ -1511,7 +1546,8 @@ html,body{min-height:100%;height:100%;overflow:hidden}
             <details class="sh-raw"><summary>Dữ liệu thô — trợ lý</summary><pre id="sh-raw-chat">—</pre></details>
           </section>
 
-          <section class="sh-panel hidden" data-sh-panel="lib">
+          <section class="sh-panel hidden" data-sh-panel="res">
+            <h3 class="sh-subhead">Kho</h3>
             <div class="sh-filter">
               <button type="button" class="btn small sh-libf on" data-sh-libf="all">Tất cả</button>
               <button type="button" class="btn small sh-libf" data-sh-libf="image">Ảnh</button>
@@ -1524,7 +1560,8 @@ html,body{min-height:100%;height:100%;overflow:hidden}
             <details class="sh-raw"><summary>Dữ liệu thô — kho</summary><pre id="sh-raw-lib">—</pre></details>
           </section>
 
-          <section class="sh-panel hidden" data-sh-panel="drive">
+          <section class="sh-panel hidden" data-sh-panel="res">
+            <h3 class="sh-subhead">Google Drive</h3>
             <div id="sh-drive-status"><p class="muted">Đang tải trạng thái Drive…</p></div>
             <div id="sh-drive-connect-box">
               <label class="lbl" for="sh-drive-client" style="display:block;margin:12px 0 6px">Client ID (khi cần connect)</label>
@@ -1539,6 +1576,7 @@ html,body{min-height:100%;height:100%;overflow:hidden}
             <div id="sh-drive-files"><p class="muted">Đang tải…</p></div>
             <details class="sh-raw"><summary>Dữ liệu thô — Drive</summary><pre id="sh-raw-drive">—</pre></details>
           </section>
+          </div>
 
           <div class="sh-confirm hidden" id="sh-confirm" role="dialog" aria-modal="true" aria-label="Xác nhận thao tác">
             <div class="sh-confirm-box">
@@ -1646,6 +1684,7 @@ function showView(v) {
   document.querySelectorAll("[data-view]").forEach((p) => p.classList.toggle("hidden", p.dataset.view !== v));
   const t = $("view-title");
   if (t) t.textContent = VIEW_TITLES[v];
+  shSyncChrome();
 }
 document.querySelectorAll("[data-view-btn]").forEach((b) => b.addEventListener("click", () => showView(b.dataset.viewBtn)));
 
@@ -2390,10 +2429,16 @@ function remoteRenderConnected() {
   $("remote-connect-box").classList.toggle("hidden", !!saved);
   if (saved) {
     $("remote-device").textContent = saved.device || "máy của bạn";
+    const sd = $("sh-device");
+    if (sd) sd.textContent = saved.device || "máy của bạn";
     // Muc triet de (chot 2026-11-04): shell dieu khien chay NGAY trong muc
     // Remote nay — khong mo link Tunnel, khong lo token ra thanh dia chi.
-    shStartShell();
+    // Vua ghep xong (hoac con phien) thi vao thang che do dieu khien;
+    // da bam Thoat thi o lai man ket noi cu cho toi khi mo lai.
+    if (shControlWanted) shStartShell();
+    else shSyncChrome();
   } else {
+    shControlWanted = false;
     shStopShell();
   }
 }
@@ -2450,6 +2495,7 @@ const SF = {
 };
 
 let shStarted = false;
+let shControlWanted = true;
 let shBound = false;
 let shWs = null;
 let shWsTimer = null;
@@ -2513,28 +2559,56 @@ function shExpire() {
 function shShowTab(name) {
   shTab = name;
   document.querySelectorAll("#sh-tabs .sh-tab").forEach((b) => b.classList.toggle("on", b.dataset.shTab === name));
+  document.querySelectorAll("#sh-side-nav .sh-nav-item").forEach((b) => b.classList.toggle("active", b.dataset.shNav === name));
   document.querySelectorAll("[data-sh-panel]").forEach((p) => p.classList.toggle("hidden", p.dataset.shPanel !== name));
   if (!remoteSaved()) return;
   if (name === "dash") shLoadDash();
   else if (name === "flow" && !shLoaded.flow) shLoadFlow();
   else if (name === "chat" && !shLoaded.chat) shLoadChat();
-  else if (name === "lib" && !shLoaded.lib) shLoadLib();
-  else if (name === "drive" && !shLoaded.drive) shLoadDrive();
+  else if (name === "res") {
+    if (!shLoaded.lib) shLoadLib();
+    if (!shLoaded.drive) shLoadDrive();
+  }
+}
+function shSyncChrome() {
+  // Dang o che do dieu khien thi menu tai khoan (sidebar tren may tinh,
+  // thanh duoi tren dien thoai) duoc thay bang 5 nut chuc nang cua shell.
+  const control = shStarted && currentView === "remote";
+  document.body.classList.toggle("sh-control", control);
+  const accNav = $("side-nav-account");
+  const shNav = $("sh-side-nav");
+  if (accNav) accNav.classList.toggle("hidden", control);
+  if (shNav) shNav.classList.toggle("hidden", !control);
 }
 function shStartShell() {
-  if (shStarted || !remoteSaved()) return;
-  shStarted = true;
-  shLoaded = {};
-  if (!shBound) { shBind(); shBound = true; }
-  shShowTab("dash");
-  shConnectWs();
+  if (!remoteSaved()) return;
+  shControlWanted = true;
+  $("sh-shell").classList.remove("hidden");
+  $("sh-home").classList.add("hidden");
+  if (!shStarted) {
+    shStarted = true;
+    shLoaded = {};
+    if (!shBound) { shBind(); shBound = true; }
+    shShowTab("dash");
+    shConnectWs();
+  }
+  shSyncChrome();
 }
-function shStopShell() {
+function shExitShell() {
+  // Thoat khoi che do dieu khien: ve man Remote cu (menu tai khoan tro lai).
+  // PHIEN VAN GIU — chi dong giao dien dieu khien, khong ngat ket noi.
+  shControlWanted = false;
   shStarted = false;
   if (shWsTimer) { clearTimeout(shWsTimer); shWsTimer = null; }
   if (shPollTimer) { clearInterval(shPollTimer); shPollTimer = null; }
   if (shWs) { try { shWs.onclose = null; shWs.close(); } catch { /* bo qua */ } shWs = null; }
   shConfirmDone(false);
+  $("sh-shell").classList.add("hidden");
+  $("sh-home").classList.remove("hidden");
+  shSyncChrome();
+}
+function shStopShell() {
+  shExitShell();
 }
 // --- WebSocket live: nhan sync + su kien; dut thi reconnect backoff
 // 1s->2s->5s->10s->30s + poll REST 5s lam du phong (hop dong muc 6). ---
@@ -2590,8 +2664,7 @@ function shScheduleWs() {
 function shReloadTab() {
   if (shTab === "dash") shLoadDash();
   else if (shTab === "flow") shLoadFlow();
-  else if (shTab === "lib") shLoadLib();
-  else if (shTab === "drive") shLoadDrive();
+  else if (shTab === "res") { shLoadLib(); shLoadDrive(); }
   else if (shTab === "chat") shLoadChatHistory();
 }
 // --- Tong quan + hang doi ---
@@ -2945,6 +3018,10 @@ async function shDriveConnect() {
 // --- Gan su kien cho shell (1 lan) ---
 function shBind() {
   document.querySelectorAll("#sh-tabs .sh-tab").forEach((b) => b.addEventListener("click", () => shShowTab(b.dataset.shTab)));
+  document.querySelectorAll("#sh-side-nav .sh-nav-item").forEach((b) => b.addEventListener("click", () => shShowTab(b.dataset.shNav)));
+  $("sh-enter").addEventListener("click", () => shStartShell());
+  $("sh-exit").addEventListener("click", () => shExitShell());
+  $("sh-disconnect").addEventListener("click", () => $("remote-disconnect").click());
   $("sh-refresh").addEventListener("click", () => { shReloadTab(); if (shTab !== "dash") shLoadDash(); });
   $("sh-queue").addEventListener("click", (e) => {
     const btn = e.target.closest("[data-sh-job]");
@@ -3021,6 +3098,7 @@ function remoteConnected(base, token, deviceName) {
   remoteStopPoll();
   remoteShowErr("");
   remoteShowStatus("");
+  shControlWanted = true; // vua ghep noi xong -> vao thang che do dieu khien
   remoteRenderConnected();
   showMsg("ok", "Đã kết nối Remote tới " + (deviceName || "máy của bạn") + ".");
 }
