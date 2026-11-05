@@ -1704,6 +1704,21 @@ section[data-view="orders"]{position:relative}
   .buy-body{padding:18px 16px 20px}
 }
 
+/* ===== v8 (o CUOI file de thang cac rule highlight cu cung specificity):
+   Menu duoi kieu floating capsule (theo mau user gui 2026-11-05) — thanh
+   noi bo tron tach khoi mep man hinh + bong do; muc dang chon co ribbon
+   accent o mep tren + nhan dam, BO nen pill (thay kieu highlight "chi doi
+   mau nen" cua 7fe4503 va thay quyet dinh nen --bg dong bo body: capsule
+   noi co chu dich dung --panel de noi tren nen body) ===== */
+@media (max-width:760px){
+  .side{left:12px;right:12px;bottom:calc(10px + env(safe-area-inset-bottom,0px));width:auto;border:1px solid var(--line);border-radius:26px;background:var(--panel);box-shadow:0 14px 34px rgba(23,20,16,.18);padding:8px 10px 9px}
+  #dash{padding-bottom:calc(112px + env(safe-area-inset-bottom,0px))}
+  .side-nav .side-item.active,#side-nav-account .side-item.active{background:transparent;color:var(--text);box-shadow:none}
+  .side-nav .side-item.active::after{font-weight:800;color:var(--text)}
+  .side-nav .side-item.active svg{opacity:1}
+  .side-nav .side-item.active::before{content:"";position:absolute;top:-8px;left:50%;transform:translateX(-50%);width:17px;height:13px;background:var(--gold);clip-path:polygon(0 0,100% 0,100% 100%,50% 74%,0 100%)}
+}
+
 </style>
 </head>
 <body>
