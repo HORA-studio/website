@@ -210,6 +210,8 @@ vào repo:
 | `VNPAY_ENV` | VNPay | `test` (mặc định) hoặc `production` |
 | `LICENSE_ISSUE_URL` | Cấp license tự động | URL endpoint nội bộ — xem bản spec, chưa tồn tại |
 | `LICENSE_ISSUE_SECRET` | Cấp license tự động | Shared secret với hệ license, chưa tồn tại |
+| `GOOGLE_CLIENT_ID` | Đăng nhập Google | Client ID của OAuth client (Web application) trong Google Cloud Console. Thiếu 1 trong 2 biến Google → nút Google báo `503` chưa cấu hình |
+| `GOOGLE_CLIENT_SECRET` | Đăng nhập Google | **Secret** — đặt qua Pages secret, không commit/chat/log |
 | `RESEND_API_KEY` | Gửi email (xác thực / quên mật khẩu / mua hàng) | Secret của Resend — **ĐÃ đặt cho Pages project `hora-website` (production) 2026-10-30** (dùng chung key với account layer `mail.hora.works`). Thiếu key → mail bị bỏ qua + log `mail.skipped`, không lỗi |
 | `EMAIL_FROM` | Gửi email | Địa chỉ gửi — **ĐÃ đặt `HORA <no-reply@mail.hora.works>` 2026-10-30** (domain `mail.hora.works` đã xác thực trong Resend). Mặc định nếu không đặt là `HORA <no-reply@hora.works>` |
 | `SITE_URL` | Link trong email | Mặc định `https://hora.works`; chỉ đặt khi test/staging domain khác |
@@ -255,6 +257,15 @@ URL cần đăng ký với từng cổng (khi có merchant):
 - MoMo IPN: `https://<domain web>/api/payments/momo-ipn`
 - VNPay IPN: `https://<domain web>/api/payments/vnpay-ipn`
 - Trang quay về (cả hai cổng): `https://<domain web>/api/payments/return`
+
+## Đăng nhập Google (OAuth 2.0) — build 2026-11-05
+
+- **Google Cloud Console** (OAuth client loại *Web application*): Authorized JavaScript origins = `https://hora.works`; Authorized redirect URIs = `https://hora.works/api/auth/google/callback` (phải khớp tuyệt đối).
+- **Endpoint:** `GET /api/auth/google` (tạo `state` chống CSRF trong cookie HttpOnly 10 phút + lưu đích quay về `?return=` — chỉ nhận path tương đối) → 302 sang Google → `GET /api/auth/google/callback` đổi `code` lấy `id_token`, xác minh qua `tokeninfo` (kiểm `aud` = Client ID, `iss`, `exp`, `email_verified = true`).
+- **Liên kết tài khoản:** khớp `customers.google_sub` trước, rồi email đã xác thực. Tài khoản mới được tạo với `email_verified_at` = ngay lúc đó (Google đã xác thực) + mật khẩu ngẫu nhiên không ai biết (muốn đặt mật khẩu web thì đi "Quên mật khẩu") + hưởng dùng thử khuyến mãi như đăng ký thường. Tài khoản cũ khớp email sẽ được đánh dấu đã xác thực + gắn `google_sub`.
+- **Schema:** cột `customers.google_sub` — DB mới đã có trong `db/schema.sql`; production cần chạy `db/migrate-google-2026-11-05.sql` (chỉ chạy 1 lần). Code fail-soft: chưa chạy migration vẫn đăng nhập được (khớp theo email).
+- Đăng nhập xong tạo phiên `hora_session` y như đăng nhập thường rồi 302 về đích đã lưu (mặc định `/account.html`; giữ được `plan/period/view/next` trên URL trang tài khoản). Lỗi → về `/account.html?auth_error=<code>` để trang hiện thông báo tiếng Việt.
+- **Chưa cấu hình secret** → `GET /api/auth/google` trả trang HTML `503` giải thích thiếu `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET`.
 
 ## Lấy thông tin merchant
 

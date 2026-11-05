@@ -10,8 +10,10 @@ CREATE TABLE IF NOT EXISTS customers (
   iterations    INTEGER NOT NULL DEFAULT 100000,
   display_name  TEXT,
   email_verified_at TEXT,               -- NULL = chua xac thuc email; ISO 8601 UTC khi da xac thuc
+  google_sub    TEXT,                   -- dinh danh Google (sub) khi dang nhap Google; NULL = chua lien ket
   created_at    TEXT NOT NULL           -- ISO 8601 UTC
 );
+CREATE UNIQUE INDEX IF NOT EXISTS idx_customers_google_sub ON customers(google_sub) WHERE google_sub IS NOT NULL;
 
 CREATE TABLE IF NOT EXISTS sessions (
   token_hash  TEXT PRIMARY KEY,         -- SHA-256 cua token; token tho chi nam trong cookie

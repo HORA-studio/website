@@ -1014,6 +1014,12 @@ html,body{min-height:100%;height:100%;overflow:hidden}
 .auth-submit span:last-child{font-size:20px;transition:transform .15s}
 .auth-submit:hover span:last-child{transform:translateX(3px)}
 .auth-terms{font-size:10.5px;line-height:1.55;color:var(--muted);text-align:center;margin:14px 0 0}
+.google-divider{display:flex;align-items:center;gap:12px;margin:16px 0 12px;color:var(--muted);font-size:11.5px}
+.google-divider:before,.google-divider:after{content:"";flex:1;height:1px;background:var(--line)}
+.google-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:49px;border-radius:12px;border:1px solid var(--line);background:var(--panel);color:var(--text);font-size:13.5px;font-weight:650;text-decoration:none;transition:border-color .15s,box-shadow .15s}
+.google-btn:hover{border-color:var(--gold);box-shadow:0 0 0 3px var(--accent-soft)}
+.google-btn svg{flex:none}
+.auth-layout.forgot-mode #google-auth{display:none}
 #f-email:disabled{opacity:.55;cursor:not-allowed}
 #reset-back{margin-bottom:14px}
 @media(max-width:760px){
@@ -1573,6 +1579,10 @@ body.sh-control [data-sh-panel="dash"]:not(.hidden){display:flex;flex-direction:
         <button class="btn primary auth-submit" type="submit" id="auth-submit"><span>Đăng ký</span><span aria-hidden="true">→</span></button>
       </div>
     </form>
+    <div id="google-auth">
+      <div class="google-divider"><span>hoặc</span></div>
+      <a class="google-btn" id="google-btn" href="/api/auth/google"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M23.5 12.3c0-.9-.1-1.5-.3-2.2H12v4.1h6.5c-.1 1.1-.8 2.7-2.4 3.8l3.7 2.9c2.2-2.1 3.7-5.1 3.7-8.6z"/><path fill="#34A853" d="M12 24c3.2 0 5.9-1.1 7.9-2.9l-3.7-2.9c-1 .7-2.4 1.2-4.2 1.2-3.2 0-5.9-2.1-6.8-5l-3.9 3C2.3 21.3 6.8 24 12 24z"/><path fill="#FBBC05" d="M5.2 14.4c-.2-.7-.4-1.5-.4-2.4s.1-1.7.4-2.4l-3.9-3C.5 8.2 0 10 0 12s.5 3.8 1.3 5.4l3.9-3z"/><path fill="#EA4335" d="M12 4.7c1.8 0 3 .8 3.7 1.4l3.3-3.2C17.9 1.1 15.2 0 12 0 6.8 0 2.3 2.7 1.3 6.6l3.9 3c.9-2.8 3.6-4.9 6.8-4.9z"/></svg><span>Tiếp tục với Google</span></a>
+    </div>
     <div id="forgot-wrap" class="hidden" style="margin-top:14px;border-top:1px solid var(--line);padding-top:6px">
       <button type="button" id="forgot-back" class="forgot-back">← Quay lại đăng nhập</button>
       <label for="forgot-email">Email của tài khoản cần đặt lại mật khẩu</label>
@@ -1977,6 +1987,8 @@ function setMode(m) {
   $("forgot-link").style.display = m === "login" ? "" : "none";
   if (m !== "login") $("forgot-wrap").classList.add("hidden");
   $("auth-tabs").classList.toggle("hidden", m === "reset");
+  const gAuth = $("google-auth");
+  if (gAuth) gAuth.classList.toggle("hidden", m === "reset");
   $("reset-back").classList.toggle("hidden", m !== "reset");
   $("f-email").disabled = m === "reset";
   $("password-label").textContent = m === "reset" ? "Mật khẩu mới" : "Mật khẩu";
@@ -2530,6 +2542,35 @@ let resetToken = null;
 {
   const qs = new URLSearchParams(location.search);
   if (qs.get("mode") === "register") setMode("register");
+  // Giu y dinh truoc dang nhap Google: goi da chon / muc muon mo / trang dich
+  // (next) — chi gom cac param nay vao dia chi quay ve, bo qua token email.
+  {
+    const retQs = new URLSearchParams();
+    for (const k of ["plan", "period", "view", "next"]) {
+      const v = qs.get(k);
+      if (v) retQs.set(k, v);
+    }
+    const gBtn = $("google-btn");
+    if (gBtn && retQs.toString()) {
+      gBtn.href = "/api/auth/google?return=" + encodeURIComponent("/account.html?" + retQs.toString());
+    }
+  }
+  // Loi tu callback Google (?auth_error=<code>): hien thong bao + xoa khoi URL.
+  const authErr = qs.get("auth_error");
+  if (authErr) {
+    const clean = new URL(location.href);
+    clean.searchParams.delete("auth_error");
+    history.replaceState(null, "", clean.pathname + clean.search + clean.hash);
+    const msgs = {
+      denied: "Bạn đã hủy đăng nhập Google.",
+      state: "Phiên đăng nhập Google đã hết hạn hoặc không khớp. Hãy bấm Tiếp tục với Google lại.",
+      not_configured: "Đăng nhập Google chưa được cấu hình trên máy chủ. Hãy dùng email + mật khẩu, hoặc báo quản trị viên đặt GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET.",
+      unverified_email: "Tài khoản Google này chưa xác thực email nên chưa đăng nhập được.",
+      token: "Không đổi được mã đăng nhập với Google. Hãy thử lại.",
+      server: "Đăng nhập Google gặp lỗi máy chủ. Hãy thử lại sau."
+    };
+    showMsg("err", msgs[authErr] || "Đăng nhập Google thất bại. Hãy thử lại hoặc dùng email + mật khẩu.");
+  }
   const verifyParam = qs.get("verify");
   const resetParam = qs.get("reset");
   if (verifyParam || resetParam) {
