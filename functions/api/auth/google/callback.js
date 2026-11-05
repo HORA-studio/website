@@ -91,7 +91,7 @@ export async function onRequestGet({ request, env }) {
     try {
       const me = await getSessionCustomer(env, request);
       if (!me || me.id !== linkCustomerId) return fail(request, "link_login_required");
-      const r = await linkGoogleToCustomer(env, request, me.id, { sub: claims.sub, email: claims.email });
+      const r = await linkGoogleToCustomer(env, request, me.id, { sub: claims.sub, email: claims.email, picture: claims.picture || "" });
       if (!r.ok) return fail(request, r.code);
       const sep = returnTo.includes("?") ? "&" : "?";
       const headers = new Headers({ Location: `${url.origin}${returnTo}${sep}google_linked=1` });
@@ -111,6 +111,7 @@ export async function onRequestGet({ request, env }) {
       sub: claims.sub,
       email: claims.email,
       name: displayName,
+      picture: claims.picture || "",
     });
     const session = await createSession(env, customer.id);
     const headers = new Headers({ Location: `${url.origin}${returnTo}` });

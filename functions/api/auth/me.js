@@ -9,7 +9,13 @@ export async function onRequestGet({ request, env }) {
   if (!customer) return errorJson("UNAUTHORIZED", "Bạn chưa đăng nhập.", 401);
   const verifiedAt = await getEmailVerifiedAt(env, customer.id);
   const google = await getGoogleLink(env, customer.id);
-  return json({ customer: { ...customer, emailVerified: !!verifiedAt, googleLinked: google.linked, googleEmail: google.email } });
+  // phone + avatar_url: fail-soft khi DB chua chay migration profile.
+  let phone = null, avatarUrl = null;
+  try {
+    const row = await env.DB.prepare("SELECT phone, avatar_url FROM customers WHERE id = ?1").bind(customer.id).first();
+    if (row) { phone = row.phone || null; avatarUrl = row.avatar_url || null; }
+  } catch { /* chua co cot -> de null */ }
+  return json({ customer: { ...customer, emailVerified: !!verifiedAt, googleLinked: google.linked, googleEmail: google.email, phone, avatarUrl } });
 }
 
 export function onRequest() {

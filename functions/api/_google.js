@@ -60,6 +60,17 @@ async function setGoogleEmail(env, customerId, email) {
   } catch { /* DB chua chay migration google_email -> bo qua */ }
 }
 
+// Anh dai dien tu Google: chi ghi khi chua co anh, hoac anh hien tai
+// cung la URL Google (https) — KHONG ghi de anh khach tu tai len (data:).
+export async function setGoogleAvatar(env, customerId, picture) {
+  const url = String(picture || "");
+  if (!/^https:\/\//.test(url)) return;
+  try {
+    await env.DB.prepare("UPDATE customers SET avatar_url = ?2 WHERE id = ?1 AND (avatar_url IS NULL OR avatar_url LIKE 'https://%')")
+      .bind(customerId, url).run();
+  } catch { /* DB chua co cot avatar_url -> bo qua */ }
+}
+
 // Trang thai lien ket Google cua 1 khach (cho /api/auth/me + trang tai khoan).
 // Fail-soft: DB chua co cot google_sub thi coi nhu chua lien ket.
 export async function getGoogleLink(env, customerId) {
@@ -99,6 +110,7 @@ export async function linkGoogleToCustomer(env, request, customerId, profile) {
     await env.DB.prepare("UPDATE customers SET google_sub = ?2 WHERE id = ?1").bind(customerId, sub).run();
   } catch { return { ok: false, code: "linked_other" }; }
   await setGoogleEmail(env, customerId, gEmail);
+  await setGoogleAvatar(env, customerId, profile.picture);
   await logEvent(env, { eventType: "auth.google_linked", customerId, ip: clientIp(request) });
   return { ok: true };
 }
@@ -175,6 +187,7 @@ export async function findOrCreateGoogleCustomer(env, request, profile) {
     }
     await setGoogleSub(env, existing.id, sub);
     await setGoogleEmail(env, existing.id, email);
+    await setGoogleAvatar(env, existing.id, profile.picture);
     await logEvent(env, { eventType: "auth.google_login", customerId: existing.id, ip: clientIp(request) });
     return { customer: { id: existing.id, email: existing.email, displayName: name || existing.display_name }, created: false };
   }
@@ -186,8 +199,8 @@ export async function findOrCreateGoogleCustomer(env, request, profile) {
   let inserted = false;
   try {
     await env.DB.prepare(
-      "INSERT INTO customers (id, email, password_hash, salt, iterations, display_name, email_verified_at, google_sub, google_email, created_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)"
-    ).bind(id, email, hash, salt, iterations, name, nowIso, sub || null, email, nowIso).run();
+      "INSERT INTO customers (id, email, password_hash, salt, iterations, display_name, email_verified_at, google_sub, google_email, avatar_url, created_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)"
+    ).bind(id, email, hash, salt, iterations, name, nowIso, sub || null, email, String(profile.picture || "") || null, nowIso).run();
     inserted = true;
   } catch {
     inserted = false; // DB chua co cot google_email -> thu lai khong co cot do

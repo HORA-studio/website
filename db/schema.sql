@@ -12,6 +12,8 @@ CREATE TABLE IF NOT EXISTS customers (
   email_verified_at TEXT,               -- NULL = chua xac thuc email; ISO 8601 UTC khi da xac thuc
   google_sub    TEXT,                   -- dinh danh Google (sub) khi dang nhap Google; NULL = chua lien ket
   google_email  TEXT,                   -- email cua Google da lien ket (co the khac email tai khoan khi lien ket thu cong)
+  phone         TEXT,                   -- so dien thoai khach tu cap nhat o trang tai khoan
+  avatar_url    TEXT,                   -- anh dai dien: URL Google hoac data URL anh tai len (160x160)
   created_at    TEXT NOT NULL           -- ISO 8601 UTC
 );
 CREATE UNIQUE INDEX IF NOT EXISTS idx_customers_google_sub ON customers(google_sub) WHERE google_sub IS NOT NULL;

@@ -1508,6 +1508,53 @@ body.sh-control [data-sh-panel="dash"]:not(.hidden){display:flex;flex-direction:
   .sh-stats-inline{flex-wrap:wrap}
   .sh-item{min-height:150px}
 }
+
+/* ===== Trang Thong tin dang settings (2026-11-05) ===== */
+.side-profile{display:flex;align-items:center;gap:11px;padding:6px 10px 16px;border-bottom:1px solid var(--line);margin-bottom:14px}
+.side-avatar{position:relative;flex:0 0 auto;width:42px;height:42px;border-radius:50%;overflow:hidden;background:var(--accent-soft);color:var(--gold);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:17px}
+.side-avatar img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.side-profile-meta{display:flex;flex-direction:column;min-width:0}
+.side-profile-meta strong{font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.side-profile-meta span{font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+body.sh-control .side-profile{display:none}
+.set-section{border-top:1px solid var(--line);padding:24px 2px 26px}
+.set-section:first-of-type{border-top:0;padding-top:8px}
+.set-head h3{margin:0 0 4px;font-size:17px;letter-spacing:-.02em}
+.set-head p{margin:0 0 16px;font-size:13.5px}
+.avatar-row{display:flex;gap:18px;align-items:flex-start;margin-bottom:20px}
+.avatar-big{position:relative;flex:0 0 auto;width:78px;height:78px;border-radius:50%;overflow:hidden;background:var(--accent-soft);color:var(--gold);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:30px}
+.avatar-big img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.avatar-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.avatar-actions .btn{cursor:pointer}
+.field-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px 16px;max-width:720px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field-full{grid-column:1/-1}
+.field input{width:100%}
+.field input[readonly]{opacity:.75}
+.field-note{margin:0;font-size:12.5px}
+.lbl{font-size:13px;font-weight:650;color:var(--muted)}
+.google-field{flex-direction:row;align-items:center;gap:10px;flex-wrap:wrap}
+.google-field .lbl{flex:0 0 auto}
+.savebar{display:flex;justify-content:flex-end;gap:10px;margin-top:22px;padding-top:16px;border-top:1px solid var(--line);max-width:720px}
+.pw-form{margin-top:14px;display:flex;flex-direction:column;gap:12px;max-width:420px}
+.pw-form input{width:100%}
+.mini-plans{display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:720px}
+.mini-plan{border:1px solid var(--line);border-radius:16px;padding:18px;background:var(--panel2)}
+.mini-plan.featured{border-color:var(--gold)}
+.mini-plan h4{margin:0 0 2px;font-size:16px}
+.mini-price{font-size:24px;font-weight:800;letter-spacing:-.03em;margin:6px 0 2px}
+.mini-plan ul{margin:10px 0 14px;padding-left:18px;font-size:13.5px;color:var(--muted)}
+.mini-plan .btn{width:100%}
+.info-toggle-row{margin-bottom:14px}
+@keyframes cardFlash{0%{box-shadow:0 0 0 0 rgba(108,92,255,0)}25%{box-shadow:0 0 0 4px rgba(108,92,255,.55)}100%{box-shadow:0 0 0 0 rgba(108,92,255,0)}}
+.price-card.flash{animation:cardFlash 1.5s ease}
+@media (max-width:760px){
+  .side-profile{display:none}
+  #side-nav-account{grid-template-columns:repeat(2,1fr)}
+  .field-grid{grid-template-columns:1fr}
+  .mini-plans{grid-template-columns:1fr}
+  .savebar{max-width:none}
+}
 </style>
 </head>
 <body>
@@ -1515,13 +1562,13 @@ body.sh-control [data-sh-panel="dash"]:not(.hidden){display:flex;flex-direction:
 
 <div class="shell solo" id="shell">
   <aside id="side" class="side hidden">
+    <div class="side-profile">
+      <span class="side-avatar"><img id="side-avatar-img" class="hidden" alt=""><span id="side-avatar-letter">?</span></span>
+      <span class="side-profile-meta"><strong id="side-name">Tài khoản</strong><span id="side-email" class="muted"></span></span>
+    </div>
     <nav class="side-nav" id="side-nav-account" aria-label="Mục tài khoản">
-      <button type="button" class="side-item active" data-view-btn="account" data-short="Tài khoản"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4.5 20.5c1.4-3.8 4.4-5.5 7.5-5.5s6.1 1.7 7.5 5.5"></path></svg> Thông tin tài khoản</button>
-      
-      
-      <button type="button" class="side-item" data-view-btn="buy" data-short="Mua gói"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.6-6.3"></path><path d="M21 3v6h-6"></path></svg> Mua gói</button>
+      <button type="button" class="side-item active" data-view-btn="account" data-short="Thông tin"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4.5 20.5c1.4-3.8 4.4-5.5 7.5-5.5s6.1 1.7 7.5 5.5"></path></svg> Thông tin</button>
       <button type="button" class="side-item" data-view-btn="orders" data-short="Lịch sử"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M8.5 6h12M8.5 12h12M8.5 18h12"></path><path d="M4 6h.01M4 12h.01M4 18h.01"></path></svg> Lịch sử giao dịch <span id="orders-unpaid-badge" class="side-badge hidden" title="Có đơn chưa thanh toán" aria-label="Có đơn chưa thanh toán">!</span></button>
-      <button type="button" class="side-item" data-view-btn="remote" data-short="Remote"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="4" width="19" height="13" rx="2"></rect><path d="M8.5 21h7M12 17v4"></path></svg> Remote</button>
     </nav>
     <nav class="side-nav hidden" id="sh-side-nav" aria-label="Mục điều khiển">
       <button type="button" class="side-item sh-nav-item active" data-sh-nav="dash" data-short="Tổng quan"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="3" width="7" height="7" rx="1.5"></rect><rect x="3" y="14" width="7" height="7" rx="1.5"></rect><rect x="14" y="14" width="7" height="7" rx="1.5"></rect></svg> Tổng quan</button>
@@ -1600,54 +1647,83 @@ body.sh-control [data-sh-panel="dash"]:not(.hidden){display:flex;flex-direction:
 
   <!-- Da dang nhap -->
   <div id="dash" class="hidden">
-    <div class="content-head"><h2 id="view-title">Thông tin tài khoản</h2></div>
+    <div class="content-head"><h2 id="view-title">Thông tin</h2></div>
     <section class="card view-panel account-panel" data-view="account">
-      <div class="account-welcome">
-        <div>
-          
-          <h2>Tài khoản của bạn<span id="acc-name"></span></h2>
-          <p class="muted">Đăng nhập để mua license, xem gói (tier) và lịch sử giao dịch của bạn.</p>
+      <span id="account-license-count" class="hidden">0</span><span id="account-order-count" class="hidden">0</span><span id="acc-name" class="hidden"></span>
+
+      <div class="set-section">
+        <div class="set-head"><h3>Thông tin cá nhân</h3><p class="muted">Ảnh đại diện, tên hiển thị và thông tin liên hệ của bạn.</p></div>
+        <div class="avatar-row">
+          <span class="avatar-big"><img id="pf-avatar-img" class="hidden" alt="Ảnh đại diện"><span id="pf-avatar-letter">?</span></span>
+          <div>
+            <div class="avatar-actions">
+              <label class="btn small primary" for="pf-avatar-file">Tải ảnh lên</label>
+              <input type="file" id="pf-avatar-file" accept="image/*" class="hidden">
+              <button class="btn small" type="button" id="pf-avatar-remove">Xóa ảnh</button>
+            </div>
+            <p class="muted" style="margin:8px 0 0;font-size:13px">Ảnh tự lấy từ Google khi bạn đăng nhập / liên kết Google, hoặc ảnh bạn tải lên (tự nén về 160×160).</p>
+          </div>
+        </div>
+        <div class="field-grid">
+          <div class="field"><label class="lbl" for="pf-name">Tên hiển thị</label><input id="pf-name" autocomplete="name" placeholder="Tên của bạn"></div>
+          <div class="field"><label class="lbl" for="pf-phone">Số điện thoại</label><input id="pf-phone" autocomplete="tel" placeholder="Chưa cập nhật"></div>
+          <div class="field field-full"><label class="lbl" for="pf-email">Email</label><input id="pf-email" readonly tabindex="-1"><p class="muted field-note">Dùng để đăng nhập vào tài khoản của bạn.</p></div>
+          <div class="field field-full google-field"><span class="lbl">Tài khoản Google</span><span class="pi-value muted" id="acc-google">Chưa liên kết</span><a class="btn small" id="btn-google-link" href="/api/auth/google?mode=link&amp;return=/account.html">Liên kết</a><button class="btn small hidden" type="button" id="btn-google-unlink">Hủy liên kết</button></div>
+        </div>
+        <div id="verify-banner" class="msg info hidden" style="display: block;">
+          <span>Email của bạn chưa được xác thực.</span>
+          <button class="btn small" type="button" id="resend-verify-btn" style="margin-left:8px">Gửi lại email xác thực</button>
+        </div>
+        <div class="savebar"><button class="btn" type="button" id="pf-cancel">Hủy</button><button class="btn primary" type="button" id="pf-save">Lưu thay đổi</button></div>
+      </div>
+
+      <div class="set-section">
+        <div class="set-head"><h3>Mật khẩu</h3><p class="muted">Đăng nhập bằng mật khẩu của bạn thay vì chỉ dùng Google.</p></div>
+        <button class="btn" type="button" id="pw-open">Đổi mật khẩu</button>
+        <div id="pw-form" class="pw-form hidden">
+          <div class="field"><label class="lbl" for="pw-cur">Mật khẩu hiện tại</label><input type="password" id="pw-cur" autocomplete="current-password"></div>
+          <div class="field"><label class="lbl" for="pw-new">Mật khẩu mới (ít nhất 8 ký tự)</label><input type="password" id="pw-new" autocomplete="new-password"></div>
+          <div class="field"><label class="lbl" for="pw-new2">Nhập lại mật khẩu mới</label><input type="password" id="pw-new2" autocomplete="new-password"></div>
+          <div class="avatar-actions"><button class="btn primary small" type="button" id="pw-save">Lưu mật khẩu</button><button class="btn small" type="button" id="pw-cancel">Đóng</button></div>
+          <p class="muted" style="margin:0;font-size:13px">Tài khoản tạo bằng Google có mật khẩu ngẫu nhiên — nếu không biết mật khẩu hiện tại, hãy <button class="btn small" type="button" id="pw-forgot">đặt mật khẩu qua email</button>.</p>
         </div>
       </div>
-      <div class="account-stats" aria-label="Tổng quan tài khoản">
-        <div class="stat-card">
-          <span class="stat-icon">⌘</span>
-          <span class="stat-label">License của tôi</span>
-          <strong id="account-license-count">0</strong>
-          <span class="stat-note">License đã gắn với tài khoản</span>
-        </div>
-        <div class="stat-card">
-          <span class="stat-icon">↗</span>
-          <span class="stat-label">Giao dịch</span>
-          <strong id="account-order-count">0</strong>
-          <span class="stat-note">Đơn hàng trong lịch sử</span>
-        </div>
-        <div class="stat-card stat-card-accent">
-          <span class="stat-icon">✳</span>
-          <span class="stat-label">Hệ sinh thái HORA</span>
-          <strong>2 ứng dụng</strong>
-          <span class="stat-note">Video Builder &amp; Facebook Builder</span>
+
+      <div class="set-section">
+        <div class="set-head"><h3>Gói dịch vụ</h3><p class="muted">Mở khóa toàn bộ tính năng của HORA Media. Bấm Mua ngay để mở trang mua gói và thanh toán.</p></div>
+        <div class="pricing-toggle-row info-toggle-row"><div class="billing-toggle" role="tablist" aria-label="Chọn thời hạn"><button type="button" class="billing-opt active" data-billing="month" role="tab" aria-selected="true">Theo tháng</button><button type="button" class="billing-opt" data-billing="year" role="tab" aria-selected="false">Theo năm<span class="save-badge">Tiết kiệm 17%</span></button></div></div>
+        <div class="mini-plans">
+          <article class="mini-plan" data-plan-card="go">
+            <h4>Go</h4>
+            <p class="muted plan-desc" style="margin:0">Cho người bắt đầu làm video bán hàng bằng AI</p>
+            <div class="mini-price"><span data-price>199.000đ</span></div>
+            <ul></ul>
+            <button class="btn" type="button" data-info-buy="go">Mua ngay</button>
+          </article>
+          <article class="mini-plan featured" data-plan-card="plus">
+            <h4>Plus</h4>
+            <p class="muted plan-desc" style="margin:0">Cho người làm nghiêm túc — thêm trợ lý AI đồng hành</p>
+            <div class="mini-price"><span data-price>299.000đ</span></div>
+            <ul></ul>
+            <button class="btn primary" type="button" data-info-buy="plus">Mua ngay</button>
+          </article>
         </div>
       </div>
-      <div class="account-profile">
-        <div class="profile-head">Thông tin cá nhân</div>
-        <div class="pi-row"><span class="pi-label">Email</span><span class="pi-value" id="acc-email">—</span></div>
-        <div class="pi-row"><span class="pi-label">Phone</span><span class="pi-value muted" id="acc-phone">Chưa cập nhật</span></div>
-        <div class="pi-row"><span class="pi-label">Google</span><span class="pi-value muted" id="acc-google">Chưa liên kết</span><a class="btn small" id="btn-google-link" href="/api/auth/google?mode=link&amp;return=/account.html" style="margin-left:8px">Liên kết</a><button class="btn small hidden" type="button" id="btn-google-unlink" style="margin-left:8px">Hủy liên kết</button></div>
+
+      <div class="set-section">
+        <div class="set-head"><h3>Kết nối ứng dụng</h3><p class="muted">Điều khiển app HORA Media trên máy tính của bạn ngay từ trình duyệt này.</p></div>
+        <p id="info-remote-status" class="muted" style="margin:0 0 12px">Chưa kết nối ứng dụng.</p>
+        <div class="avatar-actions">
+          <button class="btn primary small" type="button" id="info-remote-open">Kết nối ứng dụng</button>
+          <button class="btn small hidden" type="button" id="info-remote-disconnect">Ngắt kết nối</button>
+        </div>
       </div>
-      <div id="verify-banner" class="msg info hidden" style="display: block;">
-        <span>Email của bạn chưa được xác thực.</span>
-        <button class="btn small" type="button" id="resend-verify-btn" style="margin-left:8px">Gửi lại email xác thực</button>
-      </div>
+
       <div class="account-logout">
         <div class="account-logout-copy"><strong>Đăng xuất</strong><p class="muted">Thoát khỏi tài khoản trên trình duyệt này.</p></div>
         <button class="btn" id="logout-btn" type="button">Đăng xuất</button>
       </div>
     </section>
-
-    
-
-    
 
     <section class="card view-panel hidden purchase-panel" data-view="buy">
       <div class="purchase-hero">
@@ -1947,7 +2023,7 @@ async function api(path, opts = {}) {
   return { res, data };
 }
 // ----- Dieu huong app shell (sidebar) -----
-const VIEW_TITLES = { account: "Thông tin tài khoản", buy: "Mua gói", orders: "Lịch sử giao dịch", remote: "Remote" };
+const VIEW_TITLES = { account: "Thông tin", buy: "Mua gói", orders: "Lịch sử giao dịch", remote: "Remote" };
 let currentView = "account";
 try { currentView = sessionStorage.getItem("hora-view") || "account"; } catch { /* sessionStorage bi chan */ }
 if (!VIEW_TITLES[currentView]) currentView = "account";
@@ -2182,6 +2258,132 @@ if (googleUnlinkBtn) googleUnlinkBtn.addEventListener("click", async () => {
   }
 });
 
+// ----- Trang Thong tin dang settings -----
+let PROFILE = { displayName: "", phone: "", avatarUrl: null, email: "" };
+function renderAvatarImg() {
+  const url = PROFILE.avatarUrl;
+  const letter = (PROFILE.displayName || PROFILE.email || "?").trim().charAt(0).toUpperCase() || "?";
+  [["pf-avatar-img", "pf-avatar-letter"], ["side-avatar-img", "side-avatar-letter"]].forEach(([imgId, letterId]) => {
+    const img = $(imgId), lt = $(letterId);
+    if (!img || !lt) return;
+    lt.textContent = letter;
+    if (url) { img.src = url; img.classList.remove("hidden"); lt.classList.add("hidden"); }
+    else { img.removeAttribute("src"); img.classList.add("hidden"); lt.classList.remove("hidden"); }
+  });
+}
+function renderProfile(c) {
+  if (!c) return;
+  PROFILE = { displayName: c.displayName || "", phone: c.phone || "", avatarUrl: c.avatarUrl || null, email: c.email || "" };
+  if ($("pf-name")) $("pf-name").value = PROFILE.displayName;
+  if ($("pf-phone")) $("pf-phone").value = PROFILE.phone;
+  if ($("pf-email")) $("pf-email").value = PROFILE.email;
+  if ($("side-name")) $("side-name").textContent = PROFILE.displayName || PROFILE.email || "Tài khoản";
+  if ($("side-email")) $("side-email").textContent = PROFILE.displayName ? PROFILE.email : "";
+  renderAvatarImg();
+}
+const pfSaveBtn = $("pf-save");
+if (pfSaveBtn) pfSaveBtn.addEventListener("click", async () => {
+  const displayName = $("pf-name").value.trim();
+  const phone = $("pf-phone").value.trim();
+  const { res, data } = await api("/api/auth/profile", { method: "POST", body: JSON.stringify({ displayName, phone }) });
+  if (res.ok) {
+    PROFILE.displayName = displayName; PROFILE.phone = phone;
+    if ($("side-name")) $("side-name").textContent = displayName || PROFILE.email || "Tài khoản";
+    if ($("side-email")) $("side-email").textContent = displayName ? PROFILE.email : "";
+    renderAvatarImg();
+    showMsg("ok", "Đã lưu thông tin cá nhân.");
+  } else showMsg("err", errText(data, "Lưu thông tin thất bại. Hãy thử lại."));
+});
+const pfCancelBtn = $("pf-cancel");
+if (pfCancelBtn) pfCancelBtn.addEventListener("click", () => {
+  $("pf-name").value = PROFILE.displayName;
+  $("pf-phone").value = PROFILE.phone;
+  hideNotice();
+});
+const pfAvatarFile = $("pf-avatar-file");
+if (pfAvatarFile) pfAvatarFile.addEventListener("change", () => {
+  const file = pfAvatarFile.files && pfAvatarFile.files[0];
+  pfAvatarFile.value = "";
+  if (!file) return;
+  if (!/^image\//.test(file.type)) { showMsg("err", "File chọn không phải ảnh."); return; }
+  const img = new Image();
+  img.onload = async () => {
+    URL.revokeObjectURL(img.src);
+    const size = 160;
+    const cv = document.createElement("canvas"); cv.width = size; cv.height = size;
+    const ctx = cv.getContext("2d");
+    const scale = Math.max(size / img.width, size / img.height);
+    const w = img.width * scale, h = img.height * scale;
+    ctx.drawImage(img, (size - w) / 2, (size - h) / 2, w, h);
+    const dataUrl = cv.toDataURL("image/jpeg", 0.85);
+    const { res, data } = await api("/api/auth/avatar", { method: "POST", body: JSON.stringify({ image: dataUrl }) });
+    if (res.ok) { PROFILE.avatarUrl = dataUrl; renderAvatarImg(); showMsg("ok", "Đã cập nhật ảnh đại diện."); }
+    else showMsg("err", errText(data, "Tải ảnh lên thất bại. Hãy thử lại."));
+  };
+  img.onerror = () => showMsg("err", "Không đọc được file ảnh này.");
+  img.src = URL.createObjectURL(file);
+});
+const pfAvatarRemove = $("pf-avatar-remove");
+if (pfAvatarRemove) pfAvatarRemove.addEventListener("click", async () => {
+  const { res, data } = await api("/api/auth/avatar", { method: "POST", body: JSON.stringify({ image: null }) });
+  if (res.ok) { PROFILE.avatarUrl = null; renderAvatarImg(); showMsg("ok", "Đã xóa ảnh đại diện."); }
+  else showMsg("err", errText(data, "Xóa ảnh thất bại. Hãy thử lại."));
+});
+// Doi mat khau
+const pwOpenBtn = $("pw-open");
+if (pwOpenBtn) pwOpenBtn.addEventListener("click", () => $("pw-form").classList.toggle("hidden"));
+const pwCancelBtn = $("pw-cancel");
+if (pwCancelBtn) pwCancelBtn.addEventListener("click", () => { $("pw-form").classList.add("hidden"); });
+const pwSaveBtn = $("pw-save");
+if (pwSaveBtn) pwSaveBtn.addEventListener("click", async () => {
+  const cur = $("pw-cur").value, nw = $("pw-new").value, nw2 = $("pw-new2").value;
+  if (nw.length < 8) { showMsg("err", "Mật khẩu mới cần ít nhất 8 ký tự."); return; }
+  if (nw !== nw2) { showMsg("err", "Nhập lại mật khẩu mới chưa khớp."); return; }
+  const { res, data } = await api("/api/auth/change-password", { method: "POST", body: JSON.stringify({ currentPassword: cur, newPassword: nw }) });
+  if (res.ok) {
+    $("pw-cur").value = ""; $("pw-new").value = ""; $("pw-new2").value = "";
+    $("pw-form").classList.add("hidden");
+    showMsg("ok", "Đã đổi mật khẩu. Các thiết bị/trình duyệt khác đã bị đăng xuất.");
+  } else showMsg("err", errText(data, "Đổi mật khẩu thất bại. Hãy thử lại."));
+});
+const pwForgotBtn = $("pw-forgot");
+if (pwForgotBtn) pwForgotBtn.addEventListener("click", async () => {
+  const email = PROFILE.email || MY_EMAIL || "";
+  if (!email) { showMsg("err", "Chưa rõ email tài khoản để gửi link."); return; }
+  await api("/api/auth/forgot-password", { method: "POST", body: JSON.stringify({ email }) });
+  showMsg("info", "Đã gửi link đặt lại mật khẩu tới " + email + " (nếu hệ thống email đã cấu hình). Hãy kiểm tra hộp thư.");
+});
+// Mua goi ngay trong Thong tin -> mo view mua that + nhay the goi
+document.querySelectorAll("[data-info-buy]").forEach((b) => b.addEventListener("click", () => {
+  const plan = b.dataset.infoBuy;
+  showView("buy");
+  const card = document.querySelector('section[data-view="buy"] [data-plan-card="' + plan + '"]');
+  if (card) {
+    card.scrollIntoView({ block: "center", behavior: "smooth" });
+    card.classList.remove("flash"); void card.offsetWidth; card.classList.add("flash");
+    setTimeout(() => card.classList.remove("flash"), 1700);
+  }
+}));
+// Ket noi ung dung (Remote) ngay trong Thong tin
+function renderInfoRemote() {
+  const st = $("info-remote-status"), open = $("info-remote-open"), disc = $("info-remote-disconnect");
+  if (!st || !open || !disc) return;
+  const saved = remoteSaved();
+  if (saved) {
+    st.textContent = "Đã kết nối tới " + (saved.device || "máy của bạn") + " — phiên điều khiển được lưu trên trình duyệt này.";
+    open.textContent = "Mở view điều khiển";
+    disc.classList.remove("hidden");
+  } else {
+    st.textContent = "Chưa kết nối ứng dụng. Mở app HORA Media trên máy tính rồi quét QR / nhập mã 6 số để kết nối.";
+    open.textContent = "Kết nối ứng dụng";
+    disc.classList.add("hidden");
+  }
+}
+const infoRemoteOpen = $("info-remote-open");
+if (infoRemoteOpen) infoRemoteOpen.addEventListener("click", () => showView("remote"));
+const infoRemoteDisc = $("info-remote-disconnect");
+if (infoRemoteDisc) infoRemoteDisc.addEventListener("click", () => { const rb = $("remote-disconnect"); if (rb) rb.click(); });
+
 async function loadDash() {
   const { res, data } = await api("/api/auth/me");
   if (!res.ok) {
@@ -2208,8 +2410,9 @@ async function loadDash() {
   if (wantView && VIEW_TITLES[wantView]) showView(wantView);
   MY_EMAIL = data.customer.email || "";
   initRemoteFromUrl();
-  $("acc-email").textContent = data.customer.email;
   renderGoogleLink(data.customer);
+  renderProfile(data.customer);
+  renderInfoRemote();
   $("acc-name").textContent = data.customer.displayName ? " — " + data.customer.displayName : "";
   $("verify-banner").style.display = data.customer.emailVerified === false ? "block" : "none";
   await loadPlans().catch(() => {});
@@ -2772,6 +2975,7 @@ function remoteRenderConnected() {
   const saved = remoteSaved();
   $("remote-connected").classList.toggle("hidden", !saved);
   $("remote-connect-box").classList.toggle("hidden", !!saved);
+  renderInfoRemote();
   if (saved) {
     $("remote-device").textContent = saved.device || "máy của bạn";
     const sd = $("sh-device");
