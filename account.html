@@ -1618,10 +1618,13 @@ section[data-view="orders"]{position:relative}
      hon day menu trai dung 20px; bo di thi 2 cot bang day nhau */
   .content{padding-bottom:0}
   #dash [data-view="orders"] .lic-table-wrap{max-width:none}
-  #dash section[data-view="account"] .set-section{max-width:1120px}
+  /* Thong tin la form cai dat: giu cot 860px cho gon, khong keo gian theo man
+     nhu bang Lich su (keo gian het co lam form trong rong) */
+  #dash section[data-view="account"] .set-section{max-width:860px}
   #dash section[data-view="account"] .field-grid,
-  #dash section[data-view="account"] .savebar{max-width:1120px}
-  #dash section[data-view="account"] .account-logout{max-width:1120px}
+  #dash section[data-view="account"] .savebar{max-width:860px}
+  #dash section[data-view="account"] .account-logout{max-width:860px}
+  #dash section[data-view="account"] .account-stats{max-width:860px;padding-left:0 !important;padding-right:0 !important;padding-bottom:20px}
   #dash section[data-view="buy"] .mini-plans{max-width:1120px}
   /* Thong tin: noi dung day tu tren xuong (het can giua lam Ket noi bi day xuong),
      Dang xuat ghim day panel — day panel deu voi day menu trai */
@@ -1745,6 +1748,12 @@ section[data-view="orders"]{position:relative}
     <div class="content-head"><h2 id="view-title">Thông tin</h2></div>
     <section class="card view-panel account-panel" data-view="account">
       <span id="account-license-count" class="hidden">0</span><span id="account-order-count" class="hidden">0</span><span id="acc-name" class="hidden"></span>
+
+      <div class="account-stats" id="account-summary">
+        <div class="stat-card"><span class="stat-icon">✦</span><span class="stat-label">Gói cao nhất</span><strong id="sum-tier">—</strong><span class="stat-note" id="sum-tier-note">Đang tải…</span></div>
+        <div class="stat-card"><span class="stat-icon">🔑</span><span class="stat-label">License</span><strong id="sum-licenses">0</strong><span class="stat-note">license đang còn hiệu lực</span></div>
+        <div class="stat-card stat-card-accent"><span class="stat-icon">📅</span><span class="stat-label">Hạn dùng</span><strong id="sum-expiry">—</strong><span class="stat-note">Chi tiết ở tab Lịch sử giao dịch</span></div>
+      </div>
 
       <div class="set-section">
         <div class="set-head"><h3>Thông tin cá nhân</h3><p class="muted">Ảnh đại diện, tên hiển thị và thông tin liên hệ của bạn.</p></div>
@@ -2653,6 +2662,24 @@ async function loadLicenses() {
   if (licenseCount) licenseCount.textContent = String(LICENSES_CACHE.length);
   renderHistory();
   renderRemoteGate();
+  renderAccountSummary();
+}
+
+// Dai tong quan dau tab Thong tin: goi cao nhat / so license / han dung xa nhat.
+function renderAccountSummary() {
+  const tierEl = $("sum-tier"), licEl = $("sum-licenses"), expEl = $("sum-expiry");
+  if (!tierEl || !licEl || !expEl) return;
+  const active = LICENSES_CACHE.filter((l) => l && l.status !== "revoked");
+  const hasPlus = active.some((l) => l.tier === "plus");
+  const hasGo = active.some((l) => l.tier === "go");
+  tierEl.textContent = hasPlus ? "Plus" : hasGo ? "Go" : "Chưa có";
+  const note = $("sum-tier-note");
+  if (note) note.textContent = hasPlus ? "Đầy đủ tính năng + Trợ lý AI + Remote" : hasGo ? "Nâng cấp Plus để có Trợ lý AI + Remote" : "Mua gói ở tab Mua gói";
+  licEl.textContent = String(active.length);
+  const exps = active.map((l) => l.expiresAt).filter(Boolean).map((d) => new Date(d).getTime()).filter((t) => !Number.isNaN(t));
+  if (!active.length) expEl.textContent = "—";
+  else if (!exps.length) expEl.textContent = "Chưa kích hoạt";
+  else expEl.textContent = fmtDay(new Date(Math.max(...exps)).toISOString());
 }
 
 const GATEWAY_VI = { sepay: "SePay", momo: "MoMo", vnpay: "VNPay" };
