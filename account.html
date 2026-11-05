@@ -1796,6 +1796,19 @@ body.sh-control #dash [data-view="remote"] .remote-body{padding-top:2px}
   .sh-sendbtn{align-self:flex-end;width:40px;height:40px}
 }
 
+/* ===== v12: Nhap bang giong noi (Web Speech API, vi-VN) cho o prompt
+   Tao task + o chat Tro ly. Nut mic an khi trinh duyet khong ho tro ===== */
+.sh-composer-foot{display:contents}
+.sh-micbtn{width:40px;height:40px;border-radius:50%;border:1px solid var(--line2);background:transparent;color:var(--muted);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;flex:0 0 auto;padding:0}
+.sh-micbtn:hover{color:var(--text);border-color:var(--muted)}
+.sh-micbtn.rec{background:#dc2626;border-color:#dc2626;color:#fff;animation:sh-mic-pulse 1.2s ease-in-out infinite}
+@keyframes sh-mic-pulse{0%,100%{box-shadow:0 0 0 0 rgba(220,38,38,.45)}50%{box-shadow:0 0 0 7px rgba(220,38,38,0)}}
+.sh-prompt-box{position:relative}
+.sh-prompt-mic{position:absolute;right:8px;bottom:8px;background:var(--panel)}
+@media (max-width:760px){
+  .sh-composer-foot{display:flex;align-items:center;justify-content:space-between;width:100%}
+}
+
 </style>
 </head>
 <body>
@@ -2036,6 +2049,7 @@ body.sh-control #dash [data-view="remote"] .remote-body{padding-top:2px}
             <div class="sh-prompt-box">
               <textarea id="sh-prompt" class="sh-prompt-big" placeholder="Mô tả nội dung cần tạo… — gõ @ để đính kèm ảnh/video tham chiếu"></textarea>
               <div class="sh-refs hidden" id="sh-refs"></div>
+              <button class="sh-micbtn sh-prompt-mic" id="sh-prompt-mic" type="button" title="Nhập prompt bằng giọng nói" aria-label="Nhập prompt bằng giọng nói"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2.5" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0"/><path d="M12 17.5V21"/></svg></button>
             </div>
             <label class="lbl" for="sh-negative" style="display:block;margin:12px 0 6px">Negative prompt <span class="muted" style="font-weight:400">(những thứ KHÔNG muốn xuất hiện)</span></label>
             <textarea id="sh-negative" class="sh-neg" placeholder="Ví dụ: chữ viết, logo, mặt người lạ, mờ, méo…"></textarea>
@@ -2096,7 +2110,10 @@ body.sh-control #dash [data-view="remote"] .remote-body{padding-top:2px}
             </div>
             <div class="sh-composer">
               <textarea id="sh-chat-input" rows="1" placeholder="Hỏi cách dùng app, hoặc nhờ tạo nội dung media... (Enter gửi, Shift+Enter xuống dòng)"></textarea>
-              <button class="sh-sendbtn" id="sh-chat-send" type="button" aria-label="Gửi tin nhắn">➤</button>
+              <div class="sh-composer-foot">
+                <button class="sh-micbtn" id="sh-chat-mic" type="button" title="Nhập bằng giọng nói" aria-label="Nhập bằng giọng nói"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2.5" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0"/><path d="M12 17.5V21"/></svg></button>
+                <button class="sh-sendbtn" id="sh-chat-send" type="button" aria-label="Gửi tin nhắn">➤</button>
+              </div>
             </div>
           </section>
 
@@ -3949,6 +3966,40 @@ async function shFlowSave() {
   } catch (e) { err.textContent = e.message; err.classList.remove("hidden"); }
   finally { btn.disabled = false; }
 }
+// Nhap bang giong noi (Web Speech API): noi tieng Viet -> chu chay thang
+// vao o nhap, hien ca ket qua tam thoi; bam mic lan nua de dung. Trinh
+// duyet khong ho tro (Firefox...) thi an nut mic.
+function shVoiceAttach(textarea, btn) {
+  if (!textarea || !btn) return;
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { btn.classList.add("hidden"); return; }
+  let rec = null, active = false, base = "";
+  btn.addEventListener("click", () => {
+    if (active) { try { rec.stop(); } catch { /* bo qua */ } return; }
+    try {
+      rec = new SR();
+      rec.lang = "vi-VN";
+      rec.interimResults = true;
+      rec.continuous = true;
+      base = textarea.value ? textarea.value.replace(/\s+$/, "") + " " : "";
+      rec.onresult = (e) => {
+        let txt = "";
+        for (const r of e.results) txt += r[0].transcript;
+        textarea.value = base + txt;
+        textarea.dispatchEvent(new Event("input", { bubbles: true }));
+      };
+      rec.onend = () => { active = false; btn.classList.remove("rec"); };
+      rec.onerror = (e) => {
+        if (e.error === "not-allowed" || e.error === "service-not-allowed") showMsg("err", "Hãy cấp quyền micro cho trang để nhập bằng giọng nói.");
+        else if (e.error === "audio-capture") showMsg("err", "Không tìm thấy micro trên thiết bị.");
+      };
+      rec.start();
+      active = true;
+      btn.classList.add("rec");
+      textarea.focus();
+    } catch { showMsg("err", "Không khởi động được nhập giọng nói trên trình duyệt này."); }
+  });
+}
 // --- Tro ly ---
 let shMsgSeq = 0;
 const shMsgTexts = {};
@@ -4192,6 +4243,8 @@ function shBind() {
     document.querySelectorAll("#sh-kind label").forEach((l) => l.classList.toggle("on", l.contains(r) && r.checked || l.querySelector("input").checked));
   }));
   $("sh-chat-send").addEventListener("click", shSendChat);
+  shVoiceAttach($("sh-chat-input"), $("sh-chat-mic"));
+  shVoiceAttach($("sh-prompt"), $("sh-prompt-mic"));
   $("sh-chat-input").addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); shSendChat(); } });
   // O go tu gian chieu cao theo noi dung (toi da 132px), qua thi cuon noi
   // bo va tu cuon xuong dong moi nhat de nguoi go luon nhin thay chu.
