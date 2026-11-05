@@ -1830,6 +1830,17 @@ html:has(body.sh-control){scrollbar-gutter:stable}
   .sh-createbar .sh-submit{width:auto;margin-left:0}
 }
 
+/* ===== v17: Phan biet ro request / response trong chat theo dung tro ly
+   trong app HORA — truoc day ca 2 phia cung mau be nen khong nhin ra dau
+   la cau hoi dau la tra loi. Nay: tin cua user (request) = bong bong TIM
+   DAC, chu trang, day sang PHAI; tin AI (response) = bong bong xam nhat,
+   chu toi, om noi dung o ben TRAI ===== */
+.sh-msg.me{background:var(--gold);color:#fff;border:0;border-radius:16px;padding:10px 13px;max-width:82%}
+.sh-msg.me .who{color:rgba(255,255,255,.75)}
+.sh-msg.ai{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:16px;padding:10px 13px;flex:none;width:fit-content;max-width:88%}
+.sh-msgcol .sh-msg.ai{align-self:flex-start}
+.sh-msg.ai .who{color:var(--muted)}
+
 </style>
 </head>
 <body>
@@ -4161,8 +4172,9 @@ async function shLoadChatHistory() {
     box.innerHTML = "";
     if (!msgs.length) { box.innerHTML = `<p class="muted">Chưa có tin nhắn.</p>`; return; }
     msgs.forEach((m) => {
-      const roleRaw = String(SF.pick(m, ["role", "sender", "from"]) || "").toLowerCase();
-      const me = ["user", "me", "customer", "human"].some((g) => roleRaw.includes(g));
+      const roleRaw = String(SF.pick(m, ["role", "sender", "from", "author", "speaker", "type", "direction"]) || "").toLowerCase();
+      const meFlag = SF.pick(m, ["isUser", "isMine", "mine", "fromMe", "own"]);
+      const me = meFlag === true || ["user", "me", "customer", "human", "client", "owner", "request", "question", "outgoing"].some((g) => roleRaw.includes(g));
       const text = SF.pick(m, ["content", "text", "message", "body"]) || "";
       const needs = SF.pick(m, ["needsConfirmation", "requiresConfirmation", "pendingAction"]);
       shAppendMsg(me ? "me" : "ai", String(text) + (needs ? "\n⚠ Đề xuất này cần xác nhận trên máy tính, chưa chạy." : ""));
