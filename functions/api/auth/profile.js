@@ -12,15 +12,23 @@ export async function onRequestPost({ request, env }) {
   if (!body) return errorJson("BAD_JSON", "Dữ liệu gửi lên không hợp lệ.", 400);
 
   const displayName = String(body.displayName ?? "").trim().slice(0, 80);
-  const phone = String(body.phone ?? "").trim().slice(0, 20);
-  if (phone && !/^[0-9+().\s-]+$/.test(phone)) {
+  // phone chi cap nhat khi client gui kem (trang tai khoan khong con o SDT
+  // — tu luu ten khong duoc xoa phone da luu truoc do).
+  const hasPhone = body.phone !== undefined;
+  const phone = hasPhone ? String(body.phone ?? "").trim().slice(0, 20) : null;
+  if (hasPhone && phone && !/^[0-9+().\s-]+$/.test(phone)) {
     return errorJson("BAD_PHONE", "Số điện thoại chưa đúng định dạng.", 422);
   }
-  try {
-    await env.DB.prepare("UPDATE customers SET display_name = ?2, phone = ?3 WHERE id = ?1")
-      .bind(customer.id, displayName || null, phone || null).run();
-  } catch {
-    // DB chua co cot phone -> luu rieng ten
+  if (hasPhone) {
+    try {
+      await env.DB.prepare("UPDATE customers SET display_name = ?2, phone = ?3 WHERE id = ?1")
+        .bind(customer.id, displayName || null, phone || null).run();
+    } catch {
+      // DB chua co cot phone -> luu rieng ten
+      await env.DB.prepare("UPDATE customers SET display_name = ?2 WHERE id = ?1")
+        .bind(customer.id, displayName || null).run();
+    }
+  } else {
     await env.DB.prepare("UPDATE customers SET display_name = ?2 WHERE id = ?1")
       .bind(customer.id, displayName || null).run();
   }

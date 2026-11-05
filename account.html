@@ -1583,6 +1583,15 @@ body.sh-control .side-profile{display:none}
   #dash section[data-view="account"] .account-logout{max-width:860px}
   .content-head h2{font-size:26px}
 }
+
+/* Avatar: bam vao de doi anh (2026-11-05) */
+.avatar-wrap{position:relative;flex:0 0 auto}
+.avatar-big{border:0;padding:0;cursor:pointer;font:inherit}
+.avatar-hover{position:absolute;left:0;right:0;bottom:0;padding:4px 0 6px;background:rgba(10,10,16,.55);color:#fff;font-size:11px;font-weight:650;text-align:center;opacity:0;transition:opacity .15s;pointer-events:none}
+.avatar-big:hover .avatar-hover,.avatar-big:focus-visible .avatar-hover{opacity:1}
+.avatar-x{position:absolute;top:-5px;right:-5px;width:23px;height:23px;border-radius:50%;border:1px solid var(--line);background:var(--panel);color:var(--muted);font-size:12px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow)}
+.avatar-x:hover{color:var(--danger)}
+.side-avatar{cursor:pointer}
 </style>
 </head>
 <body>
@@ -1683,19 +1692,15 @@ body.sh-control .side-profile{display:none}
       <div class="set-section">
         <div class="set-head"><h3>Thông tin cá nhân</h3><p class="muted">Ảnh đại diện, tên hiển thị và thông tin liên hệ của bạn.</p></div>
         <div class="avatar-row">
-          <span class="avatar-big"><img id="pf-avatar-img" class="hidden" alt="Ảnh đại diện"><span id="pf-avatar-letter">?</span></span>
-          <div>
-            <div class="avatar-actions">
-              <label class="btn small primary" for="pf-avatar-file">Tải ảnh lên</label>
-              <input type="file" id="pf-avatar-file" accept="image/*" class="hidden">
-              <button class="btn small" type="button" id="pf-avatar-remove">Xóa ảnh</button>
-            </div>
-            <p class="muted" style="margin:8px 0 0;font-size:13px">Ảnh tự lấy từ Google khi bạn đăng nhập / liên kết Google, hoặc ảnh bạn tải lên (tự nén về 160×160).</p>
+          <div class="avatar-wrap">
+            <button type="button" class="avatar-big" id="pf-avatar-btn" title="Bấm để thay ảnh đại diện"><img id="pf-avatar-img" class="hidden" alt="Ảnh đại diện"><span id="pf-avatar-letter">?</span><span class="avatar-hover">Đổi ảnh</span></button>
+            <button type="button" class="avatar-x hidden" id="pf-avatar-remove" title="Xóa ảnh đã tải lên, quay về ảnh Google / mặc định">✕</button>
           </div>
+          <input type="file" id="pf-avatar-file" accept="image/*" class="hidden">
+          <p class="muted" style="margin:6px 0 0;font-size:13px;max-width:420px">Ảnh đại diện lấy từ tài khoản Google của bạn khi đã liên kết. Muốn dùng ảnh riêng, cứ bấm vào ảnh để thay (tự nén về 160×160).</p>
         </div>
         <div class="field-grid">
-          <div class="field"><label class="lbl" for="pf-name">Tên hiển thị</label><input id="pf-name" autocomplete="name" placeholder="Tên của bạn"></div>
-          <div class="field"><label class="lbl" for="pf-phone">Số điện thoại</label><input id="pf-phone" autocomplete="tel" placeholder="Chưa cập nhật"></div>
+          <div class="field field-full"><label class="lbl" for="pf-name">Tên hiển thị <span class="muted" id="pf-save-status" style="font-weight:400"></span></label><input id="pf-name" autocomplete="name" placeholder="Tên của bạn"></div>
           <div class="field field-full"><label class="lbl" for="pf-email">Email</label><input id="pf-email" readonly tabindex="-1"><p class="muted field-note">Dùng để đăng nhập vào tài khoản của bạn.</p></div>
           <div class="field field-full google-field"><span class="lbl">Tài khoản Google</span><span class="pi-value muted" id="acc-google">Chưa liên kết</span><a class="btn small" id="btn-google-link" href="/api/auth/google?mode=link&amp;return=/account.html">Liên kết</a><button class="btn small hidden" type="button" id="btn-google-unlink">Hủy liên kết</button></div>
         </div>
@@ -1703,7 +1708,6 @@ body.sh-control .side-profile{display:none}
           <span>Email của bạn chưa được xác thực.</span>
           <button class="btn small" type="button" id="resend-verify-btn" style="margin-left:8px">Gửi lại email xác thực</button>
         </div>
-        <div class="savebar"><button class="btn" type="button" id="pf-cancel">Hủy</button><button class="btn primary" type="button" id="pf-save">Lưu thay đổi</button></div>
       </div>
 
       <div class="set-section">
@@ -2299,6 +2303,8 @@ function renderAvatarImg() {
     if (url) { img.src = url; img.classList.remove("hidden"); lt.classList.add("hidden"); }
     else { img.removeAttribute("src"); img.classList.add("hidden"); lt.classList.remove("hidden"); }
   });
+  const chip = $("pf-avatar-remove");
+  if (chip) chip.classList.toggle("hidden", !(url && url.startsWith("data:")));
 }
 function renderProfile(c) {
   if (!c) return;
@@ -2310,25 +2316,38 @@ function renderProfile(c) {
   if ($("side-email")) $("side-email").textContent = PROFILE.displayName ? PROFILE.email : "";
   renderAvatarImg();
 }
-const pfSaveBtn = $("pf-save");
-if (pfSaveBtn) pfSaveBtn.addEventListener("click", async () => {
-  const displayName = $("pf-name").value.trim();
-  const phone = $("pf-phone").value.trim();
-  const { res, data } = await api("/api/auth/profile", { method: "POST", body: JSON.stringify({ displayName, phone }) });
+// Ten hien thi TU LUU: go dung tay 0,9s hoac roi khoi o la luu, khong can nut.
+let pfSaveTimer = null, pfSaving = false;
+async function autoSaveName() {
+  const input = $("pf-name"), st = $("pf-save-status");
+  if (!input) return;
+  const value = input.value.trim();
+  if (value === PROFILE.displayName || pfSaving) return;
+  pfSaving = true;
+  if (st) st.textContent = "· Đang lưu…";
+  const { res, data } = await api("/api/auth/profile", { method: "POST", body: JSON.stringify({ displayName: value }) });
+  pfSaving = false;
   if (res.ok) {
-    PROFILE.displayName = displayName; PROFILE.phone = phone;
-    if ($("side-name")) $("side-name").textContent = displayName || PROFILE.email || "Tài khoản";
-    if ($("side-email")) $("side-email").textContent = displayName ? PROFILE.email : "";
+    PROFILE.displayName = value;
+    if ($("side-name")) $("side-name").textContent = value || PROFILE.email || "Tài khoản";
+    if ($("side-email")) $("side-email").textContent = value ? PROFILE.email : "";
     renderAvatarImg();
-    showMsg("ok", "Đã lưu thông tin cá nhân.");
-  } else showMsg("err", errText(data, "Lưu thông tin thất bại. Hãy thử lại."));
-});
-const pfCancelBtn = $("pf-cancel");
-if (pfCancelBtn) pfCancelBtn.addEventListener("click", () => {
-  $("pf-name").value = PROFILE.displayName;
-  $("pf-phone").value = PROFILE.phone;
-  hideNotice();
-});
+    if (st) { st.textContent = "· Đã lưu ✓"; setTimeout(() => { if (st.textContent.includes("Đã lưu")) st.textContent = ""; }, 2400); }
+  } else {
+    if (st) st.textContent = "· Lưu thất bại";
+    showMsg("err", errText(data, "Lưu tên thất bại. Hãy thử lại."));
+  }
+}
+const pfNameInput = $("pf-name");
+if (pfNameInput) {
+  pfNameInput.addEventListener("input", () => { clearTimeout(pfSaveTimer); pfSaveTimer = setTimeout(autoSaveName, 900); });
+  pfNameInput.addEventListener("blur", () => { clearTimeout(pfSaveTimer); autoSaveName(); });
+}
+// Bam vao avatar (o Thong tin lan sidebar) de thay anh
+const pfAvatarBtn = $("pf-avatar-btn");
+if (pfAvatarBtn) pfAvatarBtn.addEventListener("click", () => { const f = $("pf-avatar-file"); if (f) f.click(); });
+const sideAvatarEl = document.querySelector(".side-avatar");
+if (sideAvatarEl) sideAvatarEl.addEventListener("click", () => { const f = $("pf-avatar-file"); if (f) f.click(); });
 const pfAvatarFile = $("pf-avatar-file");
 if (pfAvatarFile) pfAvatarFile.addEventListener("change", () => {
   const file = pfAvatarFile.files && pfAvatarFile.files[0];
