@@ -1510,11 +1510,11 @@ body.sh-control [data-sh-panel="dash"]:not(.hidden){display:flex;flex-direction:
 }
 /* ===== v7: Tong quan — da ket noi + back/quit 1 hang tren cung, 4 stat can deu, line ngan cach, empty state (feedback user 2026-11-05) ===== */
 .sh-dash-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
-.sh-dash-head .remote-ok{margin:0;flex:1;min-width:0}
-.sh-dash-head .sh-topbar-right{flex:0 0 auto}
+.sh-dash-head .sh-conn{font-size:14px}
+.sh-dash-head .sh-topbar-right{flex:0 0 auto;transform:translateY(-10px)}
 .sh-stats-bar{display:flex;align-items:center;gap:8px;padding:2px 0 12px;border-bottom:1px solid var(--line);margin-bottom:14px;font-size:14px}
-.sh-stats-bar .sh-conn,.sh-stats-bar .sh-st{flex:1 1 0;text-align:center;white-space:nowrap}
-.sh-stats-bar .sh-conn{text-align:left}
+.sh-stats-bar .sh-st{flex:1 1 0;text-align:center;white-space:nowrap}
+.sh-stats-bar .sh-st:first-child{text-align:left}
 .sh-stats-bar .sh-st:last-child{text-align:right}
 #sh-queue{padding-top:2px}
 .sh-empty{height:100%;min-height:240px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:32px 16px;box-sizing:border-box}
@@ -1524,9 +1524,9 @@ body.sh-control [data-sh-panel="dash"]:not(.hidden){display:flex;flex-direction:
 @media (max-width:760px){
   .sh-stats-bar{gap:4px;font-size:12.5px;padding-bottom:10px}
   .sh-stats-bar .sh-st b{font-size:13.5px}
-  /* Man hep: cho chu xuong dong trong o cua minh de 5 o chia deu that,
+  /* Man hep: cho chu xuong dong trong o cua minh de cac o chia deu that,
      thay vi o dai chiem cho o ngan (min-content chan flex co) */
-  .sh-stats-bar .sh-conn,.sh-stats-bar .sh-st{min-width:0;white-space:normal;text-align:center;line-height:1.3}
+  .sh-stats-bar .sh-st{min-width:0;white-space:normal;text-align:center;line-height:1.3}
 }
 /* ===== v7: Tro ly kieu client — header + doan chat moi, chips lua chon, ap dung prompt (feedback user 2026-11-05) ===== */
 .sh-chat-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-bottom:10px;border-bottom:1px solid var(--line);margin-bottom:12px}
@@ -1918,14 +1918,13 @@ section[data-view="orders"]{position:relative}
 
           <section class="sh-panel" data-sh-panel="dash">
             <div class="sh-dash-head">
-              <p class="remote-ok">✅ Đã kết nối tới <strong id="sh-device">máy của bạn</strong></p>
+              <span class="sh-conn" id="sh-conn">● Chưa nối</span>
               <div class="sh-topbar-right">
                 <button class="sh-iconbtn" id="sh-exit" type="button" title="Quay lại màn Remote" aria-label="Quay lại màn Remote"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M11 6l-6 6 6 6"/></svg></button>
                 <button class="sh-iconbtn danger" id="sh-disconnect" type="button" title="Ngắt kết nối" aria-label="Ngắt kết nối"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 3v8"/><path d="M6.3 6.5a8 8 0 1 0 11.4 0"/></svg></button>
               </div>
             </div>
             <div class="sh-stats-bar">
-              <span class="sh-conn" id="sh-conn">● Chưa nối</span>
               <span class="sh-st run"><b id="sh-stat-running">–</b> Đang chạy</span>
               <span class="sh-st wait"><b id="sh-stat-waiting">–</b> Đang chờ</span>
               <span class="sh-st done"><b id="sh-stat-done">–</b> Đã xong</span>
