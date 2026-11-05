@@ -1555,6 +1555,34 @@ body.sh-control .side-profile{display:none}
   .mini-plans{grid-template-columns:1fr}
   .savebar{max-width:none}
 }
+
+/* ===== Sidebar + bo cuc PC giong anh mau (2026-11-05, ghi de sau cung) ===== */
+.side-label{font-size:12px;font-weight:600;color:var(--muted);letter-spacing:.01em;padding:0 12px;margin:2px 0 8px}
+@media (max-width:760px){ .side-label{display:none} }
+@media (min-width:761px){
+  .shell{max-width:1220px}
+  .side{width:266px;padding:18px 12px 14px}
+  .side-profile{padding:2px 12px 18px;margin-bottom:12px;border-bottom:0}
+  .side-profile-meta strong{font-size:15px}
+  /* Menu item kieu anh mau: phang, trung tinh, muc dang chon nen xam nhat */
+  #side-nav-account{gap:2px}
+  #side-nav-account .side-item{display:flex;align-items:center;gap:12px;width:100%;padding:10px 12px;border-radius:10px;background:transparent;color:var(--muted);font-size:14.5px;font-weight:550;box-shadow:none;transform:none;transition:background .15s,color .15s}
+  #side-nav-account .side-item svg{width:19px;height:19px;flex:0 0 auto;opacity:.75}
+  #side-nav-account .side-item:hover{background:var(--panel2);color:var(--text);transform:none}
+  #side-nav-account .side-item.active{background:var(--panel2);color:var(--text);font-weight:650;box-shadow:none}
+  #side-nav-account .side-item.active svg{opacity:1}
+  /* Bo cuc noi dung PC: moi muc cung mot be rong, tieu de ro, khoang tho deu */
+  #dash section[data-view="account"]{padding:10px 36px 36px}
+  #dash section[data-view="account"] .set-section{max-width:860px;padding:30px 0 32px}
+  #dash section[data-view="account"] .set-section:first-of-type{padding-top:16px}
+  #dash section[data-view="account"] .set-head h3{font-size:19px;margin-bottom:5px}
+  #dash section[data-view="account"] .set-head p{font-size:14px;margin-bottom:20px}
+  #dash section[data-view="account"] .field-grid,
+  #dash section[data-view="account"] .mini-plans,
+  #dash section[data-view="account"] .savebar{max-width:860px}
+  #dash section[data-view="account"] .account-logout{max-width:860px}
+  .content-head h2{font-size:26px}
+}
 </style>
 </head>
 <body>
@@ -1566,6 +1594,7 @@ body.sh-control .side-profile{display:none}
       <span class="side-avatar"><img id="side-avatar-img" class="hidden" alt=""><span id="side-avatar-letter">?</span></span>
       <span class="side-profile-meta"><strong id="side-name">Tài khoản</strong><span id="side-email" class="muted"></span></span>
     </div>
+    <div class="side-label">Tài khoản</div>
     <nav class="side-nav" id="side-nav-account" aria-label="Mục tài khoản">
       <button type="button" class="side-item active" data-view-btn="account" data-short="Thông tin"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4.5 20.5c1.4-3.8 4.4-5.5 7.5-5.5s6.1 1.7 7.5 5.5"></path></svg> Thông tin</button>
       <button type="button" class="side-item" data-view-btn="orders" data-short="Lịch sử"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M8.5 6h12M8.5 12h12M8.5 18h12"></path><path d="M4 6h.01M4 12h.01M4 18h.01"></path></svg> Lịch sử giao dịch <span id="orders-unpaid-badge" class="side-badge hidden" title="Có đơn chưa thanh toán" aria-label="Có đơn chưa thanh toán">!</span></button>
