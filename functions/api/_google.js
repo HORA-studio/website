@@ -92,6 +92,30 @@ export async function getGoogleLink(env, customerId) {
 //   linked_other     — Google nay da gan voi tai khoan HORA khac.
 //   already_linked   — tai khoan nay da lien ket mot Google khac.
 //   link_unavailable — DB chua co cot google_sub (chua chay migration).
+// Tai khoan phu tao vo tinh khi khach dang nhap Google bang email KHAC email
+// tai khoan chinh: chi hap thu (xoa) khi tai khoan do CHUA co gi ca — khong don,
+// khong license that (license dung thu khuyen mai 'promo' thi xoa cung). Co don/
+// license that -> tra false de giu loi linked_other, tranh mat du lieu.
+async function tryAbsorbEmptyGoogleAccount(env, donorId) {
+  const cnt = async (sql) => {
+    try { const r = await env.DB.prepare(sql).bind(donorId).first(); return Number((r && r.n) || 0); } catch { return 0; }
+  };
+  if (await cnt("SELECT COUNT(*) AS n FROM orders WHERE customer_id = ?1") > 0) return false;
+  if (await cnt("SELECT COUNT(*) AS n FROM licenses WHERE customer_id = ?1 AND (organization IS NULL OR organization <> 'promo')") > 0) return false;
+  if (await cnt("SELECT COUNT(*) AS n FROM remote_registrations WHERE customer_id = ?1") > 0) return false;
+  const del = async (sql) => { try { await env.DB.prepare(sql).bind(donorId).run(); } catch { /* bang chua co -> bo qua */ } };
+  await del("DELETE FROM licenses WHERE customer_id = ?1");
+  await del("DELETE FROM sessions WHERE customer_id = ?1");
+  await del("DELETE FROM account_sessions WHERE customer_id = ?1");
+  await del("DELETE FROM auth_tokens WHERE customer_id = ?1");
+  await del("DELETE FROM app_links WHERE customer_id = ?1");
+  await del("DELETE FROM app_tokens WHERE customer_id = ?1");
+  await del("DELETE FROM device_auth WHERE customer_id = ?1");
+  await del("DELETE FROM remote_registrations WHERE customer_id = ?1");
+  await del("DELETE FROM customers WHERE id = ?1");
+  return true;
+}
+
 export async function linkGoogleToCustomer(env, request, customerId, profile) {
   const sub = String(profile.sub || "");
   const gEmail = String(profile.email || "").trim().toLowerCase();
@@ -103,8 +127,17 @@ export async function linkGoogleToCustomer(env, request, customerId, profile) {
   if (!current) return { ok: false, code: "link_login_required" };
   if (current.google_sub && current.google_sub !== sub) return { ok: false, code: "already_linked" };
   try {
-    const owner = await env.DB.prepare("SELECT id FROM customers WHERE google_sub = ?1").bind(sub).first();
-    if (owner && owner.id !== customerId) return { ok: false, code: "linked_other" };
+    const owner = await env.DB.prepare("SELECT id, email FROM customers WHERE google_sub = ?1").bind(sub).first();
+    // Chi hap thu khi tai khoan so huu Google chinh la tai khoan PHU do Google
+    // tao (email dang nhap trung email Google) — tai khoan mat khau that co
+    // email khac thi khong bao gio bi xoa, du dang trong rong.
+    if (owner && owner.id !== customerId && String(owner.email || "").toLowerCase() === gEmail) {
+      // Google nay thuoc tai khoan phu tao vo tinh (dang nhap Google truoc khi
+      // lien ket): hap thu neu tai khoan do trong rong, neu khong thi bao loi.
+      const absorbed = await tryAbsorbEmptyGoogleAccount(env, owner.id);
+      if (!absorbed) return { ok: false, code: "linked_other" };
+      await logEvent(env, { eventType: "auth.google_absorbed_empty", customerId, ip: clientIp(request), details: { absorbedCustomerId: owner.id } });
+    }
   } catch { /* loi doc -> unique index van chan o buoc UPDATE */ }
   try {
     await env.DB.prepare("UPDATE customers SET google_sub = ?2 WHERE id = ?1").bind(customerId, sub).run();
