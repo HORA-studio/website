@@ -1818,6 +1818,18 @@ body.sh-control #dash [data-view="remote"] .remote-body{padding-top:2px}
    phai duoi cua hop chat) thay vi doi nhau 2 dau ===== */
 html:has(body.sh-control){scrollbar-gutter:stable}
 
+/* ===== v16: Tab Tao task tren MAY TINH het gian ngang (user bao view
+   dien thoai oke nhung desktop xau vi gian het ra) — panel thu ve toi da
+   860px can giua nhu tab Thong tin; thanh dieu khien ve DUNG 1 HANG:
+   2 group toggle chia deu phan rong con lai + Submit gon o cuoi hang
+   (khong con full-width). Dien thoai giu nguyen bo cuc v9 ===== */
+@media (min-width:761px){
+  body.sh-control [data-sh-panel="create"]{max-width:860px;margin-left:auto;margin-right:auto;width:100%}
+  .sh-createbar{display:grid;grid-template-columns:1fr 1fr auto;align-items:center;gap:12px}
+  .sh-createbar .sh-groups{display:contents}
+  .sh-createbar .sh-submit{width:auto;margin-left:0}
+}
+
 </style>
 </head>
 <body>
