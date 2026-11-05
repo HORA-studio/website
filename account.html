@@ -1718,6 +1718,18 @@ section[data-view="orders"]{position:relative}
   .side-nav .side-item.active::before{content:"";position:absolute;top:-8px;left:50%;transform:translateX(-50%);width:17px;height:13px;background:var(--gold);clip-path:polygon(0 0,100% 0,100% 100%,50% 74%,0 100%)}
 }
 
+/* ===== v9: Cum toggle o Tao task — 2 group LUON cung 1 hang, chia deu 2
+   nua can doi (grid 1fr/1fr, nut ben trong gian deu), Submit xuong hang
+   duoi full-width. Truoc day createbar flex-wrap:wrap nen man hinh nao
+   hep/dai la 2 group vo lech ti le + Submit rot xuong lung chung.
+   Ca cum lui xuong: margin-top 14->20px; Submit xuong them ~50% khoang
+   cach: gap 14->21px ===== */
+.sh-createbar{flex-direction:column;align-items:stretch;flex-wrap:nowrap;gap:21px;margin-top:20px}
+.sh-createbar .sh-groups{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%}
+.sh-createbar .sh-seg{width:100%}
+.sh-createbar .sh-seg button{flex:1 1 0}
+.sh-createbar .sh-submit{margin-left:0;width:100%}
+
 </style>
 </head>
 <body>
@@ -1962,14 +1974,16 @@ section[data-view="orders"]{position:relative}
             <label class="lbl" for="sh-negative" style="display:block;margin:12px 0 6px">Negative prompt <span class="muted" style="font-weight:400">(những thứ KHÔNG muốn xuất hiện)</span></label>
             <textarea id="sh-negative" class="sh-neg" placeholder="Ví dụ: chữ viết, logo, mặt người lạ, mờ, méo…"></textarea>
             <div class="sh-createbar">
-              <div class="sh-seg" id="sh-kind">
-                <label><input type="radio" name="sh-kind" value="image">Ảnh</label>
-                <label class="on"><input type="radio" name="sh-kind" value="video" checked>Video</label>
-              </div>
-              <div class="sh-seg" id="sh-size" role="group" aria-label="Kích thước">
-                <button type="button" class="on" data-sh-size="9:16">9:16</button>
-                <button type="button" data-sh-size="16:9">16:9</button>
-                <button type="button" data-sh-size="1:1">1:1</button>
+              <div class="sh-groups">
+                <div class="sh-seg" id="sh-kind">
+                  <label><input type="radio" name="sh-kind" value="image">Ảnh</label>
+                  <label class="on"><input type="radio" name="sh-kind" value="video" checked>Video</label>
+                </div>
+                <div class="sh-seg" id="sh-size" role="group" aria-label="Kích thước">
+                  <button type="button" class="on" data-sh-size="9:16">9:16</button>
+                  <button type="button" data-sh-size="16:9">16:9</button>
+                  <button type="button" data-sh-size="1:1">1:1</button>
+                </div>
               </div>
               <button class="btn primary sh-submit" id="sh-send-prompt" type="button">Submit</button>
             </div>
