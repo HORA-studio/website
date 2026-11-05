@@ -1841,6 +1841,24 @@ html:has(body.sh-control){scrollbar-gutter:stable}
 .sh-msgcol .sh-msg.ai{align-self:flex-start}
 .sh-msg.ai .who{color:var(--muted)}
 
+/* ===== v18: Menu sidebar desktop theo mau Dribbble "Menu" (DStudio,
+   shot 22414475) — panel phang bo goc vua, item thoang (icon 19px + nhan
+   15px weight 500, mau chu gan den), heading section chu hoa nho cach
+   chu, muc dang chon CHI nen xam nhat trung tinh (bo thanh inset vang +
+   bo nen tim cua menu shell cu). Mau nhan giu tim HORA thay cam cua mau
+   (cam chi la accent cua ban thiet ke do). Mobile capsule v8 giu nguyen */
+@media (min-width:761px){
+  .side{border-radius:14px;padding:20px 14px;box-shadow:0 1px 3px rgba(23,20,16,.05)}
+  .side-label{text-transform:uppercase;letter-spacing:.09em;font-size:11.5px;font-weight:600}
+  .side-nav{gap:6px}
+  #side-nav-account{gap:6px}
+  #side-nav-account .side-item,#sh-side-nav .side-item{gap:13px;padding:11px 12px;border-radius:10px;font-size:15px;font-weight:500;color:var(--text)}
+  #side-nav-account .side-item svg,#sh-side-nav .side-item svg{width:19px;height:19px;opacity:.9}
+  #side-nav-account .side-item:hover,#sh-side-nav .side-item:hover{background:var(--panel2);color:var(--text);transform:none}
+  #side-nav-account .side-item.active,#sh-side-nav .side-item.active{background:var(--panel2);color:var(--text);font-weight:650;box-shadow:none}
+  #side-nav-account .side-item.active svg,#sh-side-nav .side-item.active svg{color:var(--gold);opacity:1}
+}
+
 </style>
 </head>
 <body>
