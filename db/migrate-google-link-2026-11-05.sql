@@ -1,0 +1,12 @@
+-- Migration: them cot google_email phuc vu LIEN KET GOOGLE THU CONG
+-- (2026-11-05): luu email cua tai khoan Google da lien ket de hien thi
+-- trong trang tai khoan ("Da lien ket: xxx@gmail.com"). Lien ket thu cong
+-- cho phep gan mot Google KHAC email voi email tai khoan.
+-- Ap len D1 production (hora-website):
+--   npx wrangler d1 execute hora-website --remote --file db/migrate-google-link-2026-11-05.sql
+-- LUU Y: can chay db/migrate-google-2026-11-05.sql (cot google_sub) TRUOC.
+-- ALTER TABLE ... ADD COLUMN chi chay duoc 1 lan — chay lai se bao loi
+-- "duplicate column name: google_email" (bo qua loi do neu da ap).
+-- Code da fail-soft: chua ap migration thi lien ket van gan google_sub,
+-- chi la trang tai khoan khong hien email Google cu the.
+ALTER TABLE customers ADD COLUMN google_email TEXT;

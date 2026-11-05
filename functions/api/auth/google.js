@@ -2,11 +2,12 @@
 // Tao state chong CSRF, luu vao cookie HttpOnly 10 phut (kem dich quay ve
 // sau dang nhap neu hop le), roi 302 sang trang chon tai khoan cua Google.
 // Dich quay ve (?return=...) chi nhan duong dan tuong doi tren cung site.
-import { errorJson } from "../_lib.js";
+import { errorJson, getSessionCustomer } from "../_lib.js";
 import { googleConfig, isGoogleConfigured, googleRedirectUri } from "../_google.js";
 
 export const GOOGLE_STATE_COOKIE = "hora_g_state";
 export const GOOGLE_RETURN_COOKIE = "hora_g_return";
+export const GOOGLE_LINK_COOKIE = "hora_g_link";
 
 function cookieFlags(request) {
   const url = new URL(request.url);
@@ -43,6 +44,21 @@ export async function onRequestGet({ request, env }) {
   const url = new URL(request.url);
   const returnTo = safeReturnTo(url.searchParams.get("return") || url.searchParams.get("next"));
 
+  // mode=link: lien ket Google vao tai khoan DANG DANG NHAP (bat ky Google
+  // nao, ke ca khac email). Bat buoc co phien dang nhap; id khach duoc luu
+  // vao cookie rieng de callback doi chieu lai (chong gan vao tai khoan khac).
+  let linkCustomerId = "";
+  if (url.searchParams.get("mode") === "link") {
+    const me = await getSessionCustomer(env, request);
+    if (!me) {
+      return new Response(null, {
+        status: 302,
+        headers: { Location: "/account.html?auth_error=link_login_required" },
+      });
+    }
+    linkCustomerId = me.id;
+  }
+
   const auth = new URL("https://accounts.google.com/o/oauth2/v2/auth");
   auth.searchParams.set("client_id", clientId);
   auth.searchParams.set("redirect_uri", googleRedirectUri(request));
@@ -56,6 +72,7 @@ export async function onRequestGet({ request, env }) {
   const headers = new Headers({ Location: auth.toString() });
   headers.append("Set-Cookie", oauthCookie(request, GOOGLE_STATE_COOKIE, state, 600));
   headers.append("Set-Cookie", oauthCookie(request, GOOGLE_RETURN_COOKIE, encodeURIComponent(returnTo), 600));
+  headers.append("Set-Cookie", oauthCookie(request, GOOGLE_LINK_COOKIE, linkCustomerId, 600));
   return new Response(null, { status: 302, headers });
 }
 

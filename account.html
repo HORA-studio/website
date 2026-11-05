@@ -1633,6 +1633,7 @@ body.sh-control [data-sh-panel="dash"]:not(.hidden){display:flex;flex-direction:
         <div class="profile-head">Thông tin cá nhân</div>
         <div class="pi-row"><span class="pi-label">Email</span><span class="pi-value" id="acc-email">—</span></div>
         <div class="pi-row"><span class="pi-label">Phone</span><span class="pi-value muted" id="acc-phone">Chưa cập nhật</span></div>
+        <div class="pi-row"><span class="pi-label">Google</span><span class="pi-value muted" id="acc-google">Chưa liên kết</span><a class="btn small" id="btn-google-link" href="/api/auth/google?mode=link&amp;return=/account.html" style="margin-left:8px">Liên kết</a><button class="btn small hidden" type="button" id="btn-google-unlink" style="margin-left:8px">Hủy liên kết</button></div>
       </div>
       <div id="verify-banner" class="msg info hidden" style="display: block;">
         <span>Email của bạn chưa được xác thực.</span>
@@ -2153,6 +2154,34 @@ $("forgot-submit").addEventListener("click", async () => {
 });
 
 // ----- Dashboard -----
+// ----- Lien ket Google (thong tin ca nhan) -----
+function renderGoogleLink(c) {
+  const st = $("acc-google"), link = $("btn-google-link"), un = $("btn-google-unlink");
+  if (!st) return;
+  if (c && c.googleLinked) {
+    st.textContent = c.googleEmail || "Đã liên kết";
+    st.classList.remove("muted");
+    if (link) link.classList.add("hidden");
+    if (un) un.classList.remove("hidden");
+  } else {
+    st.textContent = "Chưa liên kết";
+    st.classList.add("muted");
+    if (link) link.classList.remove("hidden");
+    if (un) un.classList.add("hidden");
+  }
+}
+const googleUnlinkBtn = $("btn-google-unlink");
+if (googleUnlinkBtn) googleUnlinkBtn.addEventListener("click", async () => {
+  if (!confirm("Hủy liên kết Google? Sau khi hủy, bạn đăng nhập bằng email + mật khẩu của tài khoản này.")) return;
+  const { res, data } = await api("/api/auth/google/unlink", { method: "POST" });
+  if (res.ok) {
+    renderGoogleLink({ googleLinked: false });
+    showMsg("ok", "Đã hủy liên kết Google.");
+  } else {
+    showMsg("err", errText(data, "Hủy liên kết thất bại. Hãy thử lại."));
+  }
+});
+
 async function loadDash() {
   const { res, data } = await api("/api/auth/me");
   if (!res.ok) {
@@ -2180,6 +2209,7 @@ async function loadDash() {
   MY_EMAIL = data.customer.email || "";
   initRemoteFromUrl();
   $("acc-email").textContent = data.customer.email;
+  renderGoogleLink(data.customer);
   $("acc-name").textContent = data.customer.displayName ? " — " + data.customer.displayName : "";
   $("verify-banner").style.display = data.customer.emailVerified === false ? "block" : "none";
   await loadPlans().catch(() => {});
@@ -2566,10 +2596,20 @@ let resetToken = null;
       state: "Phiên đăng nhập Google đã hết hạn hoặc không khớp. Hãy bấm Tiếp tục với Google lại.",
       not_configured: "Đăng nhập Google chưa được cấu hình trên máy chủ. Hãy dùng email + mật khẩu, hoặc báo quản trị viên đặt GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET.",
       unverified_email: "Tài khoản Google này chưa xác thực email nên chưa đăng nhập được.",
+      link_login_required: "Bạn cần đăng nhập trước khi liên kết Google. Hãy đăng nhập rồi bấm Liên kết lại.",
+      linked_other: "Tài khoản Google này đã được liên kết với một tài khoản HORA khác, không gắn trùng được.",
+      already_linked: "Tài khoản của bạn đã liên kết một Google khác. Hãy Hủy liên kết cũ trong mục Thông tin tài khoản trước.",
+      link_unavailable: "Liên kết Google chưa sẵn sàng trên máy chủ. Hãy thử lại sau.",
       token: "Không đổi được mã đăng nhập với Google. Hãy thử lại.",
       server: "Đăng nhập Google gặp lỗi máy chủ. Hãy thử lại sau."
     };
     showMsg("err", msgs[authErr] || "Đăng nhập Google thất bại. Hãy thử lại hoặc dùng email + mật khẩu.");
+  }
+  if (qs.get("google_linked")) {
+    const clean = new URL(location.href);
+    clean.searchParams.delete("google_linked");
+    history.replaceState(null, "", clean.pathname + clean.search + clean.hash);
+    showMsg("ok", "Đã liên kết tài khoản Google. Từ nay bạn có thể đăng nhập bằng Google đó.");
   }
   const verifyParam = qs.get("verify");
   const resetParam = qs.get("reset");

@@ -7,15 +7,16 @@
 // -> 302 ve dich da luu (mac dinh /account.html).
 // Loi -> 302 ve /account.html?auth_error=<code> de trang tai khoan hien
 // thong bao tieng Viet (khong bao gio de khach thay JSON tho).
-import { parseCookies, createSession } from "../../_lib.js";
-import { googleConfig, isGoogleConfigured, googleRedirectUri, findOrCreateGoogleCustomer } from "../../_google.js";
-import { GOOGLE_STATE_COOKIE, GOOGLE_RETURN_COOKIE, oauthCookie } from "../google.js";
+import { parseCookies, createSession, getSessionCustomer } from "../../_lib.js";
+import { googleConfig, isGoogleConfigured, googleRedirectUri, findOrCreateGoogleCustomer, linkGoogleToCustomer } from "../../_google.js";
+import { GOOGLE_STATE_COOKIE, GOOGLE_RETURN_COOKIE, GOOGLE_LINK_COOKIE, oauthCookie } from "../google.js";
 
 function fail(request, code) {
   const origin = new URL(request.url).origin;
   const headers = new Headers({ Location: `${origin}/account.html?auth_error=${code}` });
   headers.append("Set-Cookie", oauthCookie(request, GOOGLE_STATE_COOKIE, "", 0));
   headers.append("Set-Cookie", oauthCookie(request, GOOGLE_RETURN_COOKIE, "", 0));
+  headers.append("Set-Cookie", oauthCookie(request, GOOGLE_LINK_COOKIE, "", 0));
   return new Response(null, { status: 302, headers });
 }
 
@@ -83,7 +84,28 @@ export async function onRequestGet({ request, env }) {
     } catch { /* ten chi la phu — bo qua khi loi */ }
   }
 
-  // 3) Tim/tao khach + tao phien
+  // 3) Nhanh LIEN KET: co cookie hora_g_link thi gan Google nay vao tai
+  // khoan dang dang nhap (khong tao phien moi, khong tim/tao khach).
+  const linkCustomerId = cookies[GOOGLE_LINK_COOKIE] || "";
+  if (linkCustomerId) {
+    try {
+      const me = await getSessionCustomer(env, request);
+      if (!me || me.id !== linkCustomerId) return fail(request, "link_login_required");
+      const r = await linkGoogleToCustomer(env, request, me.id, { sub: claims.sub, email: claims.email });
+      if (!r.ok) return fail(request, r.code);
+      const sep = returnTo.includes("?") ? "&" : "?";
+      const headers = new Headers({ Location: `${url.origin}${returnTo}${sep}google_linked=1` });
+      headers.append("Set-Cookie", oauthCookie(request, GOOGLE_STATE_COOKIE, "", 0));
+      headers.append("Set-Cookie", oauthCookie(request, GOOGLE_RETURN_COOKIE, "", 0));
+      headers.append("Set-Cookie", oauthCookie(request, GOOGLE_LINK_COOKIE, "", 0));
+      return new Response(null, { status: 302, headers });
+    } catch (err) {
+      console.warn("google callback: link failed:", err && err.message ? err.message : String(err));
+      return fail(request, "server");
+    }
+  }
+
+  // 4) Tim/tao khach + tao phien
   try {
     const { customer } = await findOrCreateGoogleCustomer(env, request, {
       sub: claims.sub,
@@ -95,6 +117,7 @@ export async function onRequestGet({ request, env }) {
     headers.append("Set-Cookie", session.cookie);
     headers.append("Set-Cookie", oauthCookie(request, GOOGLE_STATE_COOKIE, "", 0));
     headers.append("Set-Cookie", oauthCookie(request, GOOGLE_RETURN_COOKIE, "", 0));
+    headers.append("Set-Cookie", oauthCookie(request, GOOGLE_LINK_COOKIE, "", 0));
     return new Response(null, { status: 302, headers });
   } catch (err) {
     console.warn("google callback: create customer/session failed:", err && err.message ? err.message : String(err));

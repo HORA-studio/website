@@ -53,6 +53,69 @@ async function setGoogleSub(env, customerId, sub) {
   } catch { /* cot chua co / sub da thuoc tai khoan khac -> bo qua */ }
 }
 
+async function setGoogleEmail(env, customerId, email) {
+  if (!email) return;
+  try {
+    await env.DB.prepare("UPDATE customers SET google_email = ?2 WHERE id = ?1").bind(customerId, email).run();
+  } catch { /* DB chua chay migration google_email -> bo qua */ }
+}
+
+// Trang thai lien ket Google cua 1 khach (cho /api/auth/me + trang tai khoan).
+// Fail-soft: DB chua co cot google_sub thi coi nhu chua lien ket.
+export async function getGoogleLink(env, customerId) {
+  try {
+    const row = await env.DB.prepare("SELECT google_sub, google_email FROM customers WHERE id = ?1").bind(customerId).first();
+    if (row) return { linked: !!row.google_sub, email: row.google_sub ? (row.google_email || null) : null };
+  } catch { /* chua co cot google_email -> thu chi google_sub */ }
+  try {
+    const row = await env.DB.prepare("SELECT google_sub FROM customers WHERE id = ?1").bind(customerId).first();
+    if (row) return { linked: !!row.google_sub, email: null };
+  } catch { /* chua co cot google_sub */ }
+  return { linked: false, email: null };
+}
+
+// Lien ket THU CONG: gan mot Google BAT KY (email co the khac email tai
+// khoan) vao tai khoan DANG DANG NHAP. Caller (callback) da xac minh
+// id_token + email_verified va da kiem phien dang nhap khop nguoi lien ket.
+// Loi tra ve kem code de callback redirect ?auth_error=<code>:
+//   linked_other     — Google nay da gan voi tai khoan HORA khac.
+//   already_linked   — tai khoan nay da lien ket mot Google khac.
+//   link_unavailable — DB chua co cot google_sub (chua chay migration).
+export async function linkGoogleToCustomer(env, request, customerId, profile) {
+  const sub = String(profile.sub || "");
+  const gEmail = String(profile.email || "").trim().toLowerCase();
+  if (!sub) return { ok: false, code: "token" };
+  let current = null;
+  try {
+    current = await env.DB.prepare("SELECT id, google_sub FROM customers WHERE id = ?1").bind(customerId).first();
+  } catch { return { ok: false, code: "link_unavailable" }; }
+  if (!current) return { ok: false, code: "link_login_required" };
+  if (current.google_sub && current.google_sub !== sub) return { ok: false, code: "already_linked" };
+  try {
+    const owner = await env.DB.prepare("SELECT id FROM customers WHERE google_sub = ?1").bind(sub).first();
+    if (owner && owner.id !== customerId) return { ok: false, code: "linked_other" };
+  } catch { /* loi doc -> unique index van chan o buoc UPDATE */ }
+  try {
+    await env.DB.prepare("UPDATE customers SET google_sub = ?2 WHERE id = ?1").bind(customerId, sub).run();
+  } catch { return { ok: false, code: "linked_other" }; }
+  await setGoogleEmail(env, customerId, gEmail);
+  await logEvent(env, { eventType: "auth.google_linked", customerId, ip: clientIp(request) });
+  return { ok: true };
+}
+
+// Huy lien ket Google: khach van dang nhap duoc bang email + mat khau
+// (hoac bang Google cung email — se tu gan lai khi dang nhap Google).
+export async function unlinkGoogle(env, request, customerId) {
+  try {
+    await env.DB.prepare("UPDATE customers SET google_sub = NULL WHERE id = ?1").bind(customerId).run();
+  } catch { return { ok: false, code: "link_unavailable" }; }
+  try {
+    await env.DB.prepare("UPDATE customers SET google_email = NULL WHERE id = ?1").bind(customerId).run();
+  } catch { /* cot google_email chua co -> khong sao */ }
+  await logEvent(env, { eventType: "auth.google_unlinked", customerId, ip: clientIp(request) });
+  return { ok: true };
+}
+
 // Cap license dung thu khuyen mai cho tai khoan MOI — cung luat voi
 // register.js (idempotent theo marker 'promo:<id>' trong notes).
 // Loi o buoc nay khong duoc lam hong dang nhap.
@@ -111,6 +174,7 @@ export async function findOrCreateGoogleCustomer(env, request, profile) {
         .bind(existing.id, name).run();
     }
     await setGoogleSub(env, existing.id, sub);
+    await setGoogleEmail(env, existing.id, email);
     await logEvent(env, { eventType: "auth.google_login", customerId: existing.id, ip: clientIp(request) });
     return { customer: { id: existing.id, email: existing.email, displayName: name || existing.display_name }, created: false };
   }
@@ -122,11 +186,21 @@ export async function findOrCreateGoogleCustomer(env, request, profile) {
   let inserted = false;
   try {
     await env.DB.prepare(
-      "INSERT INTO customers (id, email, password_hash, salt, iterations, display_name, email_verified_at, google_sub, created_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)"
-    ).bind(id, email, hash, salt, iterations, name, nowIso, sub || null, nowIso).run();
+      "INSERT INTO customers (id, email, password_hash, salt, iterations, display_name, email_verified_at, google_sub, google_email, created_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)"
+    ).bind(id, email, hash, salt, iterations, name, nowIso, sub || null, email, nowIso).run();
     inserted = true;
   } catch {
-    inserted = false; // DB chua co cot google_sub -> thu lai khong co cot do
+    inserted = false; // DB chua co cot google_email -> thu lai khong co cot do
+  }
+  if (!inserted) {
+    try {
+      await env.DB.prepare(
+        "INSERT INTO customers (id, email, password_hash, salt, iterations, display_name, email_verified_at, google_sub, created_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)"
+      ).bind(id, email, hash, salt, iterations, name, nowIso, sub || null, nowIso).run();
+      inserted = true;
+    } catch {
+      inserted = false; // DB chua co cot google_sub -> thu lai khong co cot do
+    }
   }
   if (!inserted) {
     await env.DB.prepare(
