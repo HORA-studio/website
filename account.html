@@ -1125,7 +1125,7 @@ html,body{min-height:100%;height:100%;overflow:hidden}
 #dash .lic-table tbody tr{transition:background .15s ease}
 #dash .lic-table tbody tr:hover{background:rgba(11,98,88,.04)}
 #dash .lic-table .export-cell{padding-right:18px}
-/* ----- Muc Remote (dieu khien may tinh bang ma/QR) ----- */
+/* ----- Muc Remote (dieu khien may tinh bang ma 6 so) ----- */
 #dash [data-view="remote"] .remote-body{padding:20px;max-width:680px}
 #dash [data-view="remote"] .remote-box{border:1px solid var(--line);border-radius:16px;padding:20px;background:var(--panel)}
 #dash [data-view="remote"] .remote-ok{font-size:16px;margin:0}
@@ -1137,7 +1137,6 @@ html,body{min-height:100%;height:100%;overflow:hidden}
 #dash [data-view="remote"] .remote-err{margin:14px 0 0;padding:12px 14px;border-radius:12px;background:#c93a3214;border:1px solid #c93a3255;color:var(--danger);font-size:14.5px}
 #dash [data-view="remote"] .remote-advanced{margin-top:18px;border-top:1px solid var(--line);padding-top:12px}
 #dash [data-view="remote"] .remote-advanced summary{cursor:pointer;color:var(--muted);font-size:14px}
-#dash [data-view="remote"] #remote-scan-video{width:100%;border-radius:12px;margin-top:14px;background:#000;aspect-ratio:4/3;object-fit:cover}
 /* ----- Shell dieu khien native tren web (muc triet de, 2026-11-04) -----
    Tam ve tinh nang theo hop dong API de test truoc — UI se sua sau. */
 #dash [data-view="remote"] .remote-body{max-width:1180px}
@@ -1904,7 +1903,7 @@ section[data-view="orders"]{position:relative}
     </section>
 
     <section class="card view-panel hidden" data-view="remote">
-      <div class="orders-welcome"><div><h2>Remote — điều khiển máy tính</h2><p>Mở app HORA Media trên máy tính của bạn, app sẽ hiện mã QR + mã kết nối 6 số. Quét mã hoặc nhập mã tại đây để mở view điều khiển.</p></div></div>
+      <div class="orders-welcome"><div><h2>Remote — điều khiển máy tính</h2><p>Mở app HORA Media trên máy tính của bạn, app sẽ hiện mã kết nối 6 số. Nhập mã tại đây để mở view điều khiển.</p></div></div>
       <div class="remote-body">
         <div id="remote-plus-lock" class="remote-box hidden">
           <p class="remote-ok"><strong>🔒 Remote là quyền lợi của gói Plus</strong></p>
@@ -2057,13 +2056,7 @@ section[data-view="orders"]{position:relative}
           </div>
         </div>
         <div id="remote-connect-box" class="remote-box">
-          <button class="btn primary" id="remote-scan-btn" type="button" style="width:100%">📷 Quét mã QR trên app</button>
-          <div id="remote-scan-wrap" class="hidden">
-            <video id="remote-scan-video" playsinline muted></video>
-            <p class="muted" id="remote-scan-status" style="margin:8px 0 0">Đang mở camera… hãy hướng vào mã QR trong app.</p>
-            <button class="btn small" id="remote-scan-stop" type="button" style="margin-top:10px">Dừng quét</button>
-          </div>
-          <div class="remote-or">hoặc nhập mã kết nối 6 số</div>
+          <div class="remote-or">Nhập mã kết nối 6 số trên app</div>
           <div class="remote-code" id="remote-code">
             <input inputmode="numeric" autocomplete="one-time-code" maxlength="1" aria-label="Số 1"><input inputmode="numeric" maxlength="1" aria-label="Số 2"><input inputmode="numeric" maxlength="1" aria-label="Số 3"><input inputmode="numeric" maxlength="1" aria-label="Số 4"><input inputmode="numeric" maxlength="1" aria-label="Số 5"><input inputmode="numeric" maxlength="1" aria-label="Số 6">
           </div>
@@ -2536,7 +2529,7 @@ function renderInfoRemote() {
     open.textContent = "Mở view điều khiển";
     disc.classList.remove("hidden");
   } else {
-    st.textContent = "Chưa kết nối ứng dụng. Mở app HORA Media trên máy tính rồi quét QR / nhập mã 6 số để kết nối.";
+    st.textContent = "Chưa kết nối ứng dụng. Mở app HORA Media trên máy tính rồi nhập mã 6 số để kết nối.";
     open.textContent = "Kết nối ứng dụng";
     disc.classList.add("hidden");
   }
@@ -3071,7 +3064,7 @@ else if (payParam === "pending") showMsg("info", "Đang chờ cổng thanh toán
   } catch { /* khong co khuyen mai thi giu header mac dinh */ }
 })();
 
-// ----- Muc Remote: quet QR / nhap ma -> tra Tunnel -> ghep voi app -----
+// ----- Muc Remote: nhap ma 6 so -> tra Tunnel -> ghep voi app -----
 // Luong: POST /api/remote/lookup {code} (cookie dang nhap) -> tunnelUrl cua
 // CHINH tai khoan nay; roi goi thang app qua Tunnel theo hop dong cu:
 // POST {base}/remote/pair {account, code} -> poll GET {base}/remote/pair/status
@@ -3082,8 +3075,6 @@ const REMOTE_LS_BASE = "hora.remote.baseUrl";
 const REMOTE_LS_TOKEN = "hora.remote.token";
 const REMOTE_LS_DEVICE = "hora.remote.deviceName";
 let remotePollTimer = null;
-let remoteScanStream = null;
-let remoteScanTimer = null;
 
 function remoteShowErr(text) {
   const e = $("remote-err");
@@ -4144,7 +4135,7 @@ async function remoteConnect() {
   remoteShowErr(""); remoteShowStatus("");
   if (!HAS_PLUS) { remoteShowErr("Remote là quyền lợi của gói Plus — tài khoản của bạn chưa có gói Plus đang còn hạn nên không kết nối được."); return; }
   const code = remoteCode();
-  if (code.length !== 6) { remoteShowErr("Hãy nhập đủ mã kết nối 6 số (hoặc quét mã QR trên app)."); return; }
+  if (code.length !== 6) { remoteShowErr("Hãy nhập đủ mã kết nối 6 số."); return; }
   const btn = $("remote-connect-btn");
   btn.disabled = true;
   try {
@@ -4227,49 +4218,6 @@ $("remote-disconnect").addEventListener("click", () => {
   } catch { /* bo qua */ }
   remoteRenderConnected();
 });
-// Quet QR ngay trong trang: BarcodeDetector (Chrome/Edge/Android). Trinh duyet
-// khong ho tro thi huong dan quet bang camera thuong (QR la link co san ma).
-function remoteStopScan() {
-  if (remoteScanTimer) { clearInterval(remoteScanTimer); remoteScanTimer = null; }
-  if (remoteScanStream) { remoteScanStream.getTracks().forEach((t) => t.stop()); remoteScanStream = null; }
-  $("remote-scan-wrap").classList.add("hidden");
-}
-async function remoteStartScan() {
-  remoteShowErr("");
-  if (!("BarcodeDetector" in window) || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-    remoteShowErr("Trình duyệt này không hỗ trợ quét QR trong trang. Hãy quét mã QR bằng camera thường (mã là link mở sẵn mục này) hoặc nhập mã 6 số.");
-    return;
-  }
-  try {
-    remoteScanStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
-  } catch {
-    remoteShowErr("Không mở được camera. Hãy cấp quyền camera cho trang, hoặc nhập mã 6 số.");
-    return;
-  }
-  const video = $("remote-scan-video");
-  video.srcObject = remoteScanStream;
-  $("remote-scan-wrap").classList.remove("hidden");
-  await video.play().catch(() => {});
-  const detector = new BarcodeDetector({ formats: ["qr_code"] });
-  remoteScanTimer = setInterval(async () => {
-    try {
-      const codes = await detector.detect(video);
-      if (!codes || !codes.length) return;
-      const raw = codes[0].rawValue || "";
-      let code = "";
-      try { code = new URL(raw).searchParams.get("remote_code") || ""; } catch { /* QR khong phai URL */ }
-      if (!code) code = (raw.match(/\d{6}/) || [])[0] || "";
-      if (!code) { $("remote-scan-status").textContent = "Đã thấy mã QR nhưng không đọc được mã kết nối trong đó."; return; }
-      remoteStopScan();
-      remoteSetCode(code);
-      remoteShowStatus("Đã quét được mã — đang kết nối…");
-      remoteConnect();
-    } catch { /* frame chua san sang: quet tiep */ }
-  }, 400);
-}
-$("remote-scan-btn").addEventListener("click", remoteStartScan);
-$("remote-scan-stop").addEventListener("click", remoteStopScan);
-
 // Mo trang trong trinh duyet nhung cua app khac (Zalo/Facebook...) thi moi app
 // luu cookie dang nhap rieng -> doi app la phai dang nhap lai. Hien meo mo
 // bang trinh duyet chinh de giu phien 30 ngay.
