@@ -1859,6 +1859,26 @@ html:has(body.sh-control){scrollbar-gutter:stable}
   #side-nav-account .side-item.active svg,#sh-side-nav .side-item.active svg{color:var(--gold);opacity:1}
 }
 
+/* Bang Lich su tren dien thoai (user bao 2026-11-05: bang 7 cot tran ngang,
+   khong xem duoc): duoi 760px moi dong bien thanh 1 the xep doc, nhan cot
+   lay tu data-label, khong con cuon ngang. Desktop giu nguyen bang. */
+@media (max-width:760px){
+  #dash .lic-table-wrap{overflow-x:visible}
+  #dash .lic-table{display:block;table-layout:auto;min-width:0;width:auto}
+  #dash .lic-table thead{display:none}
+  #dash .lic-table tbody{display:block}
+  #dash .lic-table tr{display:block;border:1px solid var(--line);border-radius:14px;padding:8px 14px;margin:0 0 12px;background:var(--panel)}
+  #dash .lic-table tr.pending-row{background:var(--panel)}
+  #dash .lic-table td{display:flex;align-items:center;justify-content:space-between;gap:16px;width:auto;padding:7px 0;border-bottom:0;text-align:right;white-space:normal;overflow:visible}
+  #dash .lic-table td::before{content:attr(data-label);flex:0 0 auto;margin-right:auto;font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);text-align:left}
+  #dash .lic-table td.no-label{justify-content:flex-end}
+  #dash .lic-table td.no-label::before{content:none}
+  #dash .lic-table td.key-cell{word-break:break-all}
+  #dash .lic-table .empty-row{border:0;background:transparent;padding:0}
+  #dash .lic-table .empty-row td{display:block;text-align:center}
+  #dash .lic-table .empty-row td::before{content:none}
+  #dash .lic-table .status-wait{margin:5px 0 0 auto}
+}
 </style>
 </head>
 <body>
@@ -2800,13 +2820,13 @@ function renderHistory() {
   for (const l of licenses) {
     const ordOfLic = l.orderId ? orders.find((x) => x.id === l.orderId) : null;
     html.push(`<tr>
-      <td class="key-cell">${licenseCell(l)}</td>
-      <td><span class="lic-chip">${l.tier ? esc(tierName(l.tier)) : "—"}</span>${(() => { const sub = []; if (l.app) sub.push(esc(APP_VI[l.app] || l.app)); if (l.organization === "promo") sub.push("Dùng thử"); if (ordOfLic && ordOfLic.bonusDays > 0) sub.push(`+${ordOfLic.bonusDays} ngày KM`); return sub.length ? `<span class="cell-sub">${sub.join(" · ")}</span>` : ""; })()}</td>
-      <td>${deviceCell(l)}</td>
-      <td>${esc(fmtDay(l.createdAt))}</td>
-      <td class="wrap-cell">${expiryCell(l)}</td>
-      <td>${bindingCell(l)}</td>
-      <td class="export-cell"><span class="cell-actions"><button type="button" class="export-btn" data-export-kind="license" data-export-id="${esc(l.id || "")}" title="Xuất đơn hàng này"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 11 5 5 5-5"></path><path d="M4 21h16"></path></svg> Xuất</button><button type="button" class="export-btn" data-copy="${esc(l.licenseKey || "")}" title="Sao chép license key">Copy</button></span></td>
+      <td class="key-cell" data-label="License key">${licenseCell(l)}</td>
+      <td data-label="Gói"><span class="lic-chip">${l.tier ? esc(tierName(l.tier)) : "—"}</span>${(() => { const sub = []; if (l.app) sub.push(esc(APP_VI[l.app] || l.app)); if (l.organization === "promo") sub.push("Dùng thử"); if (ordOfLic && ordOfLic.bonusDays > 0) sub.push(`+${ordOfLic.bonusDays} ngày KM`); return sub.length ? `<span class="cell-sub">${sub.join(" · ")}</span>` : ""; })()}</td>
+      <td data-label="Máy đã sử dụng">${deviceCell(l)}</td>
+      <td data-label="Thời gian">${esc(fmtDay(l.createdAt))}</td>
+      <td class="wrap-cell" data-label="Hạn dùng">${expiryCell(l)}</td>
+      <td data-label="Mua hàng">${bindingCell(l)}</td>
+      <td class="export-cell no-label"><span class="cell-actions"><button type="button" class="export-btn" data-export-kind="license" data-export-id="${esc(l.id || "")}" title="Xuất đơn hàng này"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 11 5 5 5-5"></path><path d="M4 21h16"></path></svg> Xuất</button><button type="button" class="export-btn" data-copy="${esc(l.licenseKey || "")}" title="Sao chép license key">Copy</button></span></td>
     </tr>`);
   }
   const licensedOrders = new Set(licenses.map((l) => l.orderId).filter(Boolean));
@@ -2816,13 +2836,13 @@ function renderHistory() {
     if (!["created", "awaiting_payment", "paid_pending_issue", "payment_failed"].includes(o.status)) continue;
     if (["created", "awaiting_payment"].includes(o.status) && Date.now() > payDeadline(o)) continue; // Het 15 phut cho thanh toan -> an khoi Lich su
     html.push(`<tr class="pending-row${o.status === "payment_failed" ? " error-row" : ""}">
-      <td class="muted">Chưa có license</td>
-      <td><span class="lic-chip">${esc((PLANS[o.plan] || {}).name || o.plan)} — ${esc(PERIODS[o.period] || o.period)}</span></td>
-      <td class="muted">—</td>
-      <td>${esc(fmtDay(o.createdAt))}</td>
-      ${["created", "awaiting_payment"].includes(o.status) ? `<td><span class="countdown" data-deadline="${payDeadline(o)}">Còn ${fmtCountdown(payDeadline(o) - Date.now())}</span></td>` : '<td class="muted">—</td>'}
-      <td><code title="${esc(o.id)}">${esc(shortId(o.id))}</code><br>${o.status === "payment_failed" ? `<span class="status-fail">${esc(STATUS_VI[o.status])}</span>` : ["created", "awaiting_payment"].includes(o.status) ? `<span class="status-wait">${esc(STATUS_VI[o.status])}</span>` : esc(STATUS_VI[o.status] || o.status)}</td>
-      <td class="export-cell">${["created", "awaiting_payment"].includes(o.status)
+      <td class="muted" data-label="License key">Chưa có license</td>
+      <td data-label="Gói"><span class="lic-chip">${esc((PLANS[o.plan] || {}).name || o.plan)} — ${esc(PERIODS[o.period] || o.period)}</span></td>
+      <td class="muted" data-label="Máy đã sử dụng">—</td>
+      <td data-label="Thời gian">${esc(fmtDay(o.createdAt))}</td>
+      ${["created", "awaiting_payment"].includes(o.status) ? `<td data-label="Hạn dùng"><span class="countdown" data-deadline="${payDeadline(o)}">Còn ${fmtCountdown(payDeadline(o) - Date.now())}</span></td>` : '<td class="muted" data-label="Hạn dùng">—</td>'}
+      <td data-label="Mua hàng"><code title="${esc(o.id)}">${esc(shortId(o.id))}</code><br>${o.status === "payment_failed" ? `<span class="status-fail">${esc(STATUS_VI[o.status])}</span>` : ["created", "awaiting_payment"].includes(o.status) ? `<span class="status-wait">${esc(STATUS_VI[o.status])}</span>` : esc(STATUS_VI[o.status] || o.status)}</td>
+      <td class="export-cell no-label">${["created", "awaiting_payment"].includes(o.status)
         ? `<button type="button" class="export-btn pay-open-btn" data-pay-open="${esc(o.id)}" title="Mở lại màn thanh toán">Mở</button>`
         : `<button type="button" class="export-btn" data-export-kind="order" data-export-id="${esc(o.id || "")}" title="Xuất đơn hàng này"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 11 5 5 5-5"></path><path d="M4 21h16"></path></svg> Xuất</button>`}</td>
     </tr>`);
@@ -3475,12 +3495,43 @@ function shStartShell() {
     if (!shBound) { shBind(); shBound = true; }
     shShowTab("dash");
     shConnectWs();
+    shProbeEntry();
   }
   shSyncChrome();
+}
+// Chong "ket" o shell chet (user bao 2026-11-05): vao Remote voi phien da luu
+// nhung app khong con song (tat may, Tunnel doi URL moi lan mo app) thi tu
+// xoa phien va DA ve man nhap ma, thay vi treo mai o dashboard "Mat noi".
+let shProbeGen = 0;
+let shWsUp = false;
+function shKickDeadPairing() {
+  try {
+    localStorage.removeItem(REMOTE_LS_BASE);
+    localStorage.removeItem(REMOTE_LS_TOKEN);
+    localStorage.removeItem(REMOTE_LS_DEVICE);
+  } catch { /* bo qua */ }
+  shExitShell();
+  remoteRenderConnected();
+  remoteShowErr("Không kết nối được tới máy tính — app đang tắt hoặc Tunnel đã đổi. Mở app HORA Media trên máy tính, bật Remote rồi nhập mã kết nối 6 số mới.");
+}
+async function shProbeEntry() {
+  const gen = ++shProbeGen;
+  for (let attempt = 0; attempt < 2; attempt++) {
+    if (gen !== shProbeGen || !shStarted || !remoteSaved()) return;
+    try {
+      await shApi("/remote/status");
+      return; // App co phan hoi (ke ca loi HTTP) = con song, khong da.
+    } catch (e) {
+      if (!remoteSaved()) return; // 401 -> shExpire da tu da ve man ket noi.
+      if (attempt === 0) await new Promise((r) => setTimeout(r, 1200));
+    }
+  }
+  if (gen === shProbeGen && shStarted && remoteSaved() && !shWsUp) shKickDeadPairing();
 }
 function shExitShell() {
   // Thoat khoi che do dieu khien: ve man Remote cu (menu tai khoan tro lai).
   // PHIEN VAN GIU — chi dong giao dien dieu khien, khong ngat ket noi.
+  shProbeGen++; // huy vong kiem tra da-phien neu con dang chay
   shControlWanted = false;
   shStarted = false;
   if (shWsTimer) { clearTimeout(shWsTimer); shWsTimer = null; }
@@ -3505,6 +3556,8 @@ function shConnectWs() {
   } catch { shScheduleWs(); return; }
   shWs = ws;
   ws.onopen = () => {
+    shWsUp = true;
+    shProbeGen++; // WS da noi = app con song, huy vong kiem tra da-phien.
     shWsDelay = 1000;
     if (shPollTimer) { clearInterval(shPollTimer); shPollTimer = null; }
     shSetConn(true);
@@ -3532,6 +3585,7 @@ function shConnectWs() {
   };
   ws.onclose = (ev) => {
     shWs = null;
+    shWsUp = false;
     if (!shStarted) return;
     if (ev.code === 4001) { shExpire(); return; }
     shSetConn(false);
@@ -3556,9 +3610,9 @@ async function shLoadDash() {
   if (!remoteSaved()) return;
   let statusData = null, queueData = null, statusErr = "", queueErr = "";
   try { const r = await shApi("/remote/status"); statusData = r.data; if (!r.res.ok) statusErr = SF.errText(r.data, "Không tải được trạng thái."); }
-  catch (e) { statusErr = e.message; }
+  catch (e) { statusErr = shNetErr(e); }
   try { const r = await shApi("/remote/queue"); queueData = r.data; if (!r.res.ok) queueErr = SF.errText(r.data, "Không tải được hàng đợi."); }
-  catch (e) { queueErr = e.message; }
+  catch (e) { queueErr = shNetErr(e); }
   if (!remoteSaved()) return;
   shRenderDash(statusData, SF.listOf(queueData, ["queue", "jobs"]), { status: statusData, queue: queueData });
   if (statusErr || queueErr) $("sh-queue").insertAdjacentHTML("afterbegin", `<p class="sh-err" style="margin:0 0 10px">${esc(statusErr || queueErr)}</p>`);
