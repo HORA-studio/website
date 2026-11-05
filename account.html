@@ -1773,6 +1773,29 @@ section[data-view="orders"]{position:relative}
 .sh-fnode.drop-after{box-shadow:0 2px 0 var(--gold)}
 @media (max-width:760px){ .sh-fnode-cols.has-img{flex-direction:column} .sh-fnode-img{width:100%;max-width:100%} }
 
+/* ===== v11: Composer chat tren dien thoai theo mau user gui — hop bo
+   tron, o go o tren (tu gian chieu cao, noi dung cuon len de nhin thay
+   dong dang go), nut gui tron xuong goc duoi-phai cua hop. Hang chip goi
+   y an thanh cuon ngang cho gon ===== */
+.sh-chat-suggest{scrollbar-width:none}
+.sh-chat-suggest::-webkit-scrollbar{display:none}
+/* Composer khong duoc bi panel flex ep co lai (flex-shrink mac dinh lam o
+   go dinh 1 dong du JS da set height) */
+.sh-composer{flex:0 0 auto}
+.sh-composer textarea{flex-shrink:0}
+/* Padding top cac tab shell: thong nhat + giam — truoc day cong don
+   view 6 + remote-body 20 + panel 10 = 36px (tab Tao task dinh them
+   margin-top 16px cua the label nen thanh 52px), lang phi khoang trong */
+body.sh-control [data-view="remote"]{padding-top:2px}
+body.sh-control #dash [data-view="remote"] .remote-body{padding-top:2px}
+.sh-panel{padding-top:2px}
+.sh-panel>label.lbl:first-child{margin-top:0}
+@media (max-width:760px){
+  .sh-composer{flex-direction:column;align-items:stretch;border-radius:20px;padding:10px 10px 8px 14px}
+  .sh-composer textarea{flex:0 0 auto;width:100%;max-height:132px;padding:2px 0 4px;line-height:1.45}
+  .sh-sendbtn{align-self:flex-end;width:40px;height:40px}
+}
+
 </style>
 </head>
 <body>
@@ -4061,6 +4084,7 @@ async function shSendChat() {
   errEl.classList.add("hidden");
   if (!text) return;
   input.value = "";
+  input.style.height = "auto";
   shAppendMsg("me", text);
   const btn = $("sh-chat-send");
   btn.disabled = true;
@@ -4169,6 +4193,14 @@ function shBind() {
   }));
   $("sh-chat-send").addEventListener("click", shSendChat);
   $("sh-chat-input").addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); shSendChat(); } });
+  // O go tu gian chieu cao theo noi dung (toi da 132px), qua thi cuon noi
+  // bo va tu cuon xuong dong moi nhat de nguoi go luon nhin thay chu.
+  $("sh-chat-input").addEventListener("input", (e) => {
+    const t = e.target;
+    t.style.height = "auto";
+    t.style.height = Math.min(t.scrollHeight, 132) + "px";
+    t.scrollTop = t.scrollHeight;
+  });
   $("sh-chat-new").addEventListener("click", shNewChat);
   $("sh-chat-suggest").addEventListener("click", (e) => {
     const chip = e.target.closest("[data-sh-suggest]");
