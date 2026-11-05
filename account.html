@@ -1510,7 +1510,7 @@ body.sh-control [data-sh-panel="dash"]:not(.hidden){display:flex;flex-direction:
 /* ===== v7: Tong quan — da ket noi + back/quit 1 hang tren cung, 4 stat can deu, line ngan cach, empty state (feedback user 2026-11-05) ===== */
 .sh-dash-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
 .sh-dash-head .sh-conn{font-size:14px}
-.sh-dash-head .sh-topbar-right{flex:0 0 auto;transform:translateY(-10px)}
+.sh-dash-head .sh-topbar-right{flex:0 0 auto}
 .sh-stats-bar{display:flex;align-items:center;gap:8px;padding:2px 0 12px;border-bottom:1px solid var(--line);margin-bottom:14px;font-size:14px}
 .sh-stats-bar .sh-st{flex:1 1 0;text-align:center;white-space:nowrap}
 .sh-stats-bar .sh-st:first-child{text-align:left}
@@ -1806,8 +1806,17 @@ body.sh-control #dash [data-view="remote"] .remote-body{padding-top:2px}
 .sh-prompt-box{position:relative}
 .sh-prompt-mic{position:absolute;right:8px;bottom:8px;background:var(--panel)}
 @media (max-width:760px){
-  .sh-composer-foot{display:flex;align-items:center;justify-content:space-between;width:100%}
+  .sh-composer-foot{display:flex;align-items:center;justify-content:flex-end;gap:8px;width:100%}
 }
+
+/* ===== v13: (1) Menu duoi nhay size khi doi tab — tren may Windows,
+   thanh cuon cua so chi xuat hien o tab co noi dung dai hon man hinh
+   (do bang probe: Tong quan/Tao task/Tro ly co cuon, Workflows/Tai
+   nguyen thi khong) lam chieu rong viewport thay doi ~17px, capsule
+   fixed left/right 12px bi keo theo. Giu san cho thanh cuon o moi tab
+   thi viewport khong doi nua. (2) Nut mic ngoi canh nut gui (gom ve goc
+   phai duoi cua hop chat) thay vi doi nhau 2 dau ===== */
+html:has(body.sh-control){scrollbar-gutter:stable}
 
 </style>
 </head>
@@ -3394,6 +3403,7 @@ function shShowTab(name) {
   document.querySelectorAll("#sh-tabs .sh-tab").forEach((b) => b.classList.toggle("on", b.dataset.shTab === name));
   document.querySelectorAll("#sh-side-nav .sh-nav-item").forEach((b) => b.classList.toggle("active", b.dataset.shNav === name));
   document.querySelectorAll("[data-sh-panel]").forEach((p) => p.classList.toggle("hidden", p.dataset.shPanel !== name));
+  if (name === "chat") requestAnimationFrame(shFitChatInput);
   if (!remoteSaved()) return;
   if (name === "dash") shLoadDash();
   else if (name === "flow" && !shLoaded.flow) shLoadFlow();
@@ -3664,6 +3674,13 @@ async function shSendPrompt() {
     if (cancelled) return;
     if (!res.ok) { showMsg("err", SF.errText(data, "Server từ chối task.")); return; }
     showMsg("ok", "Đã gửi task thành công.");
+    // Gui xong reset sach trang thai: dung voice (neu dang nghe), xoa
+    // prompt + negative, bo chip dinh kem.
+    shStopAllVoice();
+    $("sh-prompt").value = "";
+    $("sh-negative").value = "";
+    shRefs = [];
+    shRefRenderChips();
     shLoadDash();
   } catch (e) { showMsg("err", e.message); }
   finally { btn.disabled = false; }
@@ -3966,14 +3983,32 @@ async function shFlowSave() {
   } catch (e) { err.textContent = e.message; err.classList.remove("hidden"); }
   finally { btn.disabled = false; }
 }
+// Chieu cao o chat khop noi dung (toi da 132px); goi lai khi mo tab de o
+// khong bi "dinh" chieu cao cu neu co duong nao set value ma sot su kien.
+function shFitChatInput() {
+  const t = $("sh-chat-input");
+  if (!t) return;
+  t.style.height = "auto";
+  t.style.height = Math.min(t.scrollHeight, 132) + "px";
+  t.scrollTop = t.scrollHeight;
+}
 // Nhap bang giong noi (Web Speech API): noi tieng Viet -> chu chay thang
 // vao o nhap, hien ca ket qua tam thoi; bam mic lan nua de dung. Trinh
 // duyet khong ho tro (Firefox...) thi an nut mic.
+const shVoiceStops = [];
+function shStopAllVoice() { shVoiceStops.forEach((f) => { try { f(); } catch { /* bo qua */ } }); }
 function shVoiceAttach(textarea, btn) {
   if (!textarea || !btn) return;
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SR) { btn.classList.add("hidden"); return; }
   let rec = null, active = false, base = "";
+  // Dung cung: goi khi gui xong de reset trang thai — cat ca handler ket
+  // qua de chu noi tre khong ghi de len o vua xoa.
+  shVoiceStops.push(() => {
+    if (rec) { rec.onresult = null; rec.onend = null; rec.onerror = null; try { rec.stop(); } catch { /* bo qua */ } }
+    active = false;
+    btn.classList.remove("rec");
+  });
   btn.addEventListener("click", () => {
     if (active) { try { rec.stop(); } catch { /* bo qua */ } return; }
     try {
@@ -4134,6 +4169,7 @@ async function shSendChat() {
   const errEl = $("sh-chat-err");
   errEl.classList.add("hidden");
   if (!text) return;
+  shStopAllVoice();
   input.value = "";
   input.style.height = "auto";
   shAppendMsg("me", text);
@@ -4248,12 +4284,7 @@ function shBind() {
   $("sh-chat-input").addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); shSendChat(); } });
   // O go tu gian chieu cao theo noi dung (toi da 132px), qua thi cuon noi
   // bo va tu cuon xuong dong moi nhat de nguoi go luon nhin thay chu.
-  $("sh-chat-input").addEventListener("input", (e) => {
-    const t = e.target;
-    t.style.height = "auto";
-    t.style.height = Math.min(t.scrollHeight, 132) + "px";
-    t.scrollTop = t.scrollHeight;
-  });
+  $("sh-chat-input").addEventListener("input", shFitChatInput);
   $("sh-chat-new").addEventListener("click", shNewChat);
   $("sh-chat-suggest").addEventListener("click", (e) => {
     const chip = e.target.closest("[data-sh-suggest]");
