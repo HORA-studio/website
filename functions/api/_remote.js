@@ -76,6 +76,36 @@ export async function appCaller(env, request, body) {
   return null;
 }
 
+// Remote la quyen loi goi Plus (chot ban gia 2026-11-05: Go khong co Remote).
+// Tai khoan duoc tinh la Plus khi co license tier 'plus', status 'active' va
+// con han: expiry_utc NULL = chua kich hoat (han dem tu luc gan may) nen van
+// con hieu luc; license dung thu Plus con han cung duoc tinh. Loi DB -> false
+// (chan chua chac con hon mo oan tinh nang tra phi).
+export async function hasActivePlus(env, customerId) {
+  try {
+    const row = await env.DB.prepare(
+      "SELECT id FROM licenses WHERE customer_id = ?1 AND tier = 'plus' AND status = 'active' AND (expiry_utc IS NULL OR expiry_utc > ?2) LIMIT 1"
+    ).bind(customerId, new Date().toISOString()).first();
+    return !!row;
+  } catch {
+    return false;
+  }
+}
+
+// Trang thai dang ky cua 1 tai khoan: 'live' | 'expired' | 'none' — de lookup
+// bao dung ly do (chua co may dang ky / ma het han) thay vi 1 thong bao chung.
+export async function getRegistrationState(env, customerId) {
+  const row = await env.DB.prepare(
+    "SELECT * FROM remote_registrations WHERE customer_id = ?1"
+  ).bind(customerId).first();
+  if (!row) return { state: "none", reg: null };
+  if (new Date(row.expires_at).getTime() <= Date.now()) {
+    await env.DB.prepare("DELETE FROM remote_registrations WHERE customer_id = ?1").bind(customerId).run();
+    return { state: "expired", reg: null };
+  }
+  return { state: "live", reg: row };
+}
+
 // Doc dang ky dang song cua 1 tai khoan; het han thi xoa luon va tra null.
 export async function getLiveRegistration(env, customerId) {
   const row = await env.DB.prepare(

@@ -254,18 +254,10 @@ td.y{color:var(--accent2);font-weight:800}
 .price .promo-tag{display:none;background:rgba(108,92,255,.10);border:1px dashed var(--accent);color:var(--ink);border-radius:12px;padding:9px 12px;font-size:13px;font-weight:600;margin:10px 0 2px;line-height:1.45}
 .price .promo-tag.show{display:block}
 
-/* ===== Menu avatar o header (huong A: dang nhap xong o lai trang chu) ===== */
+/* ===== Avatar o header: bam vao la vao thang trang tai khoan, xu ly het trong do (bo menu xo, user chot 2026-11-05) ===== */
 .user-menu{position:relative}
-.avatar-btn{position:relative;width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:var(--accent);color:#fff;font-weight:800;font-size:15px;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:0;cursor:pointer;flex:0 0 auto}
+.avatar-btn{position:relative;width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:var(--accent);color:#fff;font-weight:800;font-size:15px;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:0;cursor:pointer;flex:0 0 auto;text-decoration:none}
 .avatar-btn img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.user-dropdown{position:absolute;right:0;top:calc(100% + 10px);width:264px;background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:8px;z-index:80}
-.user-dropdown a,.user-dropdown button{display:flex;width:100%;align-items:center;gap:9px;padding:9px 10px;border-radius:9px;font-size:14px;font-weight:550;color:var(--ink);background:none;border:0;text-align:left;cursor:pointer}
-.user-dropdown a:hover,.user-dropdown button:hover{background:var(--panel2)}
-.ud-head{display:flex;flex-direction:column;padding:8px 10px 10px;border-bottom:1px solid var(--line);margin-bottom:6px}
-.ud-name{font-weight:750;font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ud-email{color:var(--muted);font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ud-sep{border-top:1px solid var(--line);margin:6px 0}
-#udLogout{color:var(--muted)}
 </style></head>
 <body>
 
@@ -276,7 +268,7 @@ td.y{color:var(--accent2);font-weight:800}
       <a href="#/" data-nav="home">Trang chủ</a><a href="#how" data-anchor="how">Cách hoạt động</a><a href="#styles" data-anchor="styles">Phong cách</a><a href="#library" data-anchor="library">Video mẫu</a><a href="#faq" data-anchor="faq">FAQ</a><a href="#/gia" data-nav="pricing">Bảng giá</a><a href="/releases-latest">Tải app</a>
     </nav>
     <div class="nav-actions">
-      <a class="btn small ghost login" id="navLogin" href="/account.html">Đăng nhập</a><div class="user-menu" id="navUserWrap" style="display:none"><button type="button" class="avatar-btn" id="navAvatar" aria-haspopup="true" aria-expanded="false" title="Tài khoản"><img id="navAvatarImg" alt="" style="display:none"><span id="navAvatarLetter">?</span></button><div class="user-dropdown" id="navDropdown" hidden><div class="ud-head"><span class="ud-name" id="udName">Tài khoản</span><span class="ud-email" id="udEmail"></span></div><a href="/account.html">Thông tin &amp; cài đặt</a><a href="/#/gia">Mua gói</a><a href="/account.html?view=orders">Lịch sử giao dịch</a><a href="/account.html?view=remote">Remote — điều khiển máy tính</a><div class="ud-sep"></div><button type="button" id="udLogout">Đăng xuất</button></div></div>
+      <a class="btn small ghost login" id="navLogin" href="/account.html">Đăng nhập</a><div class="user-menu" id="navUserWrap" style="display:none"><a class="avatar-btn" id="navAvatar" href="/account.html" title="Tài khoản" aria-label="Mở trang tài khoản"><img id="navAvatarImg" alt="" style="display:none"><span id="navAvatarLetter">?</span></a></div>
       <a class="btn small primary sample" href="#library" data-anchor="library">Xem video mẫu</a>
       <button class="burger" id="burger" aria-label="Mở menu">☰</button>
     </div>
@@ -610,7 +602,7 @@ fetch('/api/promo').then(r=>r.ok?r.json():null).then(p=>{
     const tag=document.createElement('div'); tag.className='promo-tag show'; tag.textContent='🎉 '+parts.join(' · '); per.after(tag);
   });
 }).catch(()=>{});
-/* ===== Trang thai dang nhap o header: avatar + menu xo (huong A) ===== */
+/* ===== Trang thai dang nhap o header: avatar la link vao thang /account.html ===== */
 (function(){
   const login=document.getElementById('navLogin');
   // Dang nhap xong quay lai dung trang dang xem (ke ca view gia #/gia).
@@ -622,20 +614,9 @@ fetch('/api/promo').then(r=>r.ok?r.json():null).then(p=>{
     if(login) login.style.display='none';
     wrap.style.display='';
     const name=(c.displayName||'').trim(), email=c.email||'';
-    document.getElementById('udName').textContent=name||email||'Tài khoản';
-    document.getElementById('udEmail').textContent=name?email:'';
     const letter=(name||email||'?').charAt(0).toUpperCase();
     const lt=document.getElementById('navAvatarLetter'); lt.textContent=letter;
     if(c.avatarUrl){ const img=document.getElementById('navAvatarImg'); img.src=c.avatarUrl; img.style.display=''; lt.style.display='none'; }
-    const btn=document.getElementById('navAvatar'), dd=document.getElementById('navDropdown');
-    function close(){ dd.hidden=true; btn.setAttribute('aria-expanded','false'); }
-    btn.addEventListener('click',e=>{ e.stopPropagation(); const open=dd.hidden; dd.hidden=!open; btn.setAttribute('aria-expanded',String(open)); });
-    document.addEventListener('click',e=>{ if(!wrap.contains(e.target)) close(); });
-    document.addEventListener('keydown',e=>{ if(e.key==='Escape') close(); });
-    document.getElementById('udLogout').addEventListener('click',async()=>{
-      try{ await fetch('/api/auth/logout',{method:'POST',credentials:'same-origin'}); }catch(e){}
-      location.reload();
-    });
   }).catch(()=>{});
 })();
 document.getElementById('burger').addEventListener('click',()=>document.body.classList.toggle('menu-open'));

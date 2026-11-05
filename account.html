@@ -1604,6 +1604,44 @@ section[data-view="orders"]{position:relative}
 .auth-layout{margin:0 auto}
 .auth-form-panel{justify-content:center}
 
+/* ===== Dot chinh 2026-11-05 (user): boot khong chop login / gian rong theo man /
+   khoi phuc scroll / tab Mua goi + Remote rieng / Thong tin day len + Dang xuat ghim day ===== */
+.auth-boot{display:flex;align-items:center;justify-content:center;gap:10px;padding:56px 0;color:var(--muted);font-size:14px}
+.auth-boot-spin{width:18px;height:18px;border-radius:50%;border:2px solid var(--line2);border-top-color:var(--gold);animation:authBootSpin .8s linear infinite;flex:0 0 auto}
+@keyframes authBootSpin{to{transform:rotate(360deg)}}
+.buy-body{padding:22px 26px 26px}
+@media (min-width:761px){
+  /* Gian theo ti le man: shell chiem 94% chieu ngang thay vi khoa 1220px */
+  .shell{width:94vw;max-width:none}
+  .side{width:clamp(220px,15vw,300px)}
+  /* Bo padding-bottom 20px cua .content (khoi v6) — no lam day panel ngan
+     hon day menu trai dung 20px; bo di thi 2 cot bang day nhau */
+  .content{padding-bottom:0}
+  #dash [data-view="orders"] .lic-table-wrap{max-width:none}
+  #dash section[data-view="account"] .set-section{max-width:1120px}
+  #dash section[data-view="account"] .field-grid,
+  #dash section[data-view="account"] .savebar{max-width:1120px}
+  #dash section[data-view="account"] .account-logout{max-width:1120px}
+  #dash section[data-view="buy"] .mini-plans{max-width:1120px}
+  /* Thong tin: noi dung day tu tren xuong (het can giua lam Ket noi bi day xuong),
+     Dang xuat ghim day panel — day panel deu voi day menu trai */
+  .account-panel:not(.hidden){justify-content:flex-start;overflow:auto}
+  .account-panel .account-logout{margin-top:auto}
+}
+@media (max-width:860px){
+  /* Tra lai cuon trang cho dien thoai: html,body overflow:hidden o khoi auth
+     (dong ~918) khoa ca trang — ghi de tai day, panel ve static/visible */
+  html,body{height:auto;overflow:visible}
+  body{overflow-y:auto}
+  .shell{height:auto !important;min-height:0;overflow:visible}
+  .content{height:auto;overflow:visible}
+  #dash{overflow:visible}
+  .view-panel:not(.hidden){position:static;overflow:visible;height:auto !important}
+  .account-panel:not(.hidden){display:block;height:auto !important}
+  #side-nav-account{grid-template-columns:repeat(4,1fr)}
+  .buy-body{padding:18px 16px 20px}
+}
+
 </style>
 </head>
 <body>
@@ -1619,6 +1657,8 @@ section[data-view="orders"]{position:relative}
     <nav class="side-nav" id="side-nav-account" aria-label="Mục tài khoản">
       <button type="button" class="side-item active" data-view-btn="account" data-short="Thông tin"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4.5 20.5c1.4-3.8 4.4-5.5 7.5-5.5s6.1 1.7 7.5 5.5"></path></svg> Thông tin</button>
       <button type="button" class="side-item" data-view-btn="orders" data-short="Lịch sử"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M8.5 6h12M8.5 12h12M8.5 18h12"></path><path d="M4 6h.01M4 12h.01M4 18h.01"></path></svg> Lịch sử giao dịch <span id="orders-unpaid-badge" class="side-badge hidden" title="Có đơn chưa thanh toán" aria-label="Có đơn chưa thanh toán">!</span></button>
+      <button type="button" class="side-item" data-view-btn="buy" data-short="Mua gói"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 7h15l-1.5 9h-12z"></path><path d="M6 7L5 3H2"></path><circle cx="9" cy="20" r="1.6"></circle><circle cx="18" cy="20" r="1.6"></circle></svg> Mua gói</button>
+      <button type="button" class="side-item" data-view-btn="remote" data-short="Remote"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="4" width="19" height="13" rx="2"></rect><path d="M8 21h8M12 17v4"></path></svg> Remote</button>
     </nav>
     <nav class="side-nav hidden" id="sh-side-nav" aria-label="Mục điều khiển">
       <button type="button" class="side-item sh-nav-item active" data-sh-nav="dash" data-short="Tổng quan"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="3" width="7" height="7" rx="1.5"></rect><rect x="3" y="14" width="7" height="7" rx="1.5"></rect><rect x="14" y="14" width="7" height="7" rx="1.5"></rect></svg> Tổng quan</button>
@@ -1634,8 +1674,13 @@ section[data-view="orders"]{position:relative}
 
   <div id="notice" class="msg hidden"></div>
 
+  <!-- Boot: chua biet dang nhap hay chua thi CHI hien dong nay — khong ve form
+       login truoc (tranh chop form login 1 lan khi da dang nhap). loadDash
+       tra ve moi quyet dinh hien auth-card hay dash. -->
+  <div id="auth-boot" class="auth-boot" role="status"><span class="auth-boot-spin" aria-hidden="true"></span><span>Đang kiểm tra đăng nhập…</span></div>
+
   <!-- Chua dang nhap -->
-  <section id="auth-card" class="auth-layout">
+  <section id="auth-card" class="auth-layout hidden">
     <div class="auth-visual">
       <a class="auth-logo" href="https://hora.works/"><img class="brand-logo" src="data:image/png;base64,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" alt="Logo HORA Media">HORA</a>
       <div class="auth-visual-copy">
@@ -1734,8 +1779,15 @@ section[data-view="orders"]{position:relative}
         </div>
       </div>
 
-      <div class="set-section">
-        <div class="set-head"><h3>Gói dịch vụ</h3><p class="muted">Mở khóa toàn bộ tính năng của HORA Media. Bấm Mua ngay để mở trang mua gói và thanh toán.</p></div>
+      <div class="account-logout">
+        <div class="account-logout-copy"><strong>Đăng xuất</strong><p class="muted">Thoát khỏi tài khoản trên trình duyệt này.</p></div>
+        <button class="btn" id="logout-btn" type="button">Đăng xuất</button>
+      </div>
+    </section>
+
+    <section class="card view-panel hidden" data-view="buy">
+      <div class="orders-welcome"><div><h2>Mua gói</h2><p>Chọn gói để mở khóa toàn bộ tính năng của HORA Media. Bấm Mua ngay để thanh toán và nhận license.</p></div></div>
+      <div class="buy-body">
         <div class="pricing-toggle-row info-toggle-row"><div class="billing-toggle" role="tablist" aria-label="Chọn thời hạn"><button type="button" class="billing-opt active" data-billing="month" role="tab" aria-selected="true">Theo tháng</button><button type="button" class="billing-opt" data-billing="year" role="tab" aria-selected="false">Theo năm<span class="save-badge">Tiết kiệm 17%</span></button></div></div>
         <div class="mini-plans">
           <article class="mini-plan" data-plan-card="go">
@@ -1753,23 +1805,9 @@ section[data-view="orders"]{position:relative}
             <button class="btn primary" type="button" data-info-buy="plus">Mua ngay</button>
           </article>
         </div>
-      </div>
-
-      <div class="set-section">
-        <div class="set-head"><h3>Kết nối ứng dụng</h3><p class="muted">Điều khiển app HORA Media trên máy tính của bạn ngay từ trình duyệt này.</p></div>
-        <p id="info-remote-status" class="muted" style="margin:0 0 12px">Chưa kết nối ứng dụng.</p>
-        <div class="avatar-actions">
-          <button class="btn primary small" type="button" id="info-remote-open">Kết nối ứng dụng</button>
-          <button class="btn small hidden" type="button" id="info-remote-disconnect">Ngắt kết nối</button>
-        </div>
-      </div>
-
-      <div class="account-logout">
-        <div class="account-logout-copy"><strong>Đăng xuất</strong><p class="muted">Thoát khỏi tài khoản trên trình duyệt này.</p></div>
-        <button class="btn" id="logout-btn" type="button">Đăng xuất</button>
+        <p class="muted" style="margin:14px 0 0;font-size:13px">Thanh toán bằng QR SePay — license được cấp tự động ngay khi hệ thống nhận tiền, xem ở tab Lịch sử giao dịch. Remote (điều khiển máy tính) là quyền lợi riêng của gói Plus.</p>
       </div>
     </section>
-
 
     <section class="card view-panel hidden" data-view="orders">
       <button id="pay-cart-btn" class="hidden" type="button" title="Đơn đang chờ thanh toán — bấm để xem mã QR" aria-label="Đơn đang chờ thanh toán — bấm để xem mã QR"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="20.4" r="1.5"/><circle cx="17" cy="20.4" r="1.5"/><path d="M2.5 3h2.1l2.55 12.1a1.6 1.6 0 0 0 1.57 1.27h7.86a1.6 1.6 0 0 0 1.56-1.28L20.6 6.9H5.9"/></svg><span class="pay-cart-dot"></span></button>
@@ -1785,6 +1823,13 @@ section[data-view="orders"]{position:relative}
     <section class="card view-panel hidden" data-view="remote">
       <div class="orders-welcome"><div><h2>Remote — điều khiển máy tính</h2><p>Mở app HORA Media trên máy tính của bạn, app sẽ hiện mã QR + mã kết nối 6 số. Quét mã hoặc nhập mã tại đây để mở view điều khiển.</p></div></div>
       <div class="remote-body">
+        <div id="remote-plus-lock" class="remote-box hidden">
+          <p class="remote-ok"><strong>🔒 Remote là quyền lợi của gói Plus</strong></p>
+          <p class="muted" style="margin:8px 0 14px">Tài khoản của bạn chưa có gói Plus đang còn hạn nên chưa kết nối điều khiển được. Giới hạn này được kiểm tra ở máy chủ — nâng cấp lên Plus là dùng được ngay.</p>
+          <div class="remote-actions">
+            <button class="btn primary" type="button" id="remote-plus-buy">Xem gói Plus</button>
+          </div>
+        </div>
         <div id="remote-connected" class="remote-box hidden">
           <div id="sh-home">
             <p class="remote-ok">✅ Đã kết nối tới <strong id="remote-device">máy của bạn</strong></p>
@@ -2027,7 +2072,7 @@ async function api(path, opts = {}) {
   return { res, data };
 }
 // ----- Dieu huong app shell (sidebar) -----
-const VIEW_TITLES = { account: "Thông tin", orders: "Lịch sử giao dịch", remote: "Remote" };
+const VIEW_TITLES = { account: "Thông tin", orders: "Lịch sử giao dịch", buy: "Mua gói", remote: "Remote" };
 let currentView = "account";
 try { currentView = sessionStorage.getItem("hora-view") || "account"; } catch { /* sessionStorage bi chan */ }
 if (!VIEW_TITLES[currentView]) currentView = "account";
@@ -2417,6 +2462,8 @@ if (infoRemoteDisc) infoRemoteDisc.addEventListener("click", () => { const rb = 
 
 async function loadDash() {
   const { res, data } = await api("/api/auth/me");
+  const boot = $("auth-boot");
+  if (boot) boot.classList.add("hidden");
   if (!res.ok) {
     $("auth-card").classList.remove("hidden");
     $("dash").classList.add("hidden");
@@ -2443,7 +2490,6 @@ async function loadDash() {
     location.replace("/?plan=" + buyParam + "&period=" + (new URLSearchParams(location.search).get("period") === "year" ? "year" : "month") + "#/gia");
     return;
   }
-  if (wantView === "buy") { location.replace("/#/gia"); return; }
   if (wantView && VIEW_TITLES[wantView]) showView(wantView);
   MY_EMAIL = data.customer.email || "";
   initRemoteFromUrl();
@@ -2459,6 +2505,15 @@ async function loadDash() {
 
 let ORDERS_CACHE = [];
 let LICENSES_CACHE = [];
+// Remote la quyen loi goi Plus: HAS_PLUS tinh tu license Plus 'active' con han
+// (expiry null = chua kich hoat, van con hieu luc). Day chi la lop UI — lop
+// that nam o server (/api/remote/lookup + /api/app/remote-register deu 403
+// PLUS_REQUIRED), sua code trinh duyet cung khong ket noi duoc.
+let LICENSES_LOADED = false;
+let HAS_PLUS = false;
+function computeHasPlus() {
+  HAS_PLUS = LICENSES_CACHE.some((l) => l && l.tier === "plus" && l.status !== "revoked" && (!l.expiresAt || new Date(l.expiresAt).getTime() > Date.now()));
+}
 
 function tierName(t) { return t ? t.charAt(0).toUpperCase() + t.slice(1) : ""; }
 function licenseCell(l) {
@@ -2592,9 +2647,12 @@ setInterval(tickCountdowns, 1000);
 async function loadLicenses() {
   const { data } = await api("/api/licenses");
   LICENSES_CACHE = (data && data.licenses) || [];
+  LICENSES_LOADED = true;
+  computeHasPlus();
   const licenseCount = $("account-license-count");
   if (licenseCount) licenseCount.textContent = String(LICENSES_CACHE.length);
   renderHistory();
+  renderRemoteGate();
 }
 
 const GATEWAY_VI = { sepay: "SePay", momo: "MoMo", vnpay: "VNPay" };
@@ -2947,6 +3005,25 @@ function remoteSaved() {
     return base && token ? { base, token, device: localStorage.getItem(REMOTE_LS_DEVICE) || "" } : null;
   } catch { return null; }
 }
+// Gate UI cho Remote theo goi Plus (lop server moi la lop quyet dinh).
+function renderRemoteGate() {
+  const lock = $("remote-plus-lock");
+  if (!lock) return;
+  if (!LICENSES_LOADED) return;
+  if (HAS_PLUS) {
+    lock.classList.add("hidden");
+    remoteRenderConnected();
+    return;
+  }
+  lock.classList.remove("hidden");
+  const box = $("remote-connect-box"), conn = $("remote-connected");
+  if (box) box.classList.add("hidden");
+  if (conn) conn.classList.add("hidden");
+  if (shStarted) shStopShell();
+}
+const remotePlusBuy = $("remote-plus-buy");
+if (remotePlusBuy) remotePlusBuy.addEventListener("click", () => showView("buy"));
+
 function remoteRenderConnected() {
   const saved = remoteSaved();
   $("remote-connected").classList.toggle("hidden", !saved);
@@ -3142,6 +3219,7 @@ function shSyncChrome() {
 }
 function shStartShell() {
   if (!remoteSaved()) return;
+  if (LICENSES_LOADED && !HAS_PLUS) return; // Remote chi cho goi Plus (server con chan 1 lop nua)
   shControlWanted = true;
   $("sh-shell").classList.remove("hidden");
   $("sh-home").classList.add("hidden");
@@ -3868,6 +3946,7 @@ function remotePollStatus(base, code, deviceName, requestId, deadline) {
 }
 async function remoteConnect() {
   remoteShowErr(""); remoteShowStatus("");
+  if (!HAS_PLUS) { remoteShowErr("Remote là quyền lợi của gói Plus — tài khoản của bạn chưa có gói Plus đang còn hạn nên không kết nối được."); return; }
   const code = remoteCode();
   if (code.length !== 6) { remoteShowErr("Hãy nhập đủ mã kết nối 6 số (hoặc quét mã QR trên app)."); return; }
   const btn = $("remote-connect-btn");

@@ -10,7 +10,7 @@
 // va dung lam QR: user quet QR la mo dung muc Remote da dien san ma.
 import { json, errorJson, readJson, siteUrl } from "../_lib.js";
 import { logEvent, clientIp } from "../_log.js";
-import { appCaller, normalizeRemoteCode, hashRemoteCode, validTunnelUrl, REMOTE_CODE_TTL_MS } from "../_remote.js";
+import { appCaller, normalizeRemoteCode, hashRemoteCode, validTunnelUrl, hasActivePlus, REMOTE_CODE_TTL_MS } from "../_remote.js";
 
 export async function onRequestPost({ request, env }) {
   const body = await readJson(request);
@@ -18,6 +18,12 @@ export async function onRequestPost({ request, env }) {
 
   const caller = await appCaller(env, request, body);
   if (!caller) return errorJson("UNAUTHORIZED", "Token ứng dụng không hợp lệ hoặc đã bị thu hồi.", 401);
+
+  // Remote chi cho goi Plus — app cua tai khoan khong co Plus con han thi
+  // khong dang ky duoc, nen web khong bao gio tra ra Tunnel cho tai khoan do.
+  if (!(await hasActivePlus(env, caller.customerId))) {
+    return errorJson("PLUS_REQUIRED", "Remote là quyền lợi của gói Plus — tài khoản chưa có gói Plus đang còn hạn nên app không đăng ký kết nối được.", 403);
+  }
 
   const tunnelUrl = validTunnelUrl(body.tunnelUrl || body.tunnel_url);
   if (!tunnelUrl) return errorJson("INVALID_TUNNEL_URL", "URL Tunnel không hợp lệ (phải là https, hoặc http://127.0.0.1 khi test local).", 422);
