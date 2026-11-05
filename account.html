@@ -1642,6 +1642,9 @@ section[data-view="orders"]{position:relative}
   .view-panel:not(.hidden){position:static;overflow:visible;height:auto !important}
   .account-panel:not(.hidden){display:block;height:auto !important}
   #side-nav-account{grid-template-columns:repeat(4,1fr)}
+  /* Muc dang chon o thanh duoi: CHI doi mau nen — bo gach chan/vien inset
+     thua tu cac khoi cu (nhin nhu co khung + gach duoi, xau) */
+  #side-nav-account .side-item.active{background:var(--accent-soft);color:var(--gold);box-shadow:none}
   .buy-body{padding:18px 16px 20px}
 }
 
