@@ -2132,6 +2132,16 @@ document.querySelectorAll(".pw-toggle").forEach((btn) => {
   });
 });
 
+// Dich den sau khi dang nhap thanh cong (form thuong). Google di duong
+// rieng qua tham so return cua nut Google (xem khoi khoi tao ben duoi).
+function postLoginTarget() {
+  const qs = new URLSearchParams(location.search);
+  const next = qs.get("next");
+  if (next && next.startsWith("/") && !next.startsWith("//") && !next.startsWith("/account")) return next;
+  if (qs.get("plan") || qs.get("period") || qs.get("view") || qs.get("remote_code") || qs.get("payment")) return null;
+  return "/";
+}
+
 $("auth-form").addEventListener("submit", async (e) => {
   e.preventDefault();
   if (mode !== "login" && !checkPasswordMatch()) {
@@ -2168,6 +2178,11 @@ $("auth-form").addEventListener("submit", async (e) => {
     }
     if (mode === "login") {
       hideNotice();
+      // Huong A (chot 2026-11-05): dang nhap xong QUAY VE trang chu / trang
+      // du dinh (next), khong o lai trang tai khoan — tru khi den voi y dinh
+      // ro trong account (mua goi, mo muc cu the, ghep Remote, thanh toan).
+      const target = postLoginTarget();
+      if (target) { location.href = target; return; }
       await loadDash();
     } else {
       // Dang ky KHONG tao phien — phai xac thuc email roi dang nhap lai.
@@ -2832,8 +2847,15 @@ let resetToken = null;
       if (v) retQs.set(k, v);
     }
     const gBtn = $("google-btn");
-    if (gBtn && retQs.toString()) {
-      gBtn.href = "/api/auth/google?return=" + encodeURIComponent("/account.html?" + retQs.toString());
+    if (gBtn) {
+      const hasAccountIntent = qs.get("plan") || qs.get("period") || qs.get("view") || qs.get("remote_code");
+      let ret = "/";
+      if (hasAccountIntent) ret = "/account.html?" + retQs.toString();
+      else {
+        const nx = qs.get("next");
+        if (nx && nx.startsWith("/") && !nx.startsWith("//") && !nx.startsWith("/account")) ret = nx;
+      }
+      gBtn.href = "/api/auth/google?return=" + encodeURIComponent(ret);
     }
   }
   // Loi tu callback Google (?auth_error=<code>): hien thong bao + xoa khoi URL.
