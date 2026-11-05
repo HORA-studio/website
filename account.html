@@ -1730,6 +1730,49 @@ section[data-view="orders"]{position:relative}
 .sh-createbar .sh-seg button{flex:1 1 0}
 .sh-createbar .sh-submit{margin-left:0;width:100%}
 
+/* ===== v10: Editor workflow theo app — thanh tien trinh buoc, the node
+   giau noi dung (tay cam keo, NODE n, Template, anh node, Lich su, AI sua),
+   muc Y tuong / Ket qua phan tich ===== */
+.sh-flow-steps{display:flex;gap:6px;overflow-x:auto;padding:2px 0 10px;scrollbar-width:none}
+.sh-flow-steps::-webkit-scrollbar{display:none}
+.sh-step{flex:1 0 auto;min-width:86px;background:none;border:0;border-bottom:2px solid var(--line);padding:6px 8px 8px;font:inherit;color:var(--text);cursor:pointer;text-align:center;display:flex;flex-direction:column;gap:2px}
+.sh-step:disabled{cursor:not-allowed;opacity:.75}
+.sh-step-name{font-size:13.5px;font-weight:650;white-space:nowrap}
+.sh-step-state{font-size:12px;font-weight:650}
+.sh-step.done{border-bottom-color:#16a34a}
+.sh-step.done .sh-step-state{color:#16a34a}
+.sh-step.open .sh-step-state{color:#d97706}
+.sh-step.stale .sh-step-state{color:#d97706}
+.sh-step.lock .sh-step-state{color:var(--muted)}
+.sh-flow-listhead{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin:8px 0 10px}
+.sh-flow-listhead h3{margin:0;font-size:16.5px}
+.sh-flow-listhead .muted{font-size:12.5px}
+.sh-fsec{border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:12px}
+.sh-fsec h4{margin:0 0 8px;font-size:15px}
+.sh-fsec-text{margin:0;font-size:14px;line-height:1.55;white-space:pre-wrap}
+.sh-fsec-row{margin:0 0 7px;font-size:14px;line-height:1.55}
+.sh-fsec-row:last-child{margin-bottom:0}
+.sh-airow{display:flex;gap:8px;margin-top:12px}
+.sh-airow input{flex:1;min-width:0}
+.sh-fnode-head{display:flex;align-items:stretch;gap:2px;padding:0;width:auto}
+.sh-fnode-main{display:flex;gap:10px;align-items:center;flex:1;min-width:0;padding:11px 12px 11px 4px;background:none;border:0;font:inherit;color:var(--text);cursor:pointer;text-align:left}
+.sh-fnode-main:disabled{cursor:not-allowed}
+.sh-drag{display:flex;align-items:center;padding:0 2px 0 10px;color:var(--muted);cursor:grab;font-size:15px;letter-spacing:1px;user-select:none;touch-action:none}
+.sh-fnode-titles{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.sh-fnode-kicker{font-size:10.5px;font-weight:700;letter-spacing:.8px;color:var(--muted)}
+.sh-fnode-template{font-size:12.5px;color:var(--muted)}
+.sh-fnode-meta{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;min-height:28px}
+.sh-fnode-hist{display:inline-flex;align-items:center;gap:6px}
+.sh-hist-chip{font-size:12.5px;font-weight:600;border:1px solid var(--line2);border-radius:8px;padding:5px 9px;color:var(--text)}
+.sh-iconbtn.sm{width:30px;height:30px}
+.sh-fnode-cols.has-img{display:flex;gap:14px;align-items:flex-start}
+.sh-fnode-img{width:200px;max-width:42%;border-radius:10px;border:1px solid var(--line);object-fit:cover;flex:0 0 auto}
+.sh-fnode-fields{flex:1;min-width:0}
+.sh-fnode-fields textarea{width:100%}
+.sh-fnode.drop-before{box-shadow:0 -2px 0 var(--gold)}
+.sh-fnode.drop-after{box-shadow:0 2px 0 var(--gold)}
+@media (max-width:760px){ .sh-fnode-cols.has-img{flex-direction:column} .sh-fnode-img{width:100%;max-width:100%} }
+
 </style>
 </head>
 <body>
@@ -2005,6 +2048,9 @@ section[data-view="orders"]{position:relative}
                 <button class="btn primary small" id="sh-flow-save" type="button">Lưu workflow</button>
               </div>
               <p class="sh-err hidden" id="sh-flow-err" role="alert"></p>
+              <div id="sh-flow-steps" class="sh-flow-steps"></div>
+              <div id="sh-flow-sections"></div>
+              <div class="sh-flow-listhead"><h3>Danh sách node</h3><span class="muted">Kéo tay cầm ⋮⋮ để đổi thứ tự node</span></div>
               <div id="sh-flow-nodes"></div>
               <button class="btn small" id="sh-flow-addnode" type="button">+ Thêm node</button>
               <p class="muted" style="font-size:13px;margin:10px 0 0">Bấm tiêu đề node để mở/đóng và sửa nội dung. Node sau chỉ mở khi node trước đã đánh dấu xong.</p>
@@ -3674,6 +3720,88 @@ function shFlowShowList() {
   $("sh-flow-editor").classList.add("hidden");
   $("sh-flow-list").classList.remove("hidden");
 }
+// Anh cua node (sheet nhan vat, anh canh...): URL thang thi dung luon,
+// la id file thi lay qua route file cua Kho; mang media thi lay phan tu dau.
+function shNodeImage(s) {
+  const direct = SF.pick(s, ["imageUrl", "image", "mediaUrl", "refImageUrl", "refImage", "characterImageUrl", "thumbnailUrl", "thumbnail", "previewUrl"]);
+  if (typeof direct === "string" && direct) return /^https?:\/\//.test(direct) ? direct : shFileUrl(direct, "file");
+  const arr = SF.pick(s, ["images", "media", "refs", "attachments"]);
+  if (Array.isArray(arr) && arr.length) {
+    const f = arr[0];
+    if (typeof f === "string" && f) return /^https?:\/\//.test(f) ? f : shFileUrl(f, "file");
+    if (f && typeof f === "object") {
+      const fu = SF.pick(f, ["url", "imageUrl", "thumbnailUrl", "thumbnail"]);
+      if (typeof fu === "string" && /^https?:\/\//.test(fu)) return fu;
+      const fid = SF.idOf(f);
+      if (fid) return shFileUrl(fid, "thumbnail");
+    }
+  }
+  return "";
+}
+function shNodeHistory(s) {
+  const v = SF.pick(s, ["historyCount", "versionCount", "versions", "revisions", "history"]);
+  if (typeof v === "number") return v;
+  if (Array.isArray(v)) return v.length;
+  return 0;
+}
+function shStepState(n, i) {
+  const raw = String(n.statusRaw || "").toLowerCase();
+  if (/stale|outdated|cũ/.test(raw)) return { label: "Cũ — chạy lại", cls: "stale" };
+  if (n.done) return { label: "Xong", cls: "done" };
+  return shFlowUnlocked(i) ? { label: "Đang mở", cls: "open" } : { label: "Khóa", cls: "lock" };
+}
+const SH_ANALYSIS_FIELDS = [
+  [["subject", "topic", "theme"], "Chủ đề"],
+  [["mainCharacter", "character", "characters", "mainCharacters"], "Nhân vật chính"],
+  [["setting", "context", "scene", "background", "location"], "Bối cảnh"],
+  [["style", "mood", "tone"], "Phong cách / mood"],
+  [["suggestedShots", "shotCount", "shots", "numShots"], "Số shot gợi ý"],
+  [["suggestedDuration", "duration", "durationSec"], "Thời lượng gợi ý"],
+  [["aspectRatio", "ratio", "frameRatio"], "Tỉ lệ khung hình"],
+];
+function shAnalysisRows(a) {
+  if (!a || typeof a !== "object") return [];
+  const used = new Set();
+  const rows = [];
+  for (const [keys, label] of SH_ANALYSIS_FIELDS) {
+    for (const k of keys) {
+      if (a[k] !== undefined && a[k] !== null && a[k] !== "") {
+        let v = a[k];
+        if (Array.isArray(v)) v = v.join(", ");
+        else if (typeof v === "object") { try { v = JSON.stringify(v); } catch { v = ""; } }
+        rows.push([label, String(v)]); used.add(k); break;
+      }
+    }
+  }
+  for (const k of Object.keys(a)) {
+    if (used.has(k)) continue;
+    const v = a[k];
+    if (typeof v === "string" || typeof v === "number") rows.push([k, String(v)]);
+  }
+  return rows;
+}
+async function shFlowAiEdit(kind, i, btn) {
+  if (!shFlowEdit) return;
+  const input = document.querySelector(`[data-sh-ai-input="${kind}-${i}"]`);
+  const msg = input ? input.value.trim() : "";
+  const err = $("sh-flow-err");
+  const cur = kind === "idea" ? (shFlowEdit.idea || "") : (shFlowEdit.nodes[i] ? shFlowEdit.nodes[i].text : "");
+  if (!msg) { err.textContent = "Hãy nhập yêu cầu sửa cho AI."; err.classList.remove("hidden"); return; }
+  if (btn) btn.disabled = true;
+  try {
+    const prompt = "Hãy sửa nội dung sau theo yêu cầu: " + msg + "\nChỉ trả về nội dung đã sửa, không giải thích thêm.\n\nNội dung hiện tại:\n" + cur;
+    const { res, data, cancelled } = await shApi("/remote/assistant/chat", { method: "POST", body: { message: prompt } });
+    if (cancelled) return;
+    if (!res.ok) { err.textContent = SF.errText(data, "AI không sửa được — thử lại sau."); err.classList.remove("hidden"); return; }
+    const reply = data && SF.pick(data, ["reply", "content", "text", "message", "answer"]);
+    if (typeof reply !== "string" || !reply.trim()) { err.textContent = "AI chưa trả nội dung đã sửa — hãy thử lại."; err.classList.remove("hidden"); return; }
+    if (kind === "idea") shFlowEdit.idea = reply.trim(); else shFlowEdit.nodes[i].text = reply.trim();
+    err.classList.add("hidden");
+    showMsg("ok", "AI đã sửa xong — kiểm tra lại rồi bấm Lưu workflow.");
+    shRenderFlowEditor();
+  } catch (e) { err.textContent = shNetErr(e); err.classList.remove("hidden"); }
+  finally { if (btn) btn.disabled = false; }
+}
 async function shOpenFlowEditor(id) {
   const err = $("sh-flow-err");
   err.classList.add("hidden");
@@ -3685,9 +3813,19 @@ async function shOpenFlowEditor(id) {
       if (!res.ok) { showMsg("err", SF.errText(data, "Không tải được workflow.")); return; }
       shRaw("sh-raw-flow", data);
       const stages = SF.listOf(data, ["stages", "steps", "tasks", "nodes"]);
+      const ideaRaw = SF.pick(data, ["idea", "ideaText", "concept", "brief"]);
       shFlowEdit = {
         id, name: SF.titleOf(data || {}) || "",
-        nodes: stages.map((s) => ({ title: SF.titleOf(s), text: SF.nodeText(s), done: SF.statusChip(SF.statusOf(s)).cls === "done" })),
+        idea: typeof ideaRaw === "string" ? ideaRaw : "",
+        analysis: SF.pick(data, ["analysis", "analysisResult", "analyze"]) || null,
+        nodes: stages.map((s) => ({
+          title: SF.titleOf(s), text: SF.nodeText(s),
+          done: SF.statusChip(SF.statusOf(s)).cls === "done",
+          statusRaw: SF.statusOf(s),
+          template: SF.pick(s, ["template", "templateName", "templateLabel", "templateTitle"]) || "",
+          image: shNodeImage(s),
+          history: shNodeHistory(s),
+        })),
         open: 0,
       };
       if (!shFlowEdit.nodes.length) shFlowEdit.nodes = [{ title: "Node 1", text: "", done: false }];
@@ -3702,20 +3840,63 @@ async function shOpenFlowEditor(id) {
 function shFlowUnlocked(i) { return !!shFlowEdit && (i === 0 || shFlowEdit.nodes[i - 1].done); }
 function shRenderFlowEditor() {
   if (!shFlowEdit) return;
+  // Thanh tien trinh cac buoc (giong app): ten buoc + trang thai ben duoi
+  $("sh-flow-steps").innerHTML = shFlowEdit.nodes.map((n, i) => {
+    const st = shStepState(n, i);
+    return `<button type="button" class="sh-step ${st.cls}" data-sh-step="${i}" ${shFlowUnlocked(i) ? "" : "disabled"}>
+      <span class="sh-step-name">${esc(n.title || ("Node " + (i + 1)))}</span>
+      <span class="sh-step-state">${st.label}</span>
+    </button>`;
+  }).join("");
+  // Muc Y tuong + Ket qua phan tich (chi hien khi workflow co du lieu nay)
+  let sec = "";
+  if (shFlowEdit.idea) {
+    sec += `<div class="sh-fsec">
+      <h4>Ý tưởng</h4>
+      <p class="sh-fsec-text">${esc(shFlowEdit.idea)}</p>
+      <div class="sh-airow">
+        <input data-sh-ai-input="idea-0" placeholder="Nhắn AI sửa ý tưởng này..." autocomplete="off">
+        <button type="button" class="btn small" data-sh-ai="idea">Gửi</button>
+      </div>
+    </div>`;
+  }
+  const aRows = shAnalysisRows(shFlowEdit.analysis);
+  const aText = typeof shFlowEdit.analysis === "string" ? shFlowEdit.analysis : "";
+  if (aRows.length || aText) {
+    sec += `<div class="sh-fsec"><h4>Kết quả phân tích</h4>${aText ? `<p class="sh-fsec-text">${esc(aText)}</p>` : aRows.map(([k, v]) => `<p class="sh-fsec-row"><strong>${esc(k)}:</strong> ${esc(v)}</p>`).join("")}</div>`;
+  }
+  $("sh-flow-sections").innerHTML = sec;
   $("sh-flow-nodes").innerHTML = shFlowEdit.nodes.map((n, i) => {
     const unlocked = shFlowUnlocked(i);
     const open = unlocked && shFlowEdit.open === i;
-    return `<div class="sh-fnode ${n.done ? "done" : ""} ${unlocked ? "" : "locked"}">
-      <button type="button" class="sh-fnode-head" data-sh-fnode="toggle" data-i="${i}" ${unlocked ? "" : "disabled"}>
-        <span class="sh-fnode-dot">${n.done ? "✓" : i + 1}</span>
-        <span class="sh-fnode-title">${esc(n.title || ("Node " + (i + 1)))}</span>
-        <span class="sh-chip ${n.done ? "done" : "wait"}">${n.done ? "Đã xong" : unlocked ? "Đang mở" : "🔒 Khóa"}</span>
-      </button>
+    const st = shStepState(n, i);
+    return `<div class="sh-fnode ${n.done ? "done" : ""} ${unlocked ? "" : "locked"}" data-sh-card="${i}">
+      <div class="sh-fnode-head">
+        <span class="sh-drag" data-sh-drag="${i}" title="Kéo để đổi thứ tự node" aria-hidden="true">⋮⋮</span>
+        <button type="button" class="sh-fnode-main" data-sh-fnode="toggle" data-i="${i}" ${unlocked ? "" : "disabled"}>
+          <span class="sh-fnode-dot">${n.done ? "✓" : i + 1}</span>
+          <span class="sh-fnode-titles"><span class="sh-fnode-kicker">NODE ${i + 1}</span><span class="sh-fnode-title">${esc(n.title || ("Node " + (i + 1)))}</span></span>
+          <span class="sh-chip ${n.done ? "done" : "wait"}">${n.done ? "Đã xong" : unlocked ? "Đang mở" : "🔒 Khóa"}</span>
+        </button>
+      </div>
       ${open ? `<div class="sh-fnode-body">
-        <label class="lbl">Tiêu đề node</label>
-        <input data-sh-fnode-field="title" data-i="${i}" value="${esc(n.title)}" autocomplete="off">
-        <label class="lbl" style="display:block;margin-top:10px">Nội dung / prompt của node</label>
-        <textarea data-sh-fnode-field="text" data-i="${i}" rows="4" placeholder="Nội dung node này…">${esc(n.text)}</textarea>
+        <div class="sh-fnode-meta">
+          ${n.template ? `<span class="sh-fnode-template">Template: ${esc(String(n.template))}</span>` : "<span></span>"}
+          ${n.history ? `<span class="sh-fnode-hist"><span class="sh-hist-chip">Lịch sử ${n.history}</span><button type="button" class="sh-iconbtn sm" data-sh-fnode="reload" data-i="${i}" title="Tải lại từ app" aria-label="Tải lại từ app"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg></button></span>` : ""}
+        </div>
+        <div class="sh-fnode-cols ${n.image ? "has-img" : ""}">
+          ${n.image ? `<img class="sh-fnode-img" src="${esc(n.image)}" alt="" loading="lazy">` : ""}
+          <div class="sh-fnode-fields">
+            <label class="lbl">Tiêu đề node</label>
+            <input data-sh-fnode-field="title" data-i="${i}" value="${esc(n.title)}" autocomplete="off">
+            <label class="lbl" style="display:block;margin-top:10px">Nội dung / prompt của node</label>
+            <textarea data-sh-fnode-field="text" data-i="${i}" rows="7" placeholder="Nội dung node này…">${esc(n.text)}</textarea>
+          </div>
+        </div>
+        <div class="sh-airow">
+          <input data-sh-ai-input="node-${i}" placeholder="Nhắn AI sửa đoạn này..." autocomplete="off">
+          <button type="button" class="btn small" data-sh-fnode="ai" data-i="${i}">Gửi</button>
+        </div>
         <div class="sh-row-actions">
           <button type="button" class="btn small ${n.done ? "" : "primary"}" data-sh-fnode="done" data-i="${i}">${n.done ? "Bỏ đánh dấu xong" : "Đánh dấu xong"}</button>
           <button type="button" class="btn small" data-sh-fnode="del" data-i="${i}">Xóa node</button>
@@ -4059,6 +4240,64 @@ function shBind() {
     if (act === "toggle") { if (shFlowUnlocked(i)) { shFlowEdit.open = shFlowEdit.open === i ? -1 : i; shRenderFlowEditor(); } }
     else if (act === "done") { shFlowEdit.nodes[i].done = !shFlowEdit.nodes[i].done; if (shFlowEdit.nodes[i].done && shFlowUnlocked(i + 1)) shFlowEdit.open = i + 1; shRenderFlowEditor(); }
     else if (act === "del") { shFlowEdit.nodes.splice(i, 1); if (shFlowEdit.open >= shFlowEdit.nodes.length) shFlowEdit.open = shFlowEdit.nodes.length - 1; shRenderFlowEditor(); }
+    else if (act === "ai") { shFlowAiEdit("node", i, el); }
+    else if (act === "reload") { if (shFlowEdit.id) shOpenFlowEditor(shFlowEdit.id); }
+  });
+  $("sh-flow-steps").addEventListener("click", (e) => {
+    const b = e.target.closest("[data-sh-step]");
+    if (!b || !shFlowEdit) return;
+    const i = Number(b.dataset.shStep);
+    if (shFlowUnlocked(i)) { shFlowEdit.open = i; shRenderFlowEditor(); }
+  });
+  $("sh-flow-sections").addEventListener("click", (e) => {
+    const b = e.target.closest("[data-sh-ai]");
+    if (b) shFlowAiEdit("idea", 0, b);
+  });
+  // Keo tay cam de doi thu tu node (HTML5 drag & drop tren the node)
+  let shDragFrom = -1;
+  const nodesBox = $("sh-flow-nodes");
+  nodesBox.addEventListener("mousedown", (e) => {
+    const h = e.target.closest("[data-sh-drag]");
+    if (!h || !shFlowEdit) return;
+    const card = h.closest("[data-sh-card]");
+    if (card) card.draggable = true;
+  });
+  nodesBox.addEventListener("dragstart", (e) => {
+    const card = e.target.closest("[data-sh-card]");
+    if (!card) return;
+    shDragFrom = Number(card.dataset.shCard);
+    e.dataTransfer.effectAllowed = "move";
+    try { e.dataTransfer.setData("text/plain", String(shDragFrom)); } catch { /* bo qua */ }
+  });
+  nodesBox.addEventListener("dragover", (e) => {
+    const card = e.target.closest("[data-sh-card]");
+    if (!card || shDragFrom < 0) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    const r = card.getBoundingClientRect();
+    const after = (e.clientY - r.top) > r.height / 2;
+    nodesBox.querySelectorAll(".drop-before,.drop-after").forEach((c) => c.classList.remove("drop-before", "drop-after"));
+    card.classList.add(after ? "drop-after" : "drop-before");
+    card.dataset.dropAfter = after ? "1" : "";
+  });
+  nodesBox.addEventListener("drop", (e) => {
+    const card = e.target.closest("[data-sh-card]");
+    if (!card || shDragFrom < 0 || !shFlowEdit) return;
+    e.preventDefault();
+    let to = Number(card.dataset.shCard) + (card.dataset.dropAfter ? 1 : 0);
+    const from = shDragFrom;
+    shDragFrom = -1;
+    if (to > from) to -= 1;
+    if (to !== from && to >= 0 && to < shFlowEdit.nodes.length) {
+      const [moved] = shFlowEdit.nodes.splice(from, 1);
+      shFlowEdit.nodes.splice(to, 0, moved);
+      shFlowEdit.open = to;
+    }
+    shRenderFlowEditor();
+  });
+  nodesBox.addEventListener("dragend", () => {
+    shDragFrom = -1;
+    nodesBox.querySelectorAll("[data-sh-card]").forEach((c) => { c.draggable = false; c.classList.remove("drop-before", "drop-after"); });
   });
   $("sh-flow-nodes").addEventListener("input", (e) => {
     const f = e.target.closest("[data-sh-fnode-field]");
