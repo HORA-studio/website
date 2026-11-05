@@ -276,7 +276,7 @@ td.y{color:var(--accent2);font-weight:800}
       <a href="#/" data-nav="home">Trang chủ</a><a href="#how" data-anchor="how">Cách hoạt động</a><a href="#styles" data-anchor="styles">Phong cách</a><a href="#library" data-anchor="library">Video mẫu</a><a href="#faq" data-anchor="faq">FAQ</a><a href="#/gia" data-nav="pricing">Bảng giá</a><a href="/releases-latest">Tải app</a>
     </nav>
     <div class="nav-actions">
-      <a class="btn small ghost login" id="navLogin" href="/account.html">Đăng nhập</a><div class="user-menu" id="navUserWrap" style="display:none"><button type="button" class="avatar-btn" id="navAvatar" aria-haspopup="true" aria-expanded="false" title="Tài khoản"><img id="navAvatarImg" alt="" style="display:none"><span id="navAvatarLetter">?</span></button><div class="user-dropdown" id="navDropdown" hidden><div class="ud-head"><span class="ud-name" id="udName">Tài khoản</span><span class="ud-email" id="udEmail"></span></div><a href="/account.html">Thông tin &amp; cài đặt</a><a href="/account.html?view=buy">Mua gói</a><a href="/account.html?view=orders">Lịch sử giao dịch</a><a href="/account.html?view=remote">Remote — điều khiển máy tính</a><div class="ud-sep"></div><button type="button" id="udLogout">Đăng xuất</button></div></div>
+      <a class="btn small ghost login" id="navLogin" href="/account.html">Đăng nhập</a><div class="user-menu" id="navUserWrap" style="display:none"><button type="button" class="avatar-btn" id="navAvatar" aria-haspopup="true" aria-expanded="false" title="Tài khoản"><img id="navAvatarImg" alt="" style="display:none"><span id="navAvatarLetter">?</span></button><div class="user-dropdown" id="navDropdown" hidden><div class="ud-head"><span class="ud-name" id="udName">Tài khoản</span><span class="ud-email" id="udEmail"></span></div><a href="/account.html">Thông tin &amp; cài đặt</a><a href="/#/gia">Mua gói</a><a href="/account.html?view=orders">Lịch sử giao dịch</a><a href="/account.html?view=remote">Remote — điều khiển máy tính</a><div class="ud-sep"></div><button type="button" id="udLogout">Đăng xuất</button></div></div>
       <a class="btn small primary sample" href="#library" data-anchor="library">Xem video mẫu</a>
       <button class="burger" id="burger" aria-label="Mở menu">☰</button>
     </div>
@@ -777,14 +777,12 @@ el.addEventListener('pointerup',up);el.addEventListener('pointercancel',up);el.a
     modal.classList.remove('hidden');
     startPoll(orderId);
   }
-  async function buyHere(btn){
-    const u = new URL(btn.getAttribute('href'), location.origin);
-    const plan = u.searchParams.get('plan'), period = u.searchParams.get('period') || 'month';
-    const original = btn.textContent;
-    btn.textContent = 'Đang tạo đơn…'; btn.style.pointerEvents = 'none';
+  async function buyFlow(plan, period, btn, fallbackHref){
+    const original = btn ? btn.textContent : '';
+    if (btn) { btn.textContent = 'Đang tạo đơn…'; btn.style.pointerEvents = 'none'; }
     try {
       const rows = await fetchOrders();
-      if (!rows) { location.href = btn.href; return; } // chua dang nhap -> link goc sang trang dang nhap
+      if (!rows) { location.href = fallbackHref; return; } // chua dang nhap -> sang trang dang nhap kem y dinh mua
       const pending = rows.find((o) => o.plan === plan && o.period === period
         && ['created', 'awaiting_payment'].includes(o.status)
         && Date.now() <= new Date(o.createdAt).getTime() + PAY_WINDOW_MS
@@ -794,11 +792,26 @@ el.addEventListener('pointerup',up);el.addEventListener('pointercancel',up);el.a
       const d = await r.json().catch(() => ({}));
       if (r.ok && d.paymentUrl) { location.href = d.paymentUrl; return; }
       if (r.ok && d.payment_instructions) { showPay(d.payment_instructions, d.order && d.order.id, ''); return; }
-      location.href = btn.href; // loi bat ngo -> de trang tai khoan xu ly + bao loi day du
-    } catch { location.href = btn.href; }
-    finally { btn.textContent = original; btn.style.pointerEvents = ''; }
+      location.href = fallbackHref; // loi bat ngo -> de trang tai khoan xu ly + bao loi day du
+    } catch { location.href = fallbackHref; }
+    finally { if (btn) { btn.textContent = original; btn.style.pointerEvents = ''; } }
   }
-  document.querySelectorAll('[data-buy-plan]').forEach((b) => b.addEventListener('click', (e) => { e.preventDefault(); buyHere(b); }));
+  document.querySelectorAll('[data-buy-plan]').forEach((b) => b.addEventListener('click', (e) => {
+    e.preventDefault();
+    const u = new URL(b.getAttribute('href'), location.origin);
+    buyFlow(u.searchParams.get('plan'), u.searchParams.get('period') || 'month', b, b.href);
+  }));
+  // Deep link mua goi /?plan=go|plus&period=month|year (tu trang tai khoan, email,
+  // hoac sau dang nhap): tu tao don + mo QR ngay tai view gia — noi mua duy nhat.
+  const aq = new URLSearchParams(location.search);
+  const ap = aq.get('plan');
+  if (ap === 'go' || ap === 'plus') {
+    const aper = aq.get('period') === 'year' ? 'year' : 'month';
+    history.replaceState(null, '', location.pathname + '#/gia');
+    if (typeof setBilling === 'function') setBilling(aper);
+    const b = document.querySelector('[data-buy-plan="' + ap + '"]');
+    setTimeout(() => buyFlow(ap, aper, b, '/account.html?plan=' + ap + '&period=' + aper), 400);
+  }
 })();
 </script>
 </body>
