@@ -1958,6 +1958,23 @@ body.sh-control [data-sh-panel="chat"]:not(.hidden){display:flex;flex-direction:
 .sh-wf-snippet{width:100%;margin-top:5px;font-size:13px;color:var(--muted);white-space:pre-wrap;word-break:break-word;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .sh-fnode-media{width:100%;max-height:320px;border-radius:10px;border:1px solid var(--line);object-fit:cover;background:#000}
 .sh-fnode-media.is-video{object-fit:contain}
+
+/* ===== v23 (user bao 2026-11-06): tab Thong tin — bo dai 3 the lon
+   Goi/License/Han dung (cao ~2 hang the, ton dien tich), thay bang
+   1 DONG tom tat dang chip nam CANH AVATAR cho gon: ✦ Goi Plus ·
+   🔑 1 license con hieu luc · 📅 Han dung 1/11/2027. Cac id
+   sum-tier/sum-licenses/sum-expiry/sum-tier-note giu nguyen de
+   renderAccountSummary() dien du lieu nhu cu. ===== */
+.avatar-side{display:flex;flex-direction:column;gap:7px;min-width:0;justify-content:center}
+.account-summary-line{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.sum-item{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);background:var(--panel2);border-radius:999px;padding:7px 13px;font-size:13.5px;line-height:1.25;white-space:nowrap}
+.sum-item strong{font-size:14.5px}
+.sum-item .sum-label{color:var(--muted)}
+.sum-note-line{margin:0;font-size:13px}
+@media (max-width:760px){
+  .sum-item{padding:6px 10px;font-size:12.5px;gap:5px}
+  .sum-item strong{font-size:13.5px}
+}
 </style>
 </head>
 <body>
@@ -2062,12 +2079,6 @@ body.sh-control [data-sh-panel="chat"]:not(.hidden){display:flex;flex-direction:
     <section class="card view-panel account-panel" data-view="account">
       <span id="account-license-count" class="hidden">0</span><span id="account-order-count" class="hidden">0</span><span id="acc-name" class="hidden"></span>
 
-      <div class="account-stats" id="account-summary">
-        <div class="stat-card"><span class="stat-icon">✦</span><span class="stat-label">Gói cao nhất</span><strong id="sum-tier">—</strong><span class="stat-note" id="sum-tier-note">Đang tải…</span></div>
-        <div class="stat-card"><span class="stat-icon">🔑</span><span class="stat-label">License</span><strong id="sum-licenses">0</strong><span class="stat-note">license đang còn hiệu lực</span></div>
-        <div class="stat-card stat-card-accent"><span class="stat-icon">📅</span><span class="stat-label">Hạn dùng</span><strong id="sum-expiry">—</strong><span class="stat-note">Chi tiết ở tab Lịch sử giao dịch</span></div>
-      </div>
-
       <div class="set-section">
         <div class="set-head"><h3>Thông tin cá nhân</h3><p class="muted">Ảnh đại diện, tên hiển thị và thông tin liên hệ của bạn.</p></div>
         <div class="avatar-row">
@@ -2076,7 +2087,15 @@ body.sh-control [data-sh-panel="chat"]:not(.hidden){display:flex;flex-direction:
             <button type="button" class="avatar-x hidden" id="pf-avatar-remove" title="Xóa ảnh đã tải lên, quay về ảnh Google / mặc định">✕</button>
           </div>
           <input type="file" id="pf-avatar-file" accept="image/*" class="hidden">
-          <p class="muted" style="margin:6px 0 0;font-size:13px;max-width:420px">Ảnh đại diện lấy từ tài khoản Google của bạn khi đã liên kết. Muốn dùng ảnh riêng, cứ bấm vào ảnh để thay (tự nén về 160×160).</p>
+          <div class="avatar-side">
+            <div class="account-summary-line" id="account-summary" aria-label="Tóm tắt gói và license">
+              <span class="sum-item"><span aria-hidden="true">✦</span><span class="sum-label">Gói</span><strong id="sum-tier">—</strong></span>
+              <span class="sum-item"><span aria-hidden="true">🔑</span><strong id="sum-licenses">0</strong><span class="sum-label">license còn hiệu lực</span></span>
+              <span class="sum-item"><span aria-hidden="true">📅</span><span class="sum-label">Hạn dùng</span><strong id="sum-expiry">—</strong></span>
+            </div>
+            <p class="muted sum-note-line" id="sum-tier-note">Đang tải…</p>
+            <p class="muted" style="margin:0;font-size:13px">Ảnh đại diện lấy từ tài khoản Google khi đã liên kết — bấm vào ảnh để thay ảnh riêng (tự nén về 160×160).</p>
+          </div>
         </div>
         <div class="field-grid">
           <div class="field field-full"><label class="lbl" for="pf-name">Tên hiển thị <span class="muted" id="pf-save-status" style="font-weight:400"></span></label><input id="pf-name" autocomplete="name" placeholder="Tên của bạn"></div>
