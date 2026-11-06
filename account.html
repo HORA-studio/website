@@ -1920,6 +1920,44 @@ html:has(body.sh-control){scrollbar-gutter:stable}
   .sh-viewer-x:hover{background:#000;color:#fff}
   .sh-viewer-dl{background:#000;color:#fff;border-color:#fff}
 }
+
+/* ===== v22 (user bao 2026-11-06, dot 2):
+   1) Tro ly: cum chat can XUONG DUOI — panel chat chiem het chieu cao
+      con lai, khung tin nhan gian o giua, composer dinh o day panel va
+      cach menu 30px (padding-bottom:30px). Response AI mo RONG het
+      khung nhin (truoc width:fit-content + max-width:88% nen thua
+      ngang nhieu ma noi dung xep doc dai, kho doc).
+   2) Trang thai cho/loi cua Tro ly: bong bong "dang tra loi" 3 cham
+      nhay + dem giay; loi hien thanh bong bong trong khung chat kem
+      nut Gui lai; nut gui xoay spinner khi dang cho.
+   3) Workflows: the o danh sach co anh/video xem truoc + doan noi
+      dung; node trong editor hien video (truoc chi <img>). ===== */
+body.sh-control [data-sh-panel="chat"]:not(.hidden){display:flex;flex-direction:column;height:calc(100dvh - 84px);padding-bottom:30px;box-sizing:border-box}
+@media (max-width:760px){ body.sh-control [data-sh-panel="chat"]:not(.hidden){height:calc(100dvh - 190px);padding-bottom:30px} }
+.sh-chat-panel .sh-msgs{flex:1 1 auto;min-height:0}
+.sh-chat-panel .sh-composer{margin-top:auto}
+@media (min-width:761px){ body.sh-control [data-sh-panel="chat"]{padding-left:30px;padding-right:30px} }
+.sh-msgrow.ai{width:100%}
+.sh-msgcol{width:100%}
+.sh-msg.ai{width:100%;max-width:100%;flex:1 1 auto;box-sizing:border-box}
+.sh-msg.pending{display:flex;align-items:center;gap:9px;color:var(--muted)}
+.sh-typing-dots{display:inline-flex;gap:4px;align-items:center}
+.sh-typing-dots i{width:7px;height:7px;border-radius:50%;background:var(--gold);display:block;animation:sh-typing-bounce 1.1s ease-in-out infinite}
+.sh-typing-dots i:nth-child(2){animation-delay:.15s}
+.sh-typing-dots i:nth-child(3){animation-delay:.3s}
+@keyframes sh-typing-bounce{0%,60%,100%{transform:translateY(0);opacity:.45}30%{transform:translateY(-4px);opacity:1}}
+.sh-msg.err-bubble{background:rgba(201,58,50,.08);border:1px solid #c93a3255;color:var(--text);width:100%;max-width:100%;box-sizing:border-box}
+.sh-retrybtn{margin-top:8px;border:1px solid #c93a3255;background:transparent;color:var(--danger);border-radius:999px;padding:6px 14px;font:inherit;font-size:13px;font-weight:650;cursor:pointer}
+.sh-sendbtn.busy{opacity:.75;pointer-events:none}
+.sh-sendbtn .sh-spin{width:18px;height:18px;border-radius:50%;border:2.5px solid rgba(255,255,255,.35);border-top-color:#fff;display:block;margin:auto;animation:shspin .7s linear infinite}
+/* Workflows: media + noi dung trong the danh sach va trong node */
+.sh-wf-main{flex-wrap:wrap;overflow:visible}
+.sh-wf-media{display:flex;gap:8px;width:100%;margin-top:6px}
+.sh-wf-thumb{width:86px;height:86px;border-radius:10px;overflow:hidden;border:1px solid var(--line);background:var(--panel2);flex:0 0 auto;cursor:pointer;padding:0}
+.sh-wf-thumb img,.sh-wf-thumb video{width:100%;height:100%;object-fit:cover;display:block}
+.sh-wf-snippet{width:100%;margin-top:5px;font-size:13px;color:var(--muted);white-space:pre-wrap;word-break:break-word;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.sh-fnode-media{width:100%;max-height:320px;border-radius:10px;border:1px solid var(--line);object-fit:cover;background:#000}
+.sh-fnode-media.is-video{object-fit:contain}
 </style>
 </head>
 <body>
@@ -3432,9 +3470,26 @@ const SF = {
   nodeText: (o) => {
     const t = SF.pick(o, ["prompt", "content", "text", "description", "summary", "detail", "note"]);
     if (typeof t === "string" && t) return t;
+    // v22: noi dung that cua stage thuong nam long trong outputs/output/
+    // result (ban desktop: text stage chi o Outputs["text"]) — ban cu
+    // khong doc cac o nay nen node len web trong noi dung.
+    for (const k of ["outputs", "output", "result", "data"]) {
+      const n = o && o[k];
+      if (typeof n === "string" && n) return n;
+      if (n && typeof n === "object") {
+        const nt = SF.pick(n, ["text", "content", "prompt", "description", "summary"]);
+        if (typeof nt === "string" && nt) return nt;
+      }
+    }
     const cfg = SF.pick(o, ["config", "params", "input", "settings"]);
     if (cfg !== undefined) { try { return typeof cfg === "string" ? cfg : JSON.stringify(cfg); } catch { return ""; } }
     return "";
+  },
+  // v22: detail workflow co the boc trong {workflow:{...}} / {item:{...}}
+  unwrap: (data, keys) => {
+    if (!data || typeof data !== "object" || Array.isArray(data)) return data;
+    for (const k of keys) { const n = data[k]; if (n && typeof n === "object" && !Array.isArray(n)) return n; }
+    return data;
   },
   statusChip: (st) => {
     const low = String(st || "").toLowerCase();
@@ -3926,9 +3981,17 @@ function shRenderWorkflows(list, raw) {
     const id = SF.idOf(w);
     const n = SF.listOf(w, ["steps", "stages", "nodes", "tasks"]).length;
     const chip = SF.statusChip(SF.statusOf(w));
-    const desc = SF.pick(w, ["description", "summary"]);
+    // v22: the danh sach truoc day chi co ten + trang thai — khong noi
+    // dung, khong anh/video. Nay: doan noi dung (mo ta/y tuong hoac text
+    // stage dau tien) + dai media xem truoc tu cac stage (bam de xem lon).
+    const snippet = shWorkflowSnippet(w);
+    const media = shWorkflowMedia(w);
+    const mediaHtml = media.length ? `<div class="sh-wf-media">${media.map((m) => m.kind === "video"
+      ? `<button type="button" class="sh-wf-thumb" data-sh-wf-media="${esc(m.url)}" data-sh-wf-kind="video" data-sh-wf-poster="${esc(m.poster || "")}" title="Xem video"><video src="${esc(m.url)}" ${m.poster ? `poster="${esc(m.poster)}"` : ""} muted playsinline preload="metadata"></video></button>`
+      : `<button type="button" class="sh-wf-thumb" data-sh-wf-media="${esc(m.url)}" data-sh-wf-kind="image" title="Xem ảnh"><img loading="lazy" src="${esc(m.url)}" alt="" onerror="this.parentElement.style.display='none'"></button>`).join("")}</div>` : "";
     return `<div class="sh-wf-row"><div class="sh-wf-main"><b>${esc(SF.titleOf(w))}</b> <span class="sh-chip ${chip.cls}">${esc(chip.label)}</span>
-      <span class="meta">${id ? esc(id) : ""}${n ? " · " + n + " node" : ""}${SF.timeOf(w) ? " · " + esc(fmtDay(SF.timeOf(w))) : ""}${typeof desc === "string" && desc ? " · " + esc(desc) : ""}</span></div>
+      <span class="meta">${id ? esc(id) : ""}${n ? " · " + n + " node" : ""}${SF.timeOf(w) ? " · " + esc(fmtDay(SF.timeOf(w))) : ""}</span>
+      ${snippet ? `<p class="sh-wf-snippet">${esc(snippet)}</p>` : ""}${mediaHtml}</div>
       <div class="sh-row-actions">
         <button type="button" class="btn primary small sh-wf-open" data-sh-wf="detail" data-id="${esc(id || "")}" title="Mở workflow" aria-label="Mở workflow"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></button>
       </div></div>`;
@@ -3954,21 +4017,106 @@ function shFlowShowList() {
   $("sh-flow-editor").classList.add("hidden");
   $("sh-flow-list").classList.remove("hidden");
 }
-// Anh cua node (sheet nhan vat, anh canh...): URL thang thi dung luon,
-// la id file thi lay qua route file cua Kho; mang media thi lay phan tu dau.
-function shNodeImage(s) {
-  const direct = SF.pick(s, ["imageUrl", "image", "mediaUrl", "refImageUrl", "refImage", "characterImageUrl", "thumbnailUrl", "thumbnail", "previewUrl"]);
-  if (typeof direct === "string" && direct) return /^https?:\/\//.test(direct) ? direct : shFileUrl(direct, "file");
-  const arr = SF.pick(s, ["images", "media", "refs", "attachments"]);
-  if (Array.isArray(arr) && arr.length) {
-    const f = arr[0];
-    if (typeof f === "string" && f) return /^https?:\/\//.test(f) ? f : shFileUrl(f, "file");
-    if (f && typeof f === "object") {
-      const fu = SF.pick(f, ["url", "imageUrl", "thumbnailUrl", "thumbnail"]);
-      if (typeof fu === "string" && /^https?:\/\//.test(fu)) return fu;
-      const fid = SF.idOf(f);
-      if (fid) return shFileUrl(fid, "thumbnail");
+// Media cua node/stage (anh sheet nhan vat, anh canh, video ket qua...).
+// v22 lam lai: ban cu (a) coi URL TUONG DOI ("/remote/library/.../file")
+// la id file -> shFileUrl ma hoa ca duong dan thanh id sai, anh hong;
+// (b) khong doc media long trong result/output/outputs; (c) chi tra URL
+// anh nen video khong hien gi. Nay: moi URL di qua shMediaUrl (xu ly
+// tuong doi + gan token nhu v20 cua job), field la id ngan (khong chua
+// "/") moi qua shFileUrl, va tra ca {kind,url,poster} de render dung
+// the <img> hoac <video>.
+function shMediaKindOf(o, url) {
+  const k = SF.kindOf(o || {});
+  if (k) return k;
+  const u = String(url || "").split("?")[0].toLowerCase();
+  if (/\.(mp4|webm|mov|m4v)$/.test(u)) return "video";
+  if (/\.(mp3|wav|m4a|ogg)$/.test(u)) return "audio";
+  if (/\.(png|jpe?g|webp|gif|bmp|avif)$/.test(u)) return "image";
+  return "image";
+}
+function shUrlFromValue(v) {
+  if (typeof v !== "string" || !v.trim()) return "";
+  const s = v.trim();
+  const abs = shMediaUrl(s);
+  if (abs) return abs;
+  if (!s.includes("/")) return shFileUrl(s, "file"); // id file trong Kho
+  return "";
+}
+function shNodeMedia(s, opts) {
+  if (!s || typeof s !== "object") return null;
+  const allowIdFallback = !opts || opts.allowIdFallback !== false;
+  const urlKeys = ["resultUrl", "outputUrl", "videoUrl", "imageUrl", "image", "mediaUrl", "refImageUrl", "refImage", "characterImageUrl", "fileUrl", "url"];
+  const thumbKeys = ["resultThumbnail", "thumbnailUrl", "thumbnail", "previewUrl", "coverUrl", "posterUrl", "poster"];
+  const direct = SF.pick(s, urlKeys);
+  let url = shUrlFromValue(direct);
+  let poster = shUrlFromValue(SF.pick(s, thumbKeys));
+  if (!url || !poster) {
+    for (const k of ["result", "output", "outputs", "file", "media"]) {
+      const n = s[k];
+      if (typeof n === "string") { if (!url) url = shUrlFromValue(n); }
+      else if (n && typeof n === "object" && !Array.isArray(n)) {
+        if (!url) url = shUrlFromValue(SF.pick(n, urlKeys));
+        if (!poster) poster = shUrlFromValue(SF.pick(n, thumbKeys));
+        if (!url) { const fid = SF.idOf(n); if (fid) url = shFileUrl(String(fid), "file"); }
+      }
     }
+  }
+  if (!url && !poster) {
+    const arr = SF.pick(s, ["images", "media", "refs", "attachments", "files", "assets"]);
+    if (Array.isArray(arr)) {
+      for (const f of arr) {
+        if (typeof f === "string") { url = shUrlFromValue(f); if (url) break; }
+        else if (f && typeof f === "object") {
+          url = shUrlFromValue(SF.pick(f, urlKeys)) || shUrlFromValue(SF.pick(f, thumbKeys));
+          if (!url) { const fid = SF.idOf(f); if (fid) url = shFileUrl(String(fid), SF.kindOf(f) === "video" ? "file" : "thumbnail"); }
+          if (url) { poster = poster || shUrlFromValue(SF.pick(f, thumbKeys)); break; }
+        }
+      }
+    }
+  }
+  if (!url && poster) url = poster;
+  if (!url && allowIdFallback) {
+    // Chi con id ket qua/id stage: thu thumbnail qua Kho bang id do.
+    // (Chi cho node/job — workflow thi id cua no khong phai id file.)
+    let rid = SF.pick(s, ["resultId", "libraryId", "outputId", "fileId", "mediaId"]);
+    if (rid === undefined && SF.statusChip(SF.statusOf(s)).cls === "done") rid = SF.idOf(s);
+    if (rid !== undefined && rid !== null && rid !== "") { url = shFileUrl(String(rid), "thumbnail"); poster = url; }
+  }
+  if (!url) return null;
+  let kind = shMediaKindOf(s, url);
+  if (!SF.kindOf(s)) {
+    // Loai media co the nam o object long (result.kind="video"...).
+    for (const k of ["result", "output", "file", "media"]) {
+      const n = s[k];
+      if (n && typeof n === "object" && !Array.isArray(n)) { const nk = SF.kindOf(n); if (nk) { kind = nk; break; } }
+    }
+  }
+  return { kind, url, poster: poster || (kind === "image" ? url : "") };
+}
+function shNodeImage(s) {
+  const m = shNodeMedia(s);
+  if (!m) return "";
+  return m.kind === "image" ? m.url : (m.poster || m.url);
+}
+// Media cua ca workflow (cho the danh sach): que qua cac stage theo
+// thu tu, gom toi da 3 media dau tien co duoc.
+function shWorkflowMedia(w) {
+  const out = [];
+  const self = shNodeMedia(w, { allowIdFallback: false });
+  if (self) out.push(self);
+  for (const s of SF.listOf(w, ["steps", "stages", "nodes", "tasks"])) {
+    if (out.length >= 3) break;
+    const m = shNodeMedia(s);
+    if (m && !out.some((x) => x.url === m.url)) out.push(m);
+  }
+  return out.slice(0, 3);
+}
+function shWorkflowSnippet(w) {
+  const d = SF.pick(w, ["description", "summary", "idea", "ideaText", "concept", "brief"]);
+  if (typeof d === "string" && d.trim()) return d.trim();
+  for (const s of SF.listOf(w, ["steps", "stages", "nodes", "tasks"])) {
+    const t = SF.nodeText(s);
+    if (t && t.trim()) return t.trim();
   }
   return "";
 }
@@ -4021,7 +4169,8 @@ async function shFlowAiEdit(kind, i, btn) {
   const err = $("sh-flow-err");
   const cur = kind === "idea" ? (shFlowEdit.idea || "") : (shFlowEdit.nodes[i] ? shFlowEdit.nodes[i].text : "");
   if (!msg) { err.textContent = "Hãy nhập yêu cầu sửa cho AI."; err.classList.remove("hidden"); return; }
-  if (btn) btn.disabled = true;
+  const btnText = btn ? btn.textContent : "";
+  if (btn) { btn.disabled = true; btn.textContent = "Đang sửa…"; }
   try {
     const prompt = "Hãy sửa nội dung sau theo yêu cầu: " + msg + "\nChỉ trả về nội dung đã sửa, không giải thích thêm.\n\nNội dung hiện tại:\n" + cur;
     const { res, data, cancelled } = await shApi("/remote/assistant/chat", { method: "POST", body: { message: prompt } });
@@ -4034,7 +4183,7 @@ async function shFlowAiEdit(kind, i, btn) {
     showMsg("ok", "AI đã sửa xong — kiểm tra lại rồi bấm Lưu workflow.");
     shRenderFlowEditor();
   } catch (e) { err.textContent = shNetErr(e); err.classList.remove("hidden"); }
-  finally { if (btn) btn.disabled = false; }
+  finally { if (btn) { btn.disabled = false; btn.textContent = btnText; } }
 }
 async function shOpenFlowEditor(id) {
   const err = $("sh-flow-err");
@@ -4046,18 +4195,22 @@ async function shOpenFlowEditor(id) {
       const { res, data } = await shApi("/remote/workflows/" + encodeURIComponent(id));
       if (!res.ok) { showMsg("err", SF.errText(data, "Không tải được workflow.")); return; }
       shRaw("sh-raw-flow", data);
-      const stages = SF.listOf(data, ["stages", "steps", "tasks", "nodes"]);
-      const ideaRaw = SF.pick(data, ["idea", "ideaText", "concept", "brief"]);
+      // v22: detail co the boc {workflow:{...}} — ban cu doc thang tren
+      // data nen stages rong -> editor thay bang 1 node trong gia.
+      const wf = SF.unwrap(data, ["workflow", "item", "detail"]) || {};
+      const stages = SF.listOf(wf, ["stages", "steps", "tasks", "nodes"]);
+      const ideaRaw = SF.pick(wf, ["idea", "ideaText", "concept", "brief"]);
       shFlowEdit = {
-        id, name: SF.titleOf(data || {}) || "",
+        id, name: SF.titleOf(wf || {}) || "",
         idea: typeof ideaRaw === "string" ? ideaRaw : "",
-        analysis: SF.pick(data, ["analysis", "analysisResult", "analyze"]) || null,
+        analysis: SF.pick(wf, ["analysis", "analysisResult", "analyze"]) || null,
         nodes: stages.map((s) => ({
           title: SF.titleOf(s), text: SF.nodeText(s),
           done: SF.statusChip(SF.statusOf(s)).cls === "done",
           statusRaw: SF.statusOf(s),
           template: SF.pick(s, ["template", "templateName", "templateLabel", "templateTitle"]) || "",
           image: shNodeImage(s),
+          media: shNodeMedia(s),
           history: shNodeHistory(s),
         })),
         open: 0,
@@ -4118,8 +4271,9 @@ function shRenderFlowEditor() {
           ${n.template ? `<span class="sh-fnode-template">Template: ${esc(String(n.template))}</span>` : "<span></span>"}
           ${n.history ? `<span class="sh-fnode-hist"><span class="sh-hist-chip">Lịch sử ${n.history}</span><button type="button" class="sh-iconbtn sm" data-sh-fnode="reload" data-i="${i}" title="Tải lại từ app" aria-label="Tải lại từ app"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg></button></span>` : ""}
         </div>
-        <div class="sh-fnode-cols ${n.image ? "has-img" : ""}">
-          ${n.image ? `<img class="sh-fnode-img" src="${esc(n.image)}" alt="" loading="lazy">` : ""}
+        ${n.media && n.media.kind === "video" ? `<video class="sh-fnode-media is-video" controls playsinline preload="metadata" src="${esc(n.media.url)}"${n.media.poster ? ` poster="${esc(n.media.poster)}"` : ""} style="margin-bottom:12px"></video>` : ""}
+        <div class="sh-fnode-cols ${n.image && !(n.media && n.media.kind === "video") ? "has-img" : ""}">
+          ${n.image && !(n.media && n.media.kind === "video") ? `<img class="sh-fnode-img" src="${esc(n.image)}" alt="" loading="lazy" onerror="this.style.display='none'">` : ""}
           <div class="sh-fnode-fields">
             <label class="lbl">Tiêu đề node</label>
             <input data-sh-fnode-field="title" data-i="${i}" value="${esc(n.title)}" autocomplete="off">
@@ -4178,38 +4332,79 @@ function shVoiceAttach(textarea, btn) {
   if (!textarea || !btn) return;
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SR) { btn.classList.add("hidden"); return; }
-  let rec = null, active = false, base = "";
-  // Dung cung: goi khi gui xong de reset trang thai — cat ca handler ket
-  // qua de chu noi tre khong ghi de len o vua xoa.
-  shVoiceStops.push(() => {
-    if (rec) { rec.onresult = null; rec.onend = null; rec.onerror = null; try { rec.stop(); } catch { /* bo qua */ } }
-    active = false;
+  // v22 — CHONG LAP (user bao "thu am bi lap rat nhieu"):
+  // Ban cu dung continuous=true cho 1 phien dai roi cong lai e.results
+  // tu dau moi su kien; Chrome thuong gui lai cac ket qua final cu trong
+  // danh sach tich luy do -> cung 1 cau bi cong lap nhieu lan.
+  // Cach moi:
+  //  - Phien NGAN (continuous=false): moi cau noi la 1 phien rieng, xong
+  //    cau thi tu khoi dong lai phien moi khi user chua bam dung; "base"
+  //    tien len theo dung noi dung da chot, danh sach results khong con
+  //    tich luy de lap.
+  //  - Trong 1 phien chi CHOT ket qua final dung 1 lan theo chi so
+  //    (finalSeen), phan interim chi hien tam va bi thay the, khong cong.
+  //  - Chong trung: 1 doan final giong het doan final vua chot lien truoc
+  //    (Chrome doi khi phat lai) thi bo qua.
+  let rec = null, active = false, stopping = false;
+  let base = "", sessionFinal = "", finalSeen = 0, lastFinal = "";
+  function render(interim) {
+    textarea.value = base + sessionFinal + (interim || "");
+    textarea.dispatchEvent(new Event("input", { bubbles: true }));
+  }
+  function stopRec() {
+    stopping = true; active = false;
+    if (rec) { rec.onresult = null; rec.onend = null; rec.onerror = null; try { rec.stop(); } catch { /* bo qua */ } rec = null; }
     btn.classList.remove("rec");
-  });
-  btn.addEventListener("click", () => {
-    if (active) { try { rec.stop(); } catch { /* bo qua */ } return; }
+  }
+  shVoiceStops.push(stopRec);
+  function startSession() {
+    if (!active) return;
+    sessionFinal = ""; finalSeen = 0; lastFinal = "";
     try {
       rec = new SR();
       rec.lang = "vi-VN";
       rec.interimResults = true;
-      rec.continuous = true;
-      base = textarea.value ? textarea.value.replace(/\s+$/, "") + " " : "";
+      rec.continuous = false;
       rec.onresult = (e) => {
-        let txt = "";
-        for (const r of e.results) txt += r[0].transcript;
-        textarea.value = base + txt;
-        textarea.dispatchEvent(new Event("input", { bubbles: true }));
+        let interim = "";
+        for (let i = 0; i < e.results.length; i++) {
+          const r = e.results[i];
+          const t = (r[0] && r[0].transcript) || "";
+          if (r.isFinal) {
+            if (i < finalSeen) continue; // final nay da chot roi
+            finalSeen = i + 1;
+            const norm = t.trim().replace(/\s+/g, " ").toLowerCase();
+            if (norm && norm === lastFinal) continue; // Chrome phat lai
+            lastFinal = norm;
+            sessionFinal += t;
+          } else if (i >= finalSeen) interim += t;
+        }
+        render(interim);
       };
-      rec.onend = () => { active = false; btn.classList.remove("rec"); };
       rec.onerror = (e) => {
-        if (e.error === "not-allowed" || e.error === "service-not-allowed") showMsg("err", "Hãy cấp quyền micro cho trang để nhập bằng giọng nói.");
-        else if (e.error === "audio-capture") showMsg("err", "Không tìm thấy micro trên thiết bị.");
+        if (e.error === "not-allowed" || e.error === "service-not-allowed") { stopRec(); showMsg("err", "Hãy cấp quyền micro cho trang để nhập bằng giọng nói."); }
+        else if (e.error === "audio-capture") { stopRec(); showMsg("err", "Không tìm thấy micro trên thiết bị."); }
+        // "no-speech"/"aborted": de onend tu khoi dong lai phien moi.
+      };
+      rec.onend = () => {
+        if (!active || stopping) return;
+        // Chot noi dung phien vua xong vao base roi mo phien moi sach.
+        base = (base + sessionFinal).replace(/\s+$/, "") ;
+        if (base) base += " ";
+        sessionFinal = ""; finalSeen = 0;
+        setTimeout(startSession, 60);
       };
       rec.start();
-      active = true;
-      btn.classList.add("rec");
-      textarea.focus();
-    } catch { showMsg("err", "Không khởi động được nhập giọng nói trên trình duyệt này."); }
+    } catch { stopRec(); showMsg("err", "Không khởi động được nhập giọng nói trên trình duyệt này."); }
+  }
+  btn.addEventListener("click", () => {
+    if (active) { stopRec(); return; }
+    base = textarea.value ? textarea.value.replace(/\s+$/, "") + " " : "";
+    sessionFinal = ""; finalSeen = 0; lastFinal = "";
+    active = true; stopping = false;
+    btn.classList.add("rec");
+    textarea.focus();
+    startSession();
   });
 }
 // --- Tro ly ---
@@ -4265,9 +4460,74 @@ async function shApplyPrompts(mid, run, btn) {
     shShowTab("dash");
   } finally { if (btn) btn.disabled = false; }
 }
+// v22: trang thai cho cua Tro ly — truoc day gui request chi tat nut
+// gui, khong animation/khong dong trang thai, reply ve qua WebSocket
+// thi man hinh dung im nen user khong biet dang cho hay da loi.
+let shChatBusy = false;
+let shChatReplyArrived = false;
+let shChatLastText = "";
+let shChatPendingTimer = null;
+function shChatShowPending() {
+  const box = $("sh-msgs");
+  if (!box || document.getElementById("sh-chat-pending")) return;
+  if (box.querySelector(".muted")) box.innerHTML = "";
+  box.insertAdjacentHTML("beforeend", `<div class="sh-msgrow ai" id="sh-chat-pending"><div class="sh-msgcol"><div class="sh-msg ai pending" role="status" aria-live="polite"><span class="who">Trợ lý</span><span class="sh-typing-dots" aria-hidden="true"><i></i><i></i><i></i></span><span id="sh-chat-pending-txt">Đang trả lời…</span></div></div></div>`);
+  box.scrollTop = box.scrollHeight;
+  const t0 = Date.now();
+  shChatPendingTimer = setInterval(() => {
+    const el = document.getElementById("sh-chat-pending-txt");
+    if (!el) { shChatHidePending(); return; }
+    const s = Math.round((Date.now() - t0) / 1000);
+    el.textContent = s < 3 ? "Đang trả lời…" : "Đang chờ app phản hồi… " + s + "s";
+    const box2 = $("sh-msgs"); if (box2) box2.scrollTop = box2.scrollHeight;
+  }, 1000);
+}
+function shChatHidePending() {
+  if (shChatPendingTimer) { clearInterval(shChatPendingTimer); shChatPendingTimer = null; }
+  const el = document.getElementById("sh-chat-pending");
+  if (el) el.remove();
+}
+function shChatShowError(msg) {
+  shChatHidePending();
+  const errEl = $("sh-chat-err");
+  if (errEl) { errEl.textContent = msg; errEl.classList.remove("hidden"); }
+  const box = $("sh-msgs");
+  if (!box) return;
+  if (box.querySelector(".muted")) box.innerHTML = "";
+  box.insertAdjacentHTML("beforeend", `<div class="sh-msgrow ai"><div class="sh-msgcol"><div class="sh-msg ai err-bubble"><span class="who">Trợ lý — lỗi</span>${esc(msg)}<br><button type="button" class="sh-retrybtn" data-sh-retry="1">↻ Gửi lại</button></div></div></div>`);
+  box.scrollTop = box.scrollHeight;
+}
+// Cho reply ve qua WebSocket hoac qua lich su (poll 2,5s/lan): reply
+// den thi co tin AI moi trong lich su so voi moc luc gui. Het thoi gian
+// cho ma chua co -> tra false de bao loi ro rang thay vi im lang.
+async function shChatWaitReply(timeoutMs) {
+  const t0 = Date.now();
+  // Moc so sanh = so tin AI dang hien tren man hinh luc bat dau cho.
+  const box0 = $("sh-msgs");
+  const baseline = box0 ? box0.querySelectorAll(".sh-msg.ai:not(.pending):not(.err-bubble)").length : 0;
+  while (Date.now() - t0 < timeoutMs) {
+    if (shChatReplyArrived) return true;
+    await new Promise((r) => setTimeout(r, 2500));
+    if (shChatReplyArrived) return true;
+    try {
+      const path = "/remote/assistant/history" + (shThreadId ? "?threadId=" + encodeURIComponent(shThreadId) : "");
+      const { res, data } = await shApi(path);
+      if (!res.ok) continue;
+      const msgs = SF.listOf(data, ["messages", "history"]);
+      const aiCount = msgs.filter((m) => {
+        const roleRaw = String(SF.pick(m, ["role", "sender", "from", "author", "speaker", "type", "direction"]) || "").toLowerCase();
+        const meFlag = SF.pick(m, ["isUser", "isMine", "mine", "fromMe", "own"]);
+        return !(meFlag === true || ["user", "me", "customer", "human", "client", "owner", "request", "question", "outgoing"].some((g) => roleRaw.includes(g)));
+      }).length;
+      if (aiCount > baseline) { shChatHidePending(); shLoadChatHistory(); return true; }
+    } catch { /* cu tiep tuc cho toi het timeout */ }
+  }
+  return shChatReplyArrived;
+}
 function shAppendMsg(role, text, who) {
   const box = $("sh-msgs");
   if (!box) return;
+  if (role !== "me") { shChatReplyArrived = true; shChatHidePending(); }
   if (box.querySelector(".muted")) box.innerHTML = "";
   const mid = ++shMsgSeq;
   shMsgTexts[mid] = text;
@@ -4342,29 +4602,51 @@ function shNetErr(e) {
     : m;
 }
 async function shSendChat() {
+  if (shChatBusy) return; // dang cho reply thi khong gui trung
   const input = $("sh-chat-input");
   const text = input.value.trim();
   const errEl = $("sh-chat-err");
   errEl.classList.add("hidden");
   if (!text) return;
+  shChatLastText = text;
+  shChatReplyArrived = false;
   shStopAllVoice();
   input.value = "";
   input.style.height = "auto";
   shAppendMsg("me", text);
   const btn = $("sh-chat-send");
+  const btnHtml = btn.innerHTML;
+  shChatBusy = true;
   btn.disabled = true;
+  btn.classList.add("busy");
+  btn.innerHTML = `<span class="sh-spin" aria-hidden="true"></span>`;
+  btn.setAttribute("aria-label", "Đang chờ trợ lý trả lời");
+  shChatShowPending();
   try {
     const body = { message: text };
     if (shThreadId) body.threadId = shThreadId;
     const { res, data, cancelled } = await shApi("/remote/assistant/chat", { method: "POST", body });
     shRaw("sh-raw-chat", data);
-    if (cancelled) return;
-    if (!res.ok) { errEl.textContent = SF.errText(data, "Trợ lý không trả lời được."); errEl.classList.remove("hidden"); return; }
+    if (cancelled) { shChatHidePending(); return; }
+    if (!res.ok) { shChatShowError(SF.errText(data, "Trợ lý không trả lời được.")); return; }
     const reply = data && SF.pick(data, ["reply", "content", "text", "message", "answer"]);
-    if (typeof reply === "string" && reply) shAppendMsg("ai", reply);
-    else shLoadChatHistory(); // reply con lai ve qua WebSocket assistant.reply
-  } catch (e) { errEl.textContent = shNetErr(e); errEl.classList.remove("hidden"); }
-  finally { btn.disabled = false; }
+    if (typeof reply === "string" && reply) { shChatHidePending(); shAppendMsg("ai", reply); }
+    else {
+      // Reply se ve qua WebSocket assistant.reply hoac nam trong lich
+      // su: GIU bong bong dang-cho + poll lich su, toi da 60s thi bao
+      // loi ro rang (ban cu goi shLoadChatHistory ngay lap tuc — chua co
+      // reply moi — roi dung im, khong trang thai, khong loi).
+      const got = await shChatWaitReply(60000);
+      if (!got) shChatShowError("Trợ lý chưa trả lời sau 60 giây — app có thể đang bận hoặc đã mất kết nối. Hãy kiểm tra app rồi gửi lại.");
+    }
+  } catch (e) { shChatShowError(shNetErr(e)); }
+  finally {
+    shChatBusy = false;
+    btn.disabled = false;
+    btn.classList.remove("busy");
+    btn.innerHTML = btnHtml;
+    btn.setAttribute("aria-label", "Gửi tin nhắn");
+  }
 }
 // --- Kho ---
 // v20: chuan hoa 1 URL media do app tra ve — tuyet doi giu nguyen, tuong
@@ -4489,6 +4771,8 @@ function shBind() {
     if (item) shItemOpen(item.dataset.shItem);
   });
   $("sh-workflows").addEventListener("click", (e) => {
+    const thumb = e.target.closest("[data-sh-wf-media]");
+    if (thumb) { shOpenViewer(thumb.dataset.shWfMedia, "Workflow", thumb.dataset.shWfKind, thumb.dataset.shWfMedia, thumb.dataset.shWfPoster || ""); return; }
     const btn = e.target.closest("[data-sh-wf]");
     if (btn) shWorkflowAction(btn.dataset.shWf, btn.dataset.id, btn);
   });
@@ -4546,6 +4830,8 @@ function shBind() {
     if (del) { shRefs.splice(Number(del.dataset.shRefDel), 1); shRefRenderChips(); }
   });
   $("sh-msgs").addEventListener("click", async (e) => {
+    const rt = e.target.closest("[data-sh-retry]");
+    if (rt) { const inp = $("sh-chat-input"); if (inp && shChatLastText && !shChatBusy) { inp.value = shChatLastText; shSendChat(); } return; }
     const ap = e.target.closest("[data-sh-apply]");
     if (ap) { shApplyPrompts(ap.dataset.mid, ap.dataset.shApply === "run", ap); return; }
     const b = e.target.closest("[data-sh-copy]");
