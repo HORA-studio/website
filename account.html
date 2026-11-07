@@ -1975,6 +1975,86 @@ body.sh-control [data-sh-panel="chat"]:not(.hidden){display:flex;flex-direction:
   .sum-item{padding:6px 10px;font-size:12.5px;gap:5px}
   .sum-item strong{font-size:13.5px}
 }
+
+/* ===== v24 (user bao 2026-11-07):
+   1) Tong quan: 4 muc thong ke doi chu dai sang ICON SVG + so, ep DUNG
+      1 hang ke ca dien thoai hep (bo wrap cu lam rot hang).
+   2) Editor workflow: dau trang chi con nut menu 3 cham (so ra Quay lai
+      + Chay) ben trai va 5 nut stage ben phai; bo o ten + nut Luu khi mo
+      workflow co san. Bam 1 stage chi hien node cua stage do o duoi.
+   3) Chi tiet node: o tieu de + prompt TO (chu 16-17px, prompt cao
+      >=260px) va thanh thao tac Them/Xoa/Danh dau xong o ngay dau phan
+      chi tiet, khong phai cuon xuong day moi thay.
+   4) Ghi am: overlay animation thu am phu len o nhap (song am nhay +
+      cham do + dem giay + chu dang nghe) thay cho ban phim ao; doi tab
+      la tat ghi (phan JS: shShowTab/showView/visibilitychange). ===== */
+.sh-stats-bar{flex-wrap:nowrap;gap:18px}
+.sh-stats-bar .sh-st{display:inline-flex;align-items:center;gap:7px;flex:0 0 auto}
+.sh-stats-bar .sh-st svg{flex:0 0 auto;display:block}
+.sh-stats-bar .sh-st b{font-size:17px;line-height:1}
+@media (max-width:760px){
+  .sh-stats-bar{flex-wrap:nowrap;gap:14px}
+  .sh-stats-bar .sh-st{gap:5px}
+  .sh-stats-bar .sh-st svg{width:17px;height:17px}
+  .sh-stats-bar .sh-st b{font-size:15.5px}
+}
+/* Header editor workflow */
+.sh-flow-edithead{justify-content:flex-start;align-items:flex-start;gap:10px}
+.sh-menu-wrap{position:relative;flex:0 0 auto}
+.sh-menu-btn{width:42px;height:42px;border:1px solid var(--line2);border-radius:12px;background:var(--panel)}
+.sh-menu{position:absolute;top:calc(100% + 6px);left:0;z-index:40;min-width:230px;background:var(--panel);border:1px solid var(--line2);border-radius:14px;box-shadow:0 16px 38px rgba(10,20,25,.22);padding:8px;display:flex;flex-direction:column;gap:2px}
+.sh-menu-name{margin:2px 10px 7px;font-weight:700;font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:260px}
+.sh-menu-name:empty{display:none}
+.sh-menu-item{display:flex;align-items:center;gap:10px;width:100%;padding:11px 10px;border:0;border-radius:10px;background:none;font:inherit;font-size:15px;font-weight:600;color:var(--text);cursor:pointer;text-align:left}
+.sh-menu-item:hover{background:var(--panel2)}
+.sh-flow-stages{flex:1 1 auto;min-width:0;padding:0}
+.sh-step.on{border-bottom-color:var(--gold)}
+.sh-step.on .sh-step-name{color:var(--gold);font-weight:800}
+.sh-flow-newtools{display:flex;gap:8px;align-items:center;flex:0 1 auto;min-width:0}
+.sh-flow-newtools input{flex:1;min-width:120px;min-height:38px}
+.sh-flow-newtools.hidden{display:none}
+/* Thanh stage dang chon + nut Them node */
+.sh-stagebar{align-items:center}
+.sh-stagebar h3{font-size:17.5px}
+.sh-stage-add{margin-left:auto;flex:0 0 auto}
+.sh-stage-empty{border:1px dashed var(--line2);border-radius:12px;padding:18px 14px;text-align:center}
+/* Chi tiet node: truong nhap TO */
+.sh-fnode-detail{padding:14px}
+.sh-fnode-actions{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.sh-fnode-actions .btn{min-height:40px;padding:8px 14px;font-size:14px}
+.sh-fnode-actions .sh-act-del{color:var(--danger);border-color:#c93a3255}
+.sh-fnode-fields .sh-field-title{width:100%;font-size:17px;font-weight:650;line-height:1.4;padding:13px 14px;min-height:52px;border-radius:12px}
+.sh-fnode-fields .sh-field-text{width:100%;font-size:16px;line-height:1.6;padding:14px;min-height:260px;border-radius:12px;resize:vertical}
+.sh-fnode-fields label.lbl{font-size:13.5px}
+/* Overlay thu am */
+.sh-rec-overlay{position:absolute;inset:0;z-index:6;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;background:var(--panel);border-radius:inherit;padding:14px;text-align:center}
+/* Trong composer chat (hop thap 1 dong): overlay khong phu inset vi noi
+   dung cao hon hop se tran ca tren lan duoi — doi thanh tam bang noi
+   neo o day hop, cao theo noi dung, doi len phia tren hop */
+.sh-rec-overlay.in-composer{inset:auto;left:0;right:0;bottom:0;min-height:100%;border:1px solid var(--line2);border-radius:20px;box-shadow:0 12px 30px rgba(10,20,25,.20)}
+.sh-rec-overlay.hidden{display:none}
+.sh-rec-top{display:flex;align-items:center;gap:9px;font-weight:750;font-size:16px}
+.sh-rec-dot{width:11px;height:11px;border-radius:50%;background:#dc2626;animation:sh-mic-pulse 1.2s ease-in-out infinite;flex:0 0 auto}
+.sh-rec-time{font-variant-numeric:tabular-nums;color:var(--muted);font-weight:650}
+.sh-rec-wave{display:flex;align-items:center;gap:4px;height:38px}
+.sh-rec-wave i{width:5px;border-radius:3px;background:var(--gold);display:block;animation:sh-rec-bounce 0.9s ease-in-out infinite}
+.sh-rec-wave i:nth-child(1){height:14px;animation-delay:0s}
+.sh-rec-wave i:nth-child(2){height:26px;animation-delay:.12s}
+.sh-rec-wave i:nth-child(3){height:36px;animation-delay:.24s}
+.sh-rec-wave i:nth-child(4){height:22px;animation-delay:.36s}
+.sh-rec-wave i:nth-child(5){height:30px;animation-delay:.48s}
+.sh-rec-wave i:nth-child(6){height:16px;animation-delay:.6s}
+.sh-rec-wave i:nth-child(7){height:24px;animation-delay:.72s}
+@keyframes sh-rec-bounce{0%,100%{transform:scaleY(.45)}50%{transform:scaleY(1)}}
+.sh-rec-live{margin:0;font-size:14.5px;line-height:1.5;color:var(--muted);max-height:66px;overflow:hidden;max-width:640px}
+.sh-rec-live:empty{display:none}
+.sh-rec-stop{border:1px solid #c93a3255;background:transparent;color:var(--danger);border-radius:999px;padding:8px 18px;font:inherit;font-size:14px;font-weight:700;cursor:pointer}
+.sh-rec-stop:hover{background:rgba(201,58,50,.08)}
+textarea.sh-rec-on{caret-color:transparent}
+/* Nut mic dang ghi PHAI noi tren overlay de bam lan nua la dung duoc
+   (overlay phu ca hop nhap, neu khong nut mic bi che khuat) */
+.sh-micbtn.rec{position:relative;z-index:7}
+.sh-prompt-mic.rec{position:absolute;z-index:7}
 </style>
 </head>
 <body>
@@ -2194,10 +2274,10 @@ body.sh-control [data-sh-panel="chat"]:not(.hidden){display:flex;flex-direction:
               <div class="sh-dash-left">
               <span class="sh-conn" id="sh-conn">● Chưa nối</span>
               <div class="sh-stats-bar">
-              <span class="sh-st run"><b id="sh-stat-running">–</b> Đang chạy</span>
-              <span class="sh-st wait"><b id="sh-stat-waiting">–</b> Đang chờ</span>
-              <span class="sh-st done"><b id="sh-stat-done">–</b> Đã xong</span>
-              <span class="sh-st fail"><b id="sh-stat-failed">–</b> Lỗi</span>
+              <span class="sh-st run" title="Đang chạy" aria-label="Đang chạy"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M10 8.5l6 3.5-6 3.5z" fill="currentColor" stroke="none"/></svg><b id="sh-stat-running">–</b></span>
+              <span class="sh-st wait" title="Đang chờ" aria-label="Đang chờ"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg><b id="sh-stat-waiting">–</b></span>
+              <span class="sh-st done" title="Đã xong" aria-label="Đã xong"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8.5 12.5l2.5 2.5 4.5-5.5"/></svg><b id="sh-stat-done">–</b></span>
+              <span class="sh-st fail" title="Lỗi" aria-label="Lỗi"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5L22 20H2z"/><path d="M12 10v4.5"/><path d="M12 17.2h.01"/></svg><b id="sh-stat-failed">–</b></span>
               </div>
               </div>
               <div class="sh-topbar-right">
@@ -2248,19 +2328,30 @@ body.sh-control [data-sh-panel="chat"]:not(.hidden){display:flex;flex-direction:
               <div id="sh-workflows"><p class="muted">Đang tải workflow…</p></div>
             </div>
             <div id="sh-flow-editor" class="hidden">
-              <div class="sh-flow-head">
-                <button class="sh-iconbtn" id="sh-flow-back" type="button" title="Quay lại danh sách" aria-label="Quay lại danh sách"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M11 6l-6 6 6 6"/></svg></button>
-                <input id="sh-flow-name" placeholder="Tên workflow…" autocomplete="off">
-                <button class="btn small hidden" id="sh-flow-run" type="button">Chạy</button>
-                <button class="btn primary small" id="sh-flow-save" type="button">Lưu workflow</button>
+              <div class="sh-flow-head sh-flow-edithead">
+                <div class="sh-menu-wrap" id="sh-flow-menu-wrap">
+                  <button class="sh-iconbtn sh-menu-btn" id="sh-flow-menu" type="button" title="Menu workflow" aria-label="Menu workflow" aria-haspopup="true" aria-expanded="false"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg></button>
+                  <div class="sh-menu hidden" id="sh-flow-menu-pop" role="menu">
+                    <p class="sh-menu-name" id="sh-flow-rname"></p>
+                    <button type="button" class="sh-menu-item" id="sh-flow-back" role="menuitem"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="M11 6l-6 6 6 6"/></svg>Quay lại danh sách</button>
+                    <button type="button" class="sh-menu-item hidden" id="sh-flow-run" role="menuitem"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M10 8.5l6 3.5-6 3.5z" fill="currentColor" stroke="none"/></svg>Chạy workflow</button>
+                  </div>
+                </div>
+                <div id="sh-flow-steps" class="sh-flow-steps sh-flow-stages"></div>
+                <div class="sh-flow-newtools hidden" id="sh-flow-newtools">
+                  <input id="sh-flow-name" placeholder="Tên workflow…" autocomplete="off">
+                  <button class="btn primary small" id="sh-flow-save" type="button">Lưu workflow</button>
+                </div>
               </div>
               <p class="sh-err hidden" id="sh-flow-err" role="alert"></p>
-              <div id="sh-flow-steps" class="sh-flow-steps"></div>
               <div id="sh-flow-sections"></div>
-              <div class="sh-flow-listhead"><h3>Danh sách node</h3><span class="muted">Kéo tay cầm ⋮⋮ để đổi thứ tự node</span></div>
+              <div class="sh-flow-listhead sh-stagebar">
+                <h3 id="sh-flow-stage-title">Nội dung</h3>
+                <span class="muted" id="sh-flow-stage-hint">Kéo tay cầm ⋮⋮ để đổi thứ tự node trong mục này</span>
+                <button class="btn small primary sh-stage-add" id="sh-flow-addnode" type="button">+ Thêm node</button>
+              </div>
               <div id="sh-flow-nodes"></div>
-              <button class="btn small" id="sh-flow-addnode" type="button">+ Thêm node</button>
-              <p class="muted" style="font-size:13px;margin:10px 0 0">Bấm tiêu đề node để mở/đóng và sửa nội dung. Node sau chỉ mở khi node trước đã đánh dấu xong.</p>
+              <p class="muted" style="font-size:13px;margin:10px 0 0">Bấm 1 node để mở chi tiết: sửa tiêu đề / prompt trong ô lớn, thêm node, xoá node hoặc đánh dấu xong ngay trong phần chi tiết. Node khoá vẫn xem được nội dung — đánh dấu xong node trước mới sửa và đánh dấu xong được node đó.</p>
             </div>
           </section>
 
@@ -2430,6 +2521,7 @@ try { currentView = sessionStorage.getItem("hora-view") || "account"; } catch { 
 if (!VIEW_TITLES[currentView]) currentView = "account";
 function showView(v) {
   if (!VIEW_TITLES[v]) v = "account";
+  if (typeof shStopAllVoice === "function") shStopAllVoice(); // doi man chinh cung tat ghi am (v24)
   currentView = v;
   try { sessionStorage.setItem("hora-view", v); } catch { /* bo qua */ }
   document.querySelectorAll("[data-view-btn]").forEach((b) => b.classList.toggle("active", b.dataset.viewBtn === v));
@@ -3591,6 +3683,9 @@ function shExpire() {
   remoteShowErr("Phiên đã hết, hãy ghép lại.");
 }
 function shShowTab(name) {
+  // Doi tab la TAT ghi am ngay (v24, user bao: dang ghi ma chuyen tab
+  // thi trang thai ghi van giu, mic nghe len sang tab khac).
+  shStopAllVoice();
   shTab = name;
   document.querySelectorAll("#sh-tabs .sh-tab").forEach((b) => b.classList.toggle("on", b.dataset.shTab === name));
   document.querySelectorAll("#sh-side-nav .sh-nav-item").forEach((b) => b.classList.toggle("active", b.dataset.shNav === name));
@@ -3662,6 +3757,7 @@ async function shProbeEntry() {
 function shExitShell() {
   // Thoat khoi che do dieu khien: ve man Remote cu (menu tai khoan tro lai).
   // PHIEN VAN GIU — chi dong giao dien dieu khien, khong ngat ket noi.
+  shStopAllVoice();
   shProbeGen++; // huy vong kiem tra da-phien neu con dang chay
   shControlWanted = false;
   shStarted = false;
@@ -4033,8 +4129,52 @@ async function shWorkflowAction(act, id, btn) {
 let shFlowEdit = null;
 function shFlowShowList() {
   shFlowEdit = null;
+  const pop = $("sh-flow-menu-pop"); if (pop) pop.classList.add("hidden");
   $("sh-flow-editor").classList.add("hidden");
   $("sh-flow-list").classList.remove("hidden");
+}
+// --- 5 stage chuan cua workflow (v24): Noi dung / Nhan vat / Canh /
+// Storyboard / Tao video. Node thuoc stage nao: uu tien field stage cua
+// app (stage/stageKey/phase/group/section/stepType, ke ca dang so 0-4),
+// sau do nhan dien tu tieu de node, cuoi cung KE THUA stage cua node
+// truoc (node khong ghi stage thi thuoc stage dang chay). Workflow
+// khong co tin hieu stage nao thi node dau mac dinh o "Noi dung".
+const SH_STAGES = [
+  { key: "content", label: "Nội dung" },
+  { key: "character", label: "Nhân vật" },
+  { key: "scene", label: "Cảnh" },
+  { key: "storyboard", label: "Storyboard" },
+  { key: "video", label: "Tạo video" },
+];
+function shNormTxt(s) { return String(s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\u0111/g, "d"); }
+
+function shStageOfText(s) {
+  if (typeof s === "number" && s >= 0 && s < SH_STAGES.length) return SH_STAGES[s].key;
+  const t = shNormTxt(s).trim();
+  if (!t) return null;
+  if (/^[0-4]$/.test(t)) return SH_STAGES[Number(t)].key;
+  if (t.includes("storyboard")) return "storyboard";
+  if (t.includes("tao video") || t.includes("create video") || t === "video" || t.includes("render video")) return "video";
+  if (t.includes("nhan vat") || t.includes("character")) return "character";
+  if (t.includes("noi dung") || t.includes("content") || t.includes("y tuong") || t === "idea") return "content";
+  if (t.includes("canh") || t.includes("scene") || t.includes("environment")) return "scene";
+  return null;
+}
+function shFlowAssignStages() {
+  if (!shFlowEdit) return;
+  let cur = "content";
+  shFlowEdit.nodes.forEach((n) => {
+    const ex = shStageOfText(n.stageRaw) || shStageOfText(n.title);
+    if (ex) cur = ex;
+    n.stageKey = cur;
+  });
+}
+function shStageLabel(key) { const s = SH_STAGES.find((x) => x.key === key); return s ? s.label : key; }
+function shStageIdxs(key) {
+  if (!shFlowEdit) return [];
+  const out = [];
+  shFlowEdit.nodes.forEach((n, i) => { if ((n.stageKey || "content") === key) out.push(i); });
+  return out;
 }
 // Media cua node/stage (anh sheet nhan vat, anh canh, video ket qua...).
 // v22 lam lai: ban cu (a) coi URL TUONG DOI ("/remote/library/.../file")
@@ -4208,7 +4348,7 @@ async function shOpenFlowEditor(id) {
   const err = $("sh-flow-err");
   err.classList.add("hidden");
   if (!id) {
-    shFlowEdit = { id: null, name: "", nodes: [{ title: "Node 1", text: "", done: false }], open: 0 };
+    shFlowEdit = { id: null, name: "", nodes: [{ title: "Node 1", text: "", done: false, stageKey: "content" }], open: 0, stage: "content" };
   } else {
     try {
       const { res, data } = await shApi("/remote/workflows/" + encodeURIComponent(id));
@@ -4227,6 +4367,7 @@ async function shOpenFlowEditor(id) {
           title: SF.titleOf(s), text: SF.nodeText(s),
           done: SF.statusChip(SF.statusOf(s)).cls === "done",
           statusRaw: SF.statusOf(s),
+          stageRaw: SF.pick(s, ["stage", "stageKey", "stageName", "phase", "group", "section", "stepType", "stageIndex"]),
           template: SF.pick(s, ["template", "templateName", "templateLabel", "templateTitle"]) || "",
           image: shNodeImage(s),
           media: shNodeMedia(s),
@@ -4235,10 +4376,18 @@ async function shOpenFlowEditor(id) {
         open: 0,
       };
       if (!shFlowEdit.nodes.length) shFlowEdit.nodes = [{ title: "Node 1", text: "", done: false }];
+      shFlowAssignStages();
+      shFlowEdit.stage = shFlowEdit.nodes[0].stageKey || "content";
     } catch (e) { showMsg("err", e.message); return; }
   }
   $("sh-flow-name").value = shFlowEdit.name;
+  $("sh-flow-rname").textContent = shFlowEdit.name || "";
   $("sh-flow-run").classList.toggle("hidden", !shFlowEdit.id);
+  // Workflow co san: an han o ten + nut Luu (chinh theo yeu cau v24) —
+  // dau trang chi con menu 3 cham + 5 nut stage. Tao moi thi hien lai
+  // de con duong dat ten + luu.
+  $("sh-flow-newtools").classList.toggle("hidden", !!shFlowEdit.id);
+  const pop = $("sh-flow-menu-pop"); if (pop) pop.classList.add("hidden");
   $("sh-flow-list").classList.add("hidden");
   $("sh-flow-editor").classList.remove("hidden");
   shRenderFlowEditor();
@@ -4246,46 +4395,76 @@ async function shOpenFlowEditor(id) {
 function shFlowUnlocked(i) { return !!shFlowEdit && (i === 0 || shFlowEdit.nodes[i - 1].done); }
 function shRenderFlowEditor() {
   if (!shFlowEdit) return;
-  // Thanh tien trinh cac buoc (giong app): ten buoc + trang thai ben duoi
-  $("sh-flow-steps").innerHTML = shFlowEdit.nodes.map((n, i) => {
-    const st = shStepState(n, i);
-    return `<button type="button" class="sh-step ${st.cls}" data-sh-step="${i}" ${shFlowUnlocked(i) ? "" : "disabled"}>
-      <span class="sh-step-name">${esc(n.title || ("Node " + (i + 1)))}</span>
-      <span class="sh-step-state">${st.label}</span>
+  if (!shFlowEdit.stage) shFlowEdit.stage = (shFlowEdit.nodes[0] && shFlowEdit.nodes[0].stageKey) || "content";
+  const stage = shFlowEdit.stage;
+  // 5 nut stage tren header (ben phai nut menu 3 cham): trang thai cua
+  // stage = gop tu cac node trong stage; stage trong van bam duoc de
+  // vao them node.
+  $("sh-flow-steps").innerHTML = SH_STAGES.map((s) => {
+    const idxs = shStageIdxs(s.key);
+    let st;
+    if (!idxs.length) st = { label: "Trống", cls: "" };
+    else if (idxs.every((i) => shFlowEdit.nodes[i].done)) st = { label: "Xong", cls: "done" };
+    else if (idxs.some((i) => shStepState(shFlowEdit.nodes[i], i).cls === "stale")) st = { label: "Cũ — chạy lại", cls: "stale" };
+    else if (idxs.some((i) => shFlowUnlocked(i))) st = { label: "Đang mở", cls: "open" };
+    else st = { label: "Khóa", cls: "lock" };
+    // Nut stage LUON bam duoc de XEM node cua stage do (ke ca khi stage
+    // dang khoa chay) — khoa chi chan sua/danh dau xong, khong chan xem.
+    return `<button type="button" class="sh-step ${st.cls} ${stage === s.key ? "on" : ""}" data-sh-stage="${s.key}" aria-pressed="${stage === s.key}">
+      <span class="sh-step-name">${esc(s.label)}</span>
+      <span class="sh-step-state">${st.label}${idxs.length ? " · " + idxs.length : ""}</span>
     </button>`;
   }).join("");
-  // Muc Y tuong + Ket qua phan tich (chi hien khi workflow co du lieu nay)
+  // Y tuong + Ket qua phan tich la noi dung cua stage "Noi dung" — chi
+  // hien o stage do (truoc day hien o moi stage nen trung lap).
   let sec = "";
-  if (shFlowEdit.idea) {
-    sec += `<div class="sh-fsec">
-      <h4>Ý tưởng</h4>
-      <p class="sh-fsec-text">${esc(shFlowEdit.idea)}</p>
-      <div class="sh-airow">
-        <input data-sh-ai-input="idea-0" placeholder="Nhắn AI sửa ý tưởng này..." autocomplete="off">
-        <button type="button" class="btn small" data-sh-ai="idea">Gửi</button>
-      </div>
-    </div>`;
-  }
-  const aRows = shAnalysisRows(shFlowEdit.analysis);
-  const aText = typeof shFlowEdit.analysis === "string" ? shFlowEdit.analysis : "";
-  if (aRows.length || aText) {
-    sec += `<div class="sh-fsec"><h4>Kết quả phân tích</h4>${aText ? `<p class="sh-fsec-text">${esc(aText)}</p>` : aRows.map(([k, v]) => `<p class="sh-fsec-row"><strong>${esc(k)}:</strong> ${esc(v)}</p>`).join("")}</div>`;
+  if (stage === "content") {
+    if (shFlowEdit.idea) {
+      sec += `<div class="sh-fsec">
+        <h4>Ý tưởng</h4>
+        <p class="sh-fsec-text">${esc(shFlowEdit.idea)}</p>
+        <div class="sh-airow">
+          <input data-sh-ai-input="idea-0" placeholder="Nhắn AI sửa ý tưởng này..." autocomplete="off">
+          <button type="button" class="btn small" data-sh-ai="idea">Gửi</button>
+        </div>
+      </div>`;
+    }
+    const aRows = shAnalysisRows(shFlowEdit.analysis);
+    const aText = typeof shFlowEdit.analysis === "string" ? shFlowEdit.analysis : "";
+    if (aRows.length || aText) {
+      sec += `<div class="sh-fsec"><h4>Kết quả phân tích</h4>${aText ? `<p class="sh-fsec-text">${esc(aText)}</p>` : aRows.map(([k, v]) => `<p class="sh-fsec-row"><strong>${esc(k)}:</strong> ${esc(v)}</p>`).join("")}</div>`;
+    }
   }
   $("sh-flow-sections").innerHTML = sec;
-  $("sh-flow-nodes").innerHTML = shFlowEdit.nodes.map((n, i) => {
+  const stageTitle = $("sh-flow-stage-title");
+  if (stageTitle) stageTitle.textContent = shStageLabel(stage);
+  // Duoi stage chi hien node cua DUNG stage do (het lap voi hang nut
+  // phia tren nhu ban cu: tren la stage, duoi la toan bo node).
+  const idxs = shStageIdxs(stage);
+  if (!idxs.length) {
+    $("sh-flow-nodes").innerHTML = `<p class="muted sh-stage-empty">Chưa có node nào ở mục ${esc(shStageLabel(stage))} — bấm "+ Thêm node" ở trên để tạo node đầu tiên cho mục này.</p>`;
+    return;
+  }
+  $("sh-flow-nodes").innerHTML = idxs.map((i) => {
+    const n = shFlowEdit.nodes[i];
     const unlocked = shFlowUnlocked(i);
-    const open = unlocked && shFlowEdit.open === i;
-    const st = shStepState(n, i);
+    const open = shFlowEdit.open === i;
     return `<div class="sh-fnode ${n.done ? "done" : ""} ${unlocked ? "" : "locked"}" data-sh-card="${i}">
       <div class="sh-fnode-head">
         <span class="sh-drag" data-sh-drag="${i}" title="Kéo để đổi thứ tự node" aria-hidden="true">⋮⋮</span>
-        <button type="button" class="sh-fnode-main" data-sh-fnode="toggle" data-i="${i}" ${unlocked ? "" : "disabled"}>
+        <button type="button" class="sh-fnode-main" data-sh-fnode="toggle" data-i="${i}">
           <span class="sh-fnode-dot">${n.done ? "✓" : i + 1}</span>
-          <span class="sh-fnode-titles"><span class="sh-fnode-kicker">NODE ${i + 1}</span><span class="sh-fnode-title">${esc(n.title || ("Node " + (i + 1)))}</span></span>
+          <span class="sh-fnode-titles"><span class="sh-fnode-kicker">NODE ${i + 1} · ${esc(shStageLabel(n.stageKey || stage)).toUpperCase()}</span><span class="sh-fnode-title">${esc(n.title || ("Node " + (i + 1)))}</span></span>
           <span class="sh-chip ${n.done ? "done" : "wait"}">${n.done ? "Đã xong" : unlocked ? "Đang mở" : "🔒 Khóa"}</span>
         </button>
       </div>
-      ${open ? `<div class="sh-fnode-body">
+      ${open ? `<div class="sh-fnode-body sh-fnode-detail">
+        ${unlocked ? "" : `<p class="muted" style="margin:0 0 12px;font-size:13.5px">🔒 Node đang khoá vì node trước chưa đánh dấu xong — bạn vẫn xem được nội dung, đánh dấu xong node trước để sửa và đánh dấu xong node này.</p>`}
+        <div class="sh-fnode-actions">
+          <button type="button" class="btn small ${n.done ? "" : "primary"}" data-sh-fnode="done" data-i="${i}" ${unlocked ? "" : "disabled"}>${n.done ? "↩ Bỏ đánh dấu xong" : "✓ Đánh dấu xong"}</button>
+          <button type="button" class="btn small" data-sh-fnode="add" data-i="${i}">+ Thêm node</button>
+          <button type="button" class="btn small sh-act-del" data-sh-fnode="del" data-i="${i}">Xoá node</button>
+        </div>
         <div class="sh-fnode-meta">
           ${n.template ? `<span class="sh-fnode-template">Template: ${esc(String(n.template))}</span>` : "<span></span>"}
           ${n.history ? `<span class="sh-fnode-hist"><span class="sh-hist-chip">Lịch sử ${n.history}</span><button type="button" class="sh-iconbtn sm" data-sh-fnode="reload" data-i="${i}" title="Tải lại từ app" aria-label="Tải lại từ app"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg></button></span>` : ""}
@@ -4295,18 +4474,14 @@ function shRenderFlowEditor() {
           ${n.image && !(n.media && n.media.kind === "video") ? `<img class="sh-fnode-img" src="${esc(n.image)}" alt="" loading="lazy" onerror="this.style.display='none'">` : ""}
           <div class="sh-fnode-fields">
             <label class="lbl">Tiêu đề node</label>
-            <input data-sh-fnode-field="title" data-i="${i}" value="${esc(n.title)}" autocomplete="off">
-            <label class="lbl" style="display:block;margin-top:10px">Nội dung / prompt của node</label>
-            <textarea data-sh-fnode-field="text" data-i="${i}" rows="7" placeholder="Nội dung node này…">${esc(n.text)}</textarea>
+            <input class="sh-field-title" data-sh-fnode-field="title" data-i="${i}" value="${esc(n.title)}" autocomplete="off" ${unlocked ? "" : "disabled"}>
+            <label class="lbl" style="display:block;margin-top:12px">Nội dung / prompt của node</label>
+            <textarea class="sh-field-text" data-sh-fnode-field="text" data-i="${i}" rows="12" placeholder="Nội dung node này…" ${unlocked ? "" : "disabled"}>${esc(n.text)}</textarea>
           </div>
         </div>
         <div class="sh-airow">
-          <input data-sh-ai-input="node-${i}" placeholder="Nhắn AI sửa đoạn này..." autocomplete="off">
-          <button type="button" class="btn small" data-sh-fnode="ai" data-i="${i}">Gửi</button>
-        </div>
-        <div class="sh-row-actions">
-          <button type="button" class="btn small ${n.done ? "" : "primary"}" data-sh-fnode="done" data-i="${i}">${n.done ? "Bỏ đánh dấu xong" : "Đánh dấu xong"}</button>
-          <button type="button" class="btn small" data-sh-fnode="del" data-i="${i}">Xóa node</button>
+          <input data-sh-ai-input="node-${i}" placeholder="Nhắn AI sửa đoạn này..." autocomplete="off" ${unlocked ? "" : "disabled"}>
+          <button type="button" class="btn small" data-sh-fnode="ai" data-i="${i}" ${unlocked ? "" : "disabled"}>Gửi</button>
         </div>
       </div>` : ""}
     </div>`;
@@ -4314,11 +4489,13 @@ function shRenderFlowEditor() {
 }
 async function shFlowSave() {
   if (!shFlowEdit) return;
-  shFlowEdit.name = $("sh-flow-name").value.trim();
+  // Chi workflow MOI con doc ten tu o nhap; workflow co san khong con o
+  // ten tren giao dien (v24) nen giu nguyen ten da tai tu app.
+  if (!shFlowEdit.id) shFlowEdit.name = $("sh-flow-name").value.trim();
   const err = $("sh-flow-err");
   if (!shFlowEdit.name) { err.textContent = "Hãy nhập tên workflow."; err.classList.remove("hidden"); return; }
   err.classList.add("hidden");
-  const payload = { name: shFlowEdit.name, steps: shFlowEdit.nodes.map((n) => ({ name: n.title, prompt: n.text, status: n.done ? "done" : "pending" })) };
+  const payload = { name: shFlowEdit.name, steps: shFlowEdit.nodes.map((n) => ({ name: n.title, prompt: n.text, status: n.done ? "done" : "pending", stage: n.stageKey || "content" })) };
   const btn = $("sh-flow-save");
   btn.disabled = true;
   try {
@@ -4347,6 +4524,10 @@ function shFitChatInput() {
 // duyet khong ho tro (Firefox...) thi an nut mic.
 const shVoiceStops = [];
 function shStopAllVoice() { shVoiceStops.forEach((f) => { try { f(); } catch { /* bo qua */ } }); }
+// Tat ghi am khi tab/trang bi an hoac user roi trang (v24): mic khong
+// duoc nghe len khi nguoi dung khong con nhin thay o nhap nua.
+document.addEventListener("visibilitychange", () => { if (document.hidden) shStopAllVoice(); });
+window.addEventListener("pagehide", () => shStopAllVoice());
 function shVoiceAttach(textarea, btn) {
   if (!textarea || !btn) return;
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -4366,14 +4547,49 @@ function shVoiceAttach(textarea, btn) {
   //    (Chrome doi khi phat lai) thi bo qua.
   let rec = null, active = false, stopping = false;
   let base = "", sessionFinal = "", finalSeen = 0, lastFinal = "";
+  // Overlay animation thu am (v24): phu len o nhap khi dang ghi — song
+  // am nhay + cham do nhap nhay + dem giay + dong chu dang nghe + nut
+  // Dung. Kem theo: o nhap chuyen readonly + inputmode=none va KHONG
+  // focus nua nen ban phim ao tren dien thoai khong hien len khi ghi.
+  const host = textarea.closest(".sh-prompt-box, .sh-composer") || textarea.parentElement;
+  const overlay = document.createElement("div");
+  overlay.className = "sh-rec-overlay hidden" + (host && host.classList.contains("sh-composer") ? " in-composer" : "");
+  overlay.innerHTML = `<div class="sh-rec-top"><span class="sh-rec-dot"></span><span>Đang thu âm…</span><span class="sh-rec-time">0:00</span></div><div class="sh-rec-wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><p class="sh-rec-live"></p><button type="button" class="sh-rec-stop">■ Dừng thu</button>`;
+  if (host) host.appendChild(overlay);
+  const recTimeEl = overlay.querySelector(".sh-rec-time");
+  const recLiveEl = overlay.querySelector(".sh-rec-live");
+  overlay.querySelector(".sh-rec-stop").addEventListener("click", () => stopRec());
+  let recTimer = null, recStartedAt = 0;
+  function recUiOn() {
+    btn.classList.add("rec");
+    textarea.classList.add("sh-rec-on");
+    textarea.readOnly = true;
+    textarea.setAttribute("inputmode", "none");
+    if (document.activeElement === textarea) textarea.blur();
+    overlay.classList.remove("hidden");
+    recStartedAt = Date.now();
+    recTimeEl.textContent = "0:00";
+    recLiveEl.textContent = "";
+    clearInterval(recTimer);
+    recTimer = setInterval(() => { const s = Math.floor((Date.now() - recStartedAt) / 1000); recTimeEl.textContent = Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); }, 250);
+  }
+  function recUiOff() {
+    btn.classList.remove("rec");
+    textarea.classList.remove("sh-rec-on");
+    textarea.readOnly = false;
+    textarea.removeAttribute("inputmode");
+    overlay.classList.add("hidden");
+    clearInterval(recTimer); recTimer = null;
+  }
   function render(interim) {
     textarea.value = base + sessionFinal + (interim || "");
+    recLiveEl.textContent = textarea.value.trim();
     textarea.dispatchEvent(new Event("input", { bubbles: true }));
   }
   function stopRec() {
     stopping = true; active = false;
     if (rec) { rec.onresult = null; rec.onend = null; rec.onerror = null; try { rec.stop(); } catch { /* bo qua */ } rec = null; }
-    btn.classList.remove("rec");
+    recUiOff();
   }
   shVoiceStops.push(stopRec);
   function startSession() {
@@ -4421,8 +4637,10 @@ function shVoiceAttach(textarea, btn) {
     base = textarea.value ? textarea.value.replace(/\s+$/, "") + " " : "";
     sessionFinal = ""; finalSeen = 0; lastFinal = "";
     active = true; stopping = false;
-    btn.classList.add("rec");
-    textarea.focus();
+    // KHONG textarea.focus() nhu ban cu: focus se bat ban phim ao tren
+    // dien thoai che het man hinh ghi am. Overlay thu am da phu len o
+    // nhap lam giao dien ghi (recUiOn cung blur neu o dang duoc focus).
+    recUiOn();
     startSession();
   });
 }
@@ -4864,11 +5082,27 @@ function shBind() {
   $("sh-flow-new").addEventListener("click", () => shOpenFlowEditor(null));
   $("sh-flow-back").addEventListener("click", shFlowShowList);
   $("sh-flow-save").addEventListener("click", shFlowSave);
-  $("sh-flow-run").addEventListener("click", (e) => { if (shFlowEdit && shFlowEdit.id) shWorkflowAction("run", shFlowEdit.id, e.currentTarget); });
+  $("sh-flow-run").addEventListener("click", (e) => { const pop = $("sh-flow-menu-pop"); if (pop) pop.classList.add("hidden"); if (shFlowEdit && shFlowEdit.id) shWorkflowAction("run", shFlowEdit.id, e.currentTarget); });
+  // Menu 3 cham cua editor: bam de so/thu 2 nut Quay lai + Chay; bam ra
+  // ngoai hoac Escape thi dong (Escape xu ly o handler chung ben duoi).
+  $("sh-flow-menu").addEventListener("click", (e) => {
+    e.stopPropagation();
+    const pop = $("sh-flow-menu-pop");
+    const willOpen = pop.classList.contains("hidden");
+    pop.classList.toggle("hidden", !willOpen);
+    e.currentTarget.setAttribute("aria-expanded", willOpen ? "true" : "false");
+  });
+  document.addEventListener("click", (e) => {
+    const wrap = $("sh-flow-menu-wrap");
+    const pop = $("sh-flow-menu-pop");
+    if (wrap && pop && !wrap.contains(e.target)) { pop.classList.add("hidden"); const b = $("sh-flow-menu"); if (b) b.setAttribute("aria-expanded", "false"); }
+  });
   $("sh-flow-addnode").addEventListener("click", () => {
     if (!shFlowEdit) return;
-    shFlowEdit.nodes.push({ title: "Node " + (shFlowEdit.nodes.length + 1), text: "", done: false });
-    if (shFlowUnlocked(shFlowEdit.nodes.length - 1)) shFlowEdit.open = shFlowEdit.nodes.length - 1;
+    const key = shFlowEdit.stage || "content";
+    const at = (() => { const idxs = shStageIdxs(key); return idxs.length ? idxs[idxs.length - 1] + 1 : shFlowEdit.nodes.length; })();
+    shFlowEdit.nodes.splice(at, 0, { title: "Node " + (shFlowEdit.nodes.length + 1), text: "", done: false, stageKey: key });
+    if (shFlowUnlocked(at)) shFlowEdit.open = at;
     shRenderFlowEditor();
   });
   $("sh-flow-nodes").addEventListener("click", (e) => {
@@ -4876,17 +5110,25 @@ function shBind() {
     if (!el || !shFlowEdit) return;
     const i = Number(el.dataset.i);
     const act = el.dataset.shFnode;
-    if (act === "toggle") { if (shFlowUnlocked(i)) { shFlowEdit.open = shFlowEdit.open === i ? -1 : i; shRenderFlowEditor(); } }
-    else if (act === "done") { shFlowEdit.nodes[i].done = !shFlowEdit.nodes[i].done; if (shFlowEdit.nodes[i].done && shFlowUnlocked(i + 1)) shFlowEdit.open = i + 1; shRenderFlowEditor(); }
+    if (act === "toggle") { shFlowEdit.open = shFlowEdit.open === i ? -1 : i; shRenderFlowEditor(); }
+    else if (act === "done") {
+      shFlowEdit.nodes[i].done = !shFlowEdit.nodes[i].done;
+      if (shFlowEdit.nodes[i].done && shFlowEdit.nodes[i + 1] && shFlowUnlocked(i + 1)) { shFlowEdit.open = i + 1; shFlowEdit.stage = shFlowEdit.nodes[i + 1].stageKey || shFlowEdit.stage; }
+      shRenderFlowEditor();
+    }
+    else if (act === "add") { $("sh-flow-addnode").click(); }
     else if (act === "del") { shFlowEdit.nodes.splice(i, 1); if (shFlowEdit.open >= shFlowEdit.nodes.length) shFlowEdit.open = shFlowEdit.nodes.length - 1; shRenderFlowEditor(); }
     else if (act === "ai") { shFlowAiEdit("node", i, el); }
     else if (act === "reload") { if (shFlowEdit.id) shOpenFlowEditor(shFlowEdit.id); }
   });
   $("sh-flow-steps").addEventListener("click", (e) => {
-    const b = e.target.closest("[data-sh-step]");
+    const b = e.target.closest("[data-sh-stage]");
     if (!b || !shFlowEdit) return;
-    const i = Number(b.dataset.shStep);
-    if (shFlowUnlocked(i)) { shFlowEdit.open = i; shRenderFlowEditor(); }
+    shFlowEdit.stage = b.dataset.shStage;
+    const idxs = shStageIdxs(shFlowEdit.stage);
+    const firstOpen = idxs.find((i) => shFlowUnlocked(i));
+    shFlowEdit.open = firstOpen === undefined ? (idxs.length ? idxs[0] : -1) : firstOpen;
+    shRenderFlowEditor();
   });
   $("sh-flow-sections").addEventListener("click", (e) => {
     const b = e.target.closest("[data-sh-ai]");
@@ -4952,6 +5194,8 @@ function shBind() {
   $("sh-confirm-no").addEventListener("click", () => shConfirmDone(false));
   document.addEventListener("keydown", (e) => {
     if (e.key !== "Escape") return;
+    const pop = $("sh-flow-menu-pop");
+    if (pop && !pop.classList.contains("hidden")) { pop.classList.add("hidden"); return; }
     if (!$("sh-confirm").classList.contains("hidden")) shConfirmDone(false);
     else if (!$("sh-viewer").classList.contains("hidden")) shCloseViewer();
   });
