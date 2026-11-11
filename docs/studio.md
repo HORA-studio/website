@@ -184,3 +184,11 @@ hoặc chạy cả web lẫn tool cùng máy khi dùng local; (3) chạy migrati
 - Bỏ hẳn logo chữ "HORA STUDIO" (`.st-side-brand`) khỏi Studio ở mọi
   kích thước. Mobile: top bar 1 hàng — avatar trái, credit + Đăng xuất
   phải; cụm prompt ghim sticky, chỉ Kết quả cuộn.
+
+## Đăng nhập Dreamina (theo logic của Dreamina Tool — bản zip)
+
+- Luồng OAuth device flow chính thức qua CLI của tool: `POST /api/auth/login` → link ủy quyền + mã nhập tay + hạn; tool tự chạy vòng chờ (`auth wait`) ở nền; trạng thái đọc qua `GET /api/auth/status?profile=default`; `POST /api/auth/logout` để đăng xuất. Profile cố định `default` (cùng profile seam generations dùng).
+- Web proxy qua `functions/api/studio/tool-auth.js` (bắt buộc đăng nhập HORA — link/mã ủy quyền không phơi công khai):
+  - `GET /api/studio/tool-auth` → `{connected, loggedIn, account, pending, binaryMissing, error}`; chưa đặt `STUDIO_TOOL_URL` → `{connected:false}`.
+  - `POST /api/studio/tool-auth` `{action:"login"}` → `{pending}`; `{action:"logout"}` → `{ok:true}`.
+- UI: khối "Dreamina" trong sidebar của studio.html — chấm trạng thái + nút Đăng nhập/Đăng xuất; khi chờ ủy quyền hiện link + mã + giờ hết hạn và tự poll 4 giây/lần tới khi đăng nhập xong hoặc mã hết hạn (đúng flow UI của tool).

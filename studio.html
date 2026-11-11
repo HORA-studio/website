@@ -933,6 +933,47 @@ footer{padding:42px 0 110px;color:var(--muted);font-size:14px}
   .studio-scope .st-main .results-wrap{flex:1;min-height:0;overflow-y:auto}
   .studio-scope #st-dashboard,.studio-scope #st-buyPanel{flex:1;min-height:0;overflow-y:auto}
 }
+
+/* ===== Khoi ket noi Dreamina trong sidebar (login theo logic tool zip: OAuth device flow) ===== */
+.st-toolbox{border-top:1px solid var(--line);padding:12px 6px 2px;display:flex;flex-direction:column;gap:8px}
+.st-toolbox-head{display:flex;align-items:center;gap:8px}
+.st-tool-dot{width:8px;height:8px;border-radius:50%;background:#8a8578;flex:0 0 auto}
+.st-tool-dot.on{background:#2fbf71}
+.st-tool-dot.wait{background:#f5a623}
+.st-tool-dot.off{background:#e5484d}
+.st-toolbox-title{font-size:13px;font-weight:700;color:var(--ink)}
+.st-tool-state{font-size:12px;color:var(--muted);margin-left:auto;text-align:right}
+.st-tool-actions{display:flex;gap:8px}
+.st-tool-btn{flex:1;padding:8px 10px;font-size:12.5px;font-weight:700;border-radius:8px;border:1px solid var(--line2);background:var(--card2);color:var(--ink);cursor:pointer;font-family:inherit}
+.st-tool-btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.st-tool-login{display:none;border:1px solid var(--line);border-radius:10px;padding:10px 11px;background:var(--card2);font-size:12.5px}
+.st-tool-login.open{display:block}
+.st-tool-login a{color:var(--accent);font-weight:700;text-decoration:none}
+.st-tool-login .row{margin-top:6px;color:var(--muted)}
+.st-tool-login .row b{color:var(--ink)}
+.st-tool-wait{margin-top:8px;color:var(--ink)}
+@media(max-width:860px){.st-toolbox{display:none}}
+
+/* ===== Dong bo khung Studio theo account.html (do thuc nghiem cung viewport 1632x864):
+   account shell width:94vw, pad 8/12/12, gap 14; sidebar w clamp(220px,15vw,300px)
+   pad 20/14 bo 14; panel pad ngang 36px, tieu de panel 21px ===== */
+@media(min-width:861px){
+  body.studio #view-studio{padding:8px 12px 12px}
+  #view-studio .studio-scope{width:94vw;max-width:none;gap:14px}
+  #view-studio .st-side{width:clamp(220px,15vw,300px);flex-basis:clamp(220px,15vw,300px);padding:20px 14px;border-radius:14px}
+  #view-studio .st-main{padding:0}
+  #view-studio .studio-scope .hero-grid{padding:26px 36px 30px}
+  #view-studio .studio-scope .hero .hero-grid{padding-left:36px;padding-right:36px}
+  #view-studio .studio-scope .results-wrap{padding:26px 36px 36px;margin-top:14px}
+  #view-studio .studio-scope #st-dashboard,#view-studio .studio-scope #st-buyPanel{padding:26px 36px 36px}
+  .studio-scope .st-gen-head h2{font-size:21px}
+}
+@media(min-width:861px) and (max-width:1280px){
+  #view-studio .studio-scope .hero-grid{padding:24px 28px 28px}
+  #view-studio .studio-scope .hero .hero-grid{padding-left:28px;padding-right:28px}
+  #view-studio .studio-scope .results-wrap{padding:24px 28px 28px}
+  #view-studio .studio-scope #st-dashboard,#view-studio .studio-scope #st-buyPanel{padding:24px 28px 28px}
+}
 </style>
 </head>
 <body class="studio">
@@ -963,6 +1004,16 @@ footer{padding:42px 0 110px;color:var(--muted);font-size:14px}
         <button type="button" class="st-side-item" data-sp="assets" data-short="Kho tài nguyên"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></span> Kho tài nguyên</button>
         <button type="button" class="st-side-item" data-sp="buy" data-short="Mua credit"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2.5 4.8 13.5h5.7L9.3 21.5l8.7-11.5h-5.9z"/></svg></span> Mua credit</button>
       </nav>
+      <div class="st-toolbox" id="st-toolBox">
+        <div class="st-toolbox-head"><span class="st-tool-dot" id="st-toolDot"></span><span class="st-toolbox-title">Dreamina</span><span class="st-tool-state" id="st-toolState">Đang kiểm tra…</span></div>
+        <div class="st-tool-actions" id="st-toolActions"></div>
+        <div class="st-tool-login" id="st-toolLogin">
+          <a id="st-toolLink" href="#" target="_blank" rel="noopener">Mở trang ủy quyền Dreamina</a>
+          <div class="row">Mã nếu trang yêu cầu nhập tay: <b id="st-toolCode"></b></div>
+          <div class="row">Hết hạn: <span id="st-toolExp"></span></div>
+          <div class="st-tool-wait" id="st-toolWait">Đang chờ bạn ủy quyền trên trang Dreamina…</div>
+        </div>
+      </div>
       <div class="st-side-userbox">
         <div class="st-userrow">
           <a class="st-side-user" href="/account.html">
@@ -1835,5 +1886,74 @@ document.addEventListener("DOMContentLoaded",init);
 })();
 </script>
 <!-- deploy nudge 2026-11-12: kich lai Cloudflare Pages sau khi studio.html bi 404 tren live du da co tren main -->
+
+<script>
+(function(){
+  var dot=document.getElementById("st-toolDot"), stateEl=document.getElementById("st-toolState"),
+      actions=document.getElementById("st-toolActions"), loginBox=document.getElementById("st-toolLogin"),
+      link=document.getElementById("st-toolLink"), codeEl=document.getElementById("st-toolCode"),
+      expEl=document.getElementById("st-toolExp"), waitEl=document.getElementById("st-toolWait");
+  if(!dot||!stateEl||!actions) return;
+  var timer=null;
+  function setDot(cls){ dot.className="st-tool-dot"+(cls?" "+cls:""); }
+  function stopPoll(){ if(timer){ clearInterval(timer); timer=null; } }
+  function startPoll(){ stopPoll(); timer=setInterval(refresh,4000); }
+  function btn(label,cls,fn){ var b=document.createElement("button"); b.type="button"; b.className="st-tool-btn"+(cls?" "+cls:""); b.textContent=label; b.addEventListener("click",fn); return b; }
+  function accountName(a){ if(!a) return "Đã kết nối"; return a.email||a.name||a.nickname||a.userName||a.displayName||a.id||"Đã kết nối"; }
+  function showPending(p){
+    if(!p){ loginBox.classList.remove("open"); return; }
+    link.href=p.verificationUriComplete||p.verificationUri||"#";
+    codeEl.textContent=p.userCode||"";
+    expEl.textContent=p.expiresAt? new Date(p.expiresAt).toLocaleTimeString("vi-VN") : "";
+    waitEl.textContent = p.state==="expired" ? "Mã ủy quyền đã hết hạn — bấm Đăng nhập để lấy mã mới."
+      : p.state==="failed" ? ("Đăng nhập thất bại" + (p.error? ": "+p.error : ""))
+      : "Đang chờ bạn ủy quyền trên trang Dreamina…";
+    loginBox.classList.add("open");
+  }
+  function render(d, httpOk){
+    actions.innerHTML="";
+    if(!httpOk){ setDot("off"); stateEl.textContent="Cần đăng nhập HORA"; loginBox.classList.remove("open"); stopPoll(); return; }
+    if(!d || !d.connected){ setDot("off"); stateEl.textContent = d && d.unreachable ? "Không tới được tool" : "Chưa nối tool"; loginBox.classList.remove("open"); stopPoll(); return; }
+    if(d.loggedIn){
+      setDot("on"); stateEl.textContent=accountName(d.account); loginBox.classList.remove("open"); stopPoll();
+      actions.appendChild(btn("Đăng xuất Dreamina","",doLogout));
+      return;
+    }
+    var p=d.pending;
+    if(p && p.state==="waiting"){
+      setDot("wait"); stateEl.textContent="Chờ ủy quyền"; showPending(p);
+      actions.appendChild(btn("Lấy mã mới","",doLogin));
+      startPoll(); return;
+    }
+    setDot("off"); stateEl.textContent = d.binaryMissing ? "Thiếu CLI trên máy tool" : (d.error ? "Lỗi tool" : "Chưa đăng nhập");
+    showPending(p && (p.state==="expired"||p.state==="failed") ? p : null);
+    actions.appendChild(btn("Đăng nhập Dreamina (OAuth)","primary",doLogin));
+    stopPoll();
+  }
+  function refresh(){
+    fetch("/api/studio/tool-auth",{credentials:"same-origin"})
+      .then(function(r){ return r.json().then(function(d){ return {ok:r.ok, d:d}; }); })
+      .then(function(x){ render(x.d, x.ok); })
+      .catch(function(){ render(null,false); });
+  }
+  function post(action){
+    return fetch("/api/studio/tool-auth",{method:"POST",headers:{"Content-Type":"application/json"},credentials:"same-origin",body:JSON.stringify({action:action})})
+      .then(function(r){ return r.json().catch(function(){ return null; }).then(function(d){ return {ok:r.ok, d:d}; }); });
+  }
+  function doLogin(){
+    stateEl.textContent="Đang tạo mã…";
+    post("login").then(function(x){
+      if(x.ok && x.d && x.d.pending){
+        if(x.d.pending.state==="logged_in"){ refresh(); return; }
+        render({connected:true, loggedIn:false, pending:x.d.pending}, true);
+      } else {
+        stateEl.textContent=(x.d && (x.d.message||x.d.error)) || "Không tạo được mã đăng nhập";
+      }
+    }).catch(function(){ stateEl.textContent="Không tới được server"; });
+  }
+  function doLogout(){ post("logout").then(function(){ refresh(); }).catch(function(){ refresh(); }); }
+  refresh();
+})();
+</script>
 </body>
 </html>
