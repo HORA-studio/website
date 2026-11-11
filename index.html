@@ -457,7 +457,7 @@ body.blog #view-home,body.blog #view-studio,body.blog #view-buy,body.blog #view-
 
 /* ===== Studio la app rieng: an header trang ===== */
 body.studio header{display:none}
-body.studio #view-studio{padding-top:6px}
+body.studio #view-studio{padding-top:0}
 body.studio .st-side{top:0;min-height:100vh}
 
 .studio-scope .model-select{width:100%;padding:13px 14px;border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--ink);font:inherit;font-weight:600;cursor:pointer}
@@ -504,11 +504,13 @@ body.studio .st-side{top:0;min-height:100vh}
 @media(max-width:640px){.results-wrap{padding:2px 14px 26px}.results-wrap .lib{grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}}
 
 /* Hai cum gen + ket qua chung 1 background, khong chia the nua */
-#view-studio .studio-scope .hero{background:var(--card)}
+#view-studio .st-main{background:var(--card);min-height:100vh}
 #view-studio .studio-scope .hero-grid{padding-bottom:12px}
 #view-studio .studio-scope .gen-card{background:transparent;border:0;box-shadow:none;border-radius:0;padding:8px 0 0}
-.results-wrap{background:var(--card);padding-top:0}
+.results-wrap{padding-top:0}
 .results-wrap .preview-box{background:transparent;border:0;border-radius:0;box-shadow:none;padding:0;margin-top:0}
+
+.results-wrap .empty{border:0}
 </style>
 </head>
 <body>
