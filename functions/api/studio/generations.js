@@ -96,7 +96,8 @@ export async function onRequestPost({ request, env }) {
   if (!spend.ok) return errorJson("INSUFFICIENT_CREDITS", "Không đủ credit.", 402);
 
   const expires = new Date(now.getTime() + RETENTION_DAYS * 24 * 3600 * 1000);
-  const params = { ratio, ...(duration ? { duration } : {}), ...(body.sourceKey ? { sourceKey: String(body.sourceKey) } : {}) };
+  const resolution = String(body.resolution || "").slice(0, 16);
+  const params = { ratio, ...(duration ? { duration } : {}), ...(resolution ? { resolution } : {}), ...(body.sourceKey ? { sourceKey: String(body.sourceKey) } : {}) };
   await env.DB.prepare(
     `INSERT INTO studio_generations
        (id, customer_id, kind, prompt, model, model_name, params_json, status, credit_cost, created_at, expires_at)
@@ -111,6 +112,7 @@ export async function onRequestPost({ request, env }) {
       model: toolModelId(env, kind, model),
       ratio,
       ...(duration ? { duration } : {}),
+      ...(resolution ? { resolution } : {}),
       creditCeiling: Number(env.STUDIO_TOOL_CEILING || 0),
     });
     if (sent.ok && sent.job) {

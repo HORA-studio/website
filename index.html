@@ -557,6 +557,24 @@ body.studio .st-side{top:0;min-height:100vh}
 .qr-row button{font:inherit;font-size:13.5px;font-weight:600;padding:7px 12px;border-radius:8px;border:1px solid #ddd3bd;background:#faf7ef;cursor:pointer}
 .qr-x{position:absolute;top:10px;right:10px;width:32px;height:32px;border-radius:50%;border:1px solid #eee;background:#fff;cursor:pointer;font-size:14px}
 .qr-note{font-size:12.5px;color:#8a8175;margin-top:10px}
+
+.studio-scope .dur-select{padding:12px 11px;border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--ink);font:inherit;font-weight:600;cursor:pointer;font-size:14.5px}
+.studio-scope .ctrl-row .dur-select{flex:0 1 auto;max-width:190px;min-width:0}
+@media(max-width:640px){.studio-scope .ctrl-row .dur-select{flex:1 1 47%;max-width:47%}}
+.st-side-credit{justify-content:space-between}
+.st-credit-label{color:var(--muted);font-weight:600}
+.buy-grid{display:flex;flex-wrap:wrap;justify-content:center;gap:14px}
+.buy-card{flex:0 1 200px;aspect-ratio:2/3;display:flex;flex-direction:column;align-items:center}
+.buy-card .btn{margin-top:auto;width:100%}
+.buy-card .buy-cr{margin-bottom:12px}
+@media(max-width:640px){.buy-grid{gap:10px}.buy-card{flex-basis:calc(50% - 5px);max-width:185px}}
+@media(max-width:860px){
+  .st-tabs{background:#0e151d;border-top:1px solid #1e2c3a;box-shadow:none;gap:0;padding:0 4px env(safe-area-inset-bottom,0px)}
+  .st-tabs .st-side-item{min-height:56px;color:#8fa3b3;background:transparent;box-shadow:none;border-radius:0;font-size:11px;gap:2px;padding:6px 2px}
+  .st-tabs .st-side-item .ic{font-size:19px;line-height:1}
+  .st-tabs .st-side-item.on{background:transparent;box-shadow:none;color:#10dcc8}
+  .st-tabs .st-side-item:hover{background:transparent}
+}
 </style>
 </head>
 <body>
@@ -779,7 +797,7 @@ body.studio .st-side{top:0;min-height:100vh}
         <button type="button" class="st-side-item" data-sp="buy"><span class="ic">⚡</span> Mua credit</button>
       </nav>
       <div class="st-side-userbox">
-        <div class="st-side-credit"><strong id="st-creditSide">⚡ — credit</strong></div>
+        <div class="st-side-credit"><span class="st-credit-label">Còn lại</span><strong id="st-creditSide">⚡ — credit</strong></div>
         <div class="st-userrow">
           <a class="st-side-user" href="/account.html">
             <span class="st-side-avatar" id="st-sideAvatar">?</span>
@@ -803,7 +821,6 @@ body.studio .st-side{top:0;min-height:100vh}
           <button type="button" id="st-tabVideo">🎬 Tạo video</button>
         </div>
 
-        <p class="step-label">Bước 1 · Mô tả / ảnh gốc</p>
         <div class="prompt-row">
           <textarea class="prompt" id="st-promptInput" placeholder="Mô tả ảnh bạn muốn tạo…"></textarea>
           <input type="file" id="st-refFile" accept="image/*" hidden>
@@ -816,7 +833,6 @@ body.studio .st-side{top:0;min-height:100vh}
           </div>
         </div>
 
-        <p class="step-label">Bước 2 · Model &amp; khung hình <span id="st-durLabel" style="display:none">· Thời lượng</span></p>
         <div class="ctrl-row">
           <select class="model-select" id="st-modelSelect" aria-label="Chọn model"></select>
           <div class="pills" id="st-ratioPills" role="radiogroup" aria-label="Khung hình">
@@ -824,10 +840,8 @@ body.studio .st-side{top:0;min-height:100vh}
             <button type="button" data-ratio="9:16" class="on" title="Dọc (điện thoại)">9:16</button>
             <button type="button" data-ratio="16:9" title="Ngang">16:9</button>
           </div>
-          <div class="pills" id="st-durPills" style="display:none">
-            <button type="button" data-dur="5" class="on">5 giây</button>
-            <button type="button" data-dur="10">10 giây</button>
-          </div>
+          <select id="st-durSelect" class="dur-select" style="display:none" aria-label="Thời lượng"></select>
+          <select id="st-resSelect" class="dur-select" aria-label="Chất lượng"></select>
           <button type="button" class="ref-btn attach-row" id="st-refBtn" title="Đính kèm ảnh tham chiếu">📎 Đính kèm</button>
           <button class="btn primary" id="st-genBtn" type="button">✦ Tạo ngay — <span id="st-genBtnCost">5</span> credit</button>
         </div>
@@ -1327,7 +1341,7 @@ var STYLES = {
   cinema:  { label:"Điện ảnh", items:[["Ảnh gốc","Khung hình thường"],["Ảnh AI","Màu phim điện ảnh"],["Video AI","Panning chậm, 24fps"]] }
 };
 var LS_LIB="hora.studio.library.v1", LS_WALLET="hora.studio.wallet.v1";
-var state={ mode:"image", model:MODELS.image[0], ratio:"9:16", dur:5, user:null, live:false, filter:"all", tab:"library" };
+var state={ mode:"image", model:MODELS.image[0], ratio:"9:16", dur:5, resolution:"", user:null, live:false, filter:"all", tab:"library" };
 var $=function(id){return document.getElementById(id)};
 function toast(msg){ var t=$("st-toast"); t.textContent=msg; t.classList.add("on"); setTimeout(function(){t.classList.remove("on")},2600); }
 function esc(s){ return String(s||"").replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]}); }
@@ -1355,14 +1369,22 @@ function renderModels(){
     return '<option value="'+m.id+'">'+esc(m.name)+(m.desc? ' — '+esc(m.desc):'')+' · '+(m.perSecond? m.cost+" cr/giây" : m.cost+" credit")+'</option>';
   }).join("");
   sel.value=state.model.id;
-  sel.onchange=function(){ state.model=MODELS[state.mode].filter(function(m){return m.id===sel.value})[0]||MODELS[state.mode][0]; renderDurPills(); renderRatioPills(); renderCost(); };
+  sel.onchange=function(){ state.model=MODELS[state.mode].filter(function(m){return m.id===sel.value})[0]||MODELS[state.mode][0]; renderDurSelect(); renderRatioPills(); renderResSelect(); renderCost(); };
 }
 function renderCost(){ var c=costNow(); var cn=$("st-costNow"); if(cn) cn.textContent=c; $("st-genBtnCost").textContent=c; }
-function renderDurPills(){
-  var wrap=$("st-durPills"); if(!wrap) return;
+function renderDurSelect(){
+  var sel=$("st-durSelect"); if(!sel) return;
   var ds=(state.model&&state.model.durations&&state.model.durations.length)? state.model.durations : [5,10];
   if(ds.indexOf(state.dur)<0) state.dur=ds[0];
-  wrap.innerHTML=ds.map(function(d){ return '<button type="button" data-dur="'+d+'"'+(d===state.dur?' class="on"':'')+'>'+d+' giây</button>'; }).join("");
+  sel.innerHTML=ds.map(function(d){ return '<option value="'+d+'"'+(d===state.dur?' selected':'')+'>'+d+' giây</option>'; }).join("");
+  sel.onchange=function(){ state.dur=+sel.value; renderCost(); };
+}
+function renderResSelect(){
+  var sel=$("st-resSelect"); if(!sel) return;
+  var rs=(state.model&&state.model.resolutions&&state.model.resolutions.length)? state.model.resolutions : (state.mode==="video"? ["720P","1080P"] : ["1K","2K","4K"]);
+  if(state.resolution&&rs.indexOf(state.resolution)<0) state.resolution="";
+  sel.innerHTML='<option value="">Chất lượng · Mặc định</option>'+rs.map(function(r){ return '<option value="'+r+'"'+(r===state.resolution?' selected':'')+'>'+r+'</option>'; }).join("");
+  sel.onchange=function(){ state.resolution=sel.value; };
 }
 function renderRatioPills(){
   var wrap=$("st-ratioPills"); if(!wrap) return;
@@ -1376,10 +1398,10 @@ function loadServerModels(){
   fetch("/api/studio/models",{credentials:"same-origin"}).then(function(r){ return r.ok? r.json(): null; }).then(function(d){
     if(!d) return;
     ["image","video"].forEach(function(k){
-      if(Array.isArray(d[k])&&d[k].length) MODELS[k]=d[k].map(function(m){ return { id:m.id, name:m.name, desc:m.desc||"", cost:m.cost, perSecond:!!m.perSecond, durations:m.durations||null, ratios:m.ratios||null }; });
+      if(Array.isArray(d[k])&&d[k].length) MODELS[k]=d[k].map(function(m){ return { id:m.id, name:m.name, desc:m.desc||"", cost:m.cost, perSecond:!!m.perSecond, durations:m.durations||null, ratios:m.ratios||null, resolutions:m.resolutions||null }; });
     });
     if(MODELS[state.mode].indexOf(state.model)<0) state.model=MODELS[state.mode][0];
-    renderModels(); renderDurPills(); renderRatioPills(); renderCost();
+    renderModels(); renderDurSelect(); renderRatioPills(); renderResSelect(); renderCost();
   }).catch(function(){});
 }
 /* ===== Nap tien: QR + ma token ===== */
@@ -1491,9 +1513,8 @@ function setMode(mode){
   $("st-tabImage").classList.toggle("on",mode==="image");
   $("st-tabVideo").classList.toggle("on",mode==="video");
   $("st-refBlock").style.display = "block";
-  $("st-durPills").style.display = mode==="video" ? "flex":"none";
-  renderDurPills(); renderRatioPills();
-  $("st-durLabel").style.display = mode==="video" ? "inline":"none";
+  $("st-durSelect").style.display = mode==="video" ? "" : "none";
+  renderDurSelect(); renderRatioPills(); renderResSelect();
   $("st-promptInput").placeholder = mode==="video"
     ? "Mô tả chuyển động bạn muốn tạo…"
     : "Mô tả ảnh bạn muốn tạo…";
@@ -1607,7 +1628,7 @@ function doGenerate(){
   var btn=$("st-genBtn"); btn.disabled=true;
   var bar=$("st-genProgress"); bar.style.display="block"; var fill=bar.querySelector("i");
   /* Neu da dang nhap + API san sang: gui len server (xep hang, tru credit phia server) */
-  var payload={ kind:state.mode, prompt:prompt, model:state.model.id, ratio:state.ratio, duration: state.mode==="video"?state.dur:undefined };
+  var payload={ kind:state.mode, prompt:prompt, model:state.model.id, ratio:state.ratio, duration: state.mode==="video"?state.dur:undefined, resolution: state.resolution||undefined };
   var tryLive = state.user ? fetch("/api/studio/generations",{method:"POST",headers:{"Content-Type":"application/json"},credentials:"same-origin",body:JSON.stringify(payload)})
     .then(function(r){ return r.ok? r.json(): Promise.reject(r.status); }) : Promise.reject("demo");
   tryLive.then(function(data){
@@ -1660,7 +1681,6 @@ function init(){
   $("st-tabImage").addEventListener("click",function(){ setMode("image"); });
   $("st-tabVideo").addEventListener("click",function(){ setMode("video"); });
   $("st-ratioPills").addEventListener("click",function(e){ var b=e.target.closest("button"); if(!b) return; Array.prototype.forEach.call(document.querySelectorAll("#st-ratioPills button"),function(x){x.classList.remove("on")}); b.classList.add("on"); state.ratio=b.getAttribute("data-ratio"); });
-  $("st-durPills").addEventListener("click",function(e){ var b=e.target.closest("button"); if(!b) return; Array.prototype.forEach.call(document.querySelectorAll("#st-durPills button"),function(x){x.classList.remove("on")}); b.classList.add("on"); state.dur=+b.getAttribute("data-dur"); renderCost(); });
   Array.prototype.forEach.call(document.querySelectorAll("#st-styleTabs button"),function(b){ b.addEventListener("click",function(){ Array.prototype.forEach.call(document.querySelectorAll("#st-styleTabs button"),function(x){x.classList.remove("on")}); b.classList.add("on"); renderShow(b.getAttribute("data-style")); }); });
   var file=$("st-refFile"), refBtn=$("st-refBtn"), refPrev=$("st-refPreview"), refImg=$("st-refImg"), refName=$("st-refName");
   function setRef(f){

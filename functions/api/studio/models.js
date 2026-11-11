@@ -28,11 +28,12 @@ function durationMarks(f) {
 function normalize(items, kind) {
   return (items || []).map((it) => {
     const modes = it.modes || [];
-    let durations = null, ratios = null;
+    let durations = null, ratios = null, resolutions = null;
     for (const m of modes) {
       for (const f of m.flags || []) {
         if (/duration/i.test(f.flag || "")) durations = durations || durationMarks(f);
         if ((f.flag === "ratio" || f.flag === "--ratio") && Array.isArray(f.values) && f.values.length) ratios = ratios || f.values;
+        if ((f.flag === "resolution" || f.flag === "--resolution") && Array.isArray(f.values) && f.values.length) resolutions = resolutions || f.values;
       }
     }
     const p = priceFor(kind, it.model);
@@ -44,6 +45,7 @@ function normalize(items, kind) {
       ...(p.perSecond ? { perSecond: true } : {}),
       ...(durations ? { durations } : {}),
       ...(ratios ? { ratios } : {}),
+      ...(resolutions ? { resolutions } : {}),
     };
   }).filter((m) => m.id);
 }
@@ -57,7 +59,7 @@ function staticCatalog() {
       desc: "",
       cost: m.costPerSecond || m.cost,
       ...(m.costPerSecond ? { perSecond: true } : {}),
-      ...(kind === "video" ? { durations: [5, 10] } : {}),
+      ...(kind === "video" ? { durations: [5, 10], resolutions: ["720P", "1080P"] } : { resolutions: ["1K", "2K", "4K"] }),
     }));
   }
   return out;
