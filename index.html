@@ -730,6 +730,101 @@ body.studio .st-side-brand{display:none}
 .studio-scope .gcard .acts button{border:1px solid var(--line2);background:var(--card);border-radius:8px;padding:7px 11px;font-size:12px}
 #view-studio .st-side,#view-studio .st-main{border-radius:16px}
 .studio-scope .st-logout-btn{border:1px solid var(--line2);background:var(--card);border-radius:10px;padding:9px 16px;font-weight:700;font-size:13.5px}
+
+/* ===== Studio v2: giao dien toi tim theo mock user gui 23:55 11/11 ===== */
+.studio-scope{color-scheme:dark;--bg:#141126;--bg2:#1a1633;--card:#1f1b38;--card2:#262145;--line:#322c58;--line2:#3e3672;--ink:#f2f0ff;--muted:#a49ec7;--accent:#7c5cff;--gold:#7c5cff;--accent2:#20c9b2;--accent-soft:rgba(124,92,255,.16);--accent-softer:rgba(124,92,255,.07);--input-bg:#221d40;--shadow:0 18px 40px -18px rgba(5,3,20,.55)}
+body.studio{background:#141126}
+#view-studio{background:radial-gradient(900px 480px at 85% -10%,rgba(124,92,255,.14),transparent 65%),radial-gradient(700px 380px at -10% 30%,rgba(124,92,255,.06),transparent 70%)}
+#view-studio .st-main{background:transparent;border:0;box-shadow:none}
+.studio-scope .hero,.studio-scope .results-wrap,.studio-scope #st-dashboard,.studio-scope #st-buyPanel{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow)}
+.studio-scope .results-wrap{margin-top:16px;padding:20px 22px}
+.studio-scope .results-wrap .preview-box{padding:0}
+.studio-scope #st-dashboard,.studio-scope #st-buyPanel{padding:22px}
+/* Sidebar + brand */
+body.studio .st-side-brand{display:flex;align-items:center;gap:9px;padding:2px 8px 14px}
+.st-side-brand .st-logo-t{background:none;-webkit-background-clip:initial;background-clip:initial;color:var(--ink);font-size:17px;font-weight:800;letter-spacing:.14em}
+.st-logo-h{font-size:27px;font-weight:900;font-style:italic;line-height:1;background:linear-gradient(135deg,#8a6cff,#5a7bff);-webkit-background-clip:text;background-clip:text;color:transparent}
+.studio-scope .st-side-item{color:var(--muted)}
+.studio-scope .st-side-item:hover{background:var(--card2);color:var(--ink);transform:none}
+.studio-scope .st-side-item.on{background:rgba(124,92,255,.30);color:#fff;box-shadow:none;font-weight:700}
+.studio-scope .st-side-item[data-sp="buy"] .ic svg{color:#e9c46a}
+.studio-scope .st-side-userbox{background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:12px;margin-top:10px}
+.studio-scope .st-logout-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;background:#171233;border:1px solid var(--line);border-radius:10px;color:var(--ink);padding:10px;font-weight:700;font-size:13.5px;cursor:pointer}
+/* Panel tao: tieu de + hop prompt + dieu khien */
+.studio-scope .mode-tabs{display:none}
+.studio-scope .st-gen-head h2{font-size:21px;font-weight:800;margin:0 0 4px;color:var(--ink)}
+.studio-scope .st-gen-head .spark{color:var(--accent)}
+.studio-scope .st-gen-head p{margin:0 0 16px;color:var(--muted);font-size:13.5px}
+.studio-scope .prompt-box{position:relative;border:1px solid var(--line);border-radius:16px;background:var(--input-bg)}
+.studio-scope .prompt-count{position:absolute;right:12px;bottom:9px;font-size:11.5px;color:var(--muted);pointer-events:none}
+.studio-scope .ref-strip{margin-right:76px}
+.studio-scope .model-select,.studio-scope .dur-select{background:var(--card2);border:1px solid var(--line);border-radius:999px;color:var(--ink);font-size:14px;font-weight:600;padding:10px 14px}
+.studio-scope .pills button{background:var(--card2);border:1px solid var(--line);color:var(--muted);border-radius:999px}
+.studio-scope .pills button.on{background:#ecc887;border-color:transparent;color:#241f3d}
+.studio-scope .ref-btn{background:var(--card2);border:1px solid var(--line);border-radius:999px;color:var(--ink);padding:10px 16px}
+.studio-scope .btn.primary{background:linear-gradient(90deg,#7c5cff,#6547f5);border:0;color:#fff}
+.studio-scope #st-genBtn{border-radius:999px;font-size:14.5px;padding:11px 20px}
+.studio-scope #st-genBtn .spark{color:#ffd98a}
+/* Ket qua */
+.st-results-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.st-results-head h3{margin:0;font-size:16.5px;font-weight:750;display:flex;gap:8px;align-items:center;color:var(--ink)}
+.st-results-head h3 svg{color:var(--accent)}
+.st-results-meta{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:13px}
+.st-results-meta select{background:transparent;border:0;color:var(--ink);font:inherit;font-weight:600;cursor:pointer;color-scheme:dark}
+.studio-scope .gcard{background:var(--card2);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.studio-scope .gcard .prompt{font-weight:650;color:var(--ink);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.6em}
+.studio-scope .gcard .meta{justify-content:flex-start;color:var(--muted);font-size:12.5px}
+.studio-scope .thumb .badge{background:rgba(10,8,25,.72);color:#fff}
+.studio-scope .thumb .badge.kind{display:inline-flex;align-items:center;gap:4px}
+.studio-scope .thumb .badge.days{background:#1e9e6a;color:#fff}
+.studio-scope .thumb .badge.days.low{background:#d97706}
+.studio-scope .play-ic{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:46px;height:46px;border-radius:50%;background:rgba(10,8,25,.45);display:flex;align-items:center;justify-content:center;z-index:2;pointer-events:none}
+.studio-scope .play-ic::after{content:"";border-left:15px solid #fff;border-top:9px solid transparent;border-bottom:9px solid transparent;margin-left:3px}
+.studio-scope .gcard .acts button{background:#171233;border:1px solid var(--line);border-radius:10px;color:var(--ink);display:flex;align-items:center;justify-content:center;gap:7px}
+/* Topbar mobile */
+.st-topbar{display:none}
+@media(max-width:860px){
+  .st-topbar{display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:70;background:rgba(20,17,38,.9);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);padding:10px 14px;border-bottom:1px solid #322c58;color:#f2f0ff;color-scheme:dark}
+  .st-burger{display:inline-flex;align-items:center;justify-content:center;background:#262145;border:1px solid #322c58;border-radius:10px;color:#f2f0ff;width:38px;height:38px;cursor:pointer}
+  .st-top-brand{display:flex;align-items:center;gap:8px}
+  .st-top-brand .st-logo-t{font-size:15.5px;font-weight:800;letter-spacing:.14em}
+  .st-top-credit{margin-left:auto;background:#262145;border:1px solid #322c58;border-radius:999px;padding:7px 12px;font-size:13px;font-weight:700;white-space:nowrap}
+  .st-burger-menu{position:absolute;top:56px;left:10px;background:#262145;border:1px solid #322c58;border-radius:12px;padding:8px;min-width:190px;box-shadow:0 18px 40px -12px rgba(5,3,20,.6);z-index:90}
+  .st-burger-menu a,.st-burger-menu button{display:block;width:100%;text-align:left;background:none;border:0;padding:10px 12px;border-radius:8px;color:#f2f0ff;font:inherit;font-size:14px;font-weight:600;text-decoration:none;cursor:pointer}
+  .st-burger-menu a:hover,.st-burger-menu button:hover{background:#1f1b38}
+  body.studio .st-side-brand{display:none}
+  body.studio .st-side-userbox{display:none}
+  body.studio .st-tabs .st-side-item{color:var(--muted)}
+  body.studio .st-tabs .st-side-item.on{background:rgba(124,92,255,.30);color:#fff;box-shadow:none}
+  body.studio .st-tabs .st-side-item.on::before{display:none}
+  body.studio .st-tabs .st-side-item.on::after{color:#fff}
+  #view-studio{padding-bottom:calc(88px + env(safe-area-inset-bottom,0px))}
+  .studio-scope .results-wrap{padding:16px}
+  /* The ket qua dang danh sach ngang nhu mock */
+  .studio-scope #st-resultList .gcard{display:flex;gap:12px;padding:10px;position:relative}
+  .studio-scope #st-resultList .gcard .thumb{flex:0 0 86px;width:86px;height:86px;border-radius:12px;overflow:hidden}
+  .studio-scope #st-resultList .gcard .thumb img,.studio-scope #st-resultList .gcard .thumb canvas{width:100%;height:100%;object-fit:cover;display:block}
+  .studio-scope #st-resultList .gcard .body{flex:1;min-width:0;padding:0 44px 0 0}
+  .studio-scope #st-resultList .gcard .prompt{-webkit-line-clamp:1;min-height:0}
+  .studio-scope #st-resultList .gcard .thumb .badge.kind{display:none}
+  .studio-scope #st-resultList .gcard .thumb .badge.days{font-size:9.5px;padding:2px 6px}
+  .studio-scope #st-resultList .gcard .play-ic{width:30px;height:30px}
+  .studio-scope #st-resultList .gcard .play-ic::after{border-left-width:10px;border-top-width:6px;border-bottom-width:6px}
+  .studio-scope #st-resultList .gcard .acts{position:absolute;right:10px;top:50%;transform:translateY(-50%);margin:0}
+  .studio-scope #st-resultList .gcard .acts button{width:34px;height:34px;border-radius:50%;padding:0;font-size:0}
+  .studio-scope #st-resultList .gcard .acts button svg{width:16px;height:16px}
+  .studio-scope #st-resultList .gcard .meta span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+}
+
+/* Studio v2 - tinh chinh: ten user sang, hero gon, luoi ket qua 4 cot */
+.studio-scope .st-side-user{color:var(--ink)}
+.studio-scope .st-side-uname{color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.studio-scope .hero-grid{padding:22px 22px 20px}
+@media(min-width:861px){.studio-scope #st-resultList{grid-template-columns:repeat(auto-fill,minmax(205px,1fr))}}
+
+/* Studio v2 - sua: userbox day xuong day sidebar + bo khoang trong duoi panel tao */
+.studio-scope .st-side-userbox{margin-top:auto}
+#view-studio .studio-scope .hero-grid{gap:0;padding:22px 22px 20px}
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
@@ -942,10 +1037,20 @@ body.studio .st-side-brand{display:none}
 </div>
 
 <div id="view-studio">
+<div class="st-topbar">
+  <button type="button" class="st-burger" id="st-burger" aria-label="Menu"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+  <div class="st-top-brand"><span class="st-logo-h">H</span><span class="st-logo-t">HORA</span></div>
+  <span class="st-top-credit" id="st-creditTop">⚡ — credit</span>
+  <div class="st-burger-menu" id="st-burgerMenu" hidden>
+    <a href="/account.html">Tài khoản</a>
+    <a href="/account.html" id="st-burgerLogin">Đăng nhập / Đăng ký</a>
+    <button type="button" id="st-burgerLogout" style="display:none">Đăng xuất</button>
+  </div>
+</div>
   <div class="studio-scope">
     <!-- ============ HERO + GENERATOR (clone layout ShrimpReel) ============ -->
 <aside class="st-side">
-      <div class="st-side-brand">HORA <span>STUDIO</span></div>
+      <div class="st-side-brand"><span class="st-logo-h">H</span><span class="st-logo-t">HORA</span></div>
       <nav class="st-tabs" aria-label="Chức năng">
       <button type="button" class="st-side-item on" data-sp="image" data-short="Tạo ảnh"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2.5"/><circle cx="9" cy="10" r="1.6"/><path d="M4 19l5-5 3 3 4.5-4.5L21 18"/></svg></span> Tạo ảnh</button>
         <button type="button" class="st-side-item" data-sp="video" data-short="Tạo video"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M10.5 9.8v4.4L14.5 12z" fill="currentColor" stroke="none"/></svg></span> Tạo video</button>
@@ -961,7 +1066,7 @@ body.studio .st-side-brand{display:none}
         </div>
         <div class="st-side-credit"><span class="st-credit-label">Còn lại</span><strong id="st-creditSide">⚡ — credit</strong></div>
         <div class="st-side-foot">
-          <button type="button" class="st-logout-btn" id="st-logoutBtn" style="display:none">Đăng xuất</button>
+          <button type="button" class="st-logout-btn" id="st-logoutBtn" style="display:none"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg> Đăng xuất</button>
         </div>
       </div>
     </aside>
@@ -974,6 +1079,7 @@ body.studio .st-side-brand{display:none}
       <p class="sub">Đăng nhập, nạp credit, chọn model và bấm Tạo. Kết quả lưu trong thư viện riêng của tài khoản bạn trong <b>30 ngày</b> — gen lỗi được hoàn credit tự động.</p>
 
       <div class="gen-card">
+        <div class="st-gen-head"><h2><span class="spark">✦</span> <span id="st-modeTitle">Tạo ảnh bằng AI</span></h2><p id="st-modeSub">Nhập mô tả để tạo hình ảnh chất lượng cao với HORA.</p></div>
         <div class="mode-tabs" role="tablist" aria-label="Chọn loại tạo">
           <button type="button" id="st-tabImage" class="on">🖼 Tạo ảnh</button>
           <button type="button" id="st-tabVideo">🎬 Tạo video</button>
@@ -981,8 +1087,9 @@ body.studio .st-side-brand{display:none}
 
         <div class="prompt-row">
           <div class="prompt-box">
-            <textarea class="prompt" id="st-promptInput" placeholder="Mô tả ảnh bạn muốn tạo…"></textarea>
+            <textarea class="prompt" id="st-promptInput" maxlength="2000" placeholder="Mô tả ảnh bạn muốn tạo…"></textarea>
             <div class="ref-strip" id="st-refStrip" style="display:none"></div>
+            <span class="prompt-count" id="st-promptCount">0 / 2000</span>
           </div>
           <div class="ref-note" id="st-refNote" style="display:none"></div>
           <input type="file" id="st-refFile" accept="image/*" multiple hidden>
@@ -998,7 +1105,7 @@ body.studio .st-side-brand{display:none}
           <select id="st-durSelect" class="dur-select" style="display:none" aria-label="Thời lượng"></select>
           <select id="st-resSelect" class="dur-select" aria-label="Chất lượng"></select>
           <button type="button" class="ref-btn attach-row" id="st-refBtn" title="Đính kèm ảnh tham chiếu"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg> Đính kèm</button>
-          <button class="btn primary" id="st-genBtn" type="button">Tạo ngay — <span id="st-genBtnCost">5</span> credit</button>
+          <button class="btn primary" id="st-genBtn" type="button"><span class="spark">✦</span> Tạo ngay — <span id="st-genBtnCost">5</span> credit</button>
         </div>
         <div class="progress" id="st-genProgress"><i></i></div>
       </div>
@@ -1038,7 +1145,7 @@ body.studio .st-side-brand{display:none}
 <!-- ============ DASHBOARD (clone tabs ShrimpReel) ============ -->
   <div class="results-wrap">
       <div class="preview-box">
-        <h3>Kết quả</h3>
+        <div class="st-results-head"><h3><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2.5"/><circle cx="9" cy="10" r="1.6"/><path d="M4 19l5-5 3 3 4.5-4.5L21 18"/></svg> Kết quả</h3><div class="st-results-meta"><span id="st-resultsMeta">0 nội dung</span><span aria-hidden="true">•</span><label>Sắp xếp: <select id="st-sortSel"><option value="new">Mới nhất</option><option value="old">Cũ nhất</option></select></label></div></div>
         <div class="lib" id="st-resultList"></div>
       </div>
   </div>
@@ -1703,7 +1810,7 @@ function checkTopupNotifications(){
 }
 function renderCredits(){
   var txt="⚡ "+wallet.balance+" credit";
-  $("st-balanceBig").textContent=wallet.balance; var cs=$("st-creditSide"); if(cs) cs.textContent=txt;
+  $("st-balanceBig").textContent=wallet.balance; var cs=$("st-creditSide"); if(cs) cs.textContent=txt; var ct=$("st-creditTop"); if(ct) ct.textContent=txt;
 }
 function setMode(mode){
   state.mode=mode; state.model=MODELS[mode][0];
@@ -1714,6 +1821,8 @@ function setMode(mode){
   $("st-promptInput").placeholder = mode==="video"
     ? "Mô tả chuyển động bạn muốn tạo…"
     : "Mô tả ảnh bạn muốn tạo…";
+  var mt=$("st-modeTitle"); if(mt) mt.textContent = mode==="video" ? "Tạo video bằng AI" : "Tạo ảnh bằng AI";
+  var ms=$("st-modeSub"); if(ms) ms.textContent = mode==="video" ? "Nhập mô tả để tạo video chất lượng cao với HORA." : "Nhập mô tả để tạo hình ảnh chất lượng cao với HORA.";
   renderModels(); renderCost();
 }
 
@@ -1740,6 +1849,7 @@ function paintCanvases(){
     ctx.fillText(cv.getAttribute("data-kind")==="video"?"▶":"🖼", W/2, H/2+14);
   });
 }
+function modelDisplay(it){ try{ var all=(MODELS.image||[]).concat(MODELS.video||[]); for(var i=0;i<all.length;i++){ if(all[i].id===it.model) return all[i].name||it.model; } }catch(e){} return it.model; }
 function renderLib(){
   var items=library.filter(function(it){ return state.filter==="all"||it.kind===state.filter; });
   if(!items.length){ $("st-libGrid").innerHTML='<div class="empty">Chưa có mục nào ở đây.<br>Chọn <b>Tạo ảnh</b> hoặc <b>Tạo video</b> ở menu để tạo '+(state.filter==="video"?"video":"ảnh")+' đầu tiên của bạn.</div>'; return; }
@@ -1748,12 +1858,13 @@ function renderLib(){
     var statusBadge = it.status==="processing" ? '<span class="badge status-proc">Đang tạo…</span>'
       : it.status==="queued" ? '<span class="badge status-proc">Đang xếp hàng</span>'
       : it.status==="failed" ? '<span class="badge status-fail">Thất bại</span>'
-      : '<span class="badge">'+(it.kind==="video"?"🎬 Video":"🖼 Ảnh")+'</span>';
-    return '<article class="gcard"><div class="thumb'+(it.status==="processing"||it.status==="queued"?" loading":"")+'">'+thumbHtml(it)+statusBadge+(it.status==="processing"||it.status==="queued"?'<span class="spinwrap"><span class="spinner"></span></span>':'')+'<span class="badge days'+(dl<=3?" low":"")+'">Còn '+dl+' ngày</span></div>'
+      : '<span class="badge kind">'+(it.kind==="video"?"<svg viewBox='0 0 24 24' width='11' height='11' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='5' width='18' height='14' rx='2.5'/><path d='M10.5 9.8v4.4L14.5 12z' fill='currentColor' stroke='none'/></svg> Video":"<svg viewBox='0 0 24 24' width='11' height='11' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='4' width='18' height='16' rx='2.5'/><circle cx='9' cy='10' r='1.6'/><path d='M4 19l5-5 3 3 4.5-4.5L21 18'/></svg> Ảnh")+'</span>';
+    return '<article class="gcard"><div class="thumb'+(it.status==="processing"||it.status==="queued"?" loading":"")+'">'+thumbHtml(it)+statusBadge+(it.kind==="video"&&it.status==="done"?'<span class="play-ic"></span>':'')+(it.status==="processing"||it.status==="queued"?'<span class="spinwrap"><span class="spinner"></span></span>':'')+'<span class="badge days'+(dl<=3?" low":"")+'">Còn '+dl+' ngày</span></div>'
       +'<div class="body"><div class="prompt">'+esc(it.prompt)+'</div>'
-      +'<div class="meta"><span>'+esc(it.model)+'</span><span>-'+it.cost+' cr</span></div>'
-      +'<div class="meta"><span>'+fmtDate(it.createdAt)+'</span><span>Xoá: '+fmtDate(it.expiresAt).split(" ")[1]+' '+new Date(it.expiresAt).toLocaleDateString("vi-VN")+'</span></div>'
-      +(it.status==="done" ? '<div class="acts"><button type="button" data-act="dl" data-id="'+it.id+'">Tải xuống</button></div>' : '')+'</div></article>';
+      +'<div class="meta"><span>'+esc(modelDisplay(it))+' · -'+it.cost+' credit</span></div>'
+      +'<div class="meta"><span>📅 '+new Date(it.createdAt).toLocaleDateString("vi-VN")+'</span></div>'
+      +'<div class="meta"><span>🗑 Xoá: '+new Date(it.expiresAt).toLocaleDateString("vi-VN")+'</span></div>'
+      +(it.status==="done" ? '<div class="acts"><button type="button" data-act="dl" data-id="'+it.id+'"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg> Tải xuống</button></div>' : '')+'</div></article>';
   }).join("");
   paintCanvases();
   Array.prototype.forEach.call(document.querySelectorAll("#st-libGrid [data-act]"),function(b){
@@ -1767,19 +1878,21 @@ function renderLib(){
   });
 }
 function renderResults(){
-  var box=$("st-resultList"); if(!box) return;
+  var box=$("st-resultList"); if(!box) return; var rm=$("st-resultsMeta"); if(rm) rm.textContent=library.length+" nội dung";
   if(!library.length){ box.innerHTML='<div class="empty">Chưa có kết quả nào — hãy bấm “Tạo ngay”.</div>'; return; }
-  box.innerHTML=library.map(function(it){
+  var items=library.slice(); items.sort(function(a,b){ return state.sortMode==="old" ? (a.createdAt-b.createdAt) : (b.createdAt-a.createdAt); });
+  box.innerHTML=items.map(function(it){
     var dl=daysLeft(it);
     var statusBadge = it.status==="processing" ? '<span class="badge status-proc">Đang tạo…</span>'
       : it.status==="queued" ? '<span class="badge status-proc">Đang xếp hàng</span>'
       : it.status==="failed" ? '<span class="badge status-fail">Thất bại</span>'
-      : '<span class="badge">'+(it.kind==="video"?"🎬 Video":"🖼 Ảnh")+'</span>';
-    return '<article class="gcard"><div class="thumb'+(it.status==="processing"||it.status==="queued"?" loading":"")+'">'+thumbHtml(it)+statusBadge+(it.status==="processing"||it.status==="queued"?'<span class="spinwrap"><span class="spinner"></span></span>':'')+'<span class="badge days'+(dl<=3?" low":"")+'">Còn '+dl+' ngày</span></div>'
+      : '<span class="badge kind">'+(it.kind==="video"?"<svg viewBox='0 0 24 24' width='11' height='11' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='5' width='18' height='14' rx='2.5'/><path d='M10.5 9.8v4.4L14.5 12z' fill='currentColor' stroke='none'/></svg> Video":"<svg viewBox='0 0 24 24' width='11' height='11' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='4' width='18' height='16' rx='2.5'/><circle cx='9' cy='10' r='1.6'/><path d='M4 19l5-5 3 3 4.5-4.5L21 18'/></svg> Ảnh")+'</span>';
+    return '<article class="gcard"><div class="thumb'+(it.status==="processing"||it.status==="queued"?" loading":"")+'">'+thumbHtml(it)+statusBadge+(it.kind==="video"&&it.status==="done"?'<span class="play-ic"></span>':'')+(it.status==="processing"||it.status==="queued"?'<span class="spinwrap"><span class="spinner"></span></span>':'')+'<span class="badge days'+(dl<=3?" low":"")+'">Còn '+dl+' ngày</span></div>'
       +'<div class="body"><div class="prompt">'+esc(it.prompt)+'</div>'
-      +'<div class="meta"><span>'+esc(it.model)+'</span><span>-'+it.cost+' cr</span></div>'
-      +'<div class="meta"><span>'+fmtDate(it.createdAt)+'</span><span>Xoá: '+fmtDate(it.expiresAt).split(" ")[1]+' '+new Date(it.expiresAt).toLocaleDateString("vi-VN")+'</span></div>'
-      +(it.status==="done" ? '<div class="acts"><button type="button" data-act="dl" data-id="'+it.id+'">Tải xuống</button></div>' : '')+'</div></article>';
+      +'<div class="meta"><span>'+esc(modelDisplay(it))+' · -'+it.cost+' credit</span></div>'
+      +'<div class="meta"><span>📅 '+new Date(it.createdAt).toLocaleDateString("vi-VN")+'</span></div>'
+      +'<div class="meta"><span>🗑 Xoá: '+new Date(it.expiresAt).toLocaleDateString("vi-VN")+'</span></div>'
+      +(it.status==="done" ? '<div class="acts"><button type="button" data-act="dl" data-id="'+it.id+'"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg> Tải xuống</button></div>' : '')+'</div></article>';
   }).join("");
   paintCanvases();
   Array.prototype.forEach.call(box.querySelectorAll("[data-act]"),function(b){
@@ -2001,6 +2114,11 @@ function init(){
     var blob=new Blob([JSON.stringify({library:library, wallet:wallet},null,2)],{type:"application/json"});
     var a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="hora-studio-export.json"; a.click();
   });
+  var pci=$("st-promptInput"); if(pci) pci.addEventListener("input",function(){ var c=$("st-promptCount"); if(c) c.textContent=pci.value.length+" / 2000"; });
+  var ssel=$("st-sortSel"); if(ssel) ssel.addEventListener("change",function(){ state.sortMode=ssel.value; renderResults(); });
+  var bgr=$("st-burger"), bmn=$("st-burgerMenu");
+  if(bgr&&bmn){ bgr.addEventListener("click",function(e){ e.stopPropagation(); bmn.hidden=!bmn.hidden; }); document.addEventListener("click",function(e){ if(!bmn.hidden && !bmn.contains(e.target)) bmn.hidden=true; }); }
+  var blo=$("st-burgerLogout"); if(blo) blo.addEventListener("click",function(){ var l=$("st-logoutBtn"); if(l) l.click(); });
   var loBtn=$("st-logoutBtn"); if(loBtn) loBtn.addEventListener("click",function(){ fetch("/api/auth/logout",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:"{}"}).catch(function(){}).then(function(){ location.href="#/"; location.reload(); }); });
   /* Trang thai dang nhap that */
   fetch("/api/auth/me",{credentials:"same-origin"}).then(function(r){ return r.ok? r.json(): Promise.reject(r.status); })
@@ -2008,7 +2126,7 @@ function init(){
     state.user=me.customer||me;
     var name=(state.user.displayName||state.user.email||"");
     var dm=$("st-dashMail"); if(dm) dm.textContent="Đã đăng nhập: "+(state.user.email||name);
-    var ab=$("st-accountBtn"); if(ab) ab.textContent=name? name.split("@")[0] : "Tài khoản"; var su=$("st-sideUserName"); if(su) su.textContent=name||"Tài khoản"; var sa=$("st-sideAvatar"); if(sa) sa.textContent=(name||"?").charAt(0).toUpperCase(); var lo=$("st-logoutBtn"); if(lo) lo.style.display="";
+    var ab=$("st-accountBtn"); if(ab) ab.textContent=name? name.split("@")[0] : "Tài khoản"; var su=$("st-sideUserName"); if(su) su.textContent=name||"Tài khoản"; var sa=$("st-sideAvatar"); if(sa) sa.textContent=(name||"?").charAt(0).toUpperCase(); var lo=$("st-logoutBtn"); if(lo) lo.style.display=""; var bl2=$("st-burgerLogout"); if(bl2) bl2.style.display=""; var bi2=$("st-burgerLogin"); if(bi2) bi2.style.display="none";
     return loadLiveData();
   }).catch(function(){
     var mp=$("st-modePill"); if(mp) mp.textContent="● Chế độ xem thử (chưa đăng nhập)"; 
