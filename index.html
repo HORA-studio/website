@@ -830,6 +830,25 @@ body.studio .st-side-brand{display:flex;align-items:center;gap:9px;padding:2px 8
 .st-gen-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
 .st-head-credit{display:none}
 @media(max-width:860px){.st-head-credit{display:inline-flex;align-items:center;background:var(--card2);border:1px solid var(--line);border-radius:999px;padding:6px 10px;font-size:12.5px;font-weight:700;color:var(--ink);white-space:nowrap;margin-top:1px}.st-gen-head h2{font-size:19px;white-space:nowrap}}
+
+/* Studio mobile: padding sat mep + hang dieu khien gon (model+ti le 1 dong, dinh kem+tao ngay 1 dong) */
+@media(max-width:860px){
+  body.studio #view-studio{padding-left:10px;padding-right:10px}
+  #view-studio .studio-scope .hero-grid{padding:16px 14px 14px}
+  .studio-scope .results-wrap{padding:14px 12px}
+  .studio-scope .ctrl-row{gap:8px}
+  .studio-scope .ctrl-row .model-select{flex:1 1 118px;width:auto;max-width:none;min-width:0}
+  .studio-scope .ctrl-row .pills{flex:0 0 auto;flex-wrap:nowrap}
+  .studio-scope .ctrl-row .pills button{padding:8px 10px;white-space:nowrap}
+  .studio-scope .ctrl-row .dur-select{flex:1 1 40%;min-width:0;width:auto;max-width:none}
+  .studio-scope .ctrl-row .attach-row{flex:0 0 auto;margin-left:0}
+  .studio-scope .ctrl-row #st-genBtn{flex:1 1 0;min-width:0;width:auto;white-space:nowrap;padding:11px 12px;font-size:14px}
+}
+
+/* Studio mobile: ep dung cum hang - anh: Chat luong 1 dong rieng; video: Thoi luong + Chat luong chung dong; Dinh kem + Tao ngay luon chung dong */
+@media(max-width:860px){
+  .studio-scope .ctrl-row .dur-select[style*="none"] ~ #st-resSelect{flex:1 1 100%;max-width:none}
+}
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
