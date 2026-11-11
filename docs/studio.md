@@ -76,3 +76,43 @@ tự đổi sáng/tối theo hệ thống) để trang không lệch tông với
 - `result_url` không được là link R2 công khai vĩnh viễn: dùng route proxy qua
   Function có `requireAuth` hoặc signed URL ngắn hạn, nếu không người khác có
   link là xem được thư viện của khách.
+
+## Kết nối Dreamina Tool (provider gen thật) — 2026-11-11
+
+Tool nằm trong repo tại `tools/dreamina-tool/` (TypeScript/Node, bọc
+`dreamina-canvas` CLI chính thức; xem README trong thư mục đó). Tool chạy
+trên máy có đăng nhập Dreamina (OAuth), nghe HTTP ở `PORT` (mặc định 5100):
+
+- `POST /api/jobs` {kind, prompt, model, ratio, duration, creditCeiling, refs} → 201 {job}
+- `GET /api/jobs`, `GET /api/jobs/:id` — trạng thái: queued / working /
+  awaiting_approval / done / failed / interrupted; `job.results[].file` là
+  tên file kết quả, `job.error` là lỗi gốc từ CLI.
+- `GET /files/<jobId>/<file>` — tải file kết quả từ `data/results/<jobId>/`.
+- Kho tài nguyên của khách = các job của tool (danh sách + file ở `/files/`);
+  phía web, mỗi generation lưu `params.toolJobId` để đối soát 1–1.
+
+Dây nối phía web (đã code trong `functions/api/studio/`):
+
+- Chỉ bật khi đặt biến môi trường `STUDIO_TOOL_URL` (vd `http://127.0.0.1:5100`
+  khi tool chạy cùng máy, hoặc URL tunnel/public của máy chạy tool). Chưa đặt
+  → hành vi cũ: generation dừng ở `queued`.
+- `POST /api/studio/generations`: sau khi trừ credit + ghi generation, đẩy
+  job sang tool; tool nhận → `working` + lưu toolJobId; tool từ chối (HTTP
+  lỗi) → hoàn credit 100% + `failed` + trả 502; tool không tới được (mạng) →
+  giữ `queued`, ghi `params.toolError='unreachable'` để đối soát sau.
+- `GET /api/studio/generations`: đồng bộ các mục đang queued/working có
+  toolJobId — tool `done` → web `done` + `result_url` trỏ `/files/...` của
+  tool; tool `failed`/`interrupted` → web `failed` + hoàn credit (chỉ hoàn
+  khi UPDATE có guard trạng thái thắng, chống hoàn trùng); tool
+  `awaiting_approval` → giữ nguyên phía web (duyệt credit làm trong tool).
+- `STUDIO_TOOL_CEILING`: trần credit Dreamina tự duyệt mỗi job (0 = mọi job
+  chờ duyệt tay trong tool — an toàn khi mới nối). `STUDIO_TOOL_IMAGE_MODEL`
+  / `STUDIO_TOOL_VIDEO_MODEL`: ghi đè model id phía Dreamina (danh sách model
+  thật lấy từ `GET /api/models` của tool theo tài khoản đã đăng nhập).
+
+Điều kiện để chạy thật (chưa xong): (1) đăng nhập Dreamina trong tool trên
+máy chạy tool (OAuth — job test 2026-11-11 chạy đúng pipeline và dừng ở
+"Authentication is required"); (2) máy chạy tool phải tới được từ
+Cloudflare Functions (URL public/tunnel) nếu web chạy trên Pages thật —
+hoặc chạy cả web lẫn tool cùng máy khi dùng local; (3) chạy migration D1 +
+đặt các biến môi trường trên.

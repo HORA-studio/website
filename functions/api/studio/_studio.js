@@ -29,9 +29,11 @@ export const STUDIO_MODELS = {
 // qua don hang/orders hien co — webhook thanh toan cong credit bang
 // grantCredits(..., 'purchase', orderId), xem docs/studio.md).
 export const CREDIT_PACKS = {
-  trial: { name: "Gói Thử", credits: 100, amountVnd: 49000 },
-  creator: { name: "Gói Sáng tạo", credits: 600, amountVnd: 199000 },
-  pro: { name: "Gói Tháng Pro", credits: 2500, amountVnd: 499000 },
+  "topup-50": { name: "Nạp 50K", credits: 100, amountVnd: 50000 },
+  "topup-100": { name: "Nạp 100K", credits: 200, amountVnd: 100000 },
+  "topup-200": { name: "Nạp 200K", credits: 400, amountVnd: 200000 },
+  "topup-500": { name: "Nạp 500K", credits: 1000, amountVnd: 500000 },
+  "topup-1000": { name: "Nạp 1000K", credits: 2000, amountVnd: 1000000 },
 };
 
 export function findModel(kind, modelId) {
@@ -97,3 +99,55 @@ export function generationOut(r) {
 }
 
 function safeParse(s) { try { return JSON.parse(s); } catch { return null; } }
+
+// ===== Provider gen that: Dreamina Tool (tools/dreamina-tool) =====
+// Tool chay bang Node tren may co dang nhap Dreamina (OAuth qua CLI
+// dreamina-canvas), nghe HTTP API: POST /api/jobs, GET /api/jobs/:id,
+// GET /files/<jobId>/<file>. Website chi noi khi dat bien moi truong
+// STUDIO_TOOL_URL (vd http://127.0.0.1:5100 khi chay cung may, hoac URL
+// tunnel/public cua may chay tool). Chua dat -> generation dung o 'queued'
+// nhu truoc. STUDIO_TOOL_CEILING: tran credit Dreamina tu duyet cho moi job
+// (0 = moi job cho duyet tay trong tool). STUDIO_TOOL_IMAGE_MODEL /
+// STUDIO_TOOL_VIDEO_MODEL: ghi de model id phia Dreamina khi can.
+export function toolBase(env) {
+  const u = (env && env.STUDIO_TOOL_URL) || "";
+  return u ? String(u).replace(/\/+$/, "") : null;
+}
+export function toolModelId(env, kind, model) {
+  const over = kind === "video" ? env.STUDIO_TOOL_VIDEO_MODEL : env.STUDIO_TOOL_IMAGE_MODEL;
+  return over ? String(over) : model.id;
+}
+export async function toolCreateJob(env, payload) {
+  const base = toolBase(env);
+  if (!base) return { ok: false, skipped: true };
+  try {
+    const r = await fetch(base + "/api/jobs", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const data = await r.json().catch(() => null);
+    if (r.status === 201 && data && data.job) return { ok: true, job: data.job };
+    return { ok: false, status: r.status, error: (data && data.error) || "HTTP " + r.status };
+  } catch (e) {
+    return { ok: false, network: true, error: String((e && e.message) || e) };
+  }
+}
+export async function toolGetJob(env, id) {
+  const base = toolBase(env);
+  if (!base) return { ok: false, skipped: true };
+  try {
+    const r = await fetch(base + "/api/jobs/" + encodeURIComponent(id));
+    const data = await r.json().catch(() => null);
+    if (r.ok && data && data.job) return { ok: true, job: data.job };
+    return { ok: false, status: r.status };
+  } catch (e) {
+    return { ok: false, network: true };
+  }
+}
+export function toolFileUrl(env, job) {
+  const base = toolBase(env);
+  if (!base || !job || !Array.isArray(job.results)) return null;
+  const f = job.results.find((x) => x && x.file);
+  return f ? base + "/files/" + job.id + "/" + encodeURIComponent(f.file) : null;
+}

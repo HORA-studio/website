@@ -9,7 +9,7 @@
 // DELETE — ?id=... : khach xoa muc cua chinh minh (file R2 do cron don theo
 //          result_key, hoac xoa ngay khi co worker).
 import { json, errorJson, readJson, requireAuth } from "../_lib.js";
-import { findModel, generationCost, generationOut, addLedger, getBalance, newStudioId, RETENTION_DAYS } from "./_studio.js";
+import { findModel, generationCost, generationOut, addLedger, getBalance, newStudioId, RETENTION_DAYS, toolBase, toolModelId, toolCreateJob, toolGetJob, toolFileUrl } from "./_studio.js";
 
 export async function onRequestGet({ request, env }) {
   const a = await requireAuth(env, request);
@@ -24,7 +24,44 @@ export async function onRequestGet({ request, env }) {
   const { results } = await env.DB.prepare(
     "SELECT * FROM studio_generations WHERE customer_id = ?1 ORDER BY created_at DESC LIMIT 200"
   ).bind(a.customer.id).all();
-  return json({ generations: (results || []).map(generationOut) });
+  const rows = results || [];
+
+  // Dong bo trang thai tu Dreamina Tool cho cac muc dang chay (neu da noi).
+  if (toolBase(env)) {
+    for (const r of rows) {
+      if (r.status !== "queued" && r.status !== "working") continue;
+      let params = null;
+      try { params = r.params_json ? JSON.parse(r.params_json) : null; } catch (e) { params = null; }
+      const tid = params && params.toolJobId;
+      if (!tid) continue;
+      const t = await toolGetJob(env, tid);
+      if (!t.ok || !t.job) continue;
+      if (t.job.status === "done") {
+        const url = toolFileUrl(env, t.job);
+        if (!url) continue;
+        const up = await env.DB.prepare(
+          "UPDATE studio_generations SET status = 'done', result_url = ?2, completed_at = ?3 WHERE id = ?1 AND status IN ('queued','working')"
+        ).bind(r.id, url, new Date().toISOString()).run();
+        if (up.meta && up.meta.changes === 1) { r.status = "done"; r.result_url = url; }
+      } else if (t.job.status === "failed" || t.job.status === "interrupted") {
+        const errMsg = String(t.job.error || t.job.stage || "Dreamina tool bao loi");
+        const up = await env.DB.prepare(
+          "UPDATE studio_generations SET status = 'failed', error = ?2 WHERE id = ?1 AND status IN ('queued','working')"
+        ).bind(r.id, errMsg).run();
+        if (up.meta && up.meta.changes === 1) {
+          await addLedger(env, a.customer.id, r.credit_cost, "refund", r.id, "Hoan credit — gen loi (Dreamina tool)");
+          r.status = "failed"; r.error = errMsg;
+        }
+      } else if (t.job.status === "working" && r.status === "queued") {
+        await env.DB.prepare(
+          "UPDATE studio_generations SET status = 'working' WHERE id = ?1 AND status = 'queued'"
+        ).bind(r.id).run();
+        r.status = "working";
+      }
+      // tool 'awaiting_approval': giu nguyen phia web — duyet credit lam trong tool.
+    }
+  }
+  return json({ generations: rows.map(generationOut) });
 }
 
 export async function onRequestPost({ request, env }) {
@@ -63,6 +100,37 @@ export async function onRequestPost({ request, env }) {
        (id, customer_id, kind, prompt, model, model_name, params_json, status, credit_cost, created_at, expires_at)
      VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, 'queued', ?8, ?9, ?10)`
   ).bind(id, a.customer.id, kind, prompt, model.id, model.name, JSON.stringify(params), cost, now.toISOString(), expires.toISOString()).run();
+
+  // Day job sang Dreamina Tool neu da cau hinh STUDIO_TOOL_URL.
+  if (toolBase(env)) {
+    const sent = await toolCreateJob(env, {
+      kind,
+      prompt,
+      model: toolModelId(env, kind, model),
+      ratio,
+      ...(duration ? { duration } : {}),
+      creditCeiling: Number(env.STUDIO_TOOL_CEILING || 0),
+    });
+    if (sent.ok && sent.job) {
+      params.toolJobId = sent.job.id;
+      await env.DB.prepare(
+        "UPDATE studio_generations SET status = 'working', params_json = ?2 WHERE id = ?1"
+      ).bind(id, JSON.stringify(params)).run();
+    } else if (!sent.skipped && !sent.network) {
+      // Tool tu choi (vd thieu dang nhap/model sai): hoan credit + bao loi.
+      await addLedger(env, a.customer.id, cost, "refund", id, "Hoan credit — Dreamina tool tu choi job");
+      await env.DB.prepare(
+        "UPDATE studio_generations SET status = 'failed', error = ?2 WHERE id = ?1"
+      ).bind(id, String(sent.error || "Provider loi")).run();
+      return errorJson("PROVIDER_ERROR", "Dreamina tool từ chối job: " + String(sent.error || "không rõ lỗi"), 502);
+    } else if (sent.network) {
+      // Tool khong toi duoc (chua bat/sai URL): giu 'queued', danh dau de doi soat.
+      params.toolError = "unreachable";
+      await env.DB.prepare(
+        "UPDATE studio_generations SET params_json = ?2 WHERE id = ?1"
+      ).bind(id, JSON.stringify(params)).run();
+    }
+  }
 
   const row = await env.DB.prepare("SELECT * FROM studio_generations WHERE id = ?1").bind(id).first();
   return json({ generation: generationOut(row), balance: spend.balance }, 201);
