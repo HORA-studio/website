@@ -1,7 +1,10 @@
 # HORA Studio — gen ảnh/video trên web (nhánh `feature/ai-studio`)
 
-Trang `/studio.html`: người dùng đăng nhập, mua credit, tạo ảnh/video, kết quả
-lưu **30 ngày** trong thư viện riêng của từng tài khoản.
+Mục **Studio** nằm ngay trong trang chủ `index.html` (view `#/studio`, theo đúng
+cơ chế 2 view có sẵn của trang: `#/` trang chủ, `#/gia` bảng giá, `#/studio` studio):
+người dùng đăng nhập, mua credit, tạo ảnh/video, kết quả lưu **30 ngày** trong
+thư viện riêng của từng tài khoản. Đường cũ `/studio.html` chỉ còn là trang
+chuyển hướng sang `/#/studio`.
 
 ## Nguồn layout
 
@@ -23,7 +26,10 @@ tự đổi sáng/tối theo hệ thống) để trang không lệch tông với
 
 ## Đã có trong nhánh này
 
-- `studio.html` — toàn bộ giao diện + JS: đổi mode ảnh/video, chọn model/tỉ lệ/
+- `index.html` (view `#view-studio`) — toàn bộ giao diện + JS của Studio, gộp từ
+  bản `studio.html` độc lập trước đây: CSS đóng scope `.studio-scope`, mọi id gắn
+  tiền tố `st-` để không đụng id sẵn có của trang chủ (`libGrid`, `libFilters`…),
+  JS chạy trong IIFE riêng. Nội dung: đổi mode ảnh/video, chọn model/tỉ lệ/
   thời lượng, tính giá trực tiếp, thư viện lọc theo loại, đếm ngược ngày còn lại,
   sổ credit, redeem/invite/export (bản xem thử chạy bằng localStorage khi chưa
   đăng nhập hoặc API chưa sẵn sàng — có pill trạng thái ở header).
@@ -35,7 +41,9 @@ tự đổi sáng/tối theo hệ thống) để trang không lệch tông với
 - `functions/api/studio/_studio.js` — bảng model/giá tạm, gói credit, helper ví.
 - `db/migrate-studio-2026-11-11.sql` + đã nối vào `db/schema.sql`:
   `studio_credit_ledger`, `studio_generations`.
-- `index.html` — thêm link “Studio AI” vào nav (desktop + mobile).
+- `index.html` — nav (desktop + mobile) có mục “Studio AI” trỏ `#/studio`
+  (`data-nav="studio"`); router `showView/route` đã thêm nhánh `studio`
+  (bật/tắt bằng class `body.studio` như `body.pricing` của bảng giá).
 
 ## Chưa nối (bước tiếp theo, theo thứ tự)
 
