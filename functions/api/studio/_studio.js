@@ -126,6 +126,15 @@ export function toolBase(env) {
   const u = (env && env.STUDIO_TOOL_URL) || "";
   return u ? String(u).replace(/\/+$/, "") : null;
 }
+
+// Header xac thuc web->tool: khi dat STUDIO_TOOL_TOKEN (khop TOOL_TOKEN ben
+// tool) thi moi loi goi sang tool deu kem header; chua dat -> khong gui gi
+// (tuong thich nguoc voi tool dang chay khong cong token).
+export function toolHeaders(env) {
+  const t = env && env.STUDIO_TOOL_TOKEN;
+  return t ? { "x-tool-token": String(t) } : {};
+}
+
 export function toolModelId(env, kind, model) {
   const over = kind === "video" ? env.STUDIO_TOOL_VIDEO_MODEL : env.STUDIO_TOOL_IMAGE_MODEL;
   return over ? String(over) : model.id;
@@ -136,7 +145,7 @@ export async function toolCreateJob(env, payload) {
   try {
     const r = await fetch(base + "/api/jobs", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...toolHeaders(env) },
       body: JSON.stringify(payload),
     });
     const data = await r.json().catch(() => null);
@@ -150,7 +159,7 @@ export async function toolGetJob(env, id) {
   const base = toolBase(env);
   if (!base) return { ok: false, skipped: true };
   try {
-    const r = await fetch(base + "/api/jobs/" + encodeURIComponent(id));
+    const r = await fetch(base + "/api/jobs/" + encodeURIComponent(id), { headers: toolHeaders(env) });
     const data = await r.json().catch(() => null);
     if (r.ok && data && data.job) return { ok: true, job: data.job };
     return { ok: false, status: r.status };

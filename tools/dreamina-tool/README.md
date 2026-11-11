@@ -66,3 +66,25 @@ Mở http://localhost:5100 (đổi cổng bằng biến `PORT`).
 
 Mọi bước của job đều ghi log có giờ giấc trong thẻ job — lỗi ở đâu nhìn thấy ở đó,
 kèm mã lỗi và chi tiết chẩn đoán gốc của CLI.
+
+## Chạy làm worker cho HORA Studio (web gọi vào)
+
+Khi tool chạy trên máy worker để nhận lệnh từ web (xem
+`docs/studio-test.md` trong repo website để có hướng test trọn vòng):
+
+1. Máy worker cài: **dreamina-canvas CLI** (mục 1) + **cloudflared**
+   (Cloudflare Tunnel) để web với tới tool.
+2. Đăng nhập Dreamina trong tool (profile `default` — đúng profile phía web dùng).
+3. Chạy tool kèm token chung, ví dụ:
+   `TOOL_TOKEN=<chuỗi-bí-mật> npm start`
+   rồi mở tunnel: `cloudflared tunnel --url http://localhost:5100`
+4. Phía Cloudflare Pages đặt biến: `STUDIO_TOOL_URL` = URL tunnel,
+   `STUDIO_TOOL_TOKEN` = đúng chuỗi bí mật trên, `STUDIO_TOOL_CEILING` =
+   trần credit Dreamina tự duyệt mỗi job (nên đặt > 0, vd 100, nếu không mọi
+   job từ web sẽ dừng chờ duyệt tay trong tool).
+
+Khi `TOOL_TOKEN` bật, mọi `/api/*` và `/files/*` phải có header
+`x-tool-token` — phía web tự gửi khi `STUDIO_TOOL_TOKEN` được đặt; UI của
+chính tool sẽ hỏi token 1 lần (lưu trong session của trình duyệt).
+**Không bật token thì tuyệt đối không phơi tool ra internet**: ai có URL
+cũng tạo job và tiêu credit Dreamina được.

@@ -179,8 +179,18 @@ function loadState() {
 }
 
 async function api(path, opts = {}) {
-  const r = await fetch(path, { headers: { "Content-Type": "application/json" }, ...opts });
+  const headers = { "Content-Type": "application/json", ...(opts.headers || {}) };
+  const tok = sessionStorage.getItem("toolToken");
+  if (tok) headers["x-tool-token"] = tok;
+  const r = await fetch(path, { ...opts, headers });
   const data = await r.json().catch(() => ({}));
+  if (r.status === 401 && String(data.error || "").includes("x-tool-token")) {
+    const t = prompt("Tool đang bật cổng token — nhập TOOL_TOKEN để dùng UI này:");
+    if (t) {
+      sessionStorage.setItem("toolToken", t);
+      return api(path, opts);
+    }
+  }
   if (!r.ok) throw new Error(data.error || `HTTP ${r.status}`);
   return data;
 }

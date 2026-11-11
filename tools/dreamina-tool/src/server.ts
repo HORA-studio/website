@@ -13,6 +13,11 @@ import { createJob, listJobs, getJob, approveJob, loadJobs, resultsDir } from ".
 const rootDir = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
 const publicDir = path.join(rootDir, "public");
 const PORT = Number(process.env.PORT || 5100);
+// Khi tool phơi ra internet qua tunnel để web gọi vào, đặt TOOL_TOKEN (chuỗi bí
+// mật dùng chung với biến STUDIO_TOOL_TOKEN phía web) — mọi /api/* và /files/*
+// đều phải mang header x-tool-token đúng mới qua. Không đặt = không kiểm tra
+// (chạy local thuần). Giao diện web của chính tool (/) vẫn mở không cần token.
+const TOOL_TOKEN = process.env.TOOL_TOKEN || "";
 
 function sendJson(res: http.ServerResponse, code: number, obj: any) {
   const body = JSON.stringify(obj);
@@ -67,6 +72,12 @@ async function handle(req: http.IncomingMessage, res: http.ServerResponse) {
   const profile = url.searchParams.get("profile") || "default";
 
   try {
+    if (TOOL_TOKEN && (p.startsWith("/api/") || p.startsWith("/files/"))) {
+      if (req.headers["x-tool-token"] !== TOOL_TOKEN) {
+        return sendJson(res, 401, { error: "Thiếu hoặc sai x-tool-token (tool đang bật TOOL_TOKEN)" });
+      }
+    }
+
     if (method === "GET" && p === "/") {
       const html = fs.readFileSync(path.join(publicDir, "index.html"), "utf8");
       res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
@@ -217,6 +228,11 @@ export function startServer() {
       binaryFound()
         ? "Đã tìm thấy dreamina-canvas CLI."
         : "CHƯA tìm thấy dreamina-canvas CLI — cài theo README rồi chạy lại."
+    );
+    console.log(
+      TOOL_TOKEN
+        ? "Cổng token ĐANG BẬT: /api/* và /files/* cần header x-tool-token (UI sẽ hỏi token 1 lần)."
+        : "Cổng token tắt (chưa đặt TOOL_TOKEN) — chỉ nên chạy local, đừng phơi ra internet."
     );
   });
 }

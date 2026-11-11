@@ -5,7 +5,7 @@
 // chuan hoa kem gia credit phia web + moc thoi luong de UI dung pill.
 // Tool loi / chua noi / chua dang nhap Dreamina -> tra danh muc tinh du phong.
 import { json } from "../_lib.js";
-import { STUDIO_MODELS, toolBase } from "./_studio.js";
+import { STUDIO_MODELS, toolBase, toolHeaders } from "./_studio.js";
 
 // Gia web tam cho model Dreamina khong co trong bang gia tinh.
 const DEFAULT_PRICE = { image: { cost: 10 }, video: { cost: 6, perSecond: true } };
@@ -76,8 +76,8 @@ export async function onRequestGet({ env }) {
   if (base) {
     try {
       const [ri, rv] = await Promise.all([
-        fetch(base + "/api/models?type=image"),
-        fetch(base + "/api/models?type=video"),
+        fetch(base + "/api/models?type=image", { headers: toolHeaders(env) }),
+        fetch(base + "/api/models?type=video", { headers: toolHeaders(env) }),
       ]);
       const di = await ri.json().catch(() => null);
       const dv = await rv.json().catch(() => null);

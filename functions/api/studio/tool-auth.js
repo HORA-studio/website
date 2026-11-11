@@ -8,7 +8,7 @@
 // Bat buoc dang nhap HORA (requireAuth): link/ma uy quyen la thong tin nhay
 // cam, khong phoi bay cong khai.
 import { json, errorJson, requireAuth } from "../_lib.js";
-import { toolBase } from "./_studio.js";
+import { toolBase, toolHeaders } from "./_studio.js";
 
 const PROFILE = "default";
 
@@ -20,7 +20,7 @@ export async function onRequestGet({ request, env }) {
   if (!base) return json({ connected: false });
 
   try {
-    const r = await fetch(base + "/api/auth/status?profile=" + PROFILE);
+    const r = await fetch(base + "/api/auth/status?profile=" + PROFILE, { headers: toolHeaders(env) });
     const d = await r.json().catch(() => null);
     if (!r.ok || !d) {
       return json({ connected: true, loggedIn: false, error: "Tool trả lỗi khi kiểm tra đăng nhập (HTTP " + r.status + ")." });
@@ -54,7 +54,7 @@ export async function onRequestPost({ request, env }) {
     try {
       const r = await fetch(base + "/api/auth/login", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...toolHeaders(env) },
         body: JSON.stringify({ profile: PROFILE }),
       });
       const d = await r.json().catch(() => null);
@@ -69,7 +69,7 @@ export async function onRequestPost({ request, env }) {
     try {
       const r = await fetch(base + "/api/auth/logout", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...toolHeaders(env) },
         body: JSON.stringify({ profile: PROFILE }),
       });
       const d = await r.json().catch(() => null);
