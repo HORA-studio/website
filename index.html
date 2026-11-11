@@ -423,7 +423,7 @@ body.buy #view-home,body.buy #view-studio,body.buy #view-pricing{display:none}
 .st-side-item:hover{background:var(--card2)}
 .st-side-item.on{background:var(--card);box-shadow:inset 0 0 0 1px var(--line)}
 .st-side-userbox{margin-top:auto;border-top:1px solid var(--line);padding:14px 6px 4px;display:flex;flex-direction:column;gap:10px}
-.st-side-credit{display:flex;justify-content:space-between;align-items:center;font-size:12.5px;color:var(--muted)}
+.st-side-credit{display:flex;justify-content:flex-end;align-items:center;font-size:12.5px;color:var(--muted)}
 .st-side-credit strong{color:var(--ink);font-size:13.5px}
 .st-side-user{display:flex;gap:10px;align-items:center;color:var(--ink);font-weight:700;font-size:14px}
 .st-side-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(120deg,var(--accent),var(--accent2));color:#fff;display:grid;place-items:center;font-weight:900;text-transform:uppercase;flex:0 0 32px}
@@ -527,6 +527,25 @@ body.studio .st-side{top:0;min-height:100vh}
 
 .st-side-credit span{font-size:14px}
 .st-side-credit strong{font-size:16.5px}
+
+@media(max-width:860px){
+  body.studio .st-side{position:static;min-height:0;height:auto;flex-direction:row;flex-wrap:wrap;align-content:flex-start;gap:6px;padding:10px}
+  .st-side-brand{flex:1 1 100%;padding:2px 4px 6px;margin:0}
+  .st-side-item{flex:1 1 42%;justify-content:center;padding:10px 4px}
+  .st-side-userbox{flex:1 1 100%;flex-direction:row;align-items:center;gap:12px;margin:2px 0 0;border-top:1px solid var(--line);padding:8px 4px 2px}
+  .st-side-credit{display:flex}
+  .st-userrow{margin-left:auto}
+}
+@media(max-width:640px){
+  #view-studio .studio-scope .hero .wrap{padding-left:16px;padding-right:16px}
+  .buy-panel{padding:20px 16px 8px}
+  .buy-grid{grid-template-columns:repeat(2,1fr);gap:10px}
+  .buy-card{padding:16px 10px}
+  .buy-card .buy-amt{font-size:24px}
+}
+
+#view-studio .st-main{min-width:0}
+@media(max-width:640px){.studio-scope .ctrl-row .model-select{min-width:0;width:100%}}
 </style>
 </head>
 <body>
@@ -766,7 +785,7 @@ body.studio .st-side{top:0;min-height:100vh}
       <button type="button" class="st-side-item" data-sp="assets"><span class="ic">🗂️</span> Kho tài nguyên</button>
       <button type="button" class="st-side-item" data-sp="buy"><span class="ic">⚡</span> Mua credit</button>
       <div class="st-side-userbox">
-        <div class="st-side-credit"><span>Token còn lại</span><strong id="st-creditSide">⚡ — credit</strong></div>
+        <div class="st-side-credit"><strong id="st-creditSide">⚡ — credit</strong></div>
         <div class="st-userrow">
           <a class="st-side-user" href="/account.html">
             <span class="st-side-avatar" id="st-sideAvatar">?</span>
