@@ -930,6 +930,19 @@ body.studio{background:#15151e}
   body.studio .st-tabs .st-side-item.on::before{display:block;content:"";position:absolute;top:-8px;left:50%;transform:translateX(-50%);width:17px;height:13px;background:var(--gold);clip-path:polygon(0 0,100% 0,100% 100%,50% 74%,0 100%);border-radius:0}
   #view-studio{padding-bottom:calc(100px + env(safe-area-inset-bottom,0px))}
 }
+
+/* ===== Chot so sanh 2 file: khung ngoai + padding panel theo account =====
+   account: .shell max-width 1220, padding 16/20/18, gap 22; panel (view-panel) padding 22px */
+body.studio #view-studio{padding:16px 20px 18px}
+.studio-scope{max-width:1220px;margin-left:auto;margin-right:auto;gap:22px}
+#view-studio .studio-scope .hero-grid{padding:22px}
+.studio-scope .results-wrap{padding:22px}
+.studio-scope #st-dashboard,.studio-scope #st-buyPanel{padding:22px}
+@media(max-width:860px){
+  body.studio #view-studio{padding-left:10px;padding-right:10px}
+  #view-studio .studio-scope .hero-grid{padding:16px 14px 14px}
+  .studio-scope .results-wrap{padding:14px 12px}
+}
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
