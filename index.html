@@ -520,6 +520,9 @@ body.studio .st-side{top:0;min-height:100vh}
 .buy-card .buy-amt{font-size:31px;font-weight:900}
 .buy-card .buy-vnd{color:var(--muted);margin-top:2px;font-size:14px}
 .buy-card .buy-cr{font-weight:800;color:var(--accent2);margin:10px 0 15px}
+
+.st-side-logout{display:block;margin-top:9px;background:none;border:0;padding:0;font:inherit;font-size:13.5px;font-weight:700;color:var(--muted);cursor:pointer;text-align:left}
+.st-side-logout:hover{color:#c0392b;text-decoration:underline}
 </style>
 </head>
 <body>
@@ -765,6 +768,7 @@ body.studio .st-side{top:0;min-height:100vh}
           <span class="st-side-uname" id="st-sideUserName">Đăng nhập / Đăng ký</span>
         </a>
         <a class="st-side-buy" href="#/studio?panel=buy">+ Mua thêm credit</a>
+        <button type="button" class="st-side-logout" id="st-logoutBtn" style="display:none">Đăng xuất</button>
       </div>
     </aside>
     <div class="st-main">
@@ -1593,13 +1597,14 @@ function init(){
     var blob=new Blob([JSON.stringify({library:library, wallet:wallet},null,2)],{type:"application/json"});
     var a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="hora-studio-export.json"; a.click();
   });
+  var loBtn=$("st-logoutBtn"); if(loBtn) loBtn.addEventListener("click",function(){ fetch("/api/auth/logout",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:"{}"}).catch(function(){}).then(function(){ location.href="#/"; location.reload(); }); });
   /* Trang thai dang nhap that */
   fetch("/api/auth/me",{credentials:"same-origin"}).then(function(r){ return r.ok? r.json(): Promise.reject(r.status); })
   .then(function(me){
     state.user=me.customer||me;
     var name=(state.user.displayName||state.user.email||"");
     $("st-dashMail").textContent="Đã đăng nhập: "+(state.user.email||name);
-    var ab=$("st-accountBtn"); if(ab) ab.textContent=name? name.split("@")[0] : "Tài khoản"; var su=$("st-sideUserName"); if(su) su.textContent=name||"Tài khoản"; var sa=$("st-sideAvatar"); if(sa) sa.textContent=(name||"?").charAt(0).toUpperCase();
+    var ab=$("st-accountBtn"); if(ab) ab.textContent=name? name.split("@")[0] : "Tài khoản"; var su=$("st-sideUserName"); if(su) su.textContent=name||"Tài khoản"; var sa=$("st-sideAvatar"); if(sa) sa.textContent=(name||"?").charAt(0).toUpperCase(); var lo=$("st-logoutBtn"); if(lo) lo.style.display="";
     return loadLiveData();
   }).catch(function(){
     var mp=$("st-modePill"); if(mp) mp.textContent="● Chế độ xem thử (chưa đăng nhập)"; 
