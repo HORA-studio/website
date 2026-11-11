@@ -2055,6 +2055,8 @@ textarea.sh-rec-on{caret-color:transparent}
    (overlay phu ca hop nhap, neu khong nut mic bi che khuat) */
 .sh-micbtn.rec{position:relative;z-index:7}
 .sh-prompt-mic.rec{position:absolute;z-index:7}
+
+.side-foot{margin-top:14px;border-top:1px solid var(--line);padding-top:12px}
 </style>
 </head>
 <body>
@@ -2069,10 +2071,9 @@ textarea.sh-rec-on{caret-color:transparent}
     <div class="side-label">Tài khoản</div>
     <nav class="side-nav" id="side-nav-account" aria-label="Mục tài khoản">
       <button type="button" class="side-item active" data-view-btn="account" data-short="Thông tin"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4.5 20.5c1.4-3.8 4.4-5.5 7.5-5.5s6.1 1.7 7.5 5.5"></path></svg> Thông tin</button>
-      <button type="button" class="side-item" data-view-btn="buy" data-short="Mua gói"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 7h15l-1.5 9h-12z"></path><path d="M6 7L5 3H2"></path><circle cx="9" cy="20" r="1.6"></circle><circle cx="18" cy="20" r="1.6"></circle></svg> Mua gói</button>
       <button type="button" class="side-item" data-view-btn="orders" data-short="Lịch sử"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M8.5 6h12M8.5 12h12M8.5 18h12"></path><path d="M4 6h.01M4 12h.01M4 18h.01"></path></svg> Lịch sử giao dịch <span id="orders-unpaid-badge" class="side-badge hidden" title="Có đơn chưa thanh toán" aria-label="Có đơn chưa thanh toán">!</span></button>
-      <button type="button" class="side-item" data-view-btn="remote" data-short="Remote"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="4" width="19" height="13" rx="2"></rect><path d="M8 21h8M12 17v4"></path></svg> Remote</button>
     </nav>
+    <div class="side-foot"><button class="btn" id="logout-btn" type="button">Đăng xuất</button></div>
     <nav class="side-nav hidden" id="sh-side-nav" aria-label="Mục điều khiển">
       <button type="button" class="side-item sh-nav-item active" data-sh-nav="dash" data-short="Tổng quan"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="3" width="7" height="7" rx="1.5"></rect><rect x="3" y="14" width="7" height="7" rx="1.5"></rect><rect x="14" y="14" width="7" height="7" rx="1.5"></rect></svg> Tổng quan</button>
       <button type="button" class="side-item sh-nav-item" data-sh-nav="create" data-short="Tạo task"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v8M8 12h8"></path></svg> Tạo task</button>
@@ -2200,10 +2201,6 @@ textarea.sh-rec-on{caret-color:transparent}
         </div>
       </div>
 
-      <div class="account-logout">
-        <div class="account-logout-copy"><strong>Đăng xuất</strong><p class="muted">Thoát khỏi tài khoản trên trình duyệt này.</p></div>
-        <button class="btn" id="logout-btn" type="button">Đăng xuất</button>
-      </div>
     </section>
 
     <section class="card view-panel hidden" data-view="buy">
@@ -2515,7 +2512,7 @@ async function api(path, opts = {}) {
   return { res, data };
 }
 // ----- Dieu huong app shell (sidebar) -----
-const VIEW_TITLES = { account: "Thông tin", orders: "Lịch sử giao dịch", buy: "Mua gói", remote: "Remote" };
+const VIEW_TITLES = { account: "Thông tin", orders: "Lịch sử giao dịch" };
 let currentView = "account";
 try { currentView = sessionStorage.getItem("hora-view") || "account"; } catch { /* sessionStorage bi chan */ }
 if (!VIEW_TITLES[currentView]) currentView = "account";
