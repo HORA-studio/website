@@ -890,6 +890,46 @@ body.studio{background:#15151e}
 }
 
 @media(max-width:860px){#view-studio .st-side{width:auto;flex-basis:auto}}
+
+/* ===== Studio: copy 100% padding + size cua trang Tai khoan (so lieu do truc tiep tu account.html) ===== */
+.studio-scope{font-size:14.5px;line-height:1.65}
+#view-studio .st-side{flex-basis:266px;width:266px;padding:18px 12px 14px}
+.studio-scope .st-tabs{gap:2px}
+.studio-scope .st-side-item{padding:10px 12px;font-size:14.5px;font-weight:550;gap:12px;border-radius:10px}
+.studio-scope .st-side-item .ic svg{width:19px;height:19px}
+.studio-scope .st-side-item.on{background:var(--card2);color:var(--ink);font-weight:650;box-shadow:none}
+.studio-scope .st-side-userbox{background:transparent;border:0;border-radius:0;box-shadow:none;padding:2px 12px 18px;margin-bottom:12px;gap:11px}
+.studio-scope .st-side-avatar{width:40px;height:40px;font-size:15px}
+.studio-scope .st-side-uname{font-size:15px;font-weight:700}
+.studio-scope .st-logout-btn{padding:10px 17px;font-size:13.5px;font-weight:700;border-radius:10px}
+.studio-scope .hero,.studio-scope .results-wrap,.studio-scope #st-dashboard,.studio-scope #st-buyPanel{border-radius:22px}
+#view-studio .studio-scope .hero-grid{padding:28px 36px}
+.studio-scope .results-wrap{padding:28px 36px}
+.studio-scope #st-dashboard,.studio-scope #st-buyPanel{padding:28px 36px}
+.studio-scope .st-gen-head h2{font-size:23px;font-weight:700;letter-spacing:-.045em}
+.st-results-head h3{font-size:19px;font-weight:700;letter-spacing:-.02em}
+#st-resultsMeta{background:rgba(34,197,94,.13);border:1px solid rgba(34,197,94,.32);color:#4ade9e;border-radius:999px;padding:3px 10px;font-size:12px;font-weight:700}
+.studio-scope .prompt-box{border-radius:10px}
+.studio-scope .prompt-box textarea.prompt{padding:11px 13px}
+.studio-scope .model-select,.studio-scope .dur-select{padding:11px 13px;font-size:14px;border-radius:10px;border:1px solid var(--line2);background:var(--input-bg)}
+.studio-scope .ctrl-row .pills button{padding:8px 14px;font-size:13.5px;font-weight:650}
+.studio-scope .ref-btn{padding:10px 17px;font-size:13.5px;font-weight:700;border-radius:10px}
+.studio-scope #st-genBtn{padding:10px 17px;font-size:13.5px;font-weight:700;border-radius:10px}
+.studio-scope .gcard .body{padding:16px 18px}
+.studio-scope .gcard .acts button{padding:7px 11px;font-size:12px;font-weight:700;border-radius:8px}
+.studio-scope .thumb .badge.kind{padding:3px 9px;font-size:11.5px;font-weight:800;border-radius:7px;letter-spacing:.04em}
+.studio-scope .thumb .badge.days{padding:3px 10px;font-size:12px;font-weight:700;border-radius:999px;border:1px solid rgba(34,197,94,.32)}
+@media(max-width:860px){
+  #view-studio .studio-scope .hero-grid{padding:16px 14px 14px}
+  .studio-scope .results-wrap{padding:14px 12px}
+  .studio-scope .ctrl-row #st-genBtn{padding:10px 14px}
+  /* Dock mobile kieu capsule cua account: noi, le 12px, bo 26px, muc chon co ribbon */
+  #view-studio .st-side{position:fixed;left:12px;right:12px;bottom:calc(10px + env(safe-area-inset-bottom,0px));width:auto;flex-basis:auto;border:1px solid var(--line);border-radius:26px;background:var(--card);box-shadow:0 14px 34px rgba(0,0,0,.45);padding:8px 10px 9px}
+  body.studio .st-tabs .st-side-item.on{background:transparent;color:var(--ink);box-shadow:none}
+  body.studio .st-tabs .st-side-item.on::after{font-weight:800;color:var(--ink)}
+  body.studio .st-tabs .st-side-item.on::before{display:block;content:"";position:absolute;top:-8px;left:50%;transform:translateX(-50%);width:17px;height:13px;background:var(--gold);clip-path:polygon(0 0,100% 0,100% 100%,50% 74%,0 100%);border-radius:0}
+  #view-studio{padding-bottom:calc(100px + env(safe-area-inset-bottom,0px))}
+}
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
