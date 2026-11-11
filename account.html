@@ -2058,6 +2058,20 @@ textarea.sh-rec-on{caret-color:transparent}
 
 .side-foot{margin-top:14px;border-top:1px solid var(--line);padding-top:12px}
 </style>
+<style>
+.panel-head{padding:2px 2px 18px;border-bottom:1px solid var(--line)}
+.panel-head h2{margin:0 0 4px;font-size:21px;letter-spacing:-.02em}
+.panel-head p{margin:0;font-size:13.5px}
+.panel-head + .set-section{border-top:0;padding-top:16px}
+.set-row{display:flex;align-items:center;justify-content:space-between;gap:18px}
+.set-row .set-head p{margin-bottom:0}
+.btn.danger-soft{background:rgba(229,72,77,.12);color:#e5484d;border:1px solid rgba(229,72,77,.28)}
+.btn.danger-soft:hover{background:rgba(229,72,77,.2)}
+.avatar-side .lbl{text-transform:uppercase;letter-spacing:.05em;font-size:11.5px}
+.avatar-side{flex:1 1 auto}
+#pf-name{width:100%}
+@media(max-width:640px){.set-row{flex-direction:column;align-items:flex-start}}
+</style>
 </head>
 <body>
 
@@ -2160,8 +2174,10 @@ textarea.sh-rec-on{caret-color:transparent}
     <section class="card view-panel account-panel" data-view="account">
       <span id="account-license-count" class="hidden">0</span><span id="account-order-count" class="hidden">0</span><span id="acc-name" class="hidden"></span>
 
+      <div class="panel-head"><h2>Thông tin tài khoản</h2><p class="muted">Quản lý thông tin cá nhân và bảo mật tài khoản.</p></div>
+
       <div class="set-section">
-        <div class="set-head"><h3>Thông tin cá nhân</h3><p class="muted">Ảnh đại diện và tên hiển thị của bạn.</p></div>
+        <div class="set-head"><h3>Thông tin cá nhân</h3></div>
         <div class="avatar-row">
           <div class="avatar-wrap">
             <button type="button" class="avatar-big" id="pf-avatar-btn" title="Bấm để thay ảnh đại diện"><img id="pf-avatar-img" class="hidden" alt="Ảnh đại diện"><span id="pf-avatar-letter">?</span><span class="avatar-hover">Đổi ảnh</span></button>
@@ -2169,7 +2185,7 @@ textarea.sh-rec-on{caret-color:transparent}
           </div>
           <input type="file" id="pf-avatar-file" accept="image/*" class="hidden">
           <div class="avatar-side">
-            <div class="field" style="width:100%;max-width:420px"><label class="lbl" for="pf-name">Tên hiển thị <span class="muted" id="pf-save-status" style="font-weight:400"></span></label><input id="pf-name" autocomplete="name" placeholder="Tên của bạn"></div>
+            <div class="field" style="width:100%"><label class="lbl" for="pf-name">Tên hiển thị <span class="muted" id="pf-save-status" style="font-weight:400"></span></label><input id="pf-name" autocomplete="name" placeholder="Tên của bạn"></div>
           </div>
         </div>
         <div id="verify-banner" class="msg info hidden" style="display: block;">
@@ -2178,14 +2194,14 @@ textarea.sh-rec-on{caret-color:transparent}
         </div>
       </div>
 
-      <div class="set-section">
-        <div class="set-head"><h3>Mật khẩu</h3><p class="muted">Đăng nhập bằng mật khẩu của bạn thay vì chỉ dùng Google.</p></div>
+      <div class="set-section set-row">
+        <div class="set-head"><h3>Mật khẩu</h3><p class="muted">Thay đổi mật khẩu đăng nhập tài khoản.</p></div>
         <button class="btn" type="button" id="pw-open">Đổi mật khẩu</button>
       </div>
 
-      <div class="set-section">
-        <div class="set-head"><h3>Đăng xuất</h3><p class="muted">Đăng xuất khỏi tài khoản HORA trên thiết bị này.</p></div>
-        <button class="btn" type="button" id="logout-btn-2">Đăng xuất</button>
+      <div class="set-section set-row">
+        <div class="set-head"><h3>Đăng xuất</h3><p class="muted">Thoát khỏi tài khoản HORA trên thiết bị này.</p></div>
+        <button class="btn danger-soft" type="button" id="logout-btn-2">Đăng xuất</button>
       </div>
 
     </section>
