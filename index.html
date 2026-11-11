@@ -460,6 +460,19 @@ body.studio #view-studio{padding-top:6px}
 body.studio .st-side{top:0;min-height:100vh}
 
 .studio-scope .model-select{width:100%;padding:13px 14px;border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--ink);font:inherit;font-weight:600;cursor:pointer}
+
+.studio-scope .result-list{display:flex;flex-direction:column;gap:10px}
+.studio-scope .result-list .empty{border:1.5px dashed var(--line);border-radius:14px;padding:26px;text-align:center;color:var(--muted)}
+.studio-scope .rrow{display:flex;gap:12px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:10px}
+.studio-scope .rthumb{flex:0 0 92px;width:92px;height:68px;border-radius:10px;overflow:hidden;background:#111}
+.studio-scope .rthumb img,.studio-scope .rthumb canvas{width:100%;height:100%;object-fit:cover;display:block}
+.studio-scope .rmain{flex:1;min-width:0}
+.studio-scope .rprompt{font-weight:600;font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.studio-scope .rmeta{display:flex;flex-wrap:wrap;gap:5px 12px;color:var(--muted);font-size:12.5px;margin-top:4px;align-items:center}
+.studio-scope .rbadge{border:1px solid var(--line);border-radius:999px;padding:2px 8px;font-weight:700;color:var(--ink)}
+.studio-scope .racts{display:flex;gap:6px;flex-wrap:wrap}
+.studio-scope .racts button{border:1px solid var(--line);background:var(--card2);color:var(--ink);border-radius:10px;padding:7px 10px;font-weight:700;font-size:12.5px;cursor:pointer;font-family:inherit}
+@media(max-width:640px){.studio-scope .rrow{flex-wrap:wrap}.studio-scope .rthumb{flex-basis:100%;width:100%;height:150px}}
 </style>
 </head>
 <body>
@@ -722,7 +735,7 @@ body.studio .st-side{top:0;min-height:100vh}
 
         <p class="step-label">Bước 1 · Mô tả / ảnh gốc</p>
         <textarea class="prompt" id="st-promptInput" placeholder="Mô tả ảnh bạn muốn tạo…"></textarea>
-        <div id="st-refBlock" style="display:none;margin-top:10px">
+        <div id="st-refBlock" style="margin-top:10px">
           <div class="drop" id="st-refDrop">
             <span id="st-refEmpty"><b>Kéo thả ảnh tham chiếu</b> hoặc bấm để chọn — ảnh gốc tự xoá sau 7 ngày</span>
             <input type="file" id="st-refFile" accept="image/*" hidden>
@@ -770,9 +783,9 @@ body.studio .st-side{top:0;min-height:100vh}
         <span class="chip">🇻🇳 Thanh toán MoMo · VNPay · SePay</span>
       </div>
       <div class="preview-box">
-        <h3>Kết quả mới nhất</h3>
-        <p class="hint" style="margin:0 0 10px">Bản xem thử tạo ảnh mô phỏng ngay trong trình duyệt. Khi nối provider thật (fal.ai / Dreamina), khung này hiện file thật từ thư viện của bạn.</p>
-        <div class="preview-stage" id="st-previewStage">Chưa có kết quả nào — hãy bấm “Tạo ngay”.</div>
+        <h3>Kết quả</h3>
+        <p class="hint" style="margin:0 0 10px">Ảnh và video bạn tạo hiện ở đây dạng danh sách, mới nhất ở trên — đồng thời được lưu vào Kho tài nguyên (giữ 30 ngày).</p>
+        <div class="result-list" id="st-resultList"></div>
       </div>
     </div>
   </div>
@@ -1310,7 +1323,7 @@ function setMode(mode){
   state.mode=mode; state.model=MODELS[mode][0];
   $("st-tabImage").classList.toggle("on",mode==="image");
   $("st-tabVideo").classList.toggle("on",mode==="video");
-  $("st-refBlock").style.display = mode==="video" ? "block":"none";
+  $("st-refBlock").style.display = "block";
   $("st-durPills").style.display = mode==="video" ? "flex":"none";
   $("st-durLabel").style.display = mode==="video" ? "inline":"none";
   $("st-promptInput").placeholder = mode==="video"
@@ -1361,7 +1374,28 @@ function renderLib(){
     b.addEventListener("click",function(){
       var it=library.filter(function(x){return x.id===b.getAttribute("data-id")})[0]; if(!it) return;
       var act=b.getAttribute("data-act");
-      if(act==="del"){ library=library.filter(function(x){return x.id!==it.id}); persistLib(); renderLib(); toast("Đã xoá khỏi thư viện."); }
+      if(act==="del"){ library=library.filter(function(x){return x.id!==it.id}); persistLib(); renderLib(); renderResults(); toast("Đã xoá khỏi thư viện."); }
+      if(act==="reuse"){ setMode(it.kind); $("st-promptInput").value=it.prompt; window.scrollTo({top:0,behavior:"smooth"}); toast("Đã điền lại prompt — bấm Tạo ngay khi sẵn sàng."); }
+      if(act==="dl"){ if(it.dataUrl){ var a=document.createElement("a"); a.href=it.dataUrl; a.download="hora-studio-"+it.id+".png"; a.click(); } else toast("Bản xem thử chưa có file thật — khi nối provider, nút này tải file từ R2."); }
+    });
+  });
+}
+function renderResults(){
+  var box=$("st-resultList"); if(!box) return;
+  if(!library.length){ box.innerHTML='<div class="empty">Chưa có kết quả nào — hãy bấm “Tạo ngay”.</div>'; return; }
+  box.innerHTML=library.map(function(it){
+    var dl=daysLeft(it);
+    var st=(it.status==="processing"||it.status==="queued") ? '<span class="rbadge">Đang tạo…</span>' : '<span class="rbadge">'+(it.kind==="video"?"🎬 Video":"🖼 Ảnh")+'</span>';
+    return '<div class="rrow"><div class="rthumb">'+thumbHtml(it)+'</div><div class="rmain"><div class="rprompt">'+esc(it.prompt)+'</div>'
+      +'<div class="rmeta">'+st+'<span>'+esc(it.model)+'</span><span>-'+it.cost+' cr</span><span>'+fmtDate(it.createdAt)+'</span><span>Còn '+dl+' ngày</span></div></div>'
+      +'<div class="racts"><button type="button" data-act="dl" data-id="'+it.id+'">Tải xuống</button><button type="button" data-act="reuse" data-id="'+it.id+'">Dùng lại</button><button type="button" data-act="del" data-id="'+it.id+'">Xoá</button></div></div>';
+  }).join("");
+  paintCanvases();
+  Array.prototype.forEach.call(box.querySelectorAll("[data-act]"),function(b){
+    b.addEventListener("click",function(){
+      var it=library.filter(function(x){return x.id===b.getAttribute("data-id")})[0]; if(!it) return;
+      var act=b.getAttribute("data-act");
+      if(act==="del"){ library=library.filter(function(x){return x.id!==it.id}); persistLib(); renderLib(); renderResults(); toast("Đã xoá khỏi thư viện."); }
       if(act==="reuse"){ setMode(it.kind); $("st-promptInput").value=it.prompt; window.scrollTo({top:0,behavior:"smooth"}); toast("Đã điền lại prompt — bấm Tạo ngay khi sẵn sàng."); }
       if(act==="dl"){ if(it.dataUrl){ var a=document.createElement("a"); a.href=it.dataUrl; a.download="hora-studio-"+it.id+".png"; a.click(); } else toast("Bản xem thử chưa có file thật — khi nối provider, nút này tải file từ R2."); }
     });
@@ -1422,14 +1456,11 @@ function doGenerate(){
         var it={ id:"g"+now.getTime(), kind:state.mode, prompt:prompt, model:state.model.name, cost:cost, status:"done",
           createdAt:now.toISOString(), expiresAt:new Date(now.getTime()+30*86400000).toISOString(),
           hue:Math.floor(Math.random()*360), dataUrl: state.mode==="image"? demoImageDataUrl(prompt,state.ratio): null };
-        library.unshift(it); persistLib(); renderLib();
-        $("st-previewStage").innerHTML = state.mode==="image"
-          ? '<img src="'+it.dataUrl+'" alt="Kết quả vừa tạo">'
-          : '<canvas width="640" height="360" data-hue="'+it.hue+'" data-kind="video"></canvas>';
-        paintCanvases();
+        library.unshift(it); persistLib(); renderLib(); renderResults();
+        renderResults();
         bar.style.display="none"; fill.style.width="0"; btn.disabled=false;
         toast("Tạo xong! Đã lưu vào Thư viện của bạn (giữ 30 ngày).");
-        document.getElementById("st-dashboard").scrollIntoView({behavior:"smooth"});
+        var rlel=$("st-resultList"); if(rlel) rlel.scrollIntoView({behavior:"smooth",block:"nearest"});
       }
     },220);
   });
@@ -1444,7 +1475,7 @@ function loadLiveData(){
   }).then(function(g){
     state.live=true;
     library=(g.generations||[]).map(function(x){ return { id:x.id, kind:x.kind, prompt:x.prompt, model:x.model, cost:x.creditCost, status:x.status, createdAt:x.createdAt, expiresAt:x.expiresAt, dataUrl:x.resultUrl||null, hue:265 }; });
-    renderCredits(); renderLedger(); renderLib();
+    renderCredits(); renderLedger(); renderLib(); renderResults();
     var mp=$("st-modePill"); if(mp){ mp.textContent="● Đã đăng nhập — dữ liệu thật"; mp.classList.add("live"); }
   }).catch(function(){ /* giu che do xem thu */ });
 }
@@ -1452,7 +1483,7 @@ function loadLiveData(){
 /* ===== Khoi tao ===== */
 function init(){
   $("st-inviteInput").value=location.origin+"/studio.html?ref=demo";
-  renderShow("dance"); setMode("image"); renderCredits(); renderLib(); renderLedger();
+  renderShow("dance"); setMode("image"); renderCredits(); renderLib(); renderResults(); renderLedger();
   $("st-tabImage").addEventListener("click",function(){ setMode("image"); });
   $("st-tabVideo").addEventListener("click",function(){ setMode("video"); });
   Array.prototype.forEach.call(document.querySelectorAll("#st-ratioPills button"),function(b){ b.addEventListener("click",function(){ Array.prototype.forEach.call(document.querySelectorAll("#st-ratioPills button"),function(x){x.classList.remove("on")}); b.classList.add("on"); state.ratio=b.getAttribute("data-ratio"); }); });
@@ -1470,7 +1501,7 @@ function init(){
     state.tab=b.getAttribute("data-tab");
     ["library","billing","settings"].forEach(function(t){ $("panel-"+t).style.display = t===state.tab? "block":"none"; });
   }); });
-  Array.prototype.forEach.call(document.querySelectorAll("#st-libFilters button"),function(b){ b.addEventListener("click",function(){ Array.prototype.forEach.call(document.querySelectorAll("#st-libFilters button"),function(x){x.classList.remove("on")}); b.classList.add("on"); state.filter=b.getAttribute("data-filter"); renderLib(); }); });
+  Array.prototype.forEach.call(document.querySelectorAll("#st-libFilters button"),function(b){ b.addEventListener("click",function(){ Array.prototype.forEach.call(document.querySelectorAll("#st-libFilters button"),function(x){x.classList.remove("on")}); b.classList.add("on"); state.filter=b.getAttribute("data-filter"); renderLib(); renderResults(); }); });
   Array.prototype.forEach.call(document.querySelectorAll(".buy-pack"),function(b){ b.addEventListener("click",function(){
     toast("Bản xem thử: nút mua sẽ mở trang thanh toán HORA (SePay/MoMo/VNPay) và cộng credit vào ví Studio khi IPN xác nhận — xem docs/studio.md.");
   }); });
