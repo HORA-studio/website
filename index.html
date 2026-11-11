@@ -622,7 +622,7 @@ body.studio .st-side{top:16px;min-height:calc(100vh - 32px);background:var(--car
 .studio-scope .prompt-box{flex:1;min-width:0;border:1px solid var(--line);border-radius:14px;background:var(--bg2);padding:10px 12px}
 .studio-scope .prompt-box:focus-within{border-color:var(--acc)}
 .studio-scope .prompt-box textarea.prompt{border:0;background:transparent;min-height:216px;padding:4px}
-.ref-strip{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+.ref-strip{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
 .ref-chip{position:relative;width:54px;height:54px;flex:0 0 auto}
 .ref-chip img{width:54px;height:54px;object-fit:cover;border-radius:10px;border:1px solid var(--line);display:block}
 .ref-chip .ref-x{position:absolute;top:-7px;right:-7px;width:19px;height:19px;border-radius:50%;background:#1c2333;color:#fff;border:1px solid rgba(255,255,255,.4);font-size:10px;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;z-index:2}
@@ -634,6 +634,8 @@ body.studio .st-side{top:16px;min-height:calc(100vh - 32px);background:var(--car
 .studio-scope .thumb.loading canvas{animation:stpulse 1.5s ease-in-out infinite}
 @keyframes stpulse{0%,100%{opacity:.5}50%{opacity:.95}}
 .studio-scope .badge.status-fail{background:#e5484d;color:#fff}
+
+.studio-scope #st-resultList .acts button{flex:1}
 </style>
 </head>
 <body>
@@ -884,8 +886,8 @@ body.studio .st-side{top:16px;min-height:calc(100vh - 32px);background:var(--car
 
         <div class="prompt-row">
           <div class="prompt-box">
-            <div class="ref-strip" id="st-refStrip" style="display:none"></div>
             <textarea class="prompt" id="st-promptInput" placeholder="Mô tả ảnh bạn muốn tạo…"></textarea>
+            <div class="ref-strip" id="st-refStrip" style="display:none"></div>
           </div>
           <div class="ref-note" id="st-refNote" style="display:none"></div>
           <input type="file" id="st-refFile" accept="image/*" multiple hidden>
@@ -1656,7 +1658,7 @@ function renderLib(){
       +'<div class="body"><div class="prompt">'+esc(it.prompt)+'</div>'
       +'<div class="meta"><span>'+esc(it.model)+'</span><span>-'+it.cost+' cr</span></div>'
       +'<div class="meta"><span>'+fmtDate(it.createdAt)+'</span><span>Xoá: '+fmtDate(it.expiresAt).split(" ")[1]+' '+new Date(it.expiresAt).toLocaleDateString("vi-VN")+'</span></div>'
-      +'<div class="acts"><button type="button" data-act="dl" data-id="'+it.id+'">Tải xuống</button><button type="button" data-act="reuse" data-id="'+it.id+'">Dùng lại</button><button type="button" data-act="del" data-id="'+it.id+'">Xoá</button></div></div></article>';
+      +(it.status==="done" ? '<div class="acts"><button type="button" data-act="dl" data-id="'+it.id+'">Tải xuống</button></div>' : '')+'</div></article>';
   }).join("");
   paintCanvases();
   Array.prototype.forEach.call(document.querySelectorAll("#st-libGrid [data-act]"),function(b){
@@ -1682,7 +1684,7 @@ function renderResults(){
       +'<div class="body"><div class="prompt">'+esc(it.prompt)+'</div>'
       +'<div class="meta"><span>'+esc(it.model)+'</span><span>-'+it.cost+' cr</span></div>'
       +'<div class="meta"><span>'+fmtDate(it.createdAt)+'</span><span>Xoá: '+fmtDate(it.expiresAt).split(" ")[1]+' '+new Date(it.expiresAt).toLocaleDateString("vi-VN")+'</span></div>'
-      +'<div class="acts"><button type="button" data-act="dl" data-id="'+it.id+'">Tải xuống</button><button type="button" data-act="reuse" data-id="'+it.id+'">Dùng lại</button><button type="button" data-act="del" data-id="'+it.id+'">Xoá</button></div></div></article>';
+      +(it.status==="done" ? '<div class="acts"><button type="button" data-act="dl" data-id="'+it.id+'">Tải xuống</button></div>' : '')+'</div></article>';
   }).join("");
   paintCanvases();
   Array.prototype.forEach.call(box.querySelectorAll("[data-act]"),function(b){
