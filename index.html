@@ -852,9 +852,6 @@ body.studio .st-side{top:0;min-height:100vh}
         <h2>Kho tài nguyên</h2>
         <div class="mail" id="st-dashMail">Chế độ xem thử — đăng nhập để đồng bộ thư viện thật</div>
       </div>
-      <div class="dash-actions">
-        <a class="btn small primary" href="javascript:void(0)" data-stscroll="st-create">+ Tạo mới</a>
-      </div>
     </div>
     <nav class="dash-tabs">
       <button type="button" class="on" data-tab="library">Thư viện</button>
@@ -1391,7 +1388,7 @@ function paintCanvases(){
 }
 function renderLib(){
   var items=library.filter(function(it){ return state.filter==="all"||it.kind===state.filter; });
-  if(!items.length){ $("st-libGrid").innerHTML='<div class="empty">Chưa có mục nào ở đây.<br>Bấm <b>+ Tạo mới</b> để tạo '+(state.filter==="video"?"video":"ảnh")+' đầu tiên của bạn.</div>'; return; }
+  if(!items.length){ $("st-libGrid").innerHTML='<div class="empty">Chưa có mục nào ở đây.<br>Chọn <b>Tạo ảnh</b> hoặc <b>Tạo video</b> ở menu trái để tạo '+(state.filter==="video"?"video":"ảnh")+' đầu tiên của bạn.</div>'; return; }
   $("st-libGrid").innerHTML=items.map(function(it){
     var dl=daysLeft(it);
     var statusBadge = it.status==="processing" ? '<span class="badge status-proc">Đang tạo…</span>'
