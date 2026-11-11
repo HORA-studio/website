@@ -511,6 +511,15 @@ body.studio .st-side{top:0;min-height:100vh}
 .results-wrap .preview-box{background:transparent;border:0;border-radius:0;box-shadow:none;padding:0;margin-top:0}
 
 .results-wrap .empty,#st-dashboard .empty{border:0}
+
+.buy-panel{padding:30px 26px 12px}
+.buy-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;margin-top:20px}
+.buy-card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px 18px;text-align:center;position:relative}
+.buy-card.hot{border-color:var(--accent);box-shadow:0 8px 26px #7a2d5e14}
+.buy-card .tag{position:absolute;top:-11px;left:50%;transform:translateX(-50%);background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff;font-size:11px;font-weight:800;padding:4px 11px;border-radius:999px;white-space:nowrap}
+.buy-card .buy-amt{font-size:31px;font-weight:900}
+.buy-card .buy-vnd{color:var(--muted);margin-top:2px;font-size:14px}
+.buy-card .buy-cr{font-weight:800;color:var(--accent2);margin:10px 0 15px}
 </style>
 </head>
 <body>
@@ -748,13 +757,14 @@ body.studio .st-side{top:0;min-height:100vh}
       <button type="button" class="st-side-item on" data-sp="image"><span class="ic">🖼️</span> Tạo ảnh</button>
       <button type="button" class="st-side-item" data-sp="video"><span class="ic">🎬</span> Tạo video</button>
       <button type="button" class="st-side-item" data-sp="assets"><span class="ic">🗂️</span> Kho tài nguyên</button>
+      <button type="button" class="st-side-item" data-sp="buy"><span class="ic">⚡</span> Mua credit</button>
       <div class="st-side-userbox">
         <div class="st-side-credit"><span>Token còn lại</span><strong id="st-creditSide">⚡ — credit</strong></div>
         <a class="st-side-user" href="/account.html">
           <span class="st-side-avatar" id="st-sideAvatar">?</span>
           <span class="st-side-uname" id="st-sideUserName">Đăng nhập / Đăng ký</span>
         </a>
-        <a class="st-side-buy" href="#/mua">+ Mua thêm credit</a>
+        <a class="st-side-buy" href="#/studio?panel=buy">+ Mua thêm credit</a>
       </div>
     </aside>
     <div class="st-main">
@@ -845,6 +855,18 @@ body.studio .st-side{top:0;min-height:100vh}
       </div>
   </div>
 
+  <div class="buy-panel" id="st-buyPanel" style="display:none">
+    <div class="dash-head"><div><h2>Mua credit</h2><div class="mail">Chọn mệnh giá nạp — credit cộng vào ví ngay khi thanh toán được xác nhận. 1.000₫ = 2 credit.</div></div></div>
+    <div class="buy-grid">
+        <div class="buy-card"><div class="buy-amt">50K</div><div class="buy-vnd">50.000₫</div><div class="buy-cr">+100 credit</div><button type="button" class="btn block buy-pack" data-pack="topup-50">Nạp 50K</button></div>
+        <div class="buy-card"><div class="buy-amt">100K</div><div class="buy-vnd">100.000₫</div><div class="buy-cr">+200 credit</div><button type="button" class="btn block buy-pack" data-pack="topup-100">Nạp 100K</button></div>
+        <div class="buy-card hot"><span class="tag">Phổ biến</span><div class="buy-amt">200K</div><div class="buy-vnd">200.000₫</div><div class="buy-cr">+400 credit</div><button type="button" class="btn primary block buy-pack" data-pack="topup-200">Nạp 200K</button></div>
+        <div class="buy-card"><div class="buy-amt">500K</div><div class="buy-vnd">500.000₫</div><div class="buy-cr">+1.000 credit</div><button type="button" class="btn block buy-pack" data-pack="topup-500">Nạp 500K</button></div>
+        <div class="buy-card hot"><span class="tag">Lời nhất</span><div class="buy-amt">1000K</div><div class="buy-vnd">1.000.000₫</div><div class="buy-cr">+2.000 credit</div><button type="button" class="btn primary block buy-pack" data-pack="topup-1000">Nạp 1000K</button></div>
+    </div>
+    <p class="hint" style="margin-top:16px">Thanh toán qua MoMo · VNPay · SePay (cổng HORA hiện có). Credit dùng cho cả tạo ảnh &amp; tạo video, kết quả lưu 30 ngày, gen lỗi được hoàn credit.</p>
+  </div>
+
 <section class="block" id="st-dashboard">
   <div class="wrap">
     <div class="dash-head">
@@ -933,26 +955,39 @@ body.studio .st-side{top:0;min-height:100vh}
     <p style="text-align:center;color:var(--muted);margin:4px 0 0">Giá tạm để xem layout — chốt giá thật trước khi mở bán. Thanh toán qua cổng HORA hiện có: SePay · MoMo · VNPay.</p>
     <div class="packs">
       <div class="pack">
-        <h3>Gói Thử</h3>
+        <h3>Nạp 50K</h3>
         <div class="credits">100 <small>credit</small></div>
-        <div style="color:var(--muted)">49.000₫ · ≈ 20 ảnh hoặc 3 video 5s</div>
-        <ul><li>Đủ model cơ bản</li><li>Lưu kết quả 30 ngày</li><li>Hoàn credit khi gen lỗi</li></ul>
-        <button class="btn block buy-pack" data-pack="trial" type="button">Mua gói Thử</button>
-      </div>
-      <div class="pack hot">
-        <span class="tag">Phổ biến nhất</span>
-        <h3>Gói Sáng tạo</h3>
-        <div class="credits">600 <small>credit</small></div>
-        <div style="color:var(--muted)">199.000₫ · ≈ 120 ảnh hoặc 20 video 5s</div>
-        <ul><li>Mở mọi model, kể cả Kling &amp; Veo</li><li>Ưu tiên hàng đợi</li><li>Lưu kết quả 30 ngày</li><li>Hoàn credit khi gen lỗi</li></ul>
-        <button class="btn primary block buy-pack" data-pack="creator" type="button">Mua gói Sáng tạo</button>
+        <div style="color:var(--muted)">50.000₫ · ≈ 20 ảnh hoặc 3 video 5s</div>
+        <ul><li>Dùng cho cả ảnh &amp; video</li><li>Lưu kết quả 30 ngày</li><li>Hoàn credit khi gen lỗi</li></ul>
+        <button class="btn block buy-pack" data-pack="topup-50" type="button">Nạp 50K</button>
       </div>
       <div class="pack">
-        <h3>Gói Tháng Pro</h3>
-        <div class="credits">2.500 <small>credit/tháng</small></div>
-        <div style="color:var(--muted)">499.000₫/tháng · tự gia hạn, huỷ bất cứ lúc nào</div>
-        <ul><li>Credit cộng đầu mỗi chu kỳ</li><li>2 lượt gen đồng thời</li><li>Hỗ trợ ưu tiên</li></ul>
-        <button class="btn block buy-pack" data-pack="pro" type="button">Đăng ký Pro</button>
+        <h3>Nạp 100K</h3>
+        <div class="credits">200 <small>credit</small></div>
+        <div style="color:var(--muted)">100.000₫ · ≈ 40 ảnh hoặc 6 video 5s</div>
+        <ul><li>Dùng cho cả ảnh &amp; video</li><li>Lưu kết quả 30 ngày</li><li>Hoàn credit khi gen lỗi</li></ul>
+        <button class="btn block buy-pack" data-pack="topup-100" type="button">Nạp 100K</button>
+      </div>
+      <div class="pack hot">
+        <span class="tag">Phổ biến nhất</span><h3>Nạp 200K</h3>
+        <div class="credits">400 <small>credit</small></div>
+        <div style="color:var(--muted)">200.000₫ · ≈ 80 ảnh hoặc 13 video 5s</div>
+        <ul><li>Dùng cho cả ảnh &amp; video</li><li>Lưu kết quả 30 ngày</li><li>Hoàn credit khi gen lỗi</li></ul>
+        <button class="btn primary block buy-pack" data-pack="topup-200" type="button">Nạp 200K</button>
+      </div>
+      <div class="pack">
+        <h3>Nạp 500K</h3>
+        <div class="credits">1.000 <small>credit</small></div>
+        <div style="color:var(--muted)">500.000₫ · ≈ 200 ảnh hoặc 33 video 5s</div>
+        <ul><li>Dùng cho cả ảnh &amp; video</li><li>Lưu kết quả 30 ngày</li><li>Hoàn credit khi gen lỗi</li></ul>
+        <button class="btn block buy-pack" data-pack="topup-500" type="button">Nạp 500K</button>
+      </div>
+      <div class="pack">
+        <h3>Nạp 1000K</h3>
+        <div class="credits">2.000 <small>credit</small></div>
+        <div style="color:var(--muted)">1.000.000₫ · ≈ 400 ảnh hoặc 66 video 5s</div>
+        <ul><li>Dùng cho cả ảnh &amp; video</li><li>Lưu kết quả 30 ngày</li><li>Hoàn credit khi gen lỗi</li></ul>
+        <button class="btn block buy-pack" data-pack="topup-1000" type="button">Nạp 1000K</button>
       </div>
     </div>
   </div>
@@ -1582,13 +1617,15 @@ document.addEventListener("DOMContentLoaded",init);
   var hero=document.querySelector('#view-studio .hero');
   var dash=document.getElementById('st-dashboard');
   var res=document.querySelector('.results-wrap');
+  var buyP=document.getElementById('st-buyPanel');
   if(!items.length||!dash||!hero) return;
   function curMode(){ var on=document.querySelector('.st-side-item.on'); return on&&on.getAttribute('data-sp')==='video'?'video':'image'; }
   function activate(sp){
     items.forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-sp')===sp); });
-    if(sp==='assets'){ hero.style.display='none'; dash.style.display=''; if(res) res.style.display='none'; }
+    if(sp==='assets'){ hero.style.display='none'; dash.style.display=''; if(res) res.style.display='none'; if(buyP) buyP.style.display='none'; }
+    else if(sp==='buy'){ hero.style.display='none'; dash.style.display='none'; if(res) res.style.display='none'; if(buyP) buyP.style.display=''; }
     else{
-      hero.style.display=''; dash.style.display='none'; if(res) res.style.display='';
+      hero.style.display=''; dash.style.display='none'; if(res) res.style.display=''; if(buyP) buyP.style.display='none';
       var t=document.getElementById(sp==='video'?'st-tabVideo':'st-tabImage'); if(t) t.click();
     }
     window.scrollTo({top:0});
@@ -1603,8 +1640,9 @@ document.addEventListener("DOMContentLoaded",init);
     else if(e.target.closest('#st-dashboard [data-stscroll]')) activate(curMode());
   });
   dash.style.display='none';
-  var m=/#\/studio\?panel=(image|video|assets)/.exec(location.hash||'');
+  var m=/#\/studio\?panel=(image|video|assets|buy)/.exec(location.hash||'');
   if(m) document.addEventListener('DOMContentLoaded', function(){ activate(m[1]); });
+  window.addEventListener('hashchange', function(){ var m2=/#\/studio\?panel=(image|video|assets|buy)/.exec(location.hash||''); if(m2) activate(m2[1]); });
 })();
 </script>
 </body>
