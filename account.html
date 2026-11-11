@@ -2161,7 +2161,7 @@ textarea.sh-rec-on{caret-color:transparent}
       <span id="account-license-count" class="hidden">0</span><span id="account-order-count" class="hidden">0</span><span id="acc-name" class="hidden"></span>
 
       <div class="set-section">
-        <div class="set-head"><h3>Thông tin cá nhân</h3><p class="muted">Ảnh đại diện, tên hiển thị và thông tin liên hệ của bạn.</p></div>
+        <div class="set-head"><h3>Thông tin cá nhân</h3><p class="muted">Ảnh đại diện và tên hiển thị của bạn.</p></div>
         <div class="avatar-row">
           <div class="avatar-wrap">
             <button type="button" class="avatar-big" id="pf-avatar-btn" title="Bấm để thay ảnh đại diện"><img id="pf-avatar-img" class="hidden" alt="Ảnh đại diện"><span id="pf-avatar-letter">?</span><span class="avatar-hover">Đổi ảnh</span></button>
@@ -2169,19 +2169,8 @@ textarea.sh-rec-on{caret-color:transparent}
           </div>
           <input type="file" id="pf-avatar-file" accept="image/*" class="hidden">
           <div class="avatar-side">
-            <div class="account-summary-line" id="account-summary" aria-label="Tóm tắt gói và license">
-              <span class="sum-item"><span aria-hidden="true">✦</span><span class="sum-label">Gói</span><strong id="sum-tier">—</strong></span>
-              <span class="sum-item"><span aria-hidden="true">🔑</span><strong id="sum-licenses">0</strong><span class="sum-label">license còn hiệu lực</span></span>
-              <span class="sum-item"><span aria-hidden="true">📅</span><span class="sum-label">Hạn dùng</span><strong id="sum-expiry">—</strong></span>
-            </div>
-            <p class="muted sum-note-line" id="sum-tier-note">Đang tải…</p>
-            <p class="muted" style="margin:0;font-size:13px">Ảnh đại diện lấy từ tài khoản Google khi đã liên kết — bấm vào ảnh để thay ảnh riêng (tự nén về 160×160).</p>
+            <div class="field" style="width:100%;max-width:420px"><label class="lbl" for="pf-name">Tên hiển thị <span class="muted" id="pf-save-status" style="font-weight:400"></span></label><input id="pf-name" autocomplete="name" placeholder="Tên của bạn"></div>
           </div>
-        </div>
-        <div class="field-grid">
-          <div class="field field-full"><label class="lbl" for="pf-name">Tên hiển thị <span class="muted" id="pf-save-status" style="font-weight:400"></span></label><input id="pf-name" autocomplete="name" placeholder="Tên của bạn"></div>
-          <div class="field field-full"><label class="lbl" for="pf-email">Email</label><input id="pf-email" readonly tabindex="-1"><p class="muted field-note">Dùng để đăng nhập vào tài khoản của bạn.</p></div>
-          <div class="field field-full google-field"><span class="lbl">Tài khoản Google</span><span class="pi-value muted" id="acc-google">Chưa liên kết</span><a class="btn small" id="btn-google-link" href="/api/auth/google?mode=link&amp;return=/account.html">Liên kết</a><button class="btn small hidden" type="button" id="btn-google-unlink">Hủy liên kết</button></div>
         </div>
         <div id="verify-banner" class="msg info hidden" style="display: block;">
           <span>Email của bạn chưa được xác thực.</span>
@@ -2192,7 +2181,15 @@ textarea.sh-rec-on{caret-color:transparent}
       <div class="set-section">
         <div class="set-head"><h3>Mật khẩu</h3><p class="muted">Đăng nhập bằng mật khẩu của bạn thay vì chỉ dùng Google.</p></div>
         <button class="btn" type="button" id="pw-open">Đổi mật khẩu</button>
-        <div id="pw-form" class="pw-form hidden">
+      </div>
+
+    </section>
+
+    <section class="card view-panel hidden" data-view="password">
+      <div class="set-section">
+        <div class="set-head"><h3>Đổi mật khẩu</h3><p class="muted">Đăng nhập bằng mật khẩu của bạn thay vì chỉ dùng Google.</p></div>
+        <button class="btn small" type="button" id="pw-back">← Quay lại Thông tin</button>
+        <div id="pw-form" class="pw-form">
           <div class="field"><label class="lbl" for="pw-cur">Mật khẩu hiện tại</label><input type="password" id="pw-cur" autocomplete="current-password"></div>
           <div class="field"><label class="lbl" for="pw-new">Mật khẩu mới (ít nhất 8 ký tự)</label><input type="password" id="pw-new" autocomplete="new-password"></div>
           <div class="field"><label class="lbl" for="pw-new2">Nhập lại mật khẩu mới</label><input type="password" id="pw-new2" autocomplete="new-password"></div>
@@ -2200,7 +2197,6 @@ textarea.sh-rec-on{caret-color:transparent}
           <p class="muted" style="margin:0;font-size:13px">Tài khoản tạo bằng Google có mật khẩu ngẫu nhiên — nếu không biết mật khẩu hiện tại, hãy <button class="btn small" type="button" id="pw-forgot">đặt mật khẩu qua email</button>.</p>
         </div>
       </div>
-
     </section>
 
     <section class="card view-panel hidden" data-view="buy">
@@ -2512,7 +2508,7 @@ async function api(path, opts = {}) {
   return { res, data };
 }
 // ----- Dieu huong app shell (sidebar) -----
-const VIEW_TITLES = { account: "Thông tin", orders: "Lịch sử giao dịch" };
+const VIEW_TITLES = { account: "Thông tin", orders: "Lịch sử giao dịch", password: "Đổi mật khẩu" };
 let currentView = "account";
 try { currentView = sessionStorage.getItem("hora-view") || "account"; } catch { /* sessionStorage bi chan */ }
 if (!VIEW_TITLES[currentView]) currentView = "account";
@@ -2521,7 +2517,7 @@ function showView(v) {
   if (typeof shStopAllVoice === "function") shStopAllVoice(); // doi man chinh cung tat ghi am (v24)
   currentView = v;
   try { sessionStorage.setItem("hora-view", v); } catch { /* bo qua */ }
-  document.querySelectorAll("[data-view-btn]").forEach((b) => b.classList.toggle("active", b.dataset.viewBtn === v));
+  document.querySelectorAll("[data-view-btn]").forEach((b) => b.classList.toggle("active", b.dataset.viewBtn === v || (v === "password" && b.dataset.viewBtn === "account")));
   document.querySelectorAll("[data-view]").forEach((p) => p.classList.toggle("hidden", p.dataset.view !== v));
   const t = $("view-title");
   if (t) t.textContent = VIEW_TITLES[v];
@@ -2855,9 +2851,11 @@ if (pfAvatarRemove) pfAvatarRemove.addEventListener("click", async () => {
 });
 // Doi mat khau
 const pwOpenBtn = $("pw-open");
-if (pwOpenBtn) pwOpenBtn.addEventListener("click", () => $("pw-form").classList.toggle("hidden"));
+if (pwOpenBtn) pwOpenBtn.addEventListener("click", () => showView("password"));
 const pwCancelBtn = $("pw-cancel");
-if (pwCancelBtn) pwCancelBtn.addEventListener("click", () => { $("pw-form").classList.add("hidden"); });
+if (pwCancelBtn) pwCancelBtn.addEventListener("click", () => showView("account"));
+const pwBackBtn = $("pw-back");
+if (pwBackBtn) pwBackBtn.addEventListener("click", () => showView("account"));
 const pwSaveBtn = $("pw-save");
 if (pwSaveBtn) pwSaveBtn.addEventListener("click", async () => {
   const cur = $("pw-cur").value, nw = $("pw-new").value, nw2 = $("pw-new2").value;
@@ -2866,7 +2864,7 @@ if (pwSaveBtn) pwSaveBtn.addEventListener("click", async () => {
   const { res, data } = await api("/api/auth/change-password", { method: "POST", body: JSON.stringify({ currentPassword: cur, newPassword: nw }) });
   if (res.ok) {
     $("pw-cur").value = ""; $("pw-new").value = ""; $("pw-new2").value = "";
-    $("pw-form").classList.add("hidden");
+    showView("account");
     showMsg("ok", "Đã đổi mật khẩu. Các thiết bị/trình duyệt khác đã bị đăng xuất.");
   } else showMsg("err", errText(data, "Đổi mật khẩu thất bại. Hãy thử lại."));
 });
