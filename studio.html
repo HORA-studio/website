@@ -921,6 +921,18 @@ body.studio #view-studio{padding-left:10px;padding-right:10px}
 @media(max-width:860px){.studio-scope .ctrl-row #st-genBtn{padding:10px 14px}}
 
 footer{padding:42px 0 110px;color:var(--muted);font-size:14px}
+
+/* ===== Fit 4 phia nhu account (desktop): khung khoa 100dvh, khong cuon trang,
+   cot chinh day het chieu cao, vung Ket qua tu cuon ben trong ===== */
+@media(min-width:861px){
+  body.studio{height:100dvh;overflow:hidden}
+  body.studio #view-studio{height:100dvh;display:flex;flex-direction:column;overflow:hidden}
+  #view-studio .studio-scope{flex:1;min-height:0;align-items:stretch}
+  #view-studio .st-side{position:static;min-height:0;max-height:100%;overflow-y:auto}
+  #view-studio .st-main{display:flex;flex-direction:column;height:100%;min-height:0;padding-bottom:0}
+  .studio-scope .st-main .results-wrap{flex:1;min-height:0;overflow-y:auto}
+  .studio-scope #st-dashboard,.studio-scope #st-buyPanel{flex:1;min-height:0;overflow-y:auto}
+}
 </style>
 </head>
 <body class="studio">
