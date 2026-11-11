@@ -636,6 +636,17 @@ body.studio .st-side{top:16px;min-height:calc(100vh - 32px);background:var(--car
 .studio-scope .badge.status-fail{background:#e5484d;color:#fff}
 
 .studio-scope #st-resultList .acts button{flex:1}
+
+@media(max-width:860px){
+  .st-side{display:flex;flex-wrap:wrap;align-items:center}
+  .st-side-userbox{flex-direction:row;align-items:center;gap:10px;margin:0 0 0 auto;border:0;padding:0}
+  .st-side-uname{display:none}
+  .st-side-credit{display:flex;justify-content:flex-end}
+  .st-side-credit .st-credit-label{display:none}
+  .st-side-credit strong{font-size:13px;white-space:nowrap}
+  .st-side-foot{border-top:0;padding-top:0;flex:none}
+  .st-logout-btn{width:auto;padding:6px 12px;font-size:12.5px;border-radius:999px}
+}
 </style>
 </head>
 <body>
