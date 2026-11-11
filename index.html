@@ -527,6 +527,8 @@ body.studio .st-side{top:0;min-height:100vh}
   .studio-scope .ctrl-row .attach-row{margin-left:0;flex:0 0 auto}
   .studio-scope .ctrl-row #st-genBtn{flex:1 1 120px}
 }
+
+.results-wrap .preview-box h3{margin-bottom:12px}
 </style>
 </head>
 <body>
@@ -777,7 +779,6 @@ body.studio .st-side{top:0;min-height:100vh}
           <input type="file" id="st-refFile" accept="image/*" hidden>
         </div>
         <div id="st-refBlock" style="margin-top:8px">
-          <p class="ref-hint" style="margin:0">Hoặc kéo thả ảnh vào khung chat để đính kèm.</p>
           <div class="ref-preview" id="st-refPreview" style="display:none">
             <img id="st-refImg" alt="Ảnh tham chiếu">
             <div class="ref-meta"><b id="st-refName">Ảnh tham chiếu</b><span>Đã đính kèm — ảnh gốc tự xoá sau 7 ngày</span></div>
@@ -801,7 +802,6 @@ body.studio .st-side{top:0;min-height:100vh}
           <button class="btn primary" id="st-genBtn" type="button">✦ Tạo ngay — <span id="st-genBtnCost">5</span> credit</button>
         </div>
         <div class="progress" id="st-genProgress"><i></i></div>
-        <p class="hint" id="st-genHint">Chưa đăng nhập? Bạn vẫn chọn thử mọi thứ ở đây — hệ thống giữ lựa chọn và chỉ yêu cầu đăng nhập khi bấm Tạo. Kết quả chỉ mình bạn xem được.</p>
       </div>
     </div>
 
@@ -840,13 +840,12 @@ body.studio .st-side{top:0;min-height:100vh}
   <div class="results-wrap">
       <div class="preview-box">
         <h3>Kết quả</h3>
-        <p class="hint" style="margin:0 0 10px">Ảnh và video bạn tạo hiện ở đây, mới nhất ở trên — đồng thời được lưu vào Kho tài nguyên (giữ 30 ngày).</p>
         <div class="lib" id="st-resultList"></div>
       </div>
   </div>
 
   <div class="buy-panel" id="st-buyPanel" style="display:none">
-    <div class="dash-head"><div><h2>Mua credit</h2><div class="mail">Chọn mệnh giá nạp — credit cộng vào ví ngay khi thanh toán được xác nhận. 1.000₫ = 2 credit.</div></div></div>
+    <div class="dash-head"><div><h2>Mua credit</h2></div></div>
     <div class="buy-grid">
         <div class="buy-card"><div class="buy-amt">50K</div><div class="buy-vnd">50.000₫</div><div class="buy-cr">+100 credit</div><button type="button" class="btn block buy-pack" data-pack="topup-50">Nạp 50K</button></div>
         <div class="buy-card"><div class="buy-amt">100K</div><div class="buy-vnd">100.000₫</div><div class="buy-cr">+200 credit</div><button type="button" class="btn block buy-pack" data-pack="topup-100">Nạp 100K</button></div>
@@ -854,7 +853,6 @@ body.studio .st-side{top:0;min-height:100vh}
         <div class="buy-card"><div class="buy-amt">500K</div><div class="buy-vnd">500.000₫</div><div class="buy-cr">+1.000 credit</div><button type="button" class="btn block buy-pack" data-pack="topup-500">Nạp 500K</button></div>
         <div class="buy-card hot"><span class="tag">Lời nhất</span><div class="buy-amt">1000K</div><div class="buy-vnd">1.000.000₫</div><div class="buy-cr">+2.000 credit</div><button type="button" class="btn primary block buy-pack" data-pack="topup-1000">Nạp 1000K</button></div>
     </div>
-    <p class="hint" style="margin-top:16px">Thanh toán qua MoMo · VNPay · SePay (cổng HORA hiện có). Credit dùng cho cả tạo ảnh &amp; tạo video, kết quả lưu 30 ngày, gen lỗi được hoàn credit.</p>
   </div>
 
 <section class="block" id="st-dashboard">
@@ -862,7 +860,6 @@ body.studio .st-side{top:0;min-height:100vh}
     <div class="dash-head">
       <div>
         <h2>Kho tài nguyên</h2>
-        <div class="mail" id="st-dashMail">Chế độ xem thử — đăng nhập để đồng bộ thư viện thật</div>
       </div>
     </div>
     <nav class="dash-tabs">
@@ -1530,7 +1527,7 @@ function init(){
   .then(function(me){
     state.user=me.customer||me;
     var name=(state.user.displayName||state.user.email||"");
-    $("st-dashMail").textContent="Đã đăng nhập: "+(state.user.email||name);
+    var dm=$("st-dashMail"); if(dm) dm.textContent="Đã đăng nhập: "+(state.user.email||name);
     var ab=$("st-accountBtn"); if(ab) ab.textContent=name? name.split("@")[0] : "Tài khoản"; var su=$("st-sideUserName"); if(su) su.textContent=name||"Tài khoản"; var sa=$("st-sideAvatar"); if(sa) sa.textContent=(name||"?").charAt(0).toUpperCase(); var lo=$("st-logoutBtn"); if(lo) lo.style.display=""; var un=$("st-sideUserName"); if(un) un.style.display="none";
     return loadLiveData();
   }).catch(function(){
