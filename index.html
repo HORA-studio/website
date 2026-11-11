@@ -676,6 +676,25 @@ body.studio .st-side{top:16px;min-height:calc(100vh - 32px);background:var(--car
 }
 
 body.studio .st-side-brand{display:none}
+
+/* ===== Studio mobile: dock duoi clone trang Tai khoan ===== */
+@media(max-width:860px){
+  body.studio .st-side{position:fixed;left:0;right:0;bottom:0;top:auto;width:100%;height:auto;min-height:0;z-index:80;flex-direction:column;flex-wrap:nowrap;align-items:stretch;gap:0;padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px));border-radius:0;border-left:0;border-right:0;border-bottom:0;box-shadow:0 -8px 28px rgba(10,30,35,.13)}
+  body.studio .st-tabs{position:static;display:grid;grid-template-columns:repeat(4,1fr);gap:4px;background:transparent;border:0;box-shadow:none;padding:0}
+  body.studio .st-tabs .st-side-item{position:relative;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:0;padding:7px 2px 6px;border-radius:12px;background:transparent;box-shadow:none;font-size:0;line-height:1;color:var(--muted)}
+  body.studio .st-tabs .st-side-item .ic{font-size:21px;line-height:1}
+  body.studio .st-tabs .st-side-item::after{content:attr(data-short);font-size:10.5px;font-weight:650;line-height:1.2}
+  body.studio .st-tabs .st-side-item.on{background:transparent;box-shadow:none;color:var(--ink)}
+  body.studio .st-tabs .st-side-item.on::after{font-weight:800}
+  body.studio .st-tabs .st-side-item.on::before{content:"";position:absolute;top:-6px;left:50%;transform:translateX(-50%);width:18px;height:3px;border-radius:99px;background:var(--gold)}
+  body.studio .st-side-userbox{flex:none;width:100%;flex-direction:row;flex-wrap:nowrap;align-items:center;justify-content:space-between;gap:10px;margin:6px 0 0;border-top:1px solid var(--line);padding:8px 4px 2px}
+  body.studio .st-userrow{display:flex;flex:none}
+  body.studio .st-side-uname{display:none}
+  body.studio .st-side-avatar{width:30px;height:30px;flex-basis:30px;font-size:13px}
+  body.studio .st-side-credit{flex:none;font-size:13.5px}
+  body.studio .st-side-foot{flex:none}
+  body.studio #view-studio{padding-bottom:calc(132px + env(safe-area-inset-bottom,0px))}
+}
 </style>
 </head>
 <body>
@@ -892,10 +911,10 @@ body.studio .st-side-brand{display:none}
 <aside class="st-side">
       <div class="st-side-brand">HORA <span>STUDIO</span></div>
       <nav class="st-tabs" aria-label="Chức năng">
-      <button type="button" class="st-side-item on" data-sp="image"><span class="ic">🖼️</span> Tạo ảnh</button>
-        <button type="button" class="st-side-item" data-sp="video"><span class="ic">🎬</span> Tạo video</button>
-        <button type="button" class="st-side-item" data-sp="assets"><span class="ic">🗂️</span> Kho tài nguyên</button>
-        <button type="button" class="st-side-item" data-sp="buy"><span class="ic">⚡</span> Mua credit</button>
+      <button type="button" class="st-side-item on" data-sp="image" data-short="Tạo ảnh"><span class="ic">🖼️</span> Tạo ảnh</button>
+        <button type="button" class="st-side-item" data-sp="video" data-short="Tạo video"><span class="ic">🎬</span> Tạo video</button>
+        <button type="button" class="st-side-item" data-sp="assets" data-short="Kho tài nguyên"><span class="ic">🗂️</span> Kho tài nguyên</button>
+        <button type="button" class="st-side-item" data-sp="buy" data-short="Mua credit"><span class="ic">⚡</span> Mua credit</button>
       </nav>
       <div class="st-side-userbox">
         <div class="st-userrow">
