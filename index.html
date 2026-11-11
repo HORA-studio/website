@@ -869,6 +869,27 @@ body.studio .st-side-brand{display:flex;align-items:center;gap:9px;padding:2px 8
 .studio-scope .results-wrap{padding:18px 16px}
 .st-head-credit{display:inline-flex;align-items:center;background:var(--card2);border:1px solid var(--line);border-radius:999px;padding:7px 12px;font-size:13px;font-weight:700;color:var(--ink);white-space:nowrap;margin-top:1px}
 @media(max-width:860px){.st-head-credit{padding:6px 10px;font-size:12.5px}}
+
+/* Studio: mau + size theo trang Tai khoan (ban toi trong anh user gui) -
+   nen trung tinh than (bo sac tim navy), vien trang mo, nut chinh tim dac 6c5cff,
+   tab chon nen xam trung tinh, pill ti le chon = nen sang chu toi nhu toggle cua account,
+   badge con ngay kieu account (xanh la mo), sidebar rong 252px nhu .side cua account */
+.studio-scope{--bg:#15151e;--bg2:#1a1a25;--card:#1e1e2a;--card2:#232330;--line:rgba(255,255,255,.08);--line2:rgba(255,255,255,.14);--ink:#e8e6f0;--muted:#aaa7ba;--accent:#6c5cff;--gold:#6c5cff;--accent-soft:rgba(108,92,255,.10);--accent-softer:rgba(108,92,255,.05);--input-bg:rgba(255,255,255,.03);--shadow:0 1px 2px rgba(0,0,0,.25),0 16px 40px -16px rgba(0,0,0,.5)}
+body.studio{background:#15151e}
+#view-studio{background:radial-gradient(1000px 520px at 85% -10%,rgba(108,92,255,.10),transparent 65%),radial-gradient(700px 380px at -10% 30%,rgba(108,92,255,.05),transparent 70%)}
+#view-studio .st-side{flex-basis:252px;width:252px}
+.studio-scope .st-side-item.on{background:var(--card2);color:#fff;box-shadow:none}
+.studio-scope .st-gen-head h2{font-size:20px}
+.studio-scope .btn.primary{background:var(--gold)}
+.studio-scope #st-genBtn .spark{color:#fff}
+.studio-scope .pills button.on{background:var(--ink);color:#171410;border-color:transparent}
+.studio-scope .thumb .badge.days{background:rgba(34,197,94,.16);color:#4ade9e}
+.studio-scope .thumb .badge.days.low{background:rgba(217,119,6,.18);color:#fbbf24}
+@media(max-width:860px){
+  body.studio .st-tabs .st-side-item.on{background:var(--card2);color:#fff}
+}
+
+@media(max-width:860px){#view-studio .st-side{width:auto;flex-basis:auto}}
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
