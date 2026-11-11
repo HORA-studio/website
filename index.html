@@ -481,6 +481,17 @@ body.studio .st-side{top:0;min-height:100vh}
 .studio-scope .ref-meta span{color:var(--muted);font-size:12px}
 .studio-scope .ref-remove{border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:999px;padding:7px 12px;font-weight:700;font-size:12.5px;cursor:pointer;font-family:inherit}
 .studio-scope .gen-card.dragging{outline:2px dashed var(--accent);outline-offset:-6px}
+
+.studio-scope .prompt-row{display:flex;gap:10px;align-items:stretch}
+.studio-scope .prompt-row .prompt{flex:1;min-width:0}
+.studio-scope .attach-side{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border-radius:14px;padding:10px 14px;font-size:17px}
+.studio-scope .attach-side span{font-size:11.5px;font-weight:700}
+.studio-scope .ctrl-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.studio-scope .ctrl-row .model-select{flex:1 1 200px;max-width:280px;min-width:0;width:auto}
+.studio-scope .ctrl-row .pills{gap:6px}
+.studio-scope .ctrl-row .pills button{padding:8px 11px;font-size:13.5px}
+.studio-scope .ctrl-row #st-genBtn{flex:0 0 auto;margin-left:auto;padding-left:18px;padding-right:18px}
+@media(max-width:640px){.studio-scope .ctrl-row #st-genBtn{flex:1 1 100%;margin-left:0}.studio-scope .ctrl-row .model-select{max-width:none;flex-basis:100%}}
 </style>
 </head>
 <body>
@@ -742,13 +753,13 @@ body.studio .st-side{top:0;min-height:100vh}
         </div>
 
         <p class="step-label">Bước 1 · Mô tả / ảnh gốc</p>
-        <textarea class="prompt" id="st-promptInput" placeholder="Mô tả ảnh bạn muốn tạo…"></textarea>
-        <div id="st-refBlock" style="margin-top:10px">
-          <div class="ref-actions">
-            <button type="button" class="ref-btn" id="st-refBtn">📎 Đính kèm ảnh tham chiếu</button>
-            <span class="ref-hint">hoặc kéo thả ảnh vào khung chat này</span>
-            <input type="file" id="st-refFile" accept="image/*" hidden>
-          </div>
+        <div class="prompt-row">
+          <textarea class="prompt" id="st-promptInput" placeholder="Mô tả ảnh bạn muốn tạo…"></textarea>
+          <button type="button" class="ref-btn attach-side" id="st-refBtn" title="Đính kèm ảnh tham chiếu">📎<span>Đính kèm</span></button>
+          <input type="file" id="st-refFile" accept="image/*" hidden>
+        </div>
+        <div id="st-refBlock" style="margin-top:8px">
+          <p class="ref-hint" style="margin:0">Hoặc kéo thả ảnh vào khung chat để đính kèm.</p>
           <div class="ref-preview" id="st-refPreview" style="display:none">
             <img id="st-refImg" alt="Ảnh tham chiếu">
             <div class="ref-meta"><b id="st-refName">Ảnh tham chiếu</b><span>Đã đính kèm — ảnh gốc tự xoá sau 7 ngày</span></div>
@@ -756,23 +767,19 @@ body.studio .st-side{top:0;min-height:100vh}
           </div>
         </div>
 
-        <p class="step-label">Bước 2 · Chọn model</p>
-        <select class="model-select" id="st-modelSelect" aria-label="Chọn model"></select>
-
-        <p class="step-label">Bước 3 · Khung hình <span id="st-durLabel" style="display:none">· Thời lượng</span></p>
-        <div class="gen-row">
-        <div class="pills" id="st-ratioPills">
-          <button type="button" data-ratio="1:1">1:1 Vuông</button>
-          <button type="button" data-ratio="9:16" class="on">9:16 Dọc</button>
-          <button type="button" data-ratio="16:9">16:9 Ngang</button>
-          <button type="button" data-ratio="3:4">3:4</button>
-        </div>
-        <div class="pills" id="st-durPills" style="display:none">
-          <button type="button" data-dur="5" class="on">5 giây</button>
-          <button type="button" data-dur="10">10 giây</button>
-        </div>
-
-        <button class="btn primary" id="st-genBtn" type="button">✦ Tạo ngay — <span id="st-genBtnCost">5</span> credit</button>
+        <p class="step-label">Bước 2 · Model &amp; khung hình <span id="st-durLabel" style="display:none">· Thời lượng</span></p>
+        <div class="ctrl-row">
+          <select class="model-select" id="st-modelSelect" aria-label="Chọn model"></select>
+          <div class="pills" id="st-ratioPills" role="radiogroup" aria-label="Khung hình">
+            <button type="button" data-ratio="1:1" title="Vuông">1:1</button>
+            <button type="button" data-ratio="9:16" class="on" title="Dọc (điện thoại)">9:16</button>
+            <button type="button" data-ratio="16:9" title="Ngang">16:9</button>
+          </div>
+          <div class="pills" id="st-durPills" style="display:none">
+            <button type="button" data-dur="5" class="on">5 giây</button>
+            <button type="button" data-dur="10">10 giây</button>
+          </div>
+          <button class="btn primary" id="st-genBtn" type="button">✦ Tạo ngay — <span id="st-genBtnCost">5</span> credit</button>
         </div>
         <div class="progress" id="st-genProgress"><i></i></div>
         <p class="hint" id="st-genHint">Chưa đăng nhập? Bạn vẫn chọn thử mọi thứ ở đây — hệ thống giữ lựa chọn và chỉ yêu cầu đăng nhập khi bấm Tạo. Kết quả chỉ mình bạn xem được.</p>
