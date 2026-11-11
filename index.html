@@ -575,6 +575,41 @@ body.studio .st-side{top:0;min-height:100vh}
   .st-tabs .st-side-item.on{background:transparent;box-shadow:none;color:#10dcc8}
   .st-tabs .st-side-item:hover{background:transparent}
 }
+
+/* ===== Studio: shell dang panel noi nhu trang Tai khoan ===== */
+body.studio #view-studio{padding:16px 16px 26px}
+#view-studio .studio-scope{gap:16px;max-width:1360px;margin:0 auto;align-items:flex-start}
+body.studio .st-side{top:16px;min-height:calc(100vh - 32px);background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:0 4px 22px rgba(23,37,43,.06)}
+#view-studio .st-main{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:0 4px 22px rgba(23,37,43,.06);padding:22px 22px 26px;min-height:calc(100vh - 32px)}
+@media(max-width:860px){
+  body.studio #view-studio{padding:10px 10px 18px}
+  #view-studio .studio-scope{gap:12px}
+  body.studio .st-side{min-height:0}
+  #view-studio .st-main{padding:16px 14px 20px;min-height:0}
+}
+/* ===== Viewer xem media (nhu ben Remote) ===== */
+.viewer-overlay{position:fixed;inset:0;z-index:220;background:rgba(10,10,16,.78);display:flex;align-items:center;justify-content:center;padding:18px}
+.viewer-card{background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:20px;max-width:880px;width:100%;max-height:92vh;overflow:auto;padding:16px 18px 18px;box-shadow:0 30px 80px rgba(0,0,0,.45)}
+.viewer-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.viewer-count{font-size:13px;color:var(--muted);font-weight:700}
+.viewer-close{border:1px solid var(--line);background:var(--card2);color:var(--ink);width:36px;height:36px;border-radius:50%;font-size:16px;cursor:pointer}
+.viewer-stage{display:flex;align-items:center;gap:8px}
+.viewer-media{flex:1;min-width:0;display:flex;align-items:center;justify-content:center;background:#101018;border-radius:14px;overflow:hidden;min-height:240px}
+.viewer-media img,.viewer-media video{max-width:100%;max-height:62vh;display:block}
+.viewer-media canvas{width:100%;height:auto;display:block}
+.viewer-nav{flex:0 0 40px;width:40px;height:56px;border:1px solid var(--line);background:var(--card2);color:var(--ink);border-radius:12px;font-size:26px;cursor:pointer}
+.viewer-meta{margin-top:14px}
+.viewer-meta b{display:block;font-size:16px;line-height:1.45}
+.viewer-meta span{display:block;margin-top:4px;font-size:13px;color:var(--muted)}
+.viewer-actions{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+.viewer-actions .btn{flex:1;min-width:120px}
+.studio-scope .gcard .thumb{cursor:zoom-in}
+@media(max-width:640px){.viewer-overlay{padding:0}.viewer-card{max-height:100vh;height:100%;border-radius:0}.viewer-nav{flex-basis:34px;width:34px}}
+
+.st-side-foot{border-top:1px solid var(--line);padding-top:12px}
+.st-logout-btn{width:100%;padding:11px 12px;border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:12px;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit}
+.st-logout-btn:hover{background:var(--card2)}
+@media(max-width:860px){.st-side-userbox{flex-wrap:wrap}.st-side-foot{flex:1 1 100%;order:3}}
 </style>
 </head>
 <body>
@@ -797,13 +832,15 @@ body.studio .st-side{top:0;min-height:100vh}
         <button type="button" class="st-side-item" data-sp="buy"><span class="ic">⚡</span> Mua credit</button>
       </nav>
       <div class="st-side-userbox">
-        <div class="st-side-credit"><span class="st-credit-label">Còn lại</span><strong id="st-creditSide">⚡ — credit</strong></div>
         <div class="st-userrow">
           <a class="st-side-user" href="/account.html">
             <span class="st-side-avatar" id="st-sideAvatar">?</span>
             <span class="st-side-uname" id="st-sideUserName">Đăng nhập / Đăng ký</span>
           </a>
-          <button type="button" class="st-side-logout" id="st-logoutBtn" style="display:none">Đăng xuất</button>
+        </div>
+        <div class="st-side-credit"><span class="st-credit-label">Còn lại</span><strong id="st-creditSide">⚡ — credit</strong></div>
+        <div class="st-side-foot">
+          <button type="button" class="st-logout-btn" id="st-logoutBtn" style="display:none">Đăng xuất</button>
         </div>
       </div>
     </aside>
@@ -1307,6 +1344,22 @@ route();
     <div class="qr-note">Chuyển khoản đúng số tiền + đúng nội dung ở trên: credit sẽ TỰ ĐỘNG cộng vào tài khoản ngay khi tiền vào (thường dưới 1 phút). Giữ cửa sổ này mở để thấy xác nhận.</div>
   </div>
 </div>
+<div class="viewer-overlay" id="st-viewer" style="display:none">
+  <div class="viewer-card">
+    <div class="viewer-top"><span class="viewer-count" id="vw-count"></span><button type="button" class="viewer-close" id="vw-close" aria-label="Đóng">✕</button></div>
+    <div class="viewer-stage">
+      <button type="button" class="viewer-nav" id="vw-prev" aria-label="Trước">‹</button>
+      <div class="viewer-media" id="vw-media"></div>
+      <button type="button" class="viewer-nav" id="vw-next" aria-label="Sau">›</button>
+    </div>
+    <div class="viewer-meta"><b id="vw-title"></b><span id="vw-sub"></span></div>
+    <div class="viewer-actions">
+      <button type="button" class="btn" id="vw-download">Tải xuống</button>
+      <button type="button" class="btn" id="vw-reuse">Dùng lại</button>
+      <button type="button" class="btn danger" id="vw-delete">Xoá</button>
+    </div>
+  </div>
+</div>
 <div class="qr-overlay" id="okOverlay" style="z-index:210">
   <div class="qr-box ok-box">
     <div class="ok-icon">✓</div>
@@ -1594,6 +1647,77 @@ function renderResults(){
     });
   });
 }
+/* ===== Viewer xem media ===== */
+  var viewerState={ list:[], idx:0 };
+  function vwCurrent(){ return viewerState.list[viewerState.idx] || null; }
+  function openViewer(it){
+    viewerState.list=library.slice();
+    viewerState.idx=Math.max(0,viewerState.list.indexOf(it));
+    if(!viewerState.list.length) return;
+    $("st-viewer").style.display="flex"; document.body.style.overflow="hidden";
+    renderViewer();
+  }
+  function closeViewer(){
+    var m=$("vw-media"); var v=m.querySelector("video"); if(v){ try{v.pause();}catch(e){} }
+    m.innerHTML=""; $("st-viewer").style.display="none"; document.body.style.overflow="";
+  }
+  function renderViewer(){
+    var it=vwCurrent(); if(!it){ closeViewer(); return; }
+    var m=$("vw-media");
+    var isVidFile=it.dataUrl && /\.(mp4|webm|mov)(\?|$)/i.test(it.dataUrl);
+    var isImgFile=it.dataUrl && /\.(png|jpe?g|webp|gif)(\?|$)/i.test(it.dataUrl);
+    if(it.kind==="video" && (isVidFile || (it.dataUrl && it.dataUrl.indexOf("data:video")===0)))
+      m.innerHTML='<video src="'+it.dataUrl+'" controls autoplay playsinline></video>';
+    else if(it.dataUrl && (isImgFile || it.dataUrl.indexOf("data:image")===0 || it.kind==="image"))
+      m.innerHTML='<img src="'+it.dataUrl+'" alt="">';
+    else { m.innerHTML='<canvas width="960" height="640" data-hue="'+(it.hue||265)+'" data-kind="'+it.kind+'"></canvas>'; paintCanvases(); }
+    $("vw-title").textContent=it.prompt||"";
+    $("vw-sub").textContent=(it.kind==="video"?"Video":"Ảnh")+" · "+(it.model||"")+" · "+fmtDate(it.createdAt)+" · Còn "+daysLeft(it)+" ngày";
+    $("vw-count").textContent=(viewerState.idx+1)+" / "+viewerState.list.length;
+  }
+  function stepViewer(d){
+    if(!viewerState.list.length) return;
+    viewerState.idx=(viewerState.idx+d+viewerState.list.length)%viewerState.list.length;
+    renderViewer();
+  }
+  document.addEventListener("click",function(e){
+    var t=e.target&&e.target.closest? e.target.closest(".gcard .thumb") : null;
+    if(!t) return;
+    var card=t.closest(".gcard"); var btn=card? card.querySelector("[data-act]") : null;
+    var id=btn? btn.getAttribute("data-id") : null;
+    var it=library.filter(function(x){return x.id===id})[0];
+    if(it) openViewer(it);
+  });
+  $("vw-close").addEventListener("click",closeViewer);
+  $("st-viewer").addEventListener("click",function(e){ if(e.target===$("st-viewer")) closeViewer(); });
+  $("vw-prev").addEventListener("click",function(){ stepViewer(-1); });
+  $("vw-next").addEventListener("click",function(){ stepViewer(1); });
+  document.addEventListener("keydown",function(e){
+    if($("st-viewer").style.display==="none") return;
+    if(e.key==="Escape") closeViewer();
+    if(e.key==="ArrowLeft") stepViewer(-1);
+    if(e.key==="ArrowRight") stepViewer(1);
+  });
+  $("vw-download").addEventListener("click",function(){
+    var it=vwCurrent(); if(!it) return;
+    if(it.dataUrl){ var a=document.createElement("a"); a.href=it.dataUrl; a.download="hora-studio-"+it.id+(it.kind==="video"?".mp4":".png"); a.target="_blank"; a.click(); }
+    else toast("Bản xem thử chưa có file thật để tải.");
+  });
+  $("vw-reuse").addEventListener("click",function(){
+    var it=vwCurrent(); if(!it) return;
+    closeViewer(); setMode(it.kind); $("st-promptInput").value=it.prompt;
+    var gp=document.querySelector('.st-side-item[data-sp="'+it.kind+'"]'); if(gp) gp.click();
+    window.scrollTo({top:0,behavior:"smooth"}); toast("Đã điền lại prompt — bấm Tạo ngay khi sẵn sàng.");
+  });
+  $("vw-delete").addEventListener("click",function(){
+    var it=vwCurrent(); if(!it) return;
+    library=library.filter(function(x){return x.id!==it.id}); persistLib(); renderLib(); renderResults();
+    viewerState.list=library.slice();
+    if(!viewerState.list.length){ closeViewer(); }
+    else { viewerState.idx=Math.min(viewerState.idx,viewerState.list.length-1); renderViewer(); }
+    toast("Đã xoá khỏi thư viện.");
+  });
+
 function renderLedger(){
   var rows=(wallet.ledger||[]).slice().reverse();
   $("st-ledgerBody").innerHTML = rows.length ? rows.map(function(r){
@@ -1725,7 +1849,7 @@ function init(){
     state.user=me.customer||me;
     var name=(state.user.displayName||state.user.email||"");
     var dm=$("st-dashMail"); if(dm) dm.textContent="Đã đăng nhập: "+(state.user.email||name);
-    var ab=$("st-accountBtn"); if(ab) ab.textContent=name? name.split("@")[0] : "Tài khoản"; var su=$("st-sideUserName"); if(su) su.textContent=name||"Tài khoản"; var sa=$("st-sideAvatar"); if(sa) sa.textContent=(name||"?").charAt(0).toUpperCase(); var lo=$("st-logoutBtn"); if(lo) lo.style.display=""; var un=$("st-sideUserName"); if(un) un.style.display="none";
+    var ab=$("st-accountBtn"); if(ab) ab.textContent=name? name.split("@")[0] : "Tài khoản"; var su=$("st-sideUserName"); if(su) su.textContent=name||"Tài khoản"; var sa=$("st-sideAvatar"); if(sa) sa.textContent=(name||"?").charAt(0).toUpperCase(); var lo=$("st-logoutBtn"); if(lo) lo.style.display="";
     return loadLiveData();
   }).catch(function(){
     var mp=$("st-modePill"); if(mp) mp.textContent="● Chế độ xem thử (chưa đăng nhập)"; 
