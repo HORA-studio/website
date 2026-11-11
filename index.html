@@ -714,7 +714,7 @@ body.blog #view-home,body.blog #view-studio,body.blog #view-buy,body.blog #view-
         </div>
 
         <p class="step-label">Bước 1 · Mô tả / ảnh gốc</p>
-        <textarea class="prompt" id="st-promptInput" placeholder="Mô tả ảnh bạn muốn tạo… ví dụ: cô gái mặc áo dài đứng bên hồ sen lúc hoàng hôn, ánh sáng điện ảnh"></textarea>
+        <textarea class="prompt" id="st-promptInput" placeholder="Mô tả ảnh bạn muốn tạo…"></textarea>
         <div id="st-refBlock" style="display:none;margin-top:10px">
           <div class="drop" id="st-refDrop">
             <span id="st-refEmpty"><b>Kéo thả ảnh tham chiếu</b> hoặc bấm để chọn — ảnh gốc tự xoá sau 7 ngày</span>
@@ -744,7 +744,7 @@ body.blog #view-home,body.blog #view-studio,body.blog #view-buy,body.blog #view-
         <div class="cost-row"><span>Chi phí lần tạo này</span><b><span id="st-costNow">5</span> credit</b></div>
         <button class="btn primary block" id="st-genBtn" type="button">✦ Tạo ngay — <span id="st-genBtnCost">5</span> credit</button>
         <div class="progress" id="st-genProgress"><i></i></div>
-        <p class="hint" id="st-genHint">Chưa đăng nhập? Bạn vẫn chọn thử mọi thứ ở đây — hệ thống giữ lựa chọn và chỉ yêu cầu đăng nhập khi bấm Tạo (giống ShrimpReel). Kết quả chỉ mình bạn xem được.</p>
+        <p class="hint" id="st-genHint">Chưa đăng nhập? Bạn vẫn chọn thử mọi thứ ở đây — hệ thống giữ lựa chọn và chỉ yêu cầu đăng nhập khi bấm Tạo. Kết quả chỉ mình bạn xem được.</p>
       </div>
     </div>
 
@@ -1281,12 +1281,7 @@ function loadWallet(){
 function saveWallet(w){ try{ localStorage.setItem(LS_WALLET, JSON.stringify(w)); }catch(e){} }
 function loadLib(){
   try{ var l=JSON.parse(localStorage.getItem(LS_LIB)||"null"); if(Array.isArray(l)) return l; }catch(e){}
-  var now=Date.now(), day=86400000;
-  return [
-    { id:"demo1", kind:"video", prompt:"Cô gái nhảy theo trend bên bờ biển lúc hoàng hôn", model:"Kling 2.6 Motion", cost:30, status:"done", createdAt:new Date(now-1*day).toISOString(), expiresAt:new Date(now+29*day).toISOString(), hue:265 },
-    { id:"demo2", kind:"image", prompt:"Chân dung anime tóc bạc, áo dài trắng, nền hoa sen", model:"HORA Image 1", cost:5, status:"done", createdAt:new Date(now-12*day).toISOString(), expiresAt:new Date(now+18*day).toISOString(), hue:190 },
-    { id:"demo3", kind:"image", prompt:"Ảnh sản phẩm chai serum trên nền đá marble, ánh sáng studio", model:"FLUX Pro", cost:12, status:"done", createdAt:new Date(now-24*day).toISOString(), expiresAt:new Date(now+6*day).toISOString(), hue:35 }
-  ];
+  return [];
 }
 function saveLib(l){ try{ localStorage.setItem(LS_LIB, JSON.stringify(l)); }catch(e){} }
 var wallet=loadWallet(), library=loadLib();
@@ -1314,8 +1309,8 @@ function setMode(mode){
   $("st-durPills").style.display = mode==="video" ? "flex":"none";
   $("st-durLabel").style.display = mode==="video" ? "inline":"none";
   $("st-promptInput").placeholder = mode==="video"
-    ? "Mô tả chuyển động… ví dụ: cô gái mỉm cười, tóc bay nhẹ, camera đẩy chậm vào gần"
-    : "Mô tả ảnh bạn muốn tạo… ví dụ: cô gái mặc áo dài đứng bên hồ sen lúc hoàng hôn, ánh sáng điện ảnh";
+    ? "Mô tả chuyển động bạn muốn tạo…"
+    : "Mô tả ảnh bạn muốn tạo…";
   renderModels(); renderCost();
 }
 
