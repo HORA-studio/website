@@ -462,6 +462,13 @@ body.studio .st-side{top:0;min-height:100vh}
 .studio-scope .model-select{width:100%;padding:13px 14px;border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--ink);font:inherit;font-weight:600;cursor:pointer}
 
 
+
+.studio-scope .gen-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.studio-scope .gen-row .pills{gap:6px}
+.studio-scope .gen-row .pills button{padding:8px 11px;font-size:13.5px}
+.studio-scope .gen-row #st-genBtn{padding-left:22px;padding-right:22px}
+.studio-scope .gen-row #st-genBtn{flex:0 0 auto;margin-left:auto;padding-left:22px;padding-right:22px}
+@media(max-width:640px){.studio-scope .gen-row #st-genBtn{flex:1 1 100%;margin-left:0}}
 </style>
 </head>
 <body>
@@ -739,19 +746,20 @@ body.studio .st-side{top:0;min-height:100vh}
         <select class="model-select" id="st-modelSelect" aria-label="Chọn model"></select>
 
         <p class="step-label">Bước 3 · Khung hình <span id="st-durLabel" style="display:none">· Thời lượng</span></p>
+        <div class="gen-row">
         <div class="pills" id="st-ratioPills">
           <button type="button" data-ratio="1:1">1:1 Vuông</button>
           <button type="button" data-ratio="9:16" class="on">9:16 Dọc</button>
           <button type="button" data-ratio="16:9">16:9 Ngang</button>
           <button type="button" data-ratio="3:4">3:4</button>
         </div>
-        <div class="pills" id="st-durPills" style="display:none;margin-top:8px">
+        <div class="pills" id="st-durPills" style="display:none">
           <button type="button" data-dur="5" class="on">5 giây</button>
           <button type="button" data-dur="10">10 giây</button>
         </div>
 
-        <div class="cost-row"><span>Chi phí lần tạo này</span><b><span id="st-costNow">5</span> credit</b></div>
-        <button class="btn primary block" id="st-genBtn" type="button">✦ Tạo ngay — <span id="st-genBtnCost">5</span> credit</button>
+        <button class="btn primary" id="st-genBtn" type="button">✦ Tạo ngay — <span id="st-genBtnCost">5</span> credit</button>
+        </div>
         <div class="progress" id="st-genProgress"><i></i></div>
         <p class="hint" id="st-genHint">Chưa đăng nhập? Bạn vẫn chọn thử mọi thứ ở đây — hệ thống giữ lựa chọn và chỉ yêu cầu đăng nhập khi bấm Tạo. Kết quả chỉ mình bạn xem được.</p>
       </div>
@@ -1303,7 +1311,7 @@ function renderModels(){
   sel.value=state.model.id;
   sel.onchange=function(){ state.model=MODELS[state.mode].filter(function(m){return m.id===sel.value})[0]||MODELS[state.mode][0]; renderCost(); };
 }
-function renderCost(){ var c=costNow(); $("st-costNow").textContent=c; $("st-genBtnCost").textContent=c; }
+function renderCost(){ var c=costNow(); var cn=$("st-costNow"); if(cn) cn.textContent=c; $("st-genBtnCost").textContent=c; }
 function renderCredits(){
   var txt="⚡ "+wallet.balance+" credit";
   $("st-creditPill").textContent=txt; $("st-balanceBig").textContent=wallet.balance; var cs=$("st-creditSide"); if(cs) cs.textContent=txt;
