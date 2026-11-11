@@ -793,8 +793,6 @@ body.blog #view-home,body.blog #view-studio,body.blog #view-buy,body.blog #view-
         <div class="mail" id="st-dashMail">Chế độ xem thử — đăng nhập để đồng bộ thư viện thật</div>
       </div>
       <div class="dash-actions">
-        <span class="chip credit-pill" id="st-creditPill2">⚡ — credit</span>
-        <a class="btn small" href="#/mua">Mua credit</a>
         <a class="btn small primary" href="javascript:void(0)" data-stscroll="st-create">+ Tạo mới</a>
       </div>
     </div>
@@ -1299,7 +1297,7 @@ function renderModels(){
 function renderCost(){ var c=costNow(); $("st-costNow").textContent=c; $("st-genBtnCost").textContent=c; }
 function renderCredits(){
   var txt="⚡ "+wallet.balance+" credit";
-  $("st-creditPill").textContent=txt; $("st-creditPill2").textContent=txt; $("st-balanceBig").textContent=wallet.balance; var cs=$("st-creditSide"); if(cs) cs.textContent=txt;
+  $("st-creditPill").textContent=txt; $("st-balanceBig").textContent=wallet.balance; var cs=$("st-creditSide"); if(cs) cs.textContent=txt;
 }
 function setMode(mode){
   state.mode=mode; state.model=MODELS[mode][0];
