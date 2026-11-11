@@ -167,3 +167,9 @@ hoặc chạy cả web lẫn tool cùng máy khi dùng local; (3) chạy migrati
 - Điều kiện chạy thật: cấu hình SePay của website (SEPAY_* env + webhook
   API key) — vốn đã dùng cho đơn license — và chạy migration
   `db/migrate-studio-topup-2026-11-11.sql`.
+- Màn hình báo thành công (bản trước chỉ là toast): khi tiền vào, modal QR
+  tự đóng và bật MÀN THÀNH CÔNG ở giữa app (dấu ✓ lớn, "+X credit", số dư
+  hiện tại, nút "Bắt đầu tạo ngay"/"Đóng"). Ngay trước khi bật, UI gọi
+  `GET /api/studio/credits` lấy số dư thật và cập nhật mọi chỗ hiện credit
+  (sidebar, pill, số dư lớn, sổ cái) — credit trên app đổi ngay tại chỗ.
+  Trường hợp khách quay lại sau cũng bật đúng màn này (thay cho toast).

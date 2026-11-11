@@ -543,6 +543,13 @@ body.studio .st-side{top:0;min-height:100vh}
 .qr-amt{font-size:26px;font-weight:800}
 .qr-cr{color:#9a7b1e;font-weight:700;margin:2px 0 8px}
 .qr-status{font-size:13.5px;font-weight:600;color:#7a7264;margin:0 0 6px}.qr-status.paid{color:#1e7d46}
+.ok-box{text-align:center}
+.ok-icon{width:74px;height:74px;border-radius:50%;background:#e7f7ee;color:#1e7d46;font-size:38px;font-weight:800;display:flex;align-items:center;justify-content:center;margin:4px auto 10px}
+.ok-amt{font-size:31px;font-weight:800;color:#1e7d46}
+.ok-bal{color:#7a7264;margin:6px 0 18px;font-size:15px}
+.ok-box .btn{display:block;width:100%;margin-top:9px;font:inherit;font-weight:700;padding:12px;border-radius:10px;cursor:pointer}
+.ok-box .btn.primary{background:#1f1b17;color:#fff;border:1px solid #1f1b17}
+.ok-box .btn.ghost{background:#fff;color:#1f1b17;border:1px solid #ddd3bd}
 .qr-box img{width:230px;height:230px;object-fit:contain;display:block;margin:4px auto}
 .qr-miss{border:1.5px dashed #d8cfc0;border-radius:10px;padding:14px;text-align:center;color:#8a8175;font-size:13.5px;margin:8px 0}
 .qr-row{display:flex;gap:8px;align-items:center;justify-content:space-between;border-top:1px solid #f0ead9;padding:9px 0;font-size:13.5px}
@@ -1286,6 +1293,16 @@ route();
     <div class="qr-note">Chuyển khoản đúng số tiền + đúng nội dung ở trên: credit sẽ TỰ ĐỘNG cộng vào tài khoản ngay khi tiền vào (thường dưới 1 phút). Giữ cửa sổ này mở để thấy xác nhận.</div>
   </div>
 </div>
+<div class="qr-overlay" id="okOverlay" style="z-index:210">
+  <div class="qr-box ok-box">
+    <div class="ok-icon">✓</div>
+    <h3 style="margin:0 0 2px;font-size:21px">Nạp thành công!</h3>
+    <div class="ok-amt" id="okCredits">+0 credit</div>
+    <div class="ok-bal">Số dư hiện tại: <b id="okBalance">—</b> credit</div>
+    <button class="btn primary" id="okCreate" type="button">Bắt đầu tạo ngay</button>
+    <button class="btn ghost" id="okClose" type="button">Đóng</button>
+  </div>
+</div>
 <script>
 
 (function(){
@@ -1412,10 +1429,9 @@ function startQrPoll(code, credits){
       .then(function(d){
         if(d&&d.topup&&d.topup.status==="paid"){
           stopQrPoll();
-          var st=$("qrStatus"); st.textContent="✓ Đã nhận tiền — +"+credits+" credit đã cộng vào tài khoản của bạn!"; st.classList.add("paid");
           markNotified(qrState.topupId);
-          toast("Nạp thành công: +"+credits+" credit!");
-          loadLiveData();
+          closeQr();
+          refreshBalanceThen(function(bal){ showTopupSuccess(credits, bal); });
         }
       }).catch(function(){});
   },4000);
@@ -1441,6 +1457,20 @@ function closeQr(){ stopQrPoll(); $("qrOverlay").style.display="none"; }
 var LS_NOTIFIED="hora.studio.topupNotified.v1";
 function loadNotified(){ try{ var a=JSON.parse(localStorage.getItem(LS_NOTIFIED)||"[]"); return Array.isArray(a)? a: []; }catch(e){ return []; } }
 function markNotified(id){ if(!id) return; var a=loadNotified(); if(a.indexOf(id)<0){ a.push(id); try{ localStorage.setItem(LS_NOTIFIED, JSON.stringify(a.slice(-50))); }catch(e){} } }
+function showTopupSuccess(credits, balance){
+  $("okCredits").textContent="+"+credits+" credit";
+  $("okBalance").textContent=(typeof balance==="number")? balance : "—";
+  $("okOverlay").style.display="flex";
+}
+function closeOk(){ $("okOverlay").style.display="none"; }
+/* Tai lai so du THAT tu server roi cap nhat moi cho hien credit trong app
+   (sidebar, pill, so du lon, so cai) ngay lap tuc. */
+function refreshBalanceThen(cb){
+  fetch("/api/studio/credits",{credentials:"same-origin"}).then(function(r){ return r.ok? r.json(): null; }).then(function(c){
+    if(c){ wallet={ balance:c.balance, ledger:(c.ledger||[]).map(function(x){ return {at:x.createdAt, label:x.label||x.reason, amount:x.amount, after:x.balanceAfter}; }) }; renderCredits(); renderLedger(); }
+    if(cb) cb(c? c.balance : null);
+  }).catch(function(){ if(cb) cb(null); });
+}
 function checkTopupNotifications(){
   if(!state.user) return;
   fetch("/api/studio/topup",{credentials:"same-origin"}).then(function(r){ return r.ok? r.json(): null; }).then(function(d){
@@ -1449,7 +1479,7 @@ function checkTopupNotifications(){
     d.topups.forEach(function(t){
       if(t.status==="paid"&&t.paidAt&&new Date(t.paidAt).getTime()>since&&seen.indexOf(t.id)<0){ hit=true; total+=t.credits||0; markNotified(t.id); }
     });
-    if(hit) toast("Nạp thành công: +"+total+" credit đã cộng vào tài khoản của bạn!");
+    if(hit) refreshBalanceThen(function(bal){ showTopupSuccess(total, bal); });
   }).catch(function(){});
 }
 function renderCredits(){
@@ -1656,6 +1686,9 @@ function init(){
   Array.prototype.forEach.call(document.querySelectorAll("#st-libFilters button"),function(b){ b.addEventListener("click",function(){ Array.prototype.forEach.call(document.querySelectorAll("#st-libFilters button"),function(x){x.classList.remove("on")}); b.classList.add("on"); state.filter=b.getAttribute("data-filter"); renderLib(); renderResults(); }); });
   Array.prototype.forEach.call(document.querySelectorAll(".buy-pack"),function(b){ b.addEventListener("click",function(){ startTopup(b.getAttribute("data-pack")); }); });
   $("qrClose").addEventListener("click",closeQr);
+  $("okClose").addEventListener("click",closeOk);
+  $("okOverlay").addEventListener("click",function(e){ if(e.target===$("okOverlay")) closeOk(); });
+  $("okCreate").addEventListener("click",function(){ closeOk(); var b=document.querySelector('.st-side-item[data-sp="image"]'); if(b) b.click(); });
   $("qrOverlay").addEventListener("click",function(e){ if(e.target===$("qrOverlay")) closeQr(); });
   document.addEventListener("keydown",function(e){ if(e.key==="Escape") closeQr(); });
   $("qrCopyCode").addEventListener("click",function(){ try{ navigator.clipboard.writeText(qrState.code); }catch(err){} toast("Đã sao chép nội dung chuyển khoản."); });
