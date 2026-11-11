@@ -173,3 +173,14 @@ hoặc chạy cả web lẫn tool cùng máy khi dùng local; (3) chạy migrati
   `GET /api/studio/credits` lấy số dư thật và cập nhật mọi chỗ hiện credit
   (sidebar, pill, số dư lớn, sổ cái) — credit trên app đổi ngay tại chỗ.
   Trường hợp khách quay lại sau cũng bật đúng màn này (thay cho toast).
+
+## Cập nhật UI 2026-11-11 (tối)
+
+- Item đang tạo: thumbnail mặc định + vòng xoay, xong tự cập nhật thumbnail.
+- Đính kèm nhiều ảnh theo `references.max` của model, chips trong ô prompt
+  (ở đáy ô), nút X từng ảnh, giữ qua chuyển tab.
+- Thẻ đã tạo xong chỉ còn 1 nút "Tải xuống"; Kho trải full như tab Tạo;
+  thẻ Mua credit xếp giữa, gọn.
+- Bỏ hẳn logo chữ "HORA STUDIO" (`.st-side-brand`) khỏi Studio ở mọi
+  kích thước. Mobile: top bar 1 hàng — avatar trái, credit + Đăng xuất
+  phải; cụm prompt ghim sticky, chỉ Kết quả cuộn.
