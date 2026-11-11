@@ -397,6 +397,16 @@ body.studio #view-pricing{display:none}
 .studio-scope footer{border-top:1px solid var(--line);padding:26px 0 40px;color:var(--muted);font-size:13.5px;line-height:1.7}
 .studio-scope .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--bg);padding:12px 20px;border-radius:999px;font-weight:700;font-size:14px;opacity:0;pointer-events:none;transition:.25s;z-index:99;max-width:92vw;text-align:center}
 .studio-scope .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ===== De-collision Studio: trung ten class voi trang chu (.hero/.sub cua index) ===== */
+.studio-scope .hero{padding:0;text-align:left}
+.studio-scope .hero::before{content:none}
+.studio-scope .hero .sub{margin:0 0 20px;max-width:none}
+.studio-scope h1.display{max-width:none}
+.studio-scope .st-topbar #st-accountBtn{display:none}
+.studio-scope .st-topbar .btn.primary{margin-left:auto}
+.studio-scope .filters{justify-content:flex-start}
+.studio-scope .step .num{background:none;width:auto;height:auto;border-radius:0;display:block;font-weight:400;margin:0}
 </style></head>
 <body>
 
