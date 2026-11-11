@@ -415,6 +415,34 @@ body.buy #view-home,body.buy #view-studio,body.buy #view-pricing{display:none}
 @media(max-width:640px){.hdr-credit{display:none}}
 /* ===== TAM THOI — ban rut gon: an menu tren cung (xoa khoi nay de quay lai) ===== */
 .nav-links,.mobile-menu,#burger{display:none!important}
+
+/* ===== Studio dang app: sidebar trai (Dreamina-like) ===== */
+#view-studio .studio-scope{display:flex;align-items:flex-start}
+.st-side{position:sticky;top:76px;flex:0 0 230px;width:230px;padding:16px 12px;border-right:1px solid var(--line);min-height:calc(100vh - 76px);display:flex;flex-direction:column;gap:5px}
+.st-side-brand{font-weight:900;letter-spacing:.12em;font-size:17px;padding:4px 10px 14px}
+.st-side-brand span{background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.st-side-item{display:flex;gap:10px;align-items:center;width:100%;text-align:left;border:0;background:transparent;color:var(--ink);padding:11px 12px;border-radius:12px;font-weight:700;font-size:14.5px;cursor:pointer;font-family:inherit}
+.st-side-item:hover{background:var(--card2)}
+.st-side-item.on{background:var(--card);box-shadow:inset 0 0 0 1px var(--line)}
+.st-side-userbox{margin-top:auto;border-top:1px solid var(--line);padding:14px 6px 4px;display:flex;flex-direction:column;gap:10px}
+.st-side-credit{display:flex;justify-content:space-between;align-items:center;font-size:12.5px;color:var(--muted)}
+.st-side-credit strong{color:var(--ink);font-size:13.5px}
+.st-side-user{display:flex;gap:10px;align-items:center;color:var(--ink);font-weight:700;font-size:14px}
+.st-side-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(120deg,var(--accent),var(--accent2));color:#fff;display:grid;place-items:center;font-weight:900;text-transform:uppercase;flex:0 0 32px}
+.st-side-buy{font-size:13px;font-weight:700;color:var(--accent2)}
+.st-main{flex:1;min-width:0}
+#view-studio .studio-scope .hero-grid{grid-template-columns:1fr;max-width:880px;margin:0 auto;padding-top:24px}
+#view-studio .studio-scope h1.display,#view-studio .studio-scope .sub,#view-studio .studio-scope .style-tabs,#view-studio .studio-scope .show-grid,#view-studio .studio-scope .hero-chips,#view-studio .studio-scope .mode-tabs{display:none}
+#view-studio .studio-scope section.block:not(#st-dashboard){display:none}
+#view-studio .dash-tabs{display:none}
+@media(max-width:860px){
+  #view-studio .studio-scope{flex-direction:column}
+  .st-side{position:static;width:100%;flex:none;flex-direction:row;flex-wrap:wrap;align-items:center;min-height:0;border-right:0;border-bottom:1px solid var(--line)}
+  .st-side-brand{padding-bottom:4px;margin-right:auto}
+  .st-side-item{width:auto}
+  .st-side-userbox{margin:0 0 0 auto;border:0;padding:4px}
+  .st-side-credit,.st-side-buy{display:none}
+}
 </style><script>/* TAM THOI (ban rut gon): vao thang Studio */if(!location.hash||location.hash==='#'||location.hash==='#/')location.replace('#/studio');</script>
 </head>
 <body>
@@ -647,7 +675,22 @@ body.buy #view-home,body.buy #view-studio,body.buy #view-pricing{display:none}
 <div id="view-studio">
   <div class="studio-scope">
     <!-- ============ HERO + GENERATOR (clone layout ShrimpReel) ============ -->
-<div class="hero">
+<aside class="st-side">
+      <div class="st-side-brand">HORA <span>STUDIO</span></div>
+      <button type="button" class="st-side-item on" data-sp="image"><span class="ic">🖼️</span> Tạo ảnh</button>
+      <button type="button" class="st-side-item" data-sp="video"><span class="ic">🎬</span> Tạo video</button>
+      <button type="button" class="st-side-item" data-sp="assets"><span class="ic">🗂️</span> Kho tài nguyên</button>
+      <div class="st-side-userbox">
+        <div class="st-side-credit"><span>Token còn lại</span><strong id="st-creditSide">⚡ — credit</strong></div>
+        <a class="st-side-user" href="/account.html">
+          <span class="st-side-avatar" id="st-sideAvatar">?</span>
+          <span class="st-side-uname" id="st-sideUserName">Đăng nhập / Đăng ký</span>
+        </a>
+        <a class="st-side-buy" href="#/mua">+ Mua thêm credit</a>
+      </div>
+    </aside>
+    <div class="st-main">
+    <div class="hero">
   <div class="hero-glow"></div>
   <div class="wrap hero-grid">
     <div id="st-create">
@@ -736,7 +779,7 @@ body.buy #view-home,body.buy #view-studio,body.buy #view-pricing{display:none}
   <div class="wrap">
     <div class="dash-head">
       <div>
-        <h2>Studio của tôi</h2>
+        <h2>Kho tài nguyên</h2>
         <div class="mail" id="st-dashMail">Chế độ xem thử — đăng nhập để đồng bộ thư viện thật</div>
       </div>
       <div class="dash-actions">
@@ -812,10 +855,12 @@ body.buy #view-home,body.buy #view-studio,body.buy #view-pricing{display:none}
 
 <footer>
   <div class="wrap">
-    HORA Studio — một phần của HORA Media. Layout dựng theo mẫu mã nguồn mở <b>ShrimpReel</b> (MIT, qianshuixia/shrimpreel): generator trái / xem trước phải, dashboard 3 tab Thư viện · Thanh toán · Cài đặt, ví credit + sổ cái, kết quả tự xoá sau 30 ngày.<br>
+    HORA Studio — một phần của HORA Media. Layout dựng theo mẫu mã nguồn mở <b>ShrimpReel</b> (MIT, qianshuixia/shrimpreel): bố cục app sidebar trái (Tạo ảnh · Tạo video · Kho tài nguyên), ví credit + sổ cái, kết quả tự xoá sau 30 ngày.<br>
     Bản trên nhánh <b>feature/ai-studio</b> là bản xem thử giao diện + API khung — provider gen thật (fal.ai / Dreamina) và cổng nạp credit vào ví Studio sẽ nối ở bước tiếp theo (xem docs/studio.md).
   </div>
 </footer>
+    </div><!-- /st-main -->
+
   </div>
 </div>
 
@@ -1230,7 +1275,7 @@ function renderModels(){
 function renderCost(){ var c=costNow(); $("st-costNow").textContent=c; $("st-genBtnCost").textContent=c; }
 function renderCredits(){
   var txt="⚡ "+wallet.balance+" credit";
-  $("st-creditPill").textContent=txt; $("st-creditPill2").textContent=txt; $("st-balanceBig").textContent=wallet.balance;
+  $("st-creditPill").textContent=txt; $("st-creditPill2").textContent=txt; $("st-balanceBig").textContent=wallet.balance; var cs=$("st-creditSide"); if(cs) cs.textContent=txt;
 }
 function setMode(mode){
   state.mode=mode; state.model=MODELS[mode][0];
@@ -1415,7 +1460,7 @@ function init(){
     state.user=me.customer||me;
     var name=(state.user.displayName||state.user.email||"");
     $("st-dashMail").textContent="Đã đăng nhập: "+(state.user.email||name);
-    var ab=$("st-accountBtn"); if(ab) ab.textContent=name? name.split("@")[0] : "Tài khoản";
+    var ab=$("st-accountBtn"); if(ab) ab.textContent=name? name.split("@")[0] : "Tài khoản"; var su=$("st-sideUserName"); if(su) su.textContent=name||"Tài khoản"; var sa=$("st-sideAvatar"); if(sa) sa.textContent=(name||"?").charAt(0).toUpperCase();
     return loadLiveData();
   }).catch(function(){
     var mp=$("st-modePill"); if(mp) mp.textContent="● Chế độ xem thử (chưa đăng nhập)"; 
@@ -1424,6 +1469,37 @@ function init(){
 document.addEventListener("DOMContentLoaded",init);
 
   Array.prototype.forEach.call(document.querySelectorAll("[data-stscroll]"),function(a){a.addEventListener("click",function(){var el=document.getElementById(a.getAttribute("data-stscroll")); if(el) el.scrollIntoView({behavior:"smooth"});});});
+})();
+</script>
+
+<script>
+(function(){
+  var items=[].slice.call(document.querySelectorAll('.st-side-item'));
+  var hero=document.querySelector('#view-studio .hero');
+  var dash=document.getElementById('st-dashboard');
+  if(!items.length||!dash||!hero) return;
+  function curMode(){ var on=document.querySelector('.st-side-item.on'); return on&&on.getAttribute('data-sp')==='video'?'video':'image'; }
+  function activate(sp){
+    items.forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-sp')===sp); });
+    if(sp==='assets'){ hero.style.display='none'; dash.style.display=''; }
+    else{
+      hero.style.display=''; dash.style.display='none';
+      var t=document.getElementById(sp==='video'?'st-tabVideo':'st-tabImage'); if(t) t.click();
+    }
+    window.scrollTo({top:0});
+  }
+  items.forEach(function(b){ b.addEventListener('click', function(){ activate(b.getAttribute('data-sp')); }); });
+  var ti=document.getElementById('st-tabImage'), tv=document.getElementById('st-tabVideo');
+  if(ti) ti.addEventListener('click', function(){ items.forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-sp')==='image'); }); });
+  if(tv) tv.addEventListener('click', function(){ items.forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-sp')==='video'); }); });
+  document.addEventListener('click', function(e){
+    if(!e.target.closest) return;
+    if(e.target.closest('[data-act="reuse"]')) activate(curMode());
+    else if(e.target.closest('#st-dashboard [data-stscroll]')) activate(curMode());
+  });
+  dash.style.display='none';
+  var m=/#\/studio\?panel=(image|video|assets)/.exec(location.hash||'');
+  if(m) document.addEventListener('DOMContentLoaded', function(){ activate(m[1]); });
 })();
 </script>
 </body>
