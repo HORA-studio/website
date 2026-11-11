@@ -586,7 +586,7 @@ body.studio .st-side{top:0;min-height:100vh}
       <a href="#/" data-nav="home">Media</a><a href="#/studio" data-nav="studio">Studio</a><a href="#/blog" data-nav="blog">Blog</a>
     </nav>
     <div class="nav-actions">
-      <span class="hdr-credit" id="st-creditPill">⚡ — credit</span><a class="btn small primary" id="st-buyBtn" href="#/mua">+ Mua thêm</a><a class="btn small ghost login" id="navLogin" href="/account.html">Đăng nhập</a><div class="user-menu" id="navUserWrap" style="display:none"><a class="avatar-btn" id="navAvatar" href="/account.html" title="Tài khoản" aria-label="Mở trang tài khoản"><img id="navAvatarImg" alt="" style="display:none"><span id="navAvatarLetter">?</span></a></div>
+      <a class="btn small ghost login" id="navLogin" href="/account.html">Đăng nhập</a><div class="user-menu" id="navUserWrap" style="display:none"><a class="avatar-btn" id="navAvatar" href="/account.html" title="Tài khoản" aria-label="Mở trang tài khoản"><img id="navAvatarImg" alt="" style="display:none"><span id="navAvatarLetter">?</span></a></div>
       <button class="burger" id="burger" aria-label="Mở menu">☰</button>
     </div>
   </div>
@@ -1506,7 +1506,7 @@ function checkTopupNotifications(){
 }
 function renderCredits(){
   var txt="⚡ "+wallet.balance+" credit";
-  $("st-creditPill").textContent=txt; $("st-balanceBig").textContent=wallet.balance; var cs=$("st-creditSide"); if(cs) cs.textContent=txt;
+  $("st-balanceBig").textContent=wallet.balance; var cs=$("st-creditSide"); if(cs) cs.textContent=txt;
 }
 function setMode(mode){
   state.mode=mode; state.model=MODELS[mode][0];
