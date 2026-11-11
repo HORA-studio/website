@@ -139,15 +139,9 @@ hoặc chạy cả web lẫn tool cùng máy khi dùng local; (3) chạy migrati
   (bank = mã ngân hàng, account = số tài khoản, name = chủ tài khoản) —
   **chủ shop điền thông tin thật vào QR_CFG**; chưa điền thì modal hiện
   khung nhắc cấu hình, vẫn xem được số tiền/nội dung.
-- Sau khi khách nạp, **hệ thống thanh toán phía server của chủ shop** phát
-  mã token tương ứng số credit và ghi vào bảng `studio_redeem_tokens`
-  (migration `db/migrate-studio-redeem-2026-11-11.sql`: token, credits,
-  expires_at tuỳ chọn). Đây là phần server chủ shop tự làm theo hợp đồng này.
-- Khách dán token (trong modal QR hoặc ô Đổi mã ở tab Mua) →
-  `POST /api/studio/redeem` {token} (phải đăng nhập): đối soát token
-  (không có → 404, đã dùng → 409, hết hạn → 410), đánh dấu đã dùng bằng
-  UPDATE có guard chống dùng trùng, cộng credit qua ledger 'redeem',
-  trả {credits, balance}; UI tự tải lại số dư thật.
+- (ĐÃ BỎ 2026-11-11 theo chốt của chủ shop: không còn đường dán mã/token —
+  endpoint redeem, bảng `studio_redeem_tokens` và mọi ô nhập mã trên UI đã
+  gỡ. Nạp tiền chỉ còn luồng tự động ở mục dưới.)
 
 ### Tự động cộng credit khi nạp (SePay) — 2026-11-11
 - `POST /api/studio/topup` {pack} (đăng nhập): tạo phiên nạp `studio_topups`
@@ -164,8 +158,12 @@ hoặc chạy cả web lẫn tool cùng máy khi dùng local; (3) chạy migrati
 - UI: bấm Nạp (đã đăng nhập) → modal QR dùng mã server cấp + dòng trạng thái
   "Đang chờ chuyển khoản…"; UI tự hỏi `GET /api/studio/topup?code=` mỗi 4s,
   thấy paid thì báo "Đã nhận +X credit" và tải lại số dư. Chưa đăng nhập →
-  nhắc đăng nhập trước (credit phải cộng vào 1 tài khoản). Đổi mã token vẫn
-  giữ làm đường dự phòng trong modal.
+  nhắc đăng nhập trước (credit phải cộng vào 1 tài khoản).
+- Thông báo nhận thành công: nếu khách đóng modal trước khi tiền tới, lần
+  tải dữ liệu thật kế tiếp UI gọi `GET /api/studio/topup` (danh sách phiên
+  gần đây), phiên nào paid trong 7 ngày mà chưa từng báo (ghi nhớ theo id
+  trong localStorage `hora.studio.topupNotified.v1`) thì hiện toast
+  "Nạp thành công: +X credit đã cộng vào tài khoản của bạn!" đúng 1 lần.
 - Điều kiện chạy thật: cấu hình SePay của website (SEPAY_* env + webhook
   API key) — vốn đã dùng cho đơn license — và chạy migration
   `db/migrate-studio-topup-2026-11-11.sql`.

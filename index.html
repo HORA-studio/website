@@ -547,13 +547,9 @@ body.studio .st-side{top:0;min-height:100vh}
 .qr-miss{border:1.5px dashed #d8cfc0;border-radius:10px;padding:14px;text-align:center;color:#8a8175;font-size:13.5px;margin:8px 0}
 .qr-row{display:flex;gap:8px;align-items:center;justify-content:space-between;border-top:1px solid #f0ead9;padding:9px 0;font-size:13.5px}
 .qr-row b{font-size:14.5px}
-.qr-row button,.qr-redeem button{font:inherit;font-size:13.5px;font-weight:600;padding:7px 12px;border-radius:8px;border:1px solid #ddd3bd;background:#faf7ef;cursor:pointer}
+.qr-row button{font:inherit;font-size:13.5px;font-weight:600;padding:7px 12px;border-radius:8px;border:1px solid #ddd3bd;background:#faf7ef;cursor:pointer}
 .qr-x{position:absolute;top:10px;right:10px;width:32px;height:32px;border-radius:50%;border:1px solid #eee;background:#fff;cursor:pointer;font-size:14px}
 .qr-note{font-size:12.5px;color:#8a8175;margin-top:10px}
-.qr-redeem{display:flex;gap:8px;margin-top:6px}
-.qr-redeem input{flex:1;font:inherit;font-size:14px;padding:9px 11px;border:1.5px solid #ddd3bd;border-radius:9px;text-transform:uppercase}
-.qr-redeem button{background:#1f1b17;color:#fff;border-color:#1f1b17;padding:9px 14px}
-.qr-box label{display:block;font-size:13.5px;font-weight:600;margin-top:12px}
 </style>
 </head>
 <body>
@@ -924,11 +920,6 @@ body.studio .st-side{top:0;min-height:100vh}
     <div class="panel" id="st-panel-settings" style="display:none">
       <div class="set-grid">
         <div class="set-card">
-          <h3>🎁 Đổi mã credit</h3>
-          <p>Nhập mã quà tặng / khuyến mãi để cộng credit vào ví (tính năng redeem của ShrimpReel).</p>
-          <div class="inline-form"><input id="st-redeemInput" placeholder="XXXX-XXXX-XXXX" maxlength="20"><button class="btn small primary" id="st-redeemBtn" type="button">Đổi mã</button></div>
-        </div>
-        <div class="set-card">
           <h3>👥 Mời bạn — nhận 10 credit</h3>
           <p>Bạn bè mua gói đầu tiên qua link của bạn, bạn nhận 10 credit.</p>
           <div class="inline-form"><input id="st-inviteInput" readonly value=""><button class="btn small" id="st-inviteCopy" type="button">Sao chép</button></div>
@@ -1292,8 +1283,6 @@ route();
     <div class="qr-miss" id="qrMiss" style="display:none">Chưa cấu hình tài khoản nhận tiền — điền QR_CFG (ngân hàng + số tài khoản) trong mã nguồn trang để hiện mã QR.</div>
     <div class="qr-row"><span>Nội dung chuyển khoản</span><b id="qrCode"></b><button type="button" id="qrCopyCode">Sao chép</button></div>
     <div class="qr-row"><span>Tài khoản nhận</span><b id="qrAcct"></b></div>
-    <label for="qrTokenInput">Hoặc dán mã token (nếu bạn nhận được mã thay vì cộng tự động):</label>
-    <div class="qr-redeem"><input id="qrTokenInput" placeholder="XXXX-XXXX-XXXX" maxlength="64"><button type="button" id="qrRedeemBtn">Nhận credit</button></div>
     <div class="qr-note">Chuyển khoản đúng số tiền + đúng nội dung ở trên: credit sẽ TỰ ĐỘNG cộng vào tài khoản ngay khi tiền vào (thường dưới 1 phút). Giữ cửa sổ này mở để thấy xác nhận.</div>
   </div>
 </div>
@@ -1391,7 +1380,7 @@ function openQr(packId, topup){
   $("qrCredits").textContent="Nhận +"+pk.credits+" credit";
   if(topup && topup.instructions){
     // Che do TU DONG: ma + QR do server cap theo cau hinh SePay cua website.
-    qrState.code=topup.code;
+    qrState.code=topup.code; qrState.topupId=topup.id;
     $("qrAmount").textContent=fmtVnd(topup.amount);
     $("qrCode").textContent=topup.code;
     var ins=topup.instructions;
@@ -1401,7 +1390,7 @@ function openQr(packId, topup){
     startQrPoll(topup.code, pk.credits);
   } else {
     // Che do thu cong (server chua cau hinh SePay): QR theo QR_CFG neu co.
-    qrState.code="HORA"+Math.random().toString(36).slice(2,8).toUpperCase();
+    qrState.code="HORA"+Math.random().toString(36).slice(2,8).toUpperCase(); qrState.topupId=null;
     $("qrAmount").textContent=fmtVnd(pk.amount);
     $("qrCode").textContent=qrState.code;
     $("qrAcct").textContent=(QR_CFG.bank&&QR_CFG.account)? (QR_CFG.bank+" · "+QR_CFG.account+" · "+QR_CFG.name) : "Chưa cấu hình";
@@ -1411,7 +1400,6 @@ function openQr(packId, topup){
     } else { img.removeAttribute("src"); img.style.display="none"; miss.style.display=""; }
     st.textContent="Chuyển đúng số tiền + nội dung — hoặc dán mã token bên dưới sau khi nạp.";
   }
-  $("qrTokenInput").value="";
   $("qrOverlay").style.display="flex";
 }
 function startQrPoll(code, credits){
@@ -1425,6 +1413,7 @@ function startQrPoll(code, credits){
         if(d&&d.topup&&d.topup.status==="paid"){
           stopQrPoll();
           var st=$("qrStatus"); st.textContent="✓ Đã nhận tiền — +"+credits+" credit đã cộng vào tài khoản của bạn!"; st.classList.add("paid");
+          markNotified(qrState.topupId);
           toast("Nạp thành công: +"+credits+" credit!");
           loadLiveData();
         }
@@ -1444,17 +1433,24 @@ function startTopup(packId){
     }).catch(function(){ openQr(packId, null); });
 }
 function closeQr(){ stopQrPoll(); $("qrOverlay").style.display="none"; }
-/* Nhan credit bang ma token: token nhan thang vao server (POST /api/studio/redeem),
-   server doi soat + cong credit; thanh cong thi tai lai so du that. */
-function doRedeem(token, onOk){
-  token=String(token||"").trim(); if(!token){ toast("Hãy nhập mã token trước."); return; }
-  if(!state.user){ toast("Đăng nhập trước để nhận credit bằng mã token."); return; }
-  fetch("/api/studio/redeem",{method:"POST",headers:{"Content-Type":"application/json"},credentials:"same-origin",body:JSON.stringify({token:token})})
-    .then(function(r){ return r.json().then(function(d){ return { ok:r.ok, d:d }; }); })
-    .then(function(res){
-      if(res.ok&&res.d&&res.d.ok){ toast("Nhận thành công +"+res.d.credits+" credit!"); if(onOk) onOk(); loadLiveData(); }
-      else toast((res.d&&res.d.error&&res.d.error.message)||"Đổi mã thất bại.");
-    }).catch(function(){ toast("Không gọi được server — thử lại sau."); });
+/* ===== Thong bao nap thanh cong =====
+   Credit tu cong qua webhook khi tien vao. Neu khach dong modal truoc khi
+   tien toi, lan tai du lieu that ke tiep se kiem tra cac phien nap gan day:
+   phien nao 'paid' trong 7 ngay ma chua tung bao thi hien thong bao 1 lan
+   (ghi nho theo id phien trong localStorage, khong bao lai). */
+var LS_NOTIFIED="hora.studio.topupNotified.v1";
+function loadNotified(){ try{ var a=JSON.parse(localStorage.getItem(LS_NOTIFIED)||"[]"); return Array.isArray(a)? a: []; }catch(e){ return []; } }
+function markNotified(id){ if(!id) return; var a=loadNotified(); if(a.indexOf(id)<0){ a.push(id); try{ localStorage.setItem(LS_NOTIFIED, JSON.stringify(a.slice(-50))); }catch(e){} } }
+function checkTopupNotifications(){
+  if(!state.user) return;
+  fetch("/api/studio/topup",{credentials:"same-origin"}).then(function(r){ return r.ok? r.json(): null; }).then(function(d){
+    if(!d||!Array.isArray(d.topups)) return;
+    var seen=loadNotified(), total=0, since=Date.now()-7*86400000, hit=false;
+    d.topups.forEach(function(t){
+      if(t.status==="paid"&&t.paidAt&&new Date(t.paidAt).getTime()>since&&seen.indexOf(t.id)<0){ hit=true; total+=t.credits||0; markNotified(t.id); }
+    });
+    if(hit) toast("Nạp thành công: +"+total+" credit đã cộng vào tài khoản của bạn!");
+  }).catch(function(){});
 }
 function renderCredits(){
   var txt="⚡ "+wallet.balance+" credit";
@@ -1623,6 +1619,7 @@ function loadLiveData(){
     library=(g.generations||[]).map(function(x){ return { id:x.id, kind:x.kind, prompt:x.prompt, model:x.model, cost:x.creditCost, status:x.status, createdAt:x.createdAt, expiresAt:x.expiresAt, dataUrl:x.resultUrl||null, hue:265 }; });
     renderCredits(); renderLedger(); renderLib(); renderResults();
     var mp=$("st-modePill"); if(mp){ mp.textContent="● Đã đăng nhập — dữ liệu thật"; mp.classList.add("live"); }
+    checkTopupNotifications();
   }).catch(function(){ /* giu che do xem thu */ });
 }
 
@@ -1662,11 +1659,7 @@ function init(){
   $("qrOverlay").addEventListener("click",function(e){ if(e.target===$("qrOverlay")) closeQr(); });
   document.addEventListener("keydown",function(e){ if(e.key==="Escape") closeQr(); });
   $("qrCopyCode").addEventListener("click",function(){ try{ navigator.clipboard.writeText(qrState.code); }catch(err){} toast("Đã sao chép nội dung chuyển khoản."); });
-  $("qrRedeemBtn").addEventListener("click",function(){ doRedeem($("qrTokenInput").value,function(){ $("qrTokenInput").value=""; closeQr(); }); });
   loadServerModels();
-  $("st-redeemBtn").addEventListener("click",function(){
-    doRedeem($("st-redeemInput").value,function(){ $("st-redeemInput").value=""; });
-  });
   $("st-inviteCopy").addEventListener("click",function(){ $("st-inviteInput").select(); try{ navigator.clipboard.writeText($("st-inviteInput").value); }catch(e){ document.execCommand("copy"); } toast("Đã sao chép link mời."); });
   $("st-exportBtn").addEventListener("click",function(){
     var blob=new Blob([JSON.stringify({library:library, wallet:wallet},null,2)],{type:"application/json"});

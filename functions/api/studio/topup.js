@@ -76,7 +76,20 @@ export async function onRequestGet({ request, env }) {
   if (a.response) return a.response;
 
   const code = new URL(request.url).searchParams.get("code");
-  if (!code) return errorJson("MISSING_CODE", "Thiếu mã phiên nạp.", 400);
+  if (!code) {
+    // Danh sach phien nap gan day cua chinh khach — UI dung de bao
+    // "nap thanh cong" cho cac phien da paid ma khach chua thay thong bao.
+    const { results } = await env.DB.prepare(
+      "SELECT * FROM studio_topups WHERE customer_id = ?1 ORDER BY created_at DESC LIMIT 10"
+    ).bind(a.customer.id).all();
+    return json({
+      topups: (results || []).map((r) => ({
+        id: r.id, code: r.code, pack: r.pack, credits: r.credits,
+        amount: r.amount_vnd, status: r.status,
+        paidAt: r.paid_at || null, createdAt: r.created_at,
+      })),
+    });
+  }
   const row = await env.DB.prepare(
     "SELECT * FROM studio_topups WHERE code = ?1 AND customer_id = ?2"
   ).bind(String(code).toUpperCase(), a.customer.id).first();

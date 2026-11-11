@@ -283,18 +283,6 @@ CREATE INDEX IF NOT EXISTS idx_studio_gen_customer ON studio_generations(custome
 CREATE INDEX IF NOT EXISTS idx_studio_gen_status ON studio_generations(status, created_at);
 CREATE INDEX IF NOT EXISTS idx_studio_gen_expires ON studio_generations(expires_at);
 
--- Ma token nap tien Studio (redeem) — token do server thanh toan cua chu shop
--- ghi vao; khach doi token lay credit qua POST /api/studio/redeem (dung 1 lan).
-CREATE TABLE IF NOT EXISTS studio_redeem_tokens (
-  token TEXT PRIMARY KEY,
-  credits INTEGER NOT NULL,
-  created_at TEXT NOT NULL,
-  expires_at TEXT,
-  used_by TEXT,
-  used_at TEXT
-);
-CREATE INDEX IF NOT EXISTS idx_studio_tokens_usedby ON studio_redeem_tokens(used_by);
-
 -- Phien nap credit Studio qua SePay (tu dong cong khi webhook khop ma + tien).
 CREATE TABLE IF NOT EXISTS studio_topups (
   id TEXT PRIMARY KEY,
