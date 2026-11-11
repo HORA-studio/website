@@ -909,6 +909,18 @@ body.studio #view-studio{padding-left:10px;padding-right:10px}
 
 /* studio.html: trang gia (#/mua) - tieu de goi cuoc dung --text cua landing (den tren the toi); ep ve ink sang trong scope */
 .studio-scope .pack h3,.studio-scope .pack .credits{color:var(--ink)}
+
+/* ===== Bo sung khi tach file: CSS footer dung chung (bi loc sot luc tach) ===== */
+.foot{display:flex;gap:16px;flex-wrap:wrap;justify-content:space-between;align-items:center}
+/* ===== Sua sau audit space/padding/size: cac rule copy-account bi rule cu specificity cao hon de ===== */
+#view-studio .studio-scope{max-width:1220px;gap:22px}
+@media(min-width:861px){#view-studio .st-side{border-radius:18px}}
+.studio-scope .st-results-head h3{font-size:19px;font-weight:700}
+.studio-scope .ctrl-row .model-select,.studio-scope .ctrl-row .dur-select{padding:11px 13px}
+.studio-scope .ctrl-row #st-genBtn{padding:10px 17px;font-size:13.5px}
+@media(max-width:860px){.studio-scope .ctrl-row #st-genBtn{padding:10px 14px}}
+
+footer{padding:42px 0 110px;color:var(--muted);font-size:14px}
 </style>
 </head>
 <body class="studio">
