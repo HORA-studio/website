@@ -295,7 +295,7 @@ body.studio #view-pricing{display:none}
 .studio-scope .mode-tabs button.on{background:var(--ink);color:var(--bg)}
 .studio-scope .step-label{font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--accent2);margin:16px 0 8px}
 .studio-scope .step-label:first-of-type{margin-top:2px}
-.studio-scope textarea.prompt{width:100%;min-height:92px;resize:vertical;background:var(--bg2);border:1px solid var(--line);border-radius:14px;color:var(--ink);padding:12px 14px;font:inherit;font-size:14.5px;line-height:1.55}
+.studio-scope textarea.prompt{width:100%;min-height:138px;resize:vertical;background:var(--bg2);border:1px solid var(--line);border-radius:14px;color:var(--ink);padding:12px 14px;font:inherit;font-size:14.5px;line-height:1.55}
 .studio-scope textarea.prompt:focus{outline:2px solid var(--accent);outline-offset:1px}
 .studio-scope .drop{border:1.6px dashed var(--line);border-radius:14px;padding:14px;text-align:center;color:var(--muted);font-size:13.5px;background:var(--bg2)}
 .studio-scope .drop b{color:var(--ink)}
@@ -492,6 +492,14 @@ body.studio .st-side{top:0;min-height:100vh}
 .studio-scope .ctrl-row .pills button{padding:8px 11px;font-size:13.5px}
 .studio-scope .ctrl-row #st-genBtn{flex:0 0 auto;margin-left:auto;padding-left:18px;padding-right:18px}
 @media(max-width:640px){.studio-scope .ctrl-row #st-genBtn{flex:1 1 100%;margin-left:0}.studio-scope .ctrl-row .model-select{max-width:none;flex-basis:100%}}
+
+/* Dong bo co chu cum dieu khien */
+.studio-scope textarea.prompt,.studio-scope .model-select,.studio-scope .ctrl-row .pills button,.studio-scope .ctrl-row #st-genBtn,.studio-scope .ref-btn{font-size:14.5px}
+/* Ket qua chiem toan bo phia duoi, cot tu doi theo chieu rong */
+.results-wrap{padding:2px 26px 34px}
+.results-wrap .preview-box{margin-top:4px}
+.results-wrap .lib{grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
+@media(max-width:640px){.results-wrap{padding:2px 14px 26px}.results-wrap .lib{grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}}
 </style>
 </head>
 <body>
@@ -800,11 +808,6 @@ body.studio .st-side{top:0;min-height:100vh}
         <span class="chip">🔒 Chỉ chủ tài khoản xem được</span>
         <span class="chip">🇻🇳 Thanh toán MoMo · VNPay · SePay</span>
       </div>
-      <div class="preview-box">
-        <h3>Kết quả</h3>
-        <p class="hint" style="margin:0 0 10px">Ảnh và video bạn tạo hiện ở đây, mới nhất ở trên — đồng thời được lưu vào Kho tài nguyên (giữ 30 ngày).</p>
-        <div class="lib" id="st-resultList"></div>
-      </div>
     </div>
   </div>
 </div>
@@ -823,6 +826,14 @@ body.studio .st-side{top:0;min-height:100vh}
 </section>
 
 <!-- ============ DASHBOARD (clone tabs ShrimpReel) ============ -->
+  <div class="results-wrap">
+      <div class="preview-box">
+        <h3>Kết quả</h3>
+        <p class="hint" style="margin:0 0 10px">Ảnh và video bạn tạo hiện ở đây, mới nhất ở trên — đồng thời được lưu vào Kho tài nguyên (giữ 30 ngày).</p>
+        <div class="lib" id="st-resultList"></div>
+      </div>
+  </div>
+
 <section class="block" id="st-dashboard">
   <div class="wrap">
     <div class="dash-head">
@@ -899,12 +910,6 @@ body.studio .st-side{top:0;min-height:100vh}
 
 <div class="toast" id="st-toast"></div>
 
-<footer>
-  <div class="wrap">
-    HORA Studio — một phần của HORA Media. Layout dựng theo mẫu mã nguồn mở <b>ShrimpReel</b> (MIT, qianshuixia/shrimpreel): bố cục app sidebar trái (Tạo ảnh · Tạo video · Kho tài nguyên), ví credit + sổ cái, kết quả tự xoá sau 30 ngày.<br>
-    Bản trên nhánh <b>feature/ai-studio</b> là bản xem thử giao diện + API khung — provider gen thật (fal.ai / Dreamina) và cổng nạp credit vào ví Studio sẽ nối ở bước tiếp theo (xem docs/studio.md).
-  </div>
-</footer>
     </div><!-- /st-main -->
 
   </div>
@@ -1568,13 +1573,14 @@ document.addEventListener("DOMContentLoaded",init);
   var items=[].slice.call(document.querySelectorAll('.st-side-item'));
   var hero=document.querySelector('#view-studio .hero');
   var dash=document.getElementById('st-dashboard');
+  var res=document.querySelector('.results-wrap');
   if(!items.length||!dash||!hero) return;
   function curMode(){ var on=document.querySelector('.st-side-item.on'); return on&&on.getAttribute('data-sp')==='video'?'video':'image'; }
   function activate(sp){
     items.forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-sp')===sp); });
-    if(sp==='assets'){ hero.style.display='none'; dash.style.display=''; }
+    if(sp==='assets'){ hero.style.display='none'; dash.style.display=''; if(res) res.style.display='none'; }
     else{
-      hero.style.display=''; dash.style.display='none';
+      hero.style.display=''; dash.style.display='none'; if(res) res.style.display='';
       var t=document.getElementById(sp==='video'?'st-tabVideo':'st-tabImage'); if(t) t.click();
     }
     window.scrollTo({top:0});
