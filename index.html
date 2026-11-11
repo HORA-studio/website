@@ -849,6 +849,9 @@ body.studio .st-side-brand{display:flex;align-items:center;gap:9px;padding:2px 8
 @media(max-width:860px){
   .studio-scope .ctrl-row .dur-select[style*="none"] ~ #st-resSelect{flex:1 1 100%;max-width:none}
 }
+
+/* Studio: bo dong mo ta nho duoi tieu de panel tao */
+.studio-scope .st-gen-head h2{margin-bottom:14px}
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
@@ -1093,7 +1096,7 @@ body.studio .st-side-brand{display:flex;align-items:center;gap:9px;padding:2px 8
       <p class="sub">Đăng nhập, nạp credit, chọn model và bấm Tạo. Kết quả lưu trong thư viện riêng của tài khoản bạn trong <b>30 ngày</b> — gen lỗi được hoàn credit tự động.</p>
 
       <div class="gen-card">
-        <div class="st-gen-head"><div class="st-gen-head-t"><h2><span class="spark">✦</span> <span id="st-modeTitle">Tạo ảnh bằng AI</span></h2><p id="st-modeSub">Nhập mô tả để tạo hình ảnh chất lượng cao với HORA.</p></div><span class="st-head-credit" id="st-creditTop">⚡ — credit</span></div>
+        <div class="st-gen-head"><div class="st-gen-head-t"><h2><span class="spark">✦</span> <span id="st-modeTitle">Tạo ảnh bằng AI</span></h2></div><span class="st-head-credit" id="st-creditTop">⚡ — credit</span></div>
         <div class="mode-tabs" role="tablist" aria-label="Chọn loại tạo">
           <button type="button" id="st-tabImage" class="on">🖼 Tạo ảnh</button>
           <button type="button" id="st-tabVideo">🎬 Tạo video</button>
@@ -1693,6 +1696,7 @@ function renderResSelect(){
   var sel=$("st-resSelect"); if(!sel) return;
   var rs=(state.model&&state.model.resolutions&&state.model.resolutions.length)? state.model.resolutions : (state.mode==="video"? ["720P","1080P"] : ["1K","2K","4K"]);
   if(state.resolution&&rs.indexOf(state.resolution)<0) state.resolution="";
+  if(!state.resolution){ for(var ri=0;ri<rs.length;ri++){ if(String(rs[ri]).toUpperCase()==="720P"){ state.resolution=rs[ri]; break; } } }
   sel.innerHTML='<option value="">Chất lượng</option>'+rs.map(function(r){ return '<option value="'+r+'"'+(r===state.resolution?' selected':'')+'>'+r+'</option>'; }).join("");
   sel.onchange=function(){ state.resolution=sel.value; };
 }
