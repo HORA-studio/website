@@ -461,18 +461,7 @@ body.studio .st-side{top:0;min-height:100vh}
 
 .studio-scope .model-select{width:100%;padding:13px 14px;border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--ink);font:inherit;font-weight:600;cursor:pointer}
 
-.studio-scope .result-list{display:flex;flex-direction:column;gap:10px}
-.studio-scope .result-list .empty{border:1.5px dashed var(--line);border-radius:14px;padding:26px;text-align:center;color:var(--muted)}
-.studio-scope .rrow{display:flex;gap:12px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:10px}
-.studio-scope .rthumb{flex:0 0 92px;width:92px;height:68px;border-radius:10px;overflow:hidden;background:#111}
-.studio-scope .rthumb img,.studio-scope .rthumb canvas{width:100%;height:100%;object-fit:cover;display:block}
-.studio-scope .rmain{flex:1;min-width:0}
-.studio-scope .rprompt{font-weight:600;font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.studio-scope .rmeta{display:flex;flex-wrap:wrap;gap:5px 12px;color:var(--muted);font-size:12.5px;margin-top:4px;align-items:center}
-.studio-scope .rbadge{border:1px solid var(--line);border-radius:999px;padding:2px 8px;font-weight:700;color:var(--ink)}
-.studio-scope .racts{display:flex;gap:6px;flex-wrap:wrap}
-.studio-scope .racts button{border:1px solid var(--line);background:var(--card2);color:var(--ink);border-radius:10px;padding:7px 10px;font-weight:700;font-size:12.5px;cursor:pointer;font-family:inherit}
-@media(max-width:640px){.studio-scope .rrow{flex-wrap:wrap}.studio-scope .rthumb{flex-basis:100%;width:100%;height:150px}}
+
 </style>
 </head>
 <body>
@@ -784,8 +773,8 @@ body.studio .st-side{top:0;min-height:100vh}
       </div>
       <div class="preview-box">
         <h3>Kết quả</h3>
-        <p class="hint" style="margin:0 0 10px">Ảnh và video bạn tạo hiện ở đây dạng danh sách, mới nhất ở trên — đồng thời được lưu vào Kho tài nguyên (giữ 30 ngày).</p>
-        <div class="result-list" id="st-resultList"></div>
+        <p class="hint" style="margin:0 0 10px">Ảnh và video bạn tạo hiện ở đây, mới nhất ở trên — đồng thời được lưu vào Kho tài nguyên (giữ 30 ngày).</p>
+        <div class="lib" id="st-resultList"></div>
       </div>
     </div>
   </div>
@@ -1385,10 +1374,14 @@ function renderResults(){
   if(!library.length){ box.innerHTML='<div class="empty">Chưa có kết quả nào — hãy bấm “Tạo ngay”.</div>'; return; }
   box.innerHTML=library.map(function(it){
     var dl=daysLeft(it);
-    var st=(it.status==="processing"||it.status==="queued") ? '<span class="rbadge">Đang tạo…</span>' : '<span class="rbadge">'+(it.kind==="video"?"🎬 Video":"🖼 Ảnh")+'</span>';
-    return '<div class="rrow"><div class="rthumb">'+thumbHtml(it)+'</div><div class="rmain"><div class="rprompt">'+esc(it.prompt)+'</div>'
-      +'<div class="rmeta">'+st+'<span>'+esc(it.model)+'</span><span>-'+it.cost+' cr</span><span>'+fmtDate(it.createdAt)+'</span><span>Còn '+dl+' ngày</span></div></div>'
-      +'<div class="racts"><button type="button" data-act="dl" data-id="'+it.id+'">Tải xuống</button><button type="button" data-act="reuse" data-id="'+it.id+'">Dùng lại</button><button type="button" data-act="del" data-id="'+it.id+'">Xoá</button></div></div>';
+    var statusBadge = it.status==="processing" ? '<span class="badge status-proc">Đang tạo…</span>'
+      : it.status==="queued" ? '<span class="badge status-proc">Đang xếp hàng</span>'
+      : '<span class="badge">'+(it.kind==="video"?"🎬 Video":"🖼 Ảnh")+'</span>';
+    return '<article class="gcard"><div class="thumb">'+thumbHtml(it)+statusBadge+'<span class="badge days'+(dl<=3?" low":"")+'">Còn '+dl+' ngày</span></div>'
+      +'<div class="body"><div class="prompt">'+esc(it.prompt)+'</div>'
+      +'<div class="meta"><span>'+esc(it.model)+'</span><span>-'+it.cost+' cr</span></div>'
+      +'<div class="meta"><span>'+fmtDate(it.createdAt)+'</span><span>Xoá: '+fmtDate(it.expiresAt).split(" ")[1]+' '+new Date(it.expiresAt).toLocaleDateString("vi-VN")+'</span></div>'
+      +'<div class="acts"><button type="button" data-act="dl" data-id="'+it.id+'">Tải xuống</button><button type="button" data-act="reuse" data-id="'+it.id+'">Dùng lại</button><button type="button" data-act="del" data-id="'+it.id+'">Xoá</button></div></div></article>';
   }).join("");
   paintCanvases();
   Array.prototype.forEach.call(box.querySelectorAll("[data-act]"),function(b){
