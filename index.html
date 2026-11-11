@@ -269,7 +269,7 @@ body.studio #view-pricing{display:none}
 .studio-scope .mode-tabs button.on{background:var(--ink);color:var(--bg)}
 .studio-scope .step-label{font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--accent2);margin:16px 0 8px}
 .studio-scope .step-label:first-of-type{margin-top:2px}
-.studio-scope textarea.prompt{width:100%;min-height:138px;resize:vertical;background:var(--bg2);border:1px solid var(--line);border-radius:14px;color:var(--ink);padding:12px 14px;font:inherit;font-size:14.5px;line-height:1.55}
+.studio-scope textarea.prompt{width:100%;min-height:248px;resize:vertical;background:var(--bg2);border:1px solid var(--line);border-radius:14px;color:var(--ink);padding:12px 14px;font:inherit;font-size:14.5px;line-height:1.55}
 .studio-scope textarea.prompt:focus{outline:2px solid var(--accent);outline-offset:1px}
 .studio-scope .drop{border:1.6px dashed var(--line);border-radius:14px;padding:14px;text-align:center;color:var(--muted);font-size:13.5px;background:var(--bg2)}
 .studio-scope .drop b{color:var(--ink)}
@@ -610,6 +610,9 @@ body.studio .st-side{top:16px;min-height:calc(100vh - 32px);background:var(--car
 .st-logout-btn{width:100%;padding:11px 12px;border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:12px;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit}
 .st-logout-btn:hover{background:var(--card2)}
 @media(max-width:860px){.st-side-userbox{flex-wrap:wrap}.st-side-foot{flex:1 1 100%;order:3}}
+
+.studio-scope .ctrl-row .model-select{flex:0 1 auto;max-width:230px;padding:10px 11px}
+.studio-scope .ctrl-row .dur-select{padding:10px 11px;max-width:150px}
 </style>
 </head>
 <body>
@@ -1419,7 +1422,7 @@ function costNow(){ return state.model.perSecond ? state.model.cost*state.dur : 
 function renderModels(){
   var sel=$("st-modelSelect"); if(!sel) return;
   sel.innerHTML = MODELS[state.mode].map(function(m){
-    return '<option value="'+m.id+'">'+esc(m.name)+(m.desc? ' — '+esc(m.desc):'')+' · '+(m.perSecond? m.cost+" cr/giây" : m.cost+" credit")+'</option>';
+    return '<option value="'+m.id+'">'+esc(m.name)+'</option>';
   }).join("");
   sel.value=state.model.id;
   sel.onchange=function(){ state.model=MODELS[state.mode].filter(function(m){return m.id===sel.value})[0]||MODELS[state.mode][0]; renderDurSelect(); renderRatioPills(); renderResSelect(); renderCost(); };
@@ -1436,7 +1439,7 @@ function renderResSelect(){
   var sel=$("st-resSelect"); if(!sel) return;
   var rs=(state.model&&state.model.resolutions&&state.model.resolutions.length)? state.model.resolutions : (state.mode==="video"? ["720P","1080P"] : ["1K","2K","4K"]);
   if(state.resolution&&rs.indexOf(state.resolution)<0) state.resolution="";
-  sel.innerHTML='<option value="">Chất lượng · Mặc định</option>'+rs.map(function(r){ return '<option value="'+r+'"'+(r===state.resolution?' selected':'')+'>'+r+'</option>'; }).join("");
+  sel.innerHTML='<option value="">Chất lượng</option>'+rs.map(function(r){ return '<option value="'+r+'"'+(r===state.resolution?' selected':'')+'>'+r+'</option>'; }).join("");
   sel.onchange=function(){ state.resolution=sel.value; };
 }
 function renderRatioPills(){
