@@ -458,6 +458,8 @@ body.blog #view-home,body.blog #view-studio,body.blog #view-buy,body.blog #view-
 body.studio header{display:none}
 body.studio #view-studio{padding-top:6px}
 body.studio .st-side{top:0;min-height:100vh}
+
+.studio-scope .model-select{width:100%;padding:13px 14px;border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--ink);font:inherit;font-weight:600;cursor:pointer}
 </style>
 </head>
 <body>
@@ -732,7 +734,7 @@ body.studio .st-side{top:0;min-height:100vh}
         </div>
 
         <p class="step-label">Bước 2 · Chọn model</p>
-        <div class="model-list" id="st-modelList"></div>
+        <select class="model-select" id="st-modelSelect" aria-label="Chọn model"></select>
 
         <p class="step-label">Bước 3 · Khung hình <span id="st-durLabel" style="display:none">· Thời lượng</span></p>
         <div class="pills" id="st-ratioPills">
@@ -1292,12 +1294,12 @@ var wallet=loadWallet(), library=loadLib();
 /* ===== Render: model / chi phi ===== */
 function costNow(){ return state.model.perSecond ? state.model.cost*state.dur : state.model.cost; }
 function renderModels(){
-  $("st-modelList").innerHTML = MODELS[state.mode].map(function(m){
-    return '<button type="button" class="model'+(m.id===state.model.id?" on":"")+'" data-model="'+m.id+'"><span><b>'+esc(m.name)+'</b><small>'+esc(m.desc)+'</small></span><span class="cost">'+(m.perSecond? m.cost+" cr/giây" : m.cost+" credit")+'</span></button>';
+  var sel=$("st-modelSelect"); if(!sel) return;
+  sel.innerHTML = MODELS[state.mode].map(function(m){
+    return '<option value="'+m.id+'">'+esc(m.name)+' — '+esc(m.desc)+' · '+(m.perSecond? m.cost+" cr/giây" : m.cost+" credit")+'</option>';
   }).join("");
-  Array.prototype.forEach.call(document.querySelectorAll(".model"),function(b){
-    b.addEventListener("click",function(){ state.model=MODELS[state.mode].filter(function(m){return m.id===b.getAttribute("data-model")})[0]; renderModels(); renderCost(); });
-  });
+  sel.value=state.model.id;
+  sel.onchange=function(){ state.model=MODELS[state.mode].filter(function(m){return m.id===sel.value})[0]||MODELS[state.mode][0]; renderCost(); };
 }
 function renderCost(){ var c=costNow(); $("st-costNow").textContent=c; $("st-genBtnCost").textContent=c; }
 function renderCredits(){
