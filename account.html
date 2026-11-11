@@ -2070,6 +2070,36 @@ textarea.sh-rec-on{caret-color:transparent}
 .avatar-side .lbl{text-transform:uppercase;letter-spacing:.05em;font-size:11.5px}
 .avatar-side{flex:1 1 auto}
 #pf-name{width:100%}
+section[data-view="orders"] .orders-welcome{height:auto!important;min-height:0!important;padding:20px 26px 16px!important;background:none;border-bottom:1px solid var(--line);align-items:flex-start!important;justify-content:center!important;text-align:left!important}
+section[data-view="orders"] .orders-welcome h2{margin:0;font-size:21px;letter-spacing:-.02em}
+section[data-view="orders"] .orders-welcome p{color:var(--muted)}
+.lic-sec-head{display:flex;align-items:center;justify-content:space-between;padding:2px 26px 0;margin-bottom:12px}
+.lic-sec-head h3{margin:0;font-size:16.5px}
+.lic-count-badge{background:rgba(34,197,94,.13);color:#1f9d55;border:1px solid rgba(34,197,94,.32);font-size:12px;font-weight:700;padding:3px 10px;border-radius:999px}
+.lic-cards{display:flex;flex-direction:column;gap:14px;padding:0 26px 6px}
+.lic-card{border:1px solid var(--line);border-radius:16px;padding:16px 18px;background:var(--panel)}
+.lic-card-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+.lic-chip{text-transform:uppercase;letter-spacing:.04em;font-weight:800;font-size:11.5px;padding:3px 9px;border-radius:7px;background:rgba(59,130,246,.16);color:#4f9cf9}
+.lic-app{color:var(--muted);font-size:13px}
+.lic-flabel{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:650;margin-bottom:5px}
+.lic-label2{font-size:13px;color:var(--muted);margin-bottom:3px}
+.lic-key-row{display:flex;align-items:center;gap:8px}
+.lic-key{font-size:15px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lic-iconbtn{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer;padding:0}
+.lic-iconbtn:hover{color:var(--ink)}
+.lic-div{border-top:1px solid var(--line);margin:14px 0}
+.lic-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.lic-fval{font-size:15.5px;font-weight:650}
+.lic-days{color:#1f9d55;font-size:13px;margin-top:2px}
+.lic-device code{font-size:14px}
+.lic-sub{color:var(--muted);font-size:12.5px;margin-top:2px}
+.lic-foot{display:flex;align-items:center;justify-content:space-between;gap:14px}
+.lic-actions{display:flex;gap:8px;flex:0 0 auto}
+.lic-status{font-size:12.5px;font-weight:700}
+.lic-status.wait{color:#d97706}
+.lic-status.fail{color:#e5484d}
+.lic-empty{border:1px dashed var(--line);border-radius:16px;padding:28px;text-align:center}
+@media(max-width:760px){.lic-sec-head{padding:2px 16px 0}.lic-cards{padding:0 16px 6px}.lic-foot{flex-direction:column;align-items:flex-start}}
 @media(max-width:640px){.set-row{flex-direction:column;align-items:flex-start}}
 </style>
 </head>
@@ -2087,7 +2117,6 @@ textarea.sh-rec-on{caret-color:transparent}
       <button type="button" class="side-item active" data-view-btn="account" data-short="Thông tin"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4.5 20.5c1.4-3.8 4.4-5.5 7.5-5.5s6.1 1.7 7.5 5.5"></path></svg> Thông tin</button>
       <button type="button" class="side-item" data-view-btn="orders" data-short="Lịch sử"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M8.5 6h12M8.5 12h12M8.5 18h12"></path><path d="M4 6h.01M4 12h.01M4 18h.01"></path></svg> Lịch sử giao dịch <span id="orders-unpaid-badge" class="side-badge hidden" title="Có đơn chưa thanh toán" aria-label="Có đơn chưa thanh toán">!</span></button>
     </nav>
-    <div class="side-foot"><button class="btn" id="logout-btn" type="button">Đăng xuất</button></div>
     <nav class="side-nav hidden" id="sh-side-nav" aria-label="Mục điều khiển">
       <button type="button" class="side-item sh-nav-item active" data-sh-nav="dash" data-short="Tổng quan"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="3" width="7" height="7" rx="1.5"></rect><rect x="3" y="14" width="7" height="7" rx="1.5"></rect><rect x="14" y="14" width="7" height="7" rx="1.5"></rect></svg> Tổng quan</button>
       <button type="button" class="side-item sh-nav-item" data-sh-nav="create" data-short="Tạo task"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v8M8 12h8"></path></svg> Tạo task</button>
@@ -2246,12 +2275,10 @@ textarea.sh-rec-on{caret-color:transparent}
 
     <section class="card view-panel hidden" data-view="orders">
       <button id="pay-cart-btn" class="hidden" type="button" title="Đơn đang chờ thanh toán — bấm để xem mã QR" aria-label="Đơn đang chờ thanh toán — bấm để xem mã QR"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="20.4" r="1.5"/><circle cx="17" cy="20.4" r="1.5"/><path d="M2.5 3h2.1l2.55 12.1a1.6 1.6 0 0 0 1.57 1.27h7.86a1.6 1.6 0 0 0 1.56-1.28L20.6 6.9H5.9"/></svg><span class="pay-cart-dot"></span></button>
-      <div class="orders-welcome"><div><h2>Lịch sử giao dịch</h2><p>Đơn mua, license và số ngày còn lại của bạn.</p></div></div>
+      <div class="orders-welcome"><div><h2>Lịch sử giao dịch</h2><p>Quản lý đơn mua, license và thời hạn sử dụng của bạn.</p></div></div>
       <div class="orders-body">
-      <div class="lic-table-wrap"><table class="lic-table">
-          <thead><tr><th>License key</th><th>Gói</th><th>Máy đã sử dụng</th><th>Thời gian</th><th>Hạn dùng</th><th>Mua hàng</th><th></th></tr></thead>
-          <tbody id="ord-list"></tbody>
-        </table></div>
+      <div class="lic-sec-head" id="lic-sec-head"><h3>License của bạn</h3><span class="lic-count-badge hidden" id="lic-count-badge"></span></div>
+      <div id="ord-list" class="lic-cards"></div>
     </div>
     </section>
 
@@ -3030,15 +3057,31 @@ function renderHistory() {
   const html = [];
   for (const l of licenses) {
     const ordOfLic = l.orderId ? orders.find((x) => x.id === l.orderId) : null;
-    html.push(`<tr>
-      <td class="key-cell" data-label="License key">${licenseCell(l)}</td>
-      <td data-label="Gói"><span class="lic-chip">${l.tier ? esc(tierName(l.tier)) : "—"}</span>${(() => { const sub = []; if (l.app) sub.push(esc(APP_VI[l.app] || l.app)); if (l.organization === "promo") sub.push("Dùng thử"); if (ordOfLic && ordOfLic.bonusDays > 0) sub.push(`+${ordOfLic.bonusDays} ngày KM`); return sub.length ? `<span class="cell-sub">${sub.join(" · ")}</span>` : ""; })()}</td>
-      <td data-label="Máy đã sử dụng">${deviceCell(l)}</td>
-      <td data-label="Thời gian">${esc(fmtDay(l.createdAt))}</td>
-      <td class="wrap-cell" data-label="Hạn dùng">${expiryCell(l)}</td>
-      <td data-label="Mua hàng">${bindingCell(l)}</td>
-      <td class="export-cell no-label"><span class="cell-actions"><button type="button" class="export-btn" data-export-kind="license" data-export-id="${esc(l.id || "")}" title="Xuất đơn hàng này"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 11 5 5 5-5"></path><path d="M4 21h16"></path></svg> Xuất</button><button type="button" class="export-btn" data-copy="${esc(l.licenseKey || "")}" title="Sao chép license key">Copy</button></span></td>
-    </tr>`);
+    let expMain, expSub = "";
+    if (l.status === "revoked") expMain = "Đã bị thu hồi";
+    else if (!l.expiresAt) expMain = "Chưa kích hoạt";
+    else {
+      const days = Math.ceil((new Date(l.expiresAt).getTime() - Date.now()) / 86400000);
+      if (days < 0) expMain = "Đã hết hạn (" + esc(fmtDay(l.expiresAt)) + ")";
+      else { expMain = esc(fmtDay(l.expiresAt)); expSub = `<div class="lic-days">Còn ${days} ngày${ordOfLic && ordOfLic.bonusDays > 0 ? ` (+${ordOfLic.bonusDays} ngày KM)` : ""}</div>`; }
+    }
+    const appText = [l.app ? (APP_VI[l.app] || l.app) : "", l.organization === "promo" ? "Dùng thử" : ""].filter(Boolean).join(" · ");
+    const keyShort = l.licenseKey ? (l.licenseKey.length > 24 ? l.licenseKey.slice(0, 24) + "…" : l.licenseKey) : "—";
+    const buyText = l.orderId ? shortId(l.orderId) : (l.source === "claim" ? "Nhận key có sẵn" : "Được cấp");
+    html.push(`<article class="lic-card">
+      <div class="lic-card-top"><span class="lic-chip">${l.tier ? esc(tierName(l.tier)) : "—"}</span><span class="lic-app">${esc(appText)}</span></div>
+      <div class="lic-flabel">License key</div>
+      <div class="lic-key-row"><code class="lic-key" title="${esc(l.licenseKey || "")}">${esc(keyShort)}</code><button type="button" class="lic-iconbtn" data-copy="${esc(l.licenseKey || "")}" title="Sao chép license key" aria-label="Sao chép license key"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"></rect><path d="M5 15V5a2 2 0 0 1 2-2h10"></path></svg></button></div>
+      <div class="lic-div"></div>
+      <div class="lic-grid">
+        <div><div class="lic-label2">Ngày kích hoạt</div><div class="lic-fval">${esc(fmtDay(l.createdAt))}</div></div>
+        <div><div class="lic-label2">Ngày hết hạn</div><div class="lic-fval">${expMain}</div>${expSub}</div>
+      </div>
+      <div class="lic-device"><div class="lic-flabel">Thiết bị đã sử dụng</div>${l.deviceId ? `<code title="${esc(l.deviceId)}">${esc(shortId(l.deviceId))}</code>${l.deviceBoundAt ? `<div class="lic-sub">Gắn nhất: ${esc(fmtDay(l.deviceBoundAt))}</div>` : ""}` : '<span class="muted">Chưa gắn máy</span>'}</div>
+      <div class="lic-div"></div>
+      <div class="lic-foot"><div><div class="lic-label2">Mua hàng</div><div class="lic-fval">${esc(buyText)}</div></div>
+      <div class="lic-actions"><button type="button" class="btn small" data-export-kind="license" data-export-id="${esc(l.id || "")}">Xuất</button><button type="button" class="btn small primary" data-copy="${esc(l.licenseKey || "")}">Copy key</button></div></div>
+    </article>`);
   }
   const licensedOrders = new Set(licenses.map((l) => l.orderId).filter(Boolean));
   const licensedIds = new Set(licenses.map((l) => l.id));
@@ -3046,25 +3089,28 @@ function renderHistory() {
     if (licensedOrders.has(o.id) || (o.licenseId && licensedIds.has(o.licenseId))) continue;
     if (!["created", "awaiting_payment", "paid_pending_issue", "payment_failed"].includes(o.status)) continue;
     if (["created", "awaiting_payment"].includes(o.status) && Date.now() > payDeadline(o)) continue; // Het 15 phut cho thanh toan -> an khoi Lich su
-    html.push(`<tr class="pending-row${o.status === "payment_failed" ? " error-row" : ""}">
-      <td class="muted" data-label="License key">Chưa có license</td>
-      <td data-label="Gói"><span class="lic-chip">${esc((PLANS[o.plan] || {}).name || o.plan)} — ${esc(PERIODS[o.period] || o.period)}</span></td>
-      <td class="muted" data-label="Máy đã sử dụng">—</td>
-      <td data-label="Thời gian">${esc(fmtDay(o.createdAt))}</td>
-      ${["created", "awaiting_payment"].includes(o.status) ? `<td data-label="Hạn dùng"><span class="countdown" data-deadline="${payDeadline(o)}">Còn ${fmtCountdown(payDeadline(o) - Date.now())}</span></td>` : '<td class="muted" data-label="Hạn dùng">—</td>'}
-      <td data-label="Mua hàng"><code title="${esc(o.id)}">${esc(shortId(o.id))}</code><br>${o.status === "payment_failed" ? `<span class="status-fail">${esc(STATUS_VI[o.status])}</span>` : ["created", "awaiting_payment"].includes(o.status) ? `<span class="status-wait">${esc(STATUS_VI[o.status])}</span>` : esc(STATUS_VI[o.status] || o.status)}</td>
-      <td class="export-cell no-label">${["created", "awaiting_payment"].includes(o.status)
-        ? `<button type="button" class="export-btn pay-open-btn" data-pay-open="${esc(o.id)}" title="Mở lại màn thanh toán">Mở</button>`
-        : `<button type="button" class="export-btn" data-export-kind="order" data-export-id="${esc(o.id || "")}" title="Xuất đơn hàng này"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 11 5 5 5-5"></path><path d="M4 21h16"></path></svg> Xuất</button>`}</td>
-    </tr>`);
+    const waiting = ["created", "awaiting_payment"].includes(o.status);
+    html.push(`<article class="lic-card pending">
+      <div class="lic-card-top"><span class="lic-chip">${esc((PLANS[o.plan] || {}).name || o.plan)} — ${esc(PERIODS[o.period] || o.period)}</span><span class="lic-status ${o.status === "payment_failed" ? "fail" : "wait"}">${esc(STATUS_VI[o.status] || o.status)}</span></div>
+      <div class="lic-grid">
+        <div><div class="lic-label2">Thời gian</div><div class="lic-fval">${esc(fmtDay(o.createdAt))}</div></div>
+        <div><div class="lic-label2">Hạn dùng</div><div class="lic-fval">${waiting ? `<span class="countdown" data-deadline="${payDeadline(o)}">Còn ${fmtCountdown(payDeadline(o) - Date.now())}</span>` : "—"}</div></div>
+      </div>
+      <div class="lic-div"></div>
+      <div class="lic-foot"><div><div class="lic-label2">Mua hàng</div><div class="lic-fval"><code title="${esc(o.id)}">${esc(shortId(o.id))}</code></div><div class="lic-sub">Chưa có license</div></div>
+      <div class="lic-actions">${waiting ? `<button type="button" class="btn small primary" data-pay-open="${esc(o.id)}">Mở thanh toán</button>` : `<button type="button" class="btn small" data-export-kind="order" data-export-id="${esc(o.id || "")}">Xuất</button>`}</div></div>
+    </article>`);
   }
   // Badge menu Lich su: con don chua thanh toan (dang cho, con trong cua so 15 phut, chua co license) thi hien cham than do
   const hasUnpaid = orders.some((o) => ["created", "awaiting_payment"].includes(o.status) && Date.now() <= payDeadline(o) && !licensedOrders.has(o.id) && !(o.licenseId && licensedIds.has(o.licenseId)));
   const unpaidBadge = $("orders-unpaid-badge");
   if (unpaidBadge) unpaidBadge.classList.toggle("hidden", !hasUnpaid);
-  body.innerHTML = html.length ? html.join("") : '<tr class="empty-row"><td colspan="7"><div class="empty-title">Chưa có dữ liệu</div><div class="empty-sub">Lịch sử đơn hàng sẽ lưu ở đây</div></td></tr>';
+  const secHead = $("lic-sec-head"), cntBadge = $("lic-count-badge");
+  if (secHead) secHead.classList.toggle("hidden", licenses.length === 0);
+  if (cntBadge) { cntBadge.textContent = licenses.length + " License"; cntBadge.classList.toggle("hidden", licenses.length === 0); }
+  body.innerHTML = html.length ? html.join("") : '<div class="lic-empty"><div class="empty-title">Chưa có dữ liệu</div><div class="empty-sub">Lịch sử đơn hàng sẽ lưu ở đây</div></div>';
   document.querySelectorAll("[data-copy]").forEach((b) => b.addEventListener("click", async () => {
-    try { await navigator.clipboard.writeText(b.dataset.copy); b.textContent = "Đã copy"; } catch { /* clipboard bi chan */ }
+    try { await navigator.clipboard.writeText(b.dataset.copy); if (!b.querySelector("svg")) b.textContent = "Đã copy"; } catch { /* clipboard bi chan */ }
   }));
   // Nut Xuat don hang: dinh dang JSON/PDF se lam sau — hien tai chi thong bao.
   document.querySelectorAll("[data-pay-open]").forEach((b) => b.addEventListener("click", () => {
@@ -3245,8 +3291,7 @@ document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !payShee
 $("pay-cart-btn").addEventListener("click", openPaySheet);
 
 
-if ($("logout-btn-2")) $("logout-btn-2").addEventListener("click", () => { const b = $("logout-btn"); if (b) b.click(); });
-$("logout-btn").addEventListener("click", async () => {
+const lbMain = $("logout-btn-2"); if (lbMain) lbMain.addEventListener("click", async () => {
   await api("/api/auth/logout", { method: "POST", body: "{}" });
   location.reload();
 });
