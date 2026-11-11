@@ -36,6 +36,19 @@ export const CREDIT_PACKS = {
   "topup-1000": { name: "Nạp 1000K", credits: 2000, amountVnd: 1000000 },
 };
 
+// Tim model cho 1 yeu cau gen: uu tien bang gia tinh; khi da noi Dreamina
+// Tool thi chap nhan ca model id that cua tool (gia web tam mac dinh).
+export function resolveModel(env, kind, modelId) {
+  const m = findModel(kind, modelId);
+  if (m) return m;
+  if (toolBase(env) && modelId) {
+    return kind === "video"
+      ? { id: modelId, name: modelId, costPerSecond: 6 }
+      : { id: modelId, name: modelId, cost: 10 };
+  }
+  return null;
+}
+
 export function findModel(kind, modelId) {
   const list = STUDIO_MODELS[kind] || [];
   return list.find((m) => m.id === modelId) || null;

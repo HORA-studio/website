@@ -116,3 +116,35 @@ máy chạy tool (OAuth — job test 2026-11-11 chạy đúng pipeline và dừn
 Cloudflare Functions (URL public/tunnel) nếu web chạy trên Pages thật —
 hoặc chạy cả web lẫn tool cùng máy khi dùng local; (3) chạy migration D1 +
 đặt các biến môi trường trên.
+
+## Model thật từ tool + nạp tiền QR/token (2026-11-11)
+
+### Model + mốc thời lượng trên UI
+- `GET /api/studio/models` (không cần đăng nhập): khi có `STUDIO_TOOL_URL`,
+  proxy `GET /api/models?type=image|video` của Dreamina Tool và chuẩn hoá
+  schema CLI (model/displayName/modes[].flags) thành {id, name, desc, cost,
+  perSecond, durations[], ratios[]} — durations rút từ flag duration
+  (min–max/step, tối đa 8 mốc), ratios từ flag ratio. Tool lỗi/chưa đăng nhập
+  Dreamina → trả danh mục tĩnh trong `_studio.js` (source: "static").
+- UI Studio tự gọi endpoint này khi mở: dropdown model, pill tỉ lệ và pill
+  thời lượng dựng theo đúng model đang chọn; giá web tạm (model lạ: ảnh 10cr,
+  video 6cr/giây — chỉnh trong models.js `DEFAULT_PRICE`).
+- `generations` POST chấp nhận model id của tool khi đã nối (resolveModel),
+  thời lượng video nhận 1–60s theo model (không nối tool vẫn kẹp 5/10s).
+
+### Nạp tiền: QR → token → credit
+- Bấm 1 gói nạp (tab Mua credit hoặc view #/mua) → mở modal QR: số tiền đúng
+  gói, nội dung chuyển khoản `HORAxxxxxx` sinh riêng mỗi lần mở, ảnh QR từ
+  VietQR (`img.vietqr.io`) theo cấu hình `QR_CFG` trong index.html
+  (bank = mã ngân hàng, account = số tài khoản, name = chủ tài khoản) —
+  **chủ shop điền thông tin thật vào QR_CFG**; chưa điền thì modal hiện
+  khung nhắc cấu hình, vẫn xem được số tiền/nội dung.
+- Sau khi khách nạp, **hệ thống thanh toán phía server của chủ shop** phát
+  mã token tương ứng số credit và ghi vào bảng `studio_redeem_tokens`
+  (migration `db/migrate-studio-redeem-2026-11-11.sql`: token, credits,
+  expires_at tuỳ chọn). Đây là phần server chủ shop tự làm theo hợp đồng này.
+- Khách dán token (trong modal QR hoặc ô Đổi mã ở tab Mua) →
+  `POST /api/studio/redeem` {token} (phải đăng nhập): đối soát token
+  (không có → 404, đã dùng → 409, hết hạn → 410), đánh dấu đã dùng bằng
+  UPDATE có guard chống dùng trùng, cộng credit qua ledger 'redeem',
+  trả {credits, balance}; UI tự tải lại số dư thật.

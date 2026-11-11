@@ -9,7 +9,7 @@
 // DELETE — ?id=... : khach xoa muc cua chinh minh (file R2 do cron don theo
 //          result_key, hoac xoa ngay khi co worker).
 import { json, errorJson, readJson, requireAuth } from "../_lib.js";
-import { findModel, generationCost, generationOut, addLedger, getBalance, newStudioId, RETENTION_DAYS, toolBase, toolModelId, toolCreateJob, toolGetJob, toolFileUrl } from "./_studio.js";
+import { findModel, resolveModel, generationCost, generationOut, addLedger, getBalance, newStudioId, RETENTION_DAYS, toolBase, toolModelId, toolCreateJob, toolGetJob, toolFileUrl } from "./_studio.js";
 
 export async function onRequestGet({ request, env }) {
   const a = await requireAuth(env, request);
@@ -76,10 +76,12 @@ export async function onRequestPost({ request, env }) {
   const modelId = String(body.model || "");
   if (kind !== "image" && kind !== "video") return errorJson("INVALID_KIND", "Loại tạo phải là 'image' hoặc 'video'.", 422);
   if (!prompt || prompt.length > 2000) return errorJson("INVALID_PROMPT", "Mô tả không được trống và tối đa 2000 ký tự.", 422);
-  const model = findModel(kind, modelId);
+  const model = resolveModel(env, kind, modelId);
   if (!model) return errorJson("INVALID_MODEL", "Model không hợp lệ cho loại tạo này.", 422);
 
-  const duration = kind === "video" ? (Number(body.duration) === 10 ? 10 : 5) : null;
+  const duration = kind === "video"
+    ? (toolBase(env) ? Math.min(60, Math.max(1, Math.round(Number(body.duration) || 5))) : (Number(body.duration) === 10 ? 10 : 5))
+    : null;
   const ratio = ["1:1", "9:16", "16:9", "3:4"].includes(String(body.ratio)) ? String(body.ratio) : "9:16";
   const cost = generationCost(kind, model, { duration });
 
