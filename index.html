@@ -825,6 +825,11 @@ body.studio .st-side-brand{display:flex;align-items:center;gap:9px;padding:2px 8
 /* Studio v2 - sua: userbox day xuong day sidebar + bo khoang trong duoi panel tao */
 .studio-scope .st-side-userbox{margin-top:auto}
 #view-studio .studio-scope .hero-grid{gap:0;padding:22px 22px 20px}
+
+/* Studio v2: bo topbar mobile, credit ngang hang tieu de panel tao */
+.st-gen-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.st-head-credit{display:none}
+@media(max-width:860px){.st-head-credit{display:inline-flex;align-items:center;background:var(--card2);border:1px solid var(--line);border-radius:999px;padding:6px 10px;font-size:12.5px;font-weight:700;color:var(--ink);white-space:nowrap;margin-top:1px}.st-gen-head h2{font-size:19px;white-space:nowrap}}
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
@@ -1037,16 +1042,6 @@ body.studio .st-side-brand{display:flex;align-items:center;gap:9px;padding:2px 8
 </div>
 
 <div id="view-studio">
-<div class="st-topbar">
-  <button type="button" class="st-burger" id="st-burger" aria-label="Menu"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
-  <div class="st-top-brand"><span class="st-logo-h">H</span><span class="st-logo-t">HORA</span></div>
-  <span class="st-top-credit" id="st-creditTop">⚡ — credit</span>
-  <div class="st-burger-menu" id="st-burgerMenu" hidden>
-    <a href="/account.html">Tài khoản</a>
-    <a href="/account.html" id="st-burgerLogin">Đăng nhập / Đăng ký</a>
-    <button type="button" id="st-burgerLogout" style="display:none">Đăng xuất</button>
-  </div>
-</div>
   <div class="studio-scope">
     <!-- ============ HERO + GENERATOR (clone layout ShrimpReel) ============ -->
 <aside class="st-side">
@@ -1079,7 +1074,7 @@ body.studio .st-side-brand{display:flex;align-items:center;gap:9px;padding:2px 8
       <p class="sub">Đăng nhập, nạp credit, chọn model và bấm Tạo. Kết quả lưu trong thư viện riêng của tài khoản bạn trong <b>30 ngày</b> — gen lỗi được hoàn credit tự động.</p>
 
       <div class="gen-card">
-        <div class="st-gen-head"><h2><span class="spark">✦</span> <span id="st-modeTitle">Tạo ảnh bằng AI</span></h2><p id="st-modeSub">Nhập mô tả để tạo hình ảnh chất lượng cao với HORA.</p></div>
+        <div class="st-gen-head"><div class="st-gen-head-t"><h2><span class="spark">✦</span> <span id="st-modeTitle">Tạo ảnh bằng AI</span></h2><p id="st-modeSub">Nhập mô tả để tạo hình ảnh chất lượng cao với HORA.</p></div><span class="st-head-credit" id="st-creditTop">⚡ — credit</span></div>
         <div class="mode-tabs" role="tablist" aria-label="Chọn loại tạo">
           <button type="button" id="st-tabImage" class="on">🖼 Tạo ảnh</button>
           <button type="button" id="st-tabVideo">🎬 Tạo video</button>
