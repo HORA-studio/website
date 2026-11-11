@@ -97,7 +97,10 @@ export async function onRequestPost({ request, env }) {
 
   const expires = new Date(now.getTime() + RETENTION_DAYS * 24 * 3600 * 1000);
   const resolution = String(body.resolution || "").slice(0, 16);
-  const params = { ratio, ...(duration ? { duration } : {}), ...(resolution ? { resolution } : {}), ...(body.sourceKey ? { sourceKey: String(body.sourceKey) } : {}) };
+  const refs = Array.isArray(body.refs)
+    ? body.refs.filter((r) => typeof r === "string" && r.startsWith("data:image/") && r.length < 12_000_000).slice(0, 10)
+    : [];
+  const params = { ratio, ...(duration ? { duration } : {}), ...(resolution ? { resolution } : {}), ...(body.sourceKey ? { sourceKey: String(body.sourceKey) } : {}), ...(refs.length ? { refCount: refs.length } : {}) };
   await env.DB.prepare(
     `INSERT INTO studio_generations
        (id, customer_id, kind, prompt, model, model_name, params_json, status, credit_cost, created_at, expires_at)
@@ -113,6 +116,7 @@ export async function onRequestPost({ request, env }) {
       ratio,
       ...(duration ? { duration } : {}),
       ...(resolution ? { resolution } : {}),
+      ...(refs.length ? { refs } : {}),
       creditCeiling: Number(env.STUDIO_TOOL_CEILING || 0),
     });
     if (sent.ok && sent.job) {

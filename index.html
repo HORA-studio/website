@@ -613,6 +613,27 @@ body.studio .st-side{top:16px;min-height:calc(100vh - 32px);background:var(--car
 
 .studio-scope .ctrl-row .model-select{flex:0 1 auto;max-width:230px;padding:10px 11px}
 .studio-scope .ctrl-row .dur-select{padding:10px 11px;max-width:150px}
+
+#st-dashboard{border-top:0;padding-top:10px}
+#st-dashboard .wrap{max-width:none;padding:0 26px}
+.buy-panel .buy-grid{max-width:980px;margin-left:auto;margin-right:auto}
+@media(min-width:861px){.buy-panel .buy-card{flex:1 1 150px;max-width:178px}}
+.studio-scope .buy-card{aspect-ratio:4/5}
+.studio-scope .prompt-box{flex:1;min-width:0;border:1px solid var(--line);border-radius:14px;background:var(--bg2);padding:10px 12px}
+.studio-scope .prompt-box:focus-within{border-color:var(--acc)}
+.studio-scope .prompt-box textarea.prompt{border:0;background:transparent;min-height:216px;padding:4px}
+.ref-strip{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+.ref-chip{position:relative;width:54px;height:54px;flex:0 0 auto}
+.ref-chip img{width:54px;height:54px;object-fit:cover;border-radius:10px;border:1px solid var(--line);display:block}
+.ref-chip .ref-x{position:absolute;top:-7px;right:-7px;width:19px;height:19px;border-radius:50%;background:#1c2333;color:#fff;border:1px solid rgba(255,255,255,.4);font-size:10px;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;z-index:2}
+.studio-scope .prompt-row{flex-wrap:wrap}
+.ref-note{flex:0 0 100%;font-size:12px;color:var(--mut);margin-top:6px}
+.studio-scope .thumb .spinwrap{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(8,10,18,.28);z-index:3}
+.studio-scope .spinner{width:42px;height:42px;border-radius:50%;border:4px solid rgba(255,255,255,.35);border-top-color:#fff;animation:stspin .8s linear infinite}
+@keyframes stspin{to{transform:rotate(360deg)}}
+.studio-scope .thumb.loading canvas{animation:stpulse 1.5s ease-in-out infinite}
+@keyframes stpulse{0%,100%{opacity:.5}50%{opacity:.95}}
+.studio-scope .badge.status-fail{background:#e5484d;color:#fff}
 </style>
 </head>
 <body>
@@ -862,15 +883,12 @@ body.studio .st-side{top:16px;min-height:calc(100vh - 32px);background:var(--car
         </div>
 
         <div class="prompt-row">
-          <textarea class="prompt" id="st-promptInput" placeholder="Mô tả ảnh bạn muốn tạo…"></textarea>
-          <input type="file" id="st-refFile" accept="image/*" hidden>
-        </div>
-        <div id="st-refBlock" style="margin-top:8px">
-          <div class="ref-preview" id="st-refPreview" style="display:none">
-            <img id="st-refImg" alt="Ảnh tham chiếu">
-            <div class="ref-meta"><b id="st-refName">Ảnh tham chiếu</b><span>Đã đính kèm — ảnh gốc tự xoá sau 7 ngày</span></div>
-            <button type="button" class="ref-remove" id="st-refRemove">✕ Bỏ ảnh</button>
+          <div class="prompt-box">
+            <div class="ref-strip" id="st-refStrip" style="display:none"></div>
+            <textarea class="prompt" id="st-promptInput" placeholder="Mô tả ảnh bạn muốn tạo…"></textarea>
           </div>
+          <div class="ref-note" id="st-refNote" style="display:none"></div>
+          <input type="file" id="st-refFile" accept="image/*" multiple hidden>
         </div>
 
         <div class="ctrl-row">
@@ -1397,10 +1415,28 @@ var STYLES = {
   cinema:  { label:"Điện ảnh", items:[["Ảnh gốc","Khung hình thường"],["Ảnh AI","Màu phim điện ảnh"],["Video AI","Panning chậm, 24fps"]] }
 };
 var LS_LIB="hora.studio.library.v1", LS_WALLET="hora.studio.wallet.v1";
-var state={ mode:"image", model:MODELS.image[0], ratio:"9:16", dur:5, resolution:"", user:null, live:false, filter:"all", tab:"library" };
+var state={ mode:"image", model:MODELS.image[0], ratio:"9:16", dur:5, resolution:"", user:null, live:false, filter:"all", tab:"library", refs:[] };
 var $=function(id){return document.getElementById(id)};
 function toast(msg){ var t=$("st-toast"); t.textContent=msg; t.classList.add("on"); setTimeout(function(){t.classList.remove("on")},2600); }
 function esc(s){ return String(s||"").replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]}); }
+function refMax(){ var m=state.model; return (m&&m.refsMax)? m.refsMax : 4; }
+function renderRefs(){
+  var strip=$("st-refStrip"), note=$("st-refNote"); if(!strip) return;
+  if(!state.refs.length){ strip.style.display="none"; strip.innerHTML=""; if(note) note.style.display="none"; return; }
+  strip.style.display="flex";
+  strip.innerHTML=state.refs.map(function(r,i){ return '<span class="ref-chip"><img src="'+r.dataUrl+'" alt=""><button type="button" class="ref-x" data-idx="'+i+'" aria-label="Xoá ảnh đính kèm">✕</button></span>'; }).join("");
+  if(note){ note.style.display=""; note.textContent="Đã đính kèm "+state.refs.length+"/"+refMax()+" ảnh — ảnh gốc tự xoá sau 7 ngày."; }
+}
+function syncRefs(){ var mx=refMax(); if(state.refs.length>mx){ state.refs=state.refs.slice(0,mx); toast("Model này tối đa "+mx+" ảnh đính kèm — đã bỏ bớt ảnh thừa."); } renderRefs(); }
+function addRefFiles(files){
+  Array.prototype.forEach.call(files||[],function(f){
+    if(!/^image\//.test(f.type||"")){ toast("Hãy chọn file ảnh."); return; }
+    if(state.refs.length>=refMax()){ toast("Model này tối đa "+refMax()+" ảnh đính kèm."); return; }
+    var rd=new FileReader();
+    rd.onload=function(){ if(state.refs.length<refMax()){ state.refs.push({name:f.name||"Ảnh đính kèm", dataUrl:String(rd.result)}); } renderRefs(); };
+    rd.readAsDataURL(f);
+  });
+}
 function daysLeft(it){ var ms=new Date(it.expiresAt).getTime()-Date.now(); return Math.max(0,Math.ceil(ms/86400000)); }
 function fmtDate(iso){ try{ return new Date(iso).toLocaleString("vi-VN"); }catch(e){ return iso; } }
 
@@ -1427,7 +1463,7 @@ function renderModels(){
   sel.value=state.model.id;
   sel.onchange=function(){ state.model=MODELS[state.mode].filter(function(m){return m.id===sel.value})[0]||MODELS[state.mode][0]; renderDurSelect(); renderRatioPills(); renderResSelect(); renderCost(); };
 }
-function renderCost(){ var c=costNow(); var cn=$("st-costNow"); if(cn) cn.textContent=c; $("st-genBtnCost").textContent=c; }
+function renderCost(){ syncRefs(); var c=costNow(); var cn=$("st-costNow"); if(cn) cn.textContent=c; $("st-genBtnCost").textContent=c; }
 function renderDurSelect(){
   var sel=$("st-durSelect"); if(!sel) return;
   var ds=(state.model&&state.model.durations&&state.model.durations.length)? state.model.durations : [5,10];
@@ -1483,6 +1519,14 @@ function openQr(packId, topup){
     img.src=ins.qr_url; img.style.display=""; miss.style.display="none";
     st.textContent="Đang chờ chuyển khoản — credit tự cộng ngay khi tiền vào…";
     startQrPoll(topup.code, pk.credits);
+  } else if(topup && topup.code){
+    // Co phien nap tren server nhung server chua cau hinh SePay: giu ma STU that cua phien.
+    qrState.code=topup.code; qrState.topupId=topup.id;
+    $("qrAmount").textContent=fmtVnd(topup.amount);
+    $("qrCode").textContent=topup.code;
+    $("qrAcct").textContent="Chưa cấu hình";
+    img.removeAttribute("src"); img.style.display="none"; miss.style.display="";
+    st.textContent="Server chưa cấu hình tài khoản nhận tiền (SePay) — chưa thể nạp tự động.";
   } else {
     // Che do thu cong (server chua cau hinh SePay): QR theo QR_CFG neu co.
     qrState.code="HORA"+Math.random().toString(36).slice(2,8).toUpperCase(); qrState.topupId=null;
@@ -1493,7 +1537,7 @@ function openQr(packId, topup){
       img.src="https://img.vietqr.io/image/"+QR_CFG.bank+"-"+QR_CFG.account+"-compact2.png?amount="+pk.amount+"&addInfo="+encodeURIComponent(qrState.code)+"&accountName="+encodeURIComponent(QR_CFG.name);
       img.style.display=""; miss.style.display="none";
     } else { img.removeAttribute("src"); img.style.display="none"; miss.style.display=""; }
-    st.textContent="Chuyển đúng số tiền + nội dung — hoặc dán mã token bên dưới sau khi nạp.";
+    st.textContent="Chế độ thủ công: chuyển đúng số tiền + nội dung ở trên, rồi nhắn hỗ trợ để được cộng credit.";
   }
   $("qrOverlay").style.display="flex";
 }
@@ -1523,8 +1567,8 @@ function startTopup(packId){
     .then(function(r){ return r.json().then(function(d){ return { ok:r.ok, d:d }; }); })
     .then(function(res){
       if(res.ok&&res.d&&res.d.topup) openQr(packId, res.d.topup);
-      else { openQr(packId, null); toast((res.d&&res.d.error&&res.d.error.message)||"Chưa tạo được phiên nạp tự động — dùng QR thủ công."); }
-    }).catch(function(){ openQr(packId, null); });
+      else toast((res.d&&res.d.error&&res.d.error.message)||"Chưa tạo được phiên nạp — hệ thống chưa sẵn sàng, vui lòng thử lại sau.");
+    }).catch(function(){ toast("Không kết nối được máy chủ — vui lòng thử lại sau."); });
 }
 function closeQr(){ stopQrPoll(); $("qrOverlay").style.display="none"; }
 /* ===== Thong bao nap thanh cong =====
@@ -1568,7 +1612,6 @@ function setMode(mode){
   state.mode=mode; state.model=MODELS[mode][0];
   $("st-tabImage").classList.toggle("on",mode==="image");
   $("st-tabVideo").classList.toggle("on",mode==="video");
-  $("st-refBlock").style.display = "block";
   $("st-durSelect").style.display = mode==="video" ? "" : "none";
   renderDurSelect(); renderRatioPills(); renderResSelect();
   $("st-promptInput").placeholder = mode==="video"
@@ -1607,8 +1650,9 @@ function renderLib(){
     var dl=daysLeft(it);
     var statusBadge = it.status==="processing" ? '<span class="badge status-proc">Đang tạo…</span>'
       : it.status==="queued" ? '<span class="badge status-proc">Đang xếp hàng</span>'
+      : it.status==="failed" ? '<span class="badge status-fail">Thất bại</span>'
       : '<span class="badge">'+(it.kind==="video"?"🎬 Video":"🖼 Ảnh")+'</span>';
-    return '<article class="gcard"><div class="thumb">'+thumbHtml(it)+statusBadge+'<span class="badge days'+(dl<=3?" low":"")+'">Còn '+dl+' ngày</span></div>'
+    return '<article class="gcard"><div class="thumb'+(it.status==="processing"||it.status==="queued"?" loading":"")+'">'+thumbHtml(it)+statusBadge+(it.status==="processing"||it.status==="queued"?'<span class="spinwrap"><span class="spinner"></span></span>':'')+'<span class="badge days'+(dl<=3?" low":"")+'">Còn '+dl+' ngày</span></div>'
       +'<div class="body"><div class="prompt">'+esc(it.prompt)+'</div>'
       +'<div class="meta"><span>'+esc(it.model)+'</span><span>-'+it.cost+' cr</span></div>'
       +'<div class="meta"><span>'+fmtDate(it.createdAt)+'</span><span>Xoá: '+fmtDate(it.expiresAt).split(" ")[1]+' '+new Date(it.expiresAt).toLocaleDateString("vi-VN")+'</span></div>'
@@ -1632,8 +1676,9 @@ function renderResults(){
     var dl=daysLeft(it);
     var statusBadge = it.status==="processing" ? '<span class="badge status-proc">Đang tạo…</span>'
       : it.status==="queued" ? '<span class="badge status-proc">Đang xếp hàng</span>'
+      : it.status==="failed" ? '<span class="badge status-fail">Thất bại</span>'
       : '<span class="badge">'+(it.kind==="video"?"🎬 Video":"🖼 Ảnh")+'</span>';
-    return '<article class="gcard"><div class="thumb">'+thumbHtml(it)+statusBadge+'<span class="badge days'+(dl<=3?" low":"")+'">Còn '+dl+' ngày</span></div>'
+    return '<article class="gcard"><div class="thumb'+(it.status==="processing"||it.status==="queued"?" loading":"")+'">'+thumbHtml(it)+statusBadge+(it.status==="processing"||it.status==="queued"?'<span class="spinwrap"><span class="spinner"></span></span>':'')+'<span class="badge days'+(dl<=3?" low":"")+'">Còn '+dl+' ngày</span></div>'
       +'<div class="body"><div class="prompt">'+esc(it.prompt)+'</div>'
       +'<div class="meta"><span>'+esc(it.model)+'</span><span>-'+it.cost+' cr</span></div>'
       +'<div class="meta"><span>'+fmtDate(it.createdAt)+'</span><span>Xoá: '+fmtDate(it.expiresAt).split(" ")[1]+' '+new Date(it.expiresAt).toLocaleDateString("vi-VN")+'</span></div>'
@@ -1755,32 +1800,34 @@ function doGenerate(){
   var btn=$("st-genBtn"); btn.disabled=true;
   var bar=$("st-genProgress"); bar.style.display="block"; var fill=bar.querySelector("i");
   /* Neu da dang nhap + API san sang: gui len server (xep hang, tru credit phia server) */
-  var payload={ kind:state.mode, prompt:prompt, model:state.model.id, ratio:state.ratio, duration: state.mode==="video"?state.dur:undefined, resolution: state.resolution||undefined };
+  var payload={ kind:state.mode, prompt:prompt, model:state.model.id, ratio:state.ratio, duration: state.mode==="video"?state.dur:undefined, resolution: state.resolution||undefined, refs: state.refs.length? state.refs.map(function(r){return r.dataUrl;}) : undefined };
   var tryLive = state.user ? fetch("/api/studio/generations",{method:"POST",headers:{"Content-Type":"application/json"},credentials:"same-origin",body:JSON.stringify(payload)})
     .then(function(r){ return r.ok? r.json(): Promise.reject(r.status); }) : Promise.reject("demo");
   tryLive.then(function(data){
     toast("Đã xếp hàng tạo trên server — kết quả sẽ vào Thư viện khi provider xử lý xong.");
     fill.style.width="100%";
-    setTimeout(function(){ bar.style.display="none"; fill.style.width="0"; btn.disabled=false; loadLiveData(); },600);
+    setTimeout(function(){ bar.style.display="none"; fill.style.width="0"; btn.disabled=false; loadLiveData(); startLivePoll(); },600);
   }).catch(function(){
-    /* Che do xem thu: mo phong tien trinh ngay trong trinh duyet */
+    /* Che do xem thu: tao item NGAY voi thumbnail mac dinh + vong xoay; tai xong moi cap nhat anh that va bo animation */
     wallet.balance-=cost;
     wallet.ledger.push({at:new Date().toISOString(), label:"Tạo "+(state.mode==="video"?"video":"ảnh")+" · "+state.model.name, amount:-cost, after:wallet.balance});
     persistWallet(); renderCredits(); renderLedger();
+    var now=new Date();
+    var it={ id:"g"+now.getTime(), kind:state.mode, prompt:prompt, model:state.model.name, cost:cost, status:"processing",
+      createdAt:now.toISOString(), expiresAt:new Date(now.getTime()+30*86400000).toISOString(),
+      hue:Math.floor(Math.random()*360), dataUrl:null };
+    library.unshift(it); persistLib(); renderLib(); renderResults(); paintCanvases();
+    var rlel0=$("st-resultList"); if(rlel0) rlel0.scrollIntoView({behavior:"smooth",block:"nearest"});
     var p=0;
     var iv=setInterval(function(){
       p=Math.min(100,p+Math.random()*16+6); fill.style.width=p+"%";
       if(p>=100){
         clearInterval(iv);
-        var now=new Date();
-        var it={ id:"g"+now.getTime(), kind:state.mode, prompt:prompt, model:state.model.name, cost:cost, status:"done",
-          createdAt:now.toISOString(), expiresAt:new Date(now.getTime()+30*86400000).toISOString(),
-          hue:Math.floor(Math.random()*360), dataUrl: state.mode==="image"? demoImageDataUrl(prompt,state.ratio): null };
-        library.unshift(it); persistLib(); renderLib(); renderResults();
-        renderResults();
+        it.status="done";
+        it.dataUrl= state.mode==="image"? demoImageDataUrl(prompt,state.ratio): null;
+        persistLib(); renderLib(); renderResults(); paintCanvases();
         bar.style.display="none"; fill.style.width="0"; btn.disabled=false;
         toast("Tạo xong! Đã lưu vào Thư viện của bạn (giữ 30 ngày).");
-        var rlel=$("st-resultList"); if(rlel) rlel.scrollIntoView({behavior:"smooth",block:"nearest"});
       }
     },220);
   });
@@ -1794,11 +1841,26 @@ function loadLiveData(){
     return fetch("/api/studio/generations",{credentials:"same-origin"}).then(function(r){ return r.ok? r.json(): {generations:[]}; });
   }).then(function(g){
     state.live=true;
-    library=(g.generations||[]).map(function(x){ return { id:x.id, kind:x.kind, prompt:x.prompt, model:x.model, cost:x.creditCost, status:x.status, createdAt:x.createdAt, expiresAt:x.expiresAt, dataUrl:x.resultUrl||null, hue:265 }; });
+    library=(g.generations||[]).map(function(x){ return { id:x.id, kind:x.kind, prompt:x.prompt, model:x.model, cost:x.creditCost, status:x.status==="working"? "processing": x.status, createdAt:x.createdAt, expiresAt:x.expiresAt, dataUrl:x.resultUrl||null, hue:265 }; });
     renderCredits(); renderLedger(); renderLib(); renderResults();
+    if(library.some(function(it){ return it.status==="processing"||it.status==="queued"; })) startLivePoll();
     var mp=$("st-modePill"); if(mp){ mp.textContent="● Đã đăng nhập — dữ liệu thật"; mp.classList.add("live"); }
     checkTopupNotifications();
   }).catch(function(){ /* giu che do xem thu */ });
+}
+
+/* Poll du lieu that moi 4s khi con item dang tao: xong la thumbnail tu cap nhat, vong xoay tu tat */
+var livePoll=null;
+function startLivePoll(){
+  if(livePoll) return;
+  var tries=0;
+  livePoll=setInterval(function(){
+    tries++;
+    if(tries>90){ clearInterval(livePoll); livePoll=null; return; }
+    loadLiveData().then(function(){
+      if(!library.some(function(it){ return it.status==="processing"||it.status==="queued"; })){ clearInterval(livePoll); livePoll=null; }
+    }).catch(function(){});
+  },4000);
 }
 
 /* ===== Khoi tao ===== */
@@ -1809,20 +1871,17 @@ function init(){
   $("st-tabVideo").addEventListener("click",function(){ setMode("video"); });
   $("st-ratioPills").addEventListener("click",function(e){ var b=e.target.closest("button"); if(!b) return; Array.prototype.forEach.call(document.querySelectorAll("#st-ratioPills button"),function(x){x.classList.remove("on")}); b.classList.add("on"); state.ratio=b.getAttribute("data-ratio"); });
   Array.prototype.forEach.call(document.querySelectorAll("#st-styleTabs button"),function(b){ b.addEventListener("click",function(){ Array.prototype.forEach.call(document.querySelectorAll("#st-styleTabs button"),function(x){x.classList.remove("on")}); b.classList.add("on"); renderShow(b.getAttribute("data-style")); }); });
-  var file=$("st-refFile"), refBtn=$("st-refBtn"), refPrev=$("st-refPreview"), refImg=$("st-refImg"), refName=$("st-refName");
-  function setRef(f){
-    if(!f||!/^image\//.test(f.type||"")){ toast("Hãy chọn một file ảnh."); return; }
-    var rd=new FileReader(); rd.onload=function(){ refImg.src=rd.result; refName.textContent=f.name||"Ảnh tham chiếu"; refPrev.style.display="flex"; }; rd.readAsDataURL(f);
-  }
+  var file=$("st-refFile"), refBtn=$("st-refBtn");
   if(refBtn) refBtn.addEventListener("click",function(){ file.click(); });
-  file.addEventListener("change",function(){ if(file.files&&file.files[0]) setRef(file.files[0]); });
-  var refRemove=$("st-refRemove");
-  if(refRemove) refRemove.addEventListener("click",function(){ refPrev.style.display="none"; refImg.src=""; file.value=""; });
+  file.addEventListener("change",function(){ if(file.files&&file.files.length) addRefFiles(file.files); file.value=""; });
+  var stripEl=$("st-refStrip");
+  if(stripEl) stripEl.addEventListener("click",function(e){ var x=e.target.closest(".ref-x"); if(!x) return; state.refs.splice(Number(x.getAttribute("data-idx")),1); renderRefs(); });
+  renderRefs();
   var gcard=document.querySelector(".studio-scope .gen-card");
   if(gcard){
     ["dragenter","dragover"].forEach(function(ev){ gcard.addEventListener(ev,function(e){ e.preventDefault(); gcard.classList.add("dragging"); }); });
     ["dragleave","drop"].forEach(function(ev){ gcard.addEventListener(ev,function(e){ e.preventDefault(); gcard.classList.remove("dragging"); }); });
-    gcard.addEventListener("drop",function(e){ var f=e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files[0]; if(f) setRef(f); });
+    gcard.addEventListener("drop",function(e){ if(e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files.length) addRefFiles(e.dataTransfer.files); });
   }
   $("st-genBtn").addEventListener("click",doGenerate);
   Array.prototype.forEach.call(document.querySelectorAll(".dash-tabs button"),function(b){ b.addEventListener("click",function(){

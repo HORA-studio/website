@@ -28,8 +28,12 @@ function durationMarks(f) {
 function normalize(items, kind) {
   return (items || []).map((it) => {
     const modes = it.modes || [];
-    let durations = null, ratios = null, resolutions = null;
+    let durations = null, ratios = null, resolutions = null, refsMax = null, refsMin = null;
     for (const m of modes) {
+      const rf = m.references || {};
+      const mx = Number(rf.max), mn = Number(rf.min);
+      if (isFinite(mx)) refsMax = refsMax === null ? mx : Math.max(refsMax, mx);
+      if (isFinite(mn)) refsMin = refsMin === null ? mn : Math.min(refsMin, mn);
       for (const f of m.flags || []) {
         if (/duration/i.test(f.flag || "")) durations = durations || durationMarks(f);
         if ((f.flag === "ratio" || f.flag === "--ratio") && Array.isArray(f.values) && f.values.length) ratios = ratios || f.values;
@@ -46,6 +50,8 @@ function normalize(items, kind) {
       ...(durations ? { durations } : {}),
       ...(ratios ? { ratios } : {}),
       ...(resolutions ? { resolutions } : {}),
+      ...(refsMax ? { refsMax } : {}),
+      ...(refsMin ? { refsMin } : {}),
     };
   }).filter((m) => m.id);
 }
