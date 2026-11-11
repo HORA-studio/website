@@ -294,3 +294,19 @@ CREATE TABLE IF NOT EXISTS studio_redeem_tokens (
   used_at TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_studio_tokens_usedby ON studio_redeem_tokens(used_by);
+
+-- Phien nap credit Studio qua SePay (tu dong cong khi webhook khop ma + tien).
+CREATE TABLE IF NOT EXISTS studio_topups (
+  id TEXT PRIMARY KEY,
+  customer_id TEXT NOT NULL,
+  pack TEXT NOT NULL,
+  amount_vnd INTEGER NOT NULL,
+  credits INTEGER NOT NULL,
+  code TEXT NOT NULL UNIQUE,
+  status TEXT NOT NULL DEFAULT 'pending',
+  gateway_trans_id TEXT,
+  created_at TEXT NOT NULL,
+  paid_at TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_studio_topups_customer ON studio_topups(customer_id, created_at);
+CREATE INDEX IF NOT EXISTS idx_studio_topups_status ON studio_topups(status, created_at);

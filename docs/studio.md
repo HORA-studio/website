@@ -148,3 +148,24 @@ hoặc chạy cả web lẫn tool cùng máy khi dùng local; (3) chạy migrati
   (không có → 404, đã dùng → 409, hết hạn → 410), đánh dấu đã dùng bằng
   UPDATE có guard chống dùng trùng, cộng credit qua ledger 'redeem',
   trả {credits, balance}; UI tự tải lại số dư thật.
+
+### Tự động cộng credit khi nạp (SePay) — 2026-11-11
+- `POST /api/studio/topup` {pack} (đăng nhập): tạo phiên nạp `studio_topups`
+  trạng thái pending + mã riêng `STUxxxxxxxx` (tái dùng phiên pending cùng
+  gói trong 24h); trả kèm `instructions` = QR VietQR + ngân hàng/số tài khoản
+  lấy từ cấu hình SePay sẵn có của website (`buildSepayInstructions`), nên
+  UI không cần QR_CFG khi SePay đã cấu hình.
+- Webhook SePay hiện có (`/api/payments/sepay-webhook`) có thêm nhánh Studio
+  chạy trước luồng đơn hàng: quét mã STU trong nội dung chuyển khoản, số
+  tiền phải bằng đúng `amount_vnd` (lệch → log `studio.topup_amount_mismatch`,
+  không cộng, phiên giữ pending); khớp → UPDATE có guard pending→paid +
+  `addLedger 'topup'` cộng credit đúng 1 lần (SePay gửi lại webhook cũng
+  không cộng trùng — đã test giả lập D1: đúng/sai key, đúng/sai tiền, retry).
+- UI: bấm Nạp (đã đăng nhập) → modal QR dùng mã server cấp + dòng trạng thái
+  "Đang chờ chuyển khoản…"; UI tự hỏi `GET /api/studio/topup?code=` mỗi 4s,
+  thấy paid thì báo "Đã nhận +X credit" và tải lại số dư. Chưa đăng nhập →
+  nhắc đăng nhập trước (credit phải cộng vào 1 tài khoản). Đổi mã token vẫn
+  giữ làm đường dự phòng trong modal.
+- Điều kiện chạy thật: cấu hình SePay của website (SEPAY_* env + webhook
+  API key) — vốn đã dùng cho đơn license — và chạy migration
+  `db/migrate-studio-topup-2026-11-11.sql`.

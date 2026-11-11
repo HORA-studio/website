@@ -14,6 +14,7 @@
 import { json, readJson, tryIssueLicense } from "../_lib.js";
 import { normalizePaymentText, findPaymentCodeInText } from "./_gateway.js";
 import { notifyPurchaseSuccess } from "./_notify.js";
+import { addLedger } from "../studio/_studio.js";
 import { logEvent, clientIp } from "../_log.js";
 
 const ok = (extra = {}) => json({ success: true, ...extra }, 200);
@@ -46,6 +47,50 @@ export async function onRequestPost({ request, env }) {
       "SELECT id FROM payments WHERE gateway = 'sepay' AND gateway_trans_id = ?1 AND status IN ('paid', 'amount_mismatch')"
     ).bind(transId).first();
     if (dup) return ok({ duplicate: true });
+  }
+
+  // ===== Nhanh Studio: nap credit TU DONG (bang studio_topups) =====
+  // Ma nap Studio co tien to STU..., khong trung khong gian ma don hang.
+  // Khop ma + dung so tien -> ghi 'paid' + cong credit dung 1 lan
+  // (UPDATE co guard status='pending'; giao dich SePay gui lai thi dedupe
+  // theo gateway_trans_id). Lech tien -> ghi log, khong cong, khong 'paid'.
+  {
+    const { results: pendT } = await env.DB.prepare(
+      "SELECT * FROM studio_topups WHERE status = 'pending'"
+    ).all();
+    const tRows = pendT || [];
+    if (tRows.length) {
+      let tRow = null;
+      if (body.code) {
+        const wantT = normalizePaymentText(body.code);
+        tRow = tRows.find((r) => normalizePaymentText(r.code) === wantT) || null;
+      }
+      if (!tRow) {
+        const foundT = findPaymentCodeInText(`${body.content || ""} ${body.description || ""}`, tRows.map((r) => r.code));
+        if (foundT) tRow = tRows.find((r) => r.code === foundT) || null;
+      }
+      if (tRow) {
+        if (transId) {
+          const dupT = await env.DB.prepare(
+            "SELECT id FROM studio_topups WHERE gateway_trans_id = ?1 AND status = 'paid'"
+          ).bind(transId).first();
+          if (dupT) return ok({ duplicate: true, studio: true });
+        }
+        const tAmount = Number(body.transferAmount);
+        if (!Number.isFinite(tAmount) || tAmount !== Number(tRow.amount_vnd)) {
+          await logEvent(env, { eventType: "studio.topup_amount_mismatch", customerId: tRow.customer_id, actor: "sepay", ip: clientIp(request), details: { topupId: tRow.id, code: tRow.code, expected: Number(tRow.amount_vnd), got: Number.isFinite(tAmount) ? tAmount : null, transId } });
+          return ok({ matched: false, studio: true, reason: "amount_mismatch" });
+        }
+        const upT = await env.DB.prepare(
+          "UPDATE studio_topups SET status = 'paid', paid_at = ?2, gateway_trans_id = ?3 WHERE id = ?1 AND status = 'pending'"
+        ).bind(tRow.id, new Date().toISOString(), transId || null).run();
+        if (upT.meta && upT.meta.changes === 1) {
+          await addLedger(env, tRow.customer_id, tRow.credits, "topup", tRow.id, "Nap " + tRow.pack + " qua chuyen khoan — tu cong credit");
+          await logEvent(env, { eventType: "studio.topup_paid", customerId: tRow.customer_id, actor: "sepay", ip: clientIp(request), details: { topupId: tRow.id, credits: tRow.credits, amount: tAmount, transId } });
+        }
+        return ok({ studio: true, credited: tRow.credits });
+      }
+    }
   }
 
   // Danh sach phien thanh toan SePay dang cho (status 'initiated').
