@@ -1965,7 +1965,7 @@ body.sh-control [data-sh-panel="chat"]:not(.hidden){display:flex;flex-direction:
    🔑 1 license con hieu luc · 📅 Han dung 1/11/2027. Cac id
    sum-tier/sum-licenses/sum-expiry/sum-tier-note giu nguyen de
    renderAccountSummary() dien du lieu nhu cu. ===== */
-.avatar-side{display:flex;flex-direction:column;gap:7px;min-width:0;justify-content:center}
+.avatar-side{display:flex;flex-direction:column;gap:7px;min-width:0;justify-content:flex-start;margin-top:-6px}
 .account-summary-line{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .sum-item{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);background:var(--panel2);border-radius:999px;padding:7px 13px;font-size:13.5px;line-height:1.25;white-space:nowrap}
 .sum-item strong{font-size:14.5px}
@@ -2181,6 +2181,11 @@ textarea.sh-rec-on{caret-color:transparent}
       <div class="set-section">
         <div class="set-head"><h3>Mật khẩu</h3><p class="muted">Đăng nhập bằng mật khẩu của bạn thay vì chỉ dùng Google.</p></div>
         <button class="btn" type="button" id="pw-open">Đổi mật khẩu</button>
+      </div>
+
+      <div class="set-section">
+        <div class="set-head"><h3>Đăng xuất</h3><p class="muted">Đăng xuất khỏi tài khoản HORA trên thiết bị này.</p></div>
+        <button class="btn" type="button" id="logout-btn-2">Đăng xuất</button>
       </div>
 
     </section>
@@ -3224,6 +3229,7 @@ document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !payShee
 $("pay-cart-btn").addEventListener("click", openPaySheet);
 
 
+if ($("logout-btn-2")) $("logout-btn-2").addEventListener("click", () => { const b = $("logout-btn"); if (b) b.click(); });
 $("logout-btn").addEventListener("click", async () => {
   await api("/api/auth/logout", { method: "POST", body: "{}" });
   location.reload();
