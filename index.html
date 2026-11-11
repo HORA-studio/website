@@ -469,6 +469,18 @@ body.studio .st-side{top:0;min-height:100vh}
 .studio-scope .gen-row #st-genBtn{padding-left:22px;padding-right:22px}
 .studio-scope .gen-row #st-genBtn{flex:0 0 auto;margin-left:auto;padding-left:22px;padding-right:22px}
 @media(max-width:640px){.studio-scope .gen-row #st-genBtn{flex:1 1 100%;margin-left:0}}
+
+.studio-scope .ref-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.studio-scope .ref-btn{border:1px solid var(--line);background:var(--card2);color:var(--ink);border-radius:999px;padding:9px 16px;font-weight:700;font-size:13.5px;cursor:pointer;font-family:inherit}
+.studio-scope .ref-btn:hover{border-color:var(--accent)}
+.studio-scope .ref-hint{color:var(--muted);font-size:13px}
+.studio-scope .ref-preview{display:flex;align-items:center;gap:12px;margin-top:10px;border:1px solid var(--line);border-radius:14px;padding:8px;background:var(--card2)}
+.studio-scope .ref-preview img{width:64px;height:48px;object-fit:cover;border-radius:8px;display:block}
+.studio-scope .ref-meta{flex:1;min-width:0;display:flex;flex-direction:column}
+.studio-scope .ref-meta b{font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.studio-scope .ref-meta span{color:var(--muted);font-size:12px}
+.studio-scope .ref-remove{border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:999px;padding:7px 12px;font-weight:700;font-size:12.5px;cursor:pointer;font-family:inherit}
+.studio-scope .gen-card.dragging{outline:2px dashed var(--accent);outline-offset:-6px}
 </style>
 </head>
 <body>
@@ -732,13 +744,15 @@ body.studio .st-side{top:0;min-height:100vh}
         <p class="step-label">Bước 1 · Mô tả / ảnh gốc</p>
         <textarea class="prompt" id="st-promptInput" placeholder="Mô tả ảnh bạn muốn tạo…"></textarea>
         <div id="st-refBlock" style="margin-top:10px">
-          <div class="drop" id="st-refDrop">
-            <span id="st-refEmpty"><b>Kéo thả ảnh tham chiếu</b> hoặc bấm để chọn — ảnh gốc tự xoá sau 7 ngày</span>
+          <div class="ref-actions">
+            <button type="button" class="ref-btn" id="st-refBtn">📎 Đính kèm ảnh tham chiếu</button>
+            <span class="ref-hint">hoặc kéo thả ảnh vào khung chat này</span>
             <input type="file" id="st-refFile" accept="image/*" hidden>
           </div>
-          <div class="qr-row">
-            <div class="qr-box" aria-hidden="true"></div>
-            <div><b style="color:var(--ink)">Tải ảnh từ điện thoại:</b> quét mã để mở trang tải ảnh — máy tính nhận ảnh trong vài giây (mô phỏng trong bản xem thử).</div>
+          <div class="ref-preview" id="st-refPreview" style="display:none">
+            <img id="st-refImg" alt="Ảnh tham chiếu">
+            <div class="ref-meta"><b id="st-refName">Ảnh tham chiếu</b><span>Đã đính kèm — ảnh gốc tự xoá sau 7 ngày</span></div>
+            <button type="button" class="ref-remove" id="st-refRemove">✕ Bỏ ảnh</button>
           </div>
         </div>
 
@@ -1490,12 +1504,21 @@ function init(){
   Array.prototype.forEach.call(document.querySelectorAll("#st-ratioPills button"),function(b){ b.addEventListener("click",function(){ Array.prototype.forEach.call(document.querySelectorAll("#st-ratioPills button"),function(x){x.classList.remove("on")}); b.classList.add("on"); state.ratio=b.getAttribute("data-ratio"); }); });
   Array.prototype.forEach.call(document.querySelectorAll("#st-durPills button"),function(b){ b.addEventListener("click",function(){ Array.prototype.forEach.call(document.querySelectorAll("#st-durPills button"),function(x){x.classList.remove("on")}); b.classList.add("on"); state.dur=+b.getAttribute("data-dur"); renderCost(); }); });
   Array.prototype.forEach.call(document.querySelectorAll("#st-styleTabs button"),function(b){ b.addEventListener("click",function(){ Array.prototype.forEach.call(document.querySelectorAll("#st-styleTabs button"),function(x){x.classList.remove("on")}); b.classList.add("on"); renderShow(b.getAttribute("data-style")); }); });
-  var drop=$("st-refDrop"), file=$("st-refFile");
-  drop.addEventListener("click",function(){ file.click(); });
-  file.addEventListener("change",function(){
-    if(!file.files||!file.files[0]) return;
-    var rd=new FileReader(); rd.onload=function(){ drop.innerHTML='<img src="'+rd.result+'" alt="Ảnh tham chiếu"><span>Đã nhận ảnh gốc — ảnh tự xoá sau 7 ngày.</span>'; }; rd.readAsDataURL(file.files[0]);
-  });
+  var file=$("st-refFile"), refBtn=$("st-refBtn"), refPrev=$("st-refPreview"), refImg=$("st-refImg"), refName=$("st-refName");
+  function setRef(f){
+    if(!f||!/^image\//.test(f.type||"")){ toast("Hãy chọn một file ảnh."); return; }
+    var rd=new FileReader(); rd.onload=function(){ refImg.src=rd.result; refName.textContent=f.name||"Ảnh tham chiếu"; refPrev.style.display="flex"; }; rd.readAsDataURL(f);
+  }
+  if(refBtn) refBtn.addEventListener("click",function(){ file.click(); });
+  file.addEventListener("change",function(){ if(file.files&&file.files[0]) setRef(file.files[0]); });
+  var refRemove=$("st-refRemove");
+  if(refRemove) refRemove.addEventListener("click",function(){ refPrev.style.display="none"; refImg.src=""; file.value=""; });
+  var gcard=document.querySelector(".studio-scope .gen-card");
+  if(gcard){
+    ["dragenter","dragover"].forEach(function(ev){ gcard.addEventListener(ev,function(e){ e.preventDefault(); gcard.classList.add("dragging"); }); });
+    ["dragleave","drop"].forEach(function(ev){ gcard.addEventListener(ev,function(e){ e.preventDefault(); gcard.classList.remove("dragging"); }); });
+    gcard.addEventListener("drop",function(e){ var f=e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files[0]; if(f) setRef(f); });
+  }
   $("st-genBtn").addEventListener("click",doGenerate);
   Array.prototype.forEach.call(document.querySelectorAll(".dash-tabs button"),function(b){ b.addEventListener("click",function(){
     Array.prototype.forEach.call(document.querySelectorAll(".dash-tabs button"),function(x){x.classList.remove("on")}); b.classList.add("on");
