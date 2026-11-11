@@ -429,7 +429,8 @@ body.buy #view-home,body.buy #view-studio,body.buy #view-pricing{display:none}
 .st-side-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(120deg,var(--accent),var(--accent2));color:#fff;display:grid;place-items:center;font-weight:900;text-transform:uppercase;flex:0 0 32px}
 .st-side-buy{font-size:13px;font-weight:700;color:var(--accent2)}
 .st-main{flex:1;min-width:0}
-#view-studio .studio-scope .hero-grid{grid-template-columns:1fr;max-width:880px;margin:0 auto;padding-top:24px}
+#view-studio .studio-scope .hero-grid{grid-template-columns:1fr;max-width:none;margin:0;padding-top:24px}
+#view-studio .studio-scope .hero .wrap{max-width:none}
 #view-studio .studio-scope h1.display,#view-studio .studio-scope .sub,#view-studio .studio-scope .style-tabs,#view-studio .studio-scope .show-grid,#view-studio .studio-scope .hero-chips,#view-studio .studio-scope .mode-tabs{display:none}
 #view-studio .studio-scope section.block:not(#st-dashboard){display:none}
 #view-studio .dash-tabs{display:none}
@@ -490,8 +491,9 @@ body.studio .st-side{top:0;min-height:100vh}
 .studio-scope .ctrl-row .model-select{flex:1 1 200px;max-width:280px;min-width:0;width:auto}
 .studio-scope .ctrl-row .pills{gap:6px}
 .studio-scope .ctrl-row .pills button{padding:8px 11px;font-size:13.5px}
-.studio-scope .ctrl-row #st-genBtn{flex:0 0 auto;margin-left:auto;padding-left:18px;padding-right:18px}
-@media(max-width:640px){.studio-scope .ctrl-row #st-genBtn{flex:1 1 100%;margin-left:0}.studio-scope .ctrl-row .model-select{max-width:none;flex-basis:100%}}
+.studio-scope .ctrl-row #st-genBtn{flex:0 0 auto;padding-left:18px;padding-right:18px}
+.studio-scope .ctrl-row .attach-row{flex:0 0 auto;margin-left:auto;padding:10px 16px}
+@media(max-width:640px){.studio-scope .ctrl-row #st-genBtn{flex:1 1 100%}.studio-scope .ctrl-row .attach-row{margin-left:0}.studio-scope .ctrl-row .model-select{max-width:none;flex-basis:100%}}
 
 /* Dong bo co chu cum dieu khien */
 .studio-scope textarea.prompt,.studio-scope .model-select,.studio-scope .ctrl-row .pills button,.studio-scope .ctrl-row #st-genBtn,.studio-scope .ref-btn{font-size:14.5px}
@@ -762,7 +764,6 @@ body.studio .st-side{top:0;min-height:100vh}
 
         <p class="step-label">Bước 1 · Mô tả / ảnh gốc</p>
         <div class="prompt-row">
-          <button type="button" class="ref-btn attach-side" id="st-refBtn" title="Đính kèm ảnh tham chiếu">📎<span>Đính kèm</span></button>
           <textarea class="prompt" id="st-promptInput" placeholder="Mô tả ảnh bạn muốn tạo…"></textarea>
           <input type="file" id="st-refFile" accept="image/*" hidden>
         </div>
@@ -787,6 +788,7 @@ body.studio .st-side{top:0;min-height:100vh}
             <button type="button" data-dur="5" class="on">5 giây</button>
             <button type="button" data-dur="10">10 giây</button>
           </div>
+          <button type="button" class="ref-btn attach-row" id="st-refBtn" title="Đính kèm ảnh tham chiếu">📎 Đính kèm</button>
           <button class="btn primary" id="st-genBtn" type="button">✦ Tạo ngay — <span id="st-genBtnCost">5</span> credit</button>
         </div>
         <div class="progress" id="st-genProgress"><i></i></div>
