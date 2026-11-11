@@ -707,7 +707,31 @@ body.studio .st-side-brand{display:none}
   body.studio .st-tabs .st-side-item .ic svg{width:21px;height:21px}
   body.studio .st-tabs .st-side-item.on{background:rgba(124,92,255,.09);color:var(--accent)}
 }
+
+/* ===== Studio: theme + chu + nut giong trang Tai khoan ===== */
+.studio-scope{--gold:#6c5cff;--accent:#6c5cff;--accent-soft:rgba(108,92,255,.10);--accent-softer:rgba(108,92,255,.05);--line:rgba(255,255,255,.08);--line2:rgba(255,255,255,.14);--input-bg:rgba(255,255,255,.03);--card2:#232330;--shadow:0 1px 2px rgba(0,0,0,.25),0 16px 40px -16px rgba(0,0,0,.5);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;font-size:15.5px;line-height:1.6}
+@media(prefers-color-scheme:light){.studio-scope{--accent-soft:rgba(108,92,255,.08);--accent-softer:rgba(108,92,255,.04);--line:#e7e2d6;--line2:#dcd6c6;--input-bg:#ffffff;--card2:#f2efe9;--shadow:0 1px 2px rgba(23,20,16,.03),0 16px 40px -16px rgba(23,20,16,.12)}}
+#view-studio{--accent-soft:rgba(108,92,255,.10);background:radial-gradient(1000px 520px at 85% -10%,var(--accent-soft),transparent 65%)}
+@media(prefers-color-scheme:light){#view-studio{--accent-soft:rgba(108,92,255,.08)}}
+.studio-scope h2,.studio-scope h3{letter-spacing:-.01em}
+.studio-scope .hero-glow{background:radial-gradient(1000px 520px at 85% -10%,var(--accent-soft),transparent 65%),radial-gradient(700px 380px at -10% 30%,var(--accent-softer),transparent 70%)}
+.studio-scope .btn{border:1px solid var(--line2);background:var(--card);color:var(--ink);padding:10px 17px;border-radius:10px;font-weight:700;font-size:13.5px}
+.studio-scope .btn:hover{transform:translateY(-1px);box-shadow:var(--shadow)}
+.studio-scope .btn.primary{background:var(--gold);color:#fff;border-color:transparent}
+.studio-scope .btn.small{padding:7px 11px;font-size:12px;border-radius:8px}
+.studio-scope #st-genBtn{font-size:15px;padding:13px 22px;border-radius:12px}
+.studio-scope .ref-btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line2);background:var(--card);color:var(--ink);border-radius:10px;padding:10px 17px;font-weight:700;font-size:13.5px}
+.studio-scope .ref-btn:hover{transform:translateY(-1px);box-shadow:var(--shadow)}
+.studio-scope .model-select,.studio-scope .dur-select{border:1px solid var(--line2);border-radius:12px;background:var(--input-bg);font-size:15px}
+.studio-scope .prompt-box{border:1px solid var(--line2);border-radius:16px;background:var(--input-bg)}
+.studio-scope .pills button{border-color:var(--line2);background:var(--card);font-weight:650}
+.studio-scope .pills button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.studio-scope .gcard{border-radius:16px}
+.studio-scope .gcard .acts button{border:1px solid var(--line2);background:var(--card);border-radius:8px;padding:7px 11px;font-size:12px}
+#view-studio .st-side,#view-studio .st-main{border-radius:16px}
+.studio-scope .st-logout-btn{border:1px solid var(--line2);background:var(--card);border-radius:10px;padding:9px 16px;font-weight:700;font-size:13.5px}
 </style>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
 
@@ -973,8 +997,8 @@ body.studio .st-side-brand{display:none}
           </div>
           <select id="st-durSelect" class="dur-select" style="display:none" aria-label="Thời lượng"></select>
           <select id="st-resSelect" class="dur-select" aria-label="Chất lượng"></select>
-          <button type="button" class="ref-btn attach-row" id="st-refBtn" title="Đính kèm ảnh tham chiếu">📎 Đính kèm</button>
-          <button class="btn primary" id="st-genBtn" type="button">✦ Tạo ngay — <span id="st-genBtnCost">5</span> credit</button>
+          <button type="button" class="ref-btn attach-row" id="st-refBtn" title="Đính kèm ảnh tham chiếu"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg> Đính kèm</button>
+          <button class="btn primary" id="st-genBtn" type="button">Tạo ngay — <span id="st-genBtnCost">5</span> credit</button>
         </div>
         <div class="progress" id="st-genProgress"><i></i></div>
       </div>
