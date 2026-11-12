@@ -231,8 +231,17 @@ async function refreshAuth() {
       const acc = a.account || {};
       const pick = (...keys) => keys.map(k => acc[k]).find(v => v !== undefined && v !== null && v !== "");
       const name = pick("displayName", "name", "nickname", "email", "userId", "uid");
-      const credits = pick("credits", "creditBalance", "balance", "totalCredits");
-      const tier = pick("membershipTier", "tier", "plan", "membership");
+      const fmtVal = (v) => {
+        if (v === undefined || v === null) return undefined;
+        if (typeof v === "object") {
+          const inner = ["amount", "value", "total", "balance", "count", "credits", "available"]
+            .map((k) => v[k]).find((x) => typeof x === "number" || typeof x === "string");
+          return inner !== undefined ? String(inner) : JSON.stringify(v);
+        }
+        return String(v);
+      };
+      const credits = fmtVal(pick("credits", "creditBalance", "balance", "totalCredits"));
+      const tier = fmtVal(pick("membershipTier", "tier", "plan", "membership"));
       $("accountSummary").innerHTML =
         `<span class="chip ok">Đã đăng nhập</span> ${name ? esc(name) : ""}` +
         (tier ? ` · Gói: <b>${esc(tier)}</b>` : "") +
