@@ -1269,7 +1269,7 @@ body.st-gated #view-buy{visibility:hidden}
     <div class="qr-cr" id="qrCredits"></div>
     <div class="qr-status" id="qrStatus"></div>
     <img id="qrImg" alt="Mã QR chuyển khoản">
-    <div class="qr-miss" id="qrMiss" style="display:none">Chưa cấu hình tài khoản nhận tiền — điền QR_CFG (ngân hàng + số tài khoản) trong mã nguồn trang để hiện mã QR.</div>
+    <div class="qr-miss" id="qrMiss" style="display:none">Chưa cấu hình tài khoản nhận tiền trên server — mã QR chỉ hiện khi server cấp hướng dẫn thanh toán (SePay).</div>
     <div class="qr-row"><span>Nội dung chuyển khoản</span><b id="qrCode"></b><button type="button" id="qrCopyCode">Sao chép</button></div>
     <div class="qr-row"><span>Tài khoản nhận</span><b id="qrAcct"></b></div>
     <div class="qr-note">Chuyển khoản đúng số tiền + đúng nội dung ở trên: credit sẽ TỰ ĐỘNG cộng vào tài khoản ngay khi tiền vào (thường dưới 1 phút). Giữ cửa sổ này mở để thấy xác nhận.</div>
@@ -1459,8 +1459,6 @@ function loadServerModels(){
 }
 /* ===== Nap tien: QR + ma token ===== */
 var PACK_INFO={ "topup-test":{label:"10K",amount:10000,credits:10}, "topup-50":{label:"80K",amount:80000,credits:100}, "topup-100":{label:"160K",amount:160000,credits:200}, "topup-200":{label:"320K",amount:320000,credits:400}, "topup-500":{label:"800K",amount:800000,credits:1000} };
-/* DIEN THONG TIN NHAN TIEN THAT: bank = ma ngan hang VietQR (vd MB, VCB, TCB), account = so tai khoan */
-var QR_CFG={ bank:"", account:"", name:"HORA STUDIO" };
 var qrState={ code:"" };
 function fmtVnd(n){ return String(n).replace(/\B(?=(\d{3})+(?!\d))/g,".")+"₫"; }
 function openQr(packId, topup){
@@ -1480,25 +1478,18 @@ function openQr(packId, topup){
     img.src=ins.qr_url; img.style.display=""; miss.style.display="none";
     st.textContent="Đang chờ chuyển khoản — credit tự cộng ngay khi tiền vào…";
     startQrPoll(topup.code, pk.credits);
-  } else if(topup && topup.code){
-    // Co phien nap tren server nhung server chua cau hinh SePay: giu ma STU that cua phien.
-    qrState.code=topup.code; qrState.topupId=topup.id;
-    $("qrAmount").textContent=fmtVnd(topup.amount);
-    $("qrCode").textContent=topup.code;
+  } else {
+    // Khong co huong dan thanh toan tu server: TUYET DOI khong tu sinh ma/QR
+    // o client (ma gia khong ton tai tren server -> tien vao khong bao gio
+    // khop duoc phien nap). Chi hien ma STU that cua phien (neu co) + bao loi.
+    qrState.code=topup? (topup.code||"") : ""; qrState.topupId=topup? topup.id : null;
+    $("qrAmount").textContent=fmtVnd(topup? topup.amount : pk.amount);
+    $("qrCode").textContent=qrState.code||"—";
     $("qrAcct").textContent="Chưa cấu hình";
     img.removeAttribute("src"); img.style.display="none"; miss.style.display="";
-    st.textContent="Server chưa cấu hình tài khoản nhận tiền (SePay) — chưa thể nạp tự động.";
-  } else {
-    // Che do thu cong (server chua cau hinh SePay): QR theo QR_CFG neu co.
-    qrState.code="HORA"+Math.random().toString(36).slice(2,8).toUpperCase(); qrState.topupId=null;
-    $("qrAmount").textContent=fmtVnd(pk.amount);
-    $("qrCode").textContent=qrState.code;
-    $("qrAcct").textContent=(QR_CFG.bank&&QR_CFG.account)? (QR_CFG.bank+" · "+QR_CFG.account+" · "+QR_CFG.name) : "Chưa cấu hình";
-    if(QR_CFG.bank&&QR_CFG.account){
-      img.src="https://img.vietqr.io/image/"+QR_CFG.bank+"-"+QR_CFG.account+"-compact2.png?amount="+pk.amount+"&addInfo="+encodeURIComponent(qrState.code)+"&accountName="+encodeURIComponent(QR_CFG.name);
-      img.style.display=""; miss.style.display="none";
-    } else { img.removeAttribute("src"); img.style.display="none"; miss.style.display=""; }
-    st.textContent="Chế độ thủ công: chuyển đúng số tiền + nội dung ở trên, rồi nhắn hỗ trợ để được cộng credit.";
+    st.textContent=topup
+      ? "Server chưa cấu hình tài khoản nhận tiền (SePay) — chưa thể nạp tự động."
+      : "Không lấy được mã QR từ server — đóng lại rồi thử nạp lại.";
   }
   $("qrOverlay").style.display="flex";
 }
