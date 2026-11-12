@@ -21,6 +21,58 @@ const storeFile = path.join(rootDir, "data", "profiles.json");
 
 interface ProfileCfg {
   proxy?: string;
+  createdAt?: string;
+}
+
+/** Tên profile an toàn để truyền xuống CLI: chữ/số/gạch dưới/gạch ngang, tối đa 40 ký tự */
+export function validateProfileName(name: string): string {
+  const n = (name || "").trim();
+  if (!/^[a-zA-Z0-9][a-zA-Z0-9_-]{0,39}$/.test(n)) {
+    throw new Error(
+      "Tên tài khoản chưa hợp lệ — chỉ dùng chữ, số, gạch dưới/gạch ngang (tối đa 40 ký tự, không khoảng trắng)"
+    );
+  }
+  return n;
+}
+
+/** Ghi tên tài khoản vào sổ (nếu chưa có) — sổ là nguồn cho danh sách tài khoản trên UI */
+export function ensureProfile(name: string): void {
+  const n = validateProfileName(name);
+  const all = load();
+  if (!all[n]) {
+    all[n] = { createdAt: new Date().toISOString() };
+    persist();
+  }
+}
+
+export interface ProfileInfo {
+  name: string;
+  proxy: { set: boolean; masked: string };
+  createdAt?: string;
+}
+
+/** Danh sách tài khoản đã biết: "default" luôn đứng đầu, các tài khoản khác theo lúc tạo */
+export function listProfiles(): ProfileInfo[] {
+  const all = load();
+  const names = new Set<string>(["default", ...Object.keys(all)]);
+  return [...names]
+    .sort((a, b) =>
+      a === "default" ? -1 : b === "default" ? 1 : (all[a]?.createdAt || "").localeCompare(all[b]?.createdAt || "")
+    )
+    .map((name) => ({
+      name,
+      proxy: getProfileProxyInfo(name),
+      createdAt: all[name]?.createdAt,
+    }));
+}
+
+/** Xoá tài khoản khỏi sổ (kèm proxy của nó). Đăng xuất CLI do phía server gọi riêng. */
+export function deleteProfile(name: string): void {
+  const n = validateProfileName(name);
+  if (n === "default") throw new Error("Không xoá được tài khoản mặc định (default)");
+  const all = load();
+  delete all[n];
+  persist();
 }
 
 let cache: Record<string, ProfileCfg> | null = null;
@@ -112,7 +164,11 @@ export function setProfileProxy(profile: string, raw: string): { set: boolean; m
   if (!raw || !raw.trim()) {
     if (all[prof]) delete all[prof].proxy;
   } else {
-    all[prof] = { ...(all[prof] || {}), proxy: normalizeProxy(raw) };
+    all[prof] = {
+      createdAt: new Date().toISOString(),
+      ...(all[prof] || {}),
+      proxy: normalizeProxy(raw),
+    };
   }
   persist();
   return getProfileProxyInfo(prof);

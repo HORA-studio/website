@@ -4,7 +4,7 @@
  * Mỗi "tài khoản" trong tool = 1 profile của CLI (--profile).
  */
 import { runCli, cliErrorText, CliResult } from "./cli.js";
-import { getProfileProxyInfo } from "./profiles.js";
+import { getProfileProxyInfo, ensureProfile } from "./profiles.js";
 
 export interface PendingLogin {
   userCode: string;
@@ -67,6 +67,7 @@ export async function startLogin(
   profile: string
 ): Promise<{ ok: true; pending: PendingLogin } | { ok: false; error: string }> {
   const prof = profile || "default";
+  ensureProfile(prof); // đăng nhập qua luồng cũ cũng tự vào sổ danh sách tài khoản
   const r = await runCli(["auth", "login"], { profile: prof, timeoutMs: 60_000 });
   if (!r.ok) return { ok: false, error: cliErrorText(r) };
   if (r.data?.status === "logged_in" || r.data?.status === "reused") {

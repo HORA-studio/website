@@ -84,6 +84,19 @@
       <details><summary>Chi tiết tài khoản (dữ liệu gốc từ CLI)</summary><pre class="raw" id="accountRaw"></pre></details>
     </div>
     <div id="authMsg" class="msg"></div>
+    <div style="margin-top:18px;">
+      <h3 style="margin:0 0 8px;">Danh sách tài khoản</h3>
+      <div id="profileList" style="display:flex; flex-direction:column; gap:6px;"></div>
+      <div class="row" style="margin-top:10px;">
+        <div><label>Tên tài khoản mới</label>
+          <input id="newProfileName" placeholder="vd: acc2"></div>
+        <div style="flex:2;"><label>Proxy đi kèm (để trống thì gắn sau)</label>
+          <input id="newProfileProxy" placeholder="host:port:user:pass"></div>
+        <div><label>&nbsp;</label>
+          <button id="btnAddProfile">＋ Thêm tài khoản</button></div>
+      </div>
+      <div id="addProfileMsg" class="hint">Thêm tài khoản = tạo ngăn mới + gắn sẵn proxy (nếu nhập) rồi mở đăng nhập OAuth ngay — cả lần đăng nhập đầu tiên cũng đi qua proxy đó. Tool dùng CLI chính thức nên đăng nhập bằng OAuth, không có nhập cookie/sessionid.</div>
+    </div>
   </div>
 
   <div class="card">
@@ -268,7 +281,7 @@ async function refreshAuth() {
   } catch (e) { $("authMsg").textContent = "Lỗi kiểm tra đăng nhập: " + e.message; }
 }
 
-$("btnCheck").onclick = () => { refreshStatus(); refreshAuth(); };
+$("btnCheck").onclick = () => { refreshStatus(); refreshAuth(); loadProfiles(); };
 $("btnLogin").onclick = async () => {
   $("authMsg").textContent = "Đang lấy link đăng nhập...";
   try {
@@ -303,6 +316,75 @@ $("btnProxyClear").onclick = async () => {
     $("proxyMsg").textContent = "Đã xoá proxy — tài khoản này đi thẳng bằng IP của máy.";
     refreshAuth();
   } catch (e) { $("proxyMsg").textContent = "Lỗi: " + e.message; }
+};
+
+let profilesCache = [];
+async function loadProfiles() {
+  try {
+    const r = await api("/api/profiles");
+    profilesCache = r.profiles || [];
+    renderProfiles();
+    for (const p of profilesCache) void checkProfileRow(p.name);
+  } catch (e) { $("profileList").textContent = "Lỗi tải danh sách tài khoản: " + e.message; }
+}
+function renderProfiles() {
+  const el = $("profileList");
+  if (!profilesCache.length) { el.innerHTML = '<div class="hint">Chưa có tài khoản nào.</div>'; return; }
+  el.innerHTML = profilesCache.map((p) => `
+    <div class="job" style="display:flex; align-items:center; gap:10px; padding:8px 10px; margin-bottom:0;">
+      <b>${esc(p.name)}</b>
+      <span id="pf-status-${esc(p.name)}" class="hint">đang kiểm tra…</span>
+      <span class="hint">${p.proxy.set ? "Proxy: " + esc(p.proxy.masked) : "Không proxy"}</span>
+      <span style="margin-left:auto; display:flex; gap:6px;">
+        <button data-act="use" data-name="${esc(p.name)}">Chọn</button>
+        <button data-act="login" data-name="${esc(p.name)}">Đăng nhập</button>
+        ${p.name !== "default" ? `<button data-act="del" data-name="${esc(p.name)}" class="danger">Xoá</button>` : ""}
+      </span>
+    </div>`).join("");
+}
+async function checkProfileRow(name) {
+  const el = document.getElementById("pf-status-" + name);
+  try {
+    const a = await api(`/api/auth/status?profile=${encodeURIComponent(name)}`);
+    if (!el) return;
+    if (a.loggedIn) {
+      const acc = a.account || {};
+      const nm = acc.displayName || acc.name || acc.nickname || acc.email || acc.userId || acc.uid || "";
+      el.innerHTML = `<span class="chip ok">Đã đăng nhập</span> ${esc(nm)}`;
+    } else el.textContent = "Chưa đăng nhập";
+  } catch { if (el) el.textContent = "Lỗi kiểm tra"; }
+}
+$("profileList").onclick = async (ev) => {
+  const btn = ev.target.closest("button[data-act]");
+  if (!btn) return;
+  const name = btn.dataset.name;
+  if (btn.dataset.act === "use") {
+    $("profile").value = name; saveState(); refreshAuth();
+  } else if (btn.dataset.act === "login") {
+    $("profile").value = name; saveState(); refreshAuth();
+    $("btnLogin").click();
+  } else if (btn.dataset.act === "del") {
+    if (!confirm(`Xoá tài khoản "${name}" khỏi danh sách? Tool sẽ đăng xuất tài khoản này và bỏ proxy của nó.`)) return;
+    try {
+      await api(`/api/profiles/${encodeURIComponent(name)}`, { method: "DELETE" });
+      if (profile() === name) { $("profile").value = "default"; saveState(); refreshAuth(); }
+      loadProfiles();
+    } catch (e) { alert("Lỗi xoá: " + e.message); }
+  }
+};
+$("btnAddProfile").onclick = async () => {
+  const name = $("newProfileName").value.trim();
+  const proxy = $("newProfileProxy").value.trim();
+  if (!name) { $("addProfileMsg").textContent = "Chưa nhập tên tài khoản."; return; }
+  try {
+    await api("/api/profiles", { method: "POST", body: JSON.stringify({ name, proxy: proxy || undefined }) });
+    $("newProfileName").value = ""; $("newProfileProxy").value = "";
+    $("addProfileMsg").textContent = `Đã tạo tài khoản "${name}"${proxy ? " kèm proxy" : ""} — đang mở đăng nhập…`;
+    $("profile").value = name; saveState();
+    await loadProfiles();
+    refreshAuth();
+    $("btnLogin").click();
+  } catch (e) { $("addProfileMsg").textContent = "Lỗi: " + e.message; }
 };
 
 async function loadCanvases() {
@@ -516,6 +598,7 @@ async function refreshJobs() {
 
 refreshStatus();
 refreshAuth();
+loadProfiles();
 refreshJobs();
 loadState();
 setInterval(refreshJobs, 3000);

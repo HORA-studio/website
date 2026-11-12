@@ -47,6 +47,9 @@ Mở http://localhost:5100 (đổi cổng bằng biến `PORT`).
    định `default`) → bấm *Đăng nhập (OAuth)* → bấm link, đăng nhập + Authorize
    trên trang Dreamina → tool tự nhận khi xong. Thông tin tài khoản, gói và
    credit hiện ngay trong tool (lấy qua `auth account`).
+   **Danh sách tài khoản** ngay bên dưới: nút *＋ Thêm tài khoản* tạo ngăn
+   mới kèm proxy (nếu nhập) rồi mở đăng nhập luôn; mỗi dòng cho Chọn /
+   Đăng nhập / Xoá và hiện trạng thái + proxy của tài khoản đó.
 2. **Canvas**: chọn canvas có sẵn hoặc để tool tự tạo. Canvas mở xem trực tiếp
    được trên web Dreamina qua link trong tool.
 3. **Tạo ảnh/video**: chọn model (danh sách thật do CLI trả về theo tài

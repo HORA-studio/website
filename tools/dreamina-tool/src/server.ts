@@ -8,7 +8,14 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { binaryFound, cliVersion, runCli, cliErrorText } from "./cli.js";
 import { startLogin, getAuthStatus, logout } from "./auth.js";
-import { setProfileProxy } from "./profiles.js";
+import {
+  setProfileProxy,
+  listProfiles,
+  ensureProfile,
+  deleteProfile,
+  validateProfileName,
+  normalizeProxy,
+} from "./profiles.js";
 import { createJob, listJobs, getJob, approveJob, loadJobs, resultsDir } from "./jobs.js";
 
 const rootDir = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -105,6 +112,39 @@ async function handle(req: http.IncomingMessage, res: http.ServerResponse) {
       const r = await startLogin(body.profile || "default");
       if (!r.ok) return sendJson(res, 400, { error: r.error });
       return sendJson(res, 200, { pending: r.pending });
+    }
+
+    if (method === "GET" && p === "/api/profiles") {
+      return sendJson(res, 200, { profiles: listProfiles() });
+    }
+
+    if (method === "POST" && p === "/api/profiles") {
+      const body = await readBody(req);
+      try {
+        const name = validateProfileName(String(body.name || ""));
+        // Kiểm tra proxy trước khi tạo, tránh tạo nửa vời khi proxy sai định dạng
+        if (body.proxy && String(body.proxy).trim()) normalizeProxy(String(body.proxy));
+        ensureProfile(name);
+        if (body.proxy && String(body.proxy).trim()) setProfileProxy(name, String(body.proxy));
+        return sendJson(res, 201, {
+          ok: true,
+          profile: listProfiles().find((x) => x.name === name),
+        });
+      } catch (e: any) {
+        return sendJson(res, 400, { error: e?.message || String(e) });
+      }
+    }
+
+    const profileDelMatch = p.match(/^\/api\/profiles\/([A-Za-z0-9_-]+)$/);
+    if (method === "DELETE" && profileDelMatch) {
+      try {
+        const name = validateProfileName(profileDelMatch[1]);
+        await logout(name).catch(() => undefined); // đăng xuất CLI luôn nếu được
+        deleteProfile(name);
+        return sendJson(res, 200, { ok: true });
+      } catch (e: any) {
+        return sendJson(res, 400, { error: e?.message || String(e) });
+      }
     }
 
     if (method === "POST" && p === "/api/profiles/proxy") {
