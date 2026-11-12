@@ -983,6 +983,29 @@ footer{padding:42px 0 110px;color:var(--muted);font-size:14px}
 #view-studio.st-booting #st-boot{display:flex;position:absolute;inset:0;z-index:60;align-items:flex-start;justify-content:center;gap:12px;padding-top:120px;background:#15151e;color:#b9b9c9;font:500 15px system-ui,sans-serif}
 .st-boot-spin{width:22px;height:22px;flex:none;border-radius:50%;border:3px solid rgba(255,255,255,.18);border-top-color:#6c5cff;animation:stbootspin .8s linear infinite}
 @keyframes stbootspin{to{transform:rotate(360deg)}}
+/* ===== Cong dang nhap Studio (2026-11-12): chua dang nhap thi khoa han Studio,
+   chi hien bang dang nhap — khong dong/khong tat duoc, khong con che do xem thu ===== */
+#view-studio.st-locked>*{visibility:hidden}
+body.st-gated #view-buy{visibility:hidden}
+.st-gate{position:fixed;inset:0;z-index:400;display:flex;align-items:center;justify-content:center;padding:18px;background:rgba(12,12,19,.97);overflow-y:auto}
+.st-gate-card{width:min(400px,100%);background:#1e1e2a;border:1px solid #303044;border-radius:22px;padding:28px 26px 22px;box-shadow:0 24px 50px rgba(0,0,0,.45);color:#e8e6f0;font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.st-gate-brand{display:flex;align-items:center;gap:10px;font-weight:900;letter-spacing:.13em;font-size:17px;margin-bottom:18px}
+.st-gate-brand em{font-style:normal;background:linear-gradient(90deg,#7c5cff,#20c9b2);-webkit-background-clip:text;background-clip:text;color:transparent}
+.st-gate-logo{width:36px;height:36px;border-radius:11px;background:linear-gradient(135deg,#7c5cff,#20c9b2);color:#fff;display:grid;place-items:center;font-size:18px;letter-spacing:0}
+.st-gate-card h2{margin:0 0 8px;font-size:22px;letter-spacing:-.01em}
+.st-gate-sub{margin:0 0 18px;color:#aaa7ba;font-size:14px;line-height:1.55}
+.st-gate-card form label{display:block;font-size:13px;font-weight:700;color:#c9c6da;margin-bottom:12px}
+.st-gate-card form input{display:block;width:100%;margin-top:6px;background:#15151e;border:1px solid #303044;border-radius:12px;color:#e8e6f0;padding:12px 14px;font:inherit;font-size:14.5px;font-weight:500}
+.st-gate-card form input:focus{outline:2px solid #7c5cff;outline-offset:1px;border-color:#7c5cff}
+.st-gate-err{background:rgba(229,72,77,.13);border:1px solid rgba(229,72,77,.55);color:#ff9d9a;border-radius:12px;padding:10px 12px;font-size:13.5px;line-height:1.5;margin-bottom:12px}
+.st-gate-submit{width:100%;margin-top:2px}
+.st-gate-or{display:flex;align-items:center;gap:12px;color:#8b88a0;font-size:12.5px;font-weight:700;margin:16px 0}
+.st-gate-or::before,.st-gate-or::after{content:"";flex:1;height:1px;background:#303044}
+.st-gate-google{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;background:#fff;color:#1f1f1f;border-radius:999px;padding:12px 16px;font-weight:700;font-size:14.5px}
+.st-gate-google:hover{filter:brightness(.94)}
+.st-gate-links{display:flex;justify-content:space-between;gap:10px;margin-top:16px;font-size:13.5px}
+.st-gate-links a{color:#20c9b2;font-weight:700}
+.st-gate-home{display:block;margin-top:18px;padding-top:14px;border-top:1px solid #303044;color:#aaa7ba;font-size:13.5px;font-weight:600}
 </style>
 <div id="view-studio" class="st-booting">
   <div id="st-boot"><div class="st-boot-spin"></div><span>Đang tải Studio…</span></div>
@@ -1210,6 +1233,26 @@ footer{padding:42px 0 110px;color:var(--muted);font-size:14px}
   </div>
 </div>
 
+<div class="st-gate" id="st-authGate" style="display:none" role="dialog" aria-modal="true" aria-labelledby="st-gateTitle">
+  <div class="st-gate-card">
+    <div class="st-gate-brand"><span class="st-gate-logo">H</span><span>HORA <em>Studio</em></span></div>
+    <h2 id="st-gateTitle">Đăng nhập để vào Studio</h2>
+    <p class="st-gate-sub">Studio chỉ dành cho tài khoản đã đăng nhập. Đăng nhập xong là vào thẳng Studio — chưa đăng nhập thì không vào được.</p>
+    <form id="st-gateForm" autocomplete="on">
+      <label>Email<input type="email" id="st-gateEmail" required autocomplete="email" placeholder="ban@email.com"></label>
+      <label>Mật khẩu<input type="password" id="st-gatePass" required autocomplete="current-password" placeholder="Mật khẩu của bạn"></label>
+      <div class="st-gate-err" id="st-gateErr" style="display:none"></div>
+      <button type="submit" class="btn primary st-gate-submit" id="st-gateSubmit">Đăng nhập &amp; vào Studio</button>
+    </form>
+    <div class="st-gate-or"><span>hoặc</span></div>
+    <a class="st-gate-google" id="st-gateGoogle" href="/api/auth/google?return=%2Fstudio.html"><svg width="19" height="19" viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M23.5 12.3c0-.9-.1-1.5-.3-2.2H12v4.1h6.5c-.1 1.1-.8 2.7-2.4 3.8l3.7 2.9c2.2-2.1 3.7-5.1 3.7-8.6z"/><path fill="#34A853" d="M12 24c3.2 0 5.9-1.1 7.9-2.9l-3.7-2.9c-1 .7-2.4 1.2-4.2 1.2-3.2 0-5.9-2.1-6.8-5l-3.9 3C2.3 21.3 6.8 24 12 24z"/><path fill="#FBBC05" d="M5.2 14.4c-.2-.7-.4-1.5-.4-2.4s.1-1.7.4-2.4l-3.9-3C.5 8.2 0 10 0 12s.5 3.8 1.3 5.4l3.9-3z"/><path fill="#EA4335" d="M12 4.7c1.8 0 3 .8 3.7 1.4l3.3-3.2C17.9 1.1 15.2 0 12 0 6.8 0 2.3 2.7 1.3 6.6l3.9 3c.9-2.8 3.6-4.9 6.8-4.9z"/></svg><span>Tiếp tục với Google</span></a>
+    <div class="st-gate-links">
+      <a href="/account.html?mode=register&amp;next=%2Fstudio.html">Chưa có tài khoản? Đăng ký</a>
+      <a href="/account.html?next=%2Fstudio.html">Quên mật khẩu?</a>
+    </div>
+    <a class="st-gate-home" href="/">← Về trang chủ</a>
+  </div>
+</div>
 <div class="qr-overlay" id="qrOverlay">
   <div class="qr-box">
     <button class="qr-x" id="qrClose" type="button" aria-label="Đóng">✕</button>
@@ -1305,6 +1348,21 @@ var LS_LIB="hora.studio.library.v1", LS_WALLET="hora.studio.wallet.v1";
 var state={ mode:"image", model:MODELS.image[0], ratio:"9:16", dur:5, resolution:"", user:null, live:false, filter:"all", tab:"library", refs:[] };
 var $=function(id){return document.getElementById(id)};
 function toast(msg){ var t=$("st-toast"); t.textContent=msg; t.classList.add("on"); setTimeout(function(){t.classList.remove("on")},2600); }
+/* ===== Cong dang nhap: chua dang nhap = khoa Studio + hien bang dang nhap, khong cach nao vao duoc ===== */
+var authLocked=false;
+function showAuthGate(){
+  authLocked=true;
+  var v=$("view-studio"); if(v) v.classList.add("st-locked");
+  document.body.classList.add("st-gated");
+  var g=$("st-authGate"); if(g) g.style.display="flex";
+  var e=$("st-gateEmail"); if(e) setTimeout(function(){ try{ e.focus(); }catch(_){} },60);
+}
+function hideAuthGate(){
+  authLocked=false;
+  var v=$("view-studio"); if(v) v.classList.remove("st-locked");
+  document.body.classList.remove("st-gated");
+  var g=$("st-authGate"); if(g) g.style.display="none";
+}
 function esc(s){ return String(s||"").replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]}); }
 function refMax(){ var m=state.model; return (m&&m.refsMax)? m.refsMax : 4; }
 function renderRefs(){
@@ -1694,6 +1752,7 @@ function demoImageDataUrl(prompt, ratio){
 
 /* ===== Bam Tao ===== */
 function doGenerate(){
+  if(!state.user){ showAuthGate(); toast("Bạn cần đăng nhập để dùng Studio."); return; }
   var prompt=$("st-promptInput").value.trim();
   if(!prompt){ toast("Hãy nhập mô tả trước đã."); $("st-promptInput").focus(); return; }
   var cost=costNow();
@@ -1709,36 +1768,13 @@ function doGenerate(){
     fill.style.width="100%";
     setTimeout(function(){ bar.style.display="none"; fill.style.width="0"; btn.disabled=false; loadLiveData(); startLivePoll(); },600);
   }).catch(function(err){
-    /* DA DANG NHAP ma request that loi: hien loi THAT, khong gia lap xem thu.
-       (Ban xem thu chi danh cho khach chua dang nhap.) */
-    if(state.user){
-      bar.style.display="none"; fill.style.width="0"; btn.disabled=false;
-      var emsg=(typeof err==="number")? ("lỗi HTTP "+err) : "không kết nối được tới server";
-      toast("Tạo đơn trên server thất bại — "+emsg+". Đơn CHƯA được tạo, hãy thử lại sau ít phút.");
-      return;
-    }
-    /* Che do xem thu (chua dang nhap): tao item NGAY voi thumbnail mac dinh + vong xoay; tai xong moi cap nhat anh that va bo animation */
-    wallet.balance-=cost;
-    wallet.ledger.push({at:new Date().toISOString(), label:"Tạo "+(state.mode==="video"?"video":"ảnh")+" · "+state.model.name, amount:-cost, after:wallet.balance});
-    persistWallet(); renderCredits(); renderLedger();
-    var now=new Date();
-    var it={ id:"g"+now.getTime(), kind:state.mode, prompt:prompt, model:state.model.name, cost:cost, status:"processing",
-      createdAt:now.toISOString(), expiresAt:new Date(now.getTime()+30*86400000).toISOString(),
-      hue:Math.floor(Math.random()*360), dataUrl:null };
-    library.unshift(it); persistLib(); renderLib(); renderResults(); paintCanvases();
-    var rlel0=$("st-resultList"); if(rlel0) rlel0.scrollIntoView({behavior:"smooth",block:"nearest"});
-    var p=0;
-    var iv=setInterval(function(){
-      p=Math.min(100,p+Math.random()*16+6); fill.style.width=p+"%";
-      if(p>=100){
-        clearInterval(iv);
-        it.status="done";
-        it.dataUrl= state.mode==="image"? demoImageDataUrl(prompt,state.ratio): null;
-        persistLib(); renderLib(); renderResults(); paintCanvases();
-        bar.style.display="none"; fill.style.width="0"; btn.disabled=false;
-        toast("Tạo xong! Đã lưu vào Thư viện của bạn (giữ 30 ngày).");
-      }
-    },220);
+    /* Loi thi hien loi THAT — khong con che do xem thu/gia lap cho khach chua dang nhap
+       (chua dang nhap thi da bi cong dang nhap chan o tren). */
+    bar.style.display="none"; fill.style.width="0"; btn.disabled=false;
+    if(!state.user){ showAuthGate(); toast("Bạn cần đăng nhập để dùng Studio."); return; }
+    var emsg=(typeof err==="number")? ("lỗi HTTP "+err) : "không kết nối được tới server";
+    toast("Tạo đơn trên server thất bại — "+emsg+". Đơn CHƯA được tạo, hãy thử lại sau ít phút.");
+    return;
   });
 }
 
@@ -1781,7 +1817,7 @@ function init(){
      va trang thai dang nhap/du lieu that tai xong moi mo — het canh nhay demo -> that.
      Fail-safe 6s: du loi mang cung khong bao gio ket trang trang. */
   var bootLeft=2, bootLifted=false;
-  function liftBoot(){ if(bootLifted) return; bootLifted=true; var v=$("view-studio"); if(v) v.classList.remove("st-booting"); }
+  function liftBoot(){ if(bootLifted||authLocked) return; bootLifted=true; var v=$("view-studio"); if(v) v.classList.remove("st-booting"); }
   function bootStep(){ bootLeft--; if(bootLeft<=0) liftBoot(); }
   setTimeout(liftBoot,6000);
   $("st-inviteInput").value=location.origin+"/studio.html?ref=demo";
@@ -1829,16 +1865,36 @@ function init(){
   if(bgr&&bmn){ bgr.addEventListener("click",function(e){ e.stopPropagation(); bmn.hidden=!bmn.hidden; }); document.addEventListener("click",function(e){ if(!bmn.hidden && !bmn.contains(e.target)) bmn.hidden=true; }); }
   var blo=$("st-burgerLogout"); if(blo) blo.addEventListener("click",function(){ var l=$("st-logoutBtn"); if(l) l.click(); });
   var loBtn=$("st-logoutBtn"); if(loBtn) loBtn.addEventListener("click",function(){ fetch("/api/auth/logout",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:"{}"}).catch(function(){}).then(function(){ location.href="#/"; location.reload(); }); });
-  /* Trang thai dang nhap that */
+  /* Form dang nhap ngay trong cong: dang nhap xong tai lai trang -> vao thang Studio */
+  var gf=$("st-gateForm");
+  if(gf) gf.addEventListener("submit",function(ev){
+    ev.preventDefault();
+    var em=$("st-gateEmail").value.trim(), pw=$("st-gatePass").value;
+    var errEl=$("st-gateErr"); if(errEl) errEl.style.display="none";
+    var sb=$("st-gateSubmit"); sb.disabled=true; sb.textContent="Đang đăng nhập…";
+    fetch("/api/auth/login",{method:"POST",headers:{"Content-Type":"application/json"},credentials:"same-origin",body:JSON.stringify({email:em,password:pw})})
+    .then(function(r){ return r.json().catch(function(){ return null; }).then(function(d){ return { ok:r.ok, d:d }; }); })
+    .then(function(res){
+      if(res.ok){ location.reload(); return; }
+      sb.disabled=false; sb.textContent="Đăng nhập & vào Studio";
+      if(errEl){ errEl.textContent=(res.d&&res.d.error&&res.d.error.message)||"Đăng nhập thất bại — vui lòng thử lại."; errEl.style.display=""; }
+    }).catch(function(){
+      sb.disabled=false; sb.textContent="Đăng nhập & vào Studio";
+      if(errEl){ errEl.textContent="Không kết nối được máy chủ — vui lòng thử lại sau."; errEl.style.display=""; }
+    });
+  });
+  /* Trang thai dang nhap that: chua dang nhap -> khoa Studio + mo bang dang nhap, khong cho vao */
   fetch("/api/auth/me",{credentials:"same-origin"}).then(function(r){ return r.ok? r.json(): Promise.reject(r.status); })
   .then(function(me){
     state.user=me.customer||me;
+    hideAuthGate();
     var name=(state.user.displayName||state.user.email||"");
     var dm=$("st-dashMail"); if(dm) dm.textContent="Đã đăng nhập: "+(state.user.email||name);
     var ab=$("st-accountBtn"); if(ab) ab.textContent=name? name.split("@")[0] : "Tài khoản"; var su=$("st-sideUserName"); if(su) su.textContent=name||"Tài khoản"; var sa=$("st-sideAvatar"); if(sa) sa.textContent=(name||"?").charAt(0).toUpperCase(); var lo=$("st-logoutBtn"); if(lo) lo.style.display=""; var bl2=$("st-burgerLogout"); if(bl2) bl2.style.display=""; var bi2=$("st-burgerLogin"); if(bi2) bi2.style.display="none";
     return loadLiveData();
   }).catch(function(){
-    var mp=$("st-modePill"); if(mp) mp.textContent="● Chế độ xem thử (chưa đăng nhập)"; 
+    state.user=null;
+    showAuthGate();
   }).then(bootStep,bootStep);
 }
 document.addEventListener("DOMContentLoaded",init);
