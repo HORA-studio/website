@@ -4,6 +4,7 @@
  * Mỗi "tài khoản" trong tool = 1 profile của CLI (--profile).
  */
 import { runCli, cliErrorText, CliResult } from "./cli.js";
+import { getProfileProxyInfo } from "./profiles.js";
 
 export interface PendingLogin {
   userCode: string;
@@ -106,6 +107,8 @@ export interface AuthStatus {
   region?: string;
   account: any | null;
   pending: PendingLogin | null;
+  /** Proxy của profile (đã che mật khẩu) — set=false nghĩa là đi thẳng bằng IP máy */
+  proxy: { set: boolean; masked: string };
   error?: string;
 }
 
@@ -118,6 +121,7 @@ export async function getAuthStatus(profile: string): Promise<AuthStatus> {
       profile: prof,
       account: null,
       pending: getPending(prof),
+      proxy: getProfileProxyInfo(prof),
       error: cliErrorText(r),
       binaryMissing: r.exitCode === -1,
     };
@@ -134,6 +138,7 @@ export async function getAuthStatus(profile: string): Promise<AuthStatus> {
     region: r.data?.region,
     account,
     pending: getPending(prof),
+    proxy: getProfileProxyInfo(prof),
   };
 }
 

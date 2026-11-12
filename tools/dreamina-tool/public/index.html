@@ -64,6 +64,16 @@
           <button id="btnLogout" class="danger">Đăng xuất</button>
         </div></div>
     </div>
+    <div class="row" style="margin-top:10px;">
+      <div style="flex:2;"><label>Proxy của tài khoản này (để trống = đi thẳng bằng IP máy)</label>
+        <input id="proxyInput" placeholder="host:port:user:pass hoặc http://user:pass@host:port"></div>
+      <div><label>&nbsp;</label>
+        <div style="display:flex; gap:8px;">
+          <button id="btnProxySave">Lưu proxy</button>
+          <button id="btnProxyClear" class="danger">Xoá proxy</button>
+        </div></div>
+    </div>
+    <div id="proxyMsg" class="hint">Đang kiểm tra proxy...</div>
     <div id="loginBox" class="hidden" style="margin-top:12px;">
       <div class="msg">Bấm link để đăng nhập + ủy quyền, xong quay lại đây — tool tự nhận:</div>
       <div style="margin:8px 0;"><a id="loginLink" href="#" target="_blank" rel="noopener">Mở trang ủy quyền Dreamina</a></div>
@@ -209,6 +219,11 @@ async function refreshStatus() {
 async function refreshAuth() {
   try {
     const a = await api(`/api/auth/status?profile=${encodeURIComponent(profile())}`);
+    if (a.proxy) {
+      $("proxyMsg").textContent = a.proxy.set
+        ? `Proxy đang bật: ${a.proxy.masked} — đăng nhập và mọi job của tài khoản này đều đi qua proxy này.`
+        : "Chưa đặt proxy — tài khoản này đi thẳng bằng IP của máy.";
+    }
     if (a.error) { $("authMsg").innerHTML = `<span style="color:var(--err)">${esc(a.error)}</span>`; }
     if (a.loggedIn) {
       $("loginBox").classList.add("hidden");
@@ -262,6 +277,24 @@ $("btnLogout").onclick = async () => {
   catch (e) { $("authMsg").textContent = "Lỗi: " + e.message; }
 };
 $("profile").onchange = () => { refreshAuth(); saveState(); };
+$("btnProxySave").onclick = async () => {
+  const v = $("proxyInput").value.trim();
+  if (!v) { $("proxyMsg").textContent = "Chưa nhập proxy — muốn bỏ proxy thì bấm Xoá proxy."; return; }
+  try {
+    const r = await api("/api/profiles/proxy", { method: "POST", body: JSON.stringify({ profile: profile(), proxy: v }) });
+    $("proxyInput").value = "";
+    $("proxyMsg").textContent = `Đã lưu proxy: ${r.proxy.masked}`;
+    refreshAuth();
+  } catch (e) { $("proxyMsg").textContent = "Lỗi: " + e.message; }
+};
+$("btnProxyClear").onclick = async () => {
+  try {
+    await api("/api/profiles/proxy", { method: "POST", body: JSON.stringify({ profile: profile(), proxy: "" }) });
+    $("proxyInput").value = "";
+    $("proxyMsg").textContent = "Đã xoá proxy — tài khoản này đi thẳng bằng IP của máy.";
+    refreshAuth();
+  } catch (e) { $("proxyMsg").textContent = "Lỗi: " + e.message; }
+};
 
 async function loadCanvases() {
   try {

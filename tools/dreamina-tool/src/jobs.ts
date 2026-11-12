@@ -10,6 +10,7 @@ import path from "path";
 import { randomUUID } from "crypto";
 import { fileURLToPath } from "url";
 import { runCli, cliErrorText } from "./cli.js";
+import { getProfileProxyInfo } from "./profiles.js";
 
 const rootDir = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
 export const dataDir = path.join(rootDir, "data");
@@ -186,6 +187,8 @@ export function createJob(input: NewJobInput): Job {
     job,
     `Tạo job ${job.kind === "image" ? "ảnh" : "video"} — model ${job.model}, trần tự duyệt ${job.creditCeiling} credit`
   );
+  const px = getProfileProxyInfo(job.profile);
+  if (px.set) log(job, `Đi qua proxy của tài khoản: ${px.masked}`);
   void runPipeline(job, input.refs || []).catch((e) => {
     fail(job, "Pipeline lỗi", e?.message || String(e));
   });

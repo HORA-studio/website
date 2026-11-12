@@ -8,6 +8,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { binaryFound, cliVersion, runCli, cliErrorText } from "./cli.js";
 import { startLogin, getAuthStatus, logout } from "./auth.js";
+import { setProfileProxy } from "./profiles.js";
 import { createJob, listJobs, getJob, approveJob, loadJobs, resultsDir } from "./jobs.js";
 
 const rootDir = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -104,6 +105,17 @@ async function handle(req: http.IncomingMessage, res: http.ServerResponse) {
       const r = await startLogin(body.profile || "default");
       if (!r.ok) return sendJson(res, 400, { error: r.error });
       return sendJson(res, 200, { pending: r.pending });
+    }
+
+    if (method === "POST" && p === "/api/profiles/proxy") {
+      const body = await readBody(req);
+      const prof = String(body.profile || "default");
+      try {
+        const info = setProfileProxy(prof, body.proxy ?? "");
+        return sendJson(res, 200, { ok: true, profile: prof, proxy: info });
+      } catch (e: any) {
+        return sendJson(res, 400, { error: e?.message || String(e) });
+      }
     }
 
     if (method === "POST" && p === "/api/auth/logout") {

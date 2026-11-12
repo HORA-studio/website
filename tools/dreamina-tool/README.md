@@ -57,6 +57,22 @@ Mở http://localhost:5100 (đổi cổng bằng biến `PORT`).
    dừng ở trạng thái **Chờ duyệt** — bạn bấm duyệt mới chạy tiếp. Kết quả tải
    về `data/results/<job-id>/` và hiện ngay trong trang.
 
+## Proxy theo tài khoản (profile)
+
+Mỗi profile đặt được 1 proxy riêng ngay trong UI (mục *Trạng thái & tài
+khoản*): khi có proxy, **đăng nhập và mọi job của tài khoản đó đều đi qua
+proxy** — tool truyền biến `HTTP_PROXY`/`HTTPS_PROXY` vào CLI (CLI đọc biến
+môi trường proxy chuẩn). Chưa đặt thì đi thẳng bằng IP của máy.
+
+Định dạng nhận: `host:port`, `host:port:user:pass`, hoặc
+`http://user:pass@host:port` (hỗ trợ http/https/socks5). Mật khẩu proxy lưu
+ở `data/profiles.json` trên máy chạy tool và **luôn bị che khi hiển thị**.
+
+Cách dùng an toàn: mỗi tài khoản một **proxy dân cư tĩnh (static
+residential/ISP)**, gắn cố định lâu dài, **cùng nước với region của tài
+khoản**; tránh proxy datacenter và proxy xoay vòng — đổi IP liên tục còn
+đáng ngờ hơn dùng chung một IP ổn định.
+
 ## Kiến trúc
 
 - `src/cli.ts` — tìm binary + chạy lệnh CLI (`--format json`), dùng cho mọi thao tác.
