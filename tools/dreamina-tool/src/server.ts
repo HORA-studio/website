@@ -87,6 +87,16 @@ async function handle(req: http.IncomingMessage, res: http.ServerResponse) {
     }
 
     if (method === "GET" && p === "/") {
+      // Giao diện quản trị CHỈ mở khi truy cập ngay trên máy worker
+      // (Host localhost/127.0.0.1). Qua tunnel (Host tool.hora.works) → 404:
+      // khách chỉ được dùng Studio, không ai ngoài worker thấy giao diện
+      // tool. API /api/* và /files/* không bị ảnh hưởng (vẫn qua cổng token).
+      let host = (req.headers.host || "").toLowerCase();
+      host = host.startsWith("[") ? host.slice(0, host.indexOf("]") + 1) : host.split(":")[0];
+      const isLocalHost = ["localhost", "127.0.0.1", "::1", "[::1]"].includes(host);
+      if (!isLocalHost) {
+        return sendJson(res, 404, { error: "Không thấy đường dẫn" });
+      }
       const html = fs.readFileSync(path.join(publicDir, "index.html"), "utf8");
       res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
       res.end(html);

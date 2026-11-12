@@ -35,6 +35,9 @@ Mục đích: chứng minh worker tự nhận việc và sinh được ảnh/vid
    - Linux/macOS: `TOOL_TOKEN=test123 npm start`
    - Windows PowerShell: `$env:TOOL_TOKEN="test123"; npm start`
 3. Mở http://localhost:5100 → UI hỏi token → nhập `test123`.
+   Giao diện quản trị CHỈ mở ở localhost trên chính máy worker; mở qua
+   địa chỉ tunnel (tool.hora.works) sẽ ra 404 — khách chỉ dùng Studio,
+   phía web gọi API qua cổng token như thường, không bị ảnh hưởng.
 4. Mục tài khoản: profile `default` → **Đăng nhập (OAuth)** → bấm link →
    đăng nhập Dreamina + Authorize → tool hiện tên tài khoản + credit.
 5. Tạo thử 1 job ảnh prompt ngắn ngay trong UI của tool.
