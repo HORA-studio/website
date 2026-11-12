@@ -1092,7 +1092,6 @@ footer{padding:42px 0 110px;color:var(--muted);font-size:14px}
         <div class="buy-card"><div class="buy-amt">100K</div><div class="buy-vnd">100.000₫</div><div class="buy-cr">+200 credit</div><button type="button" class="btn block buy-pack" data-pack="topup-100">Nạp 100K</button></div>
         <div class="buy-card hot"><span class="tag">Phổ biến</span><div class="buy-amt">200K</div><div class="buy-vnd">200.000₫</div><div class="buy-cr">+400 credit</div><button type="button" class="btn primary block buy-pack" data-pack="topup-200">Nạp 200K</button></div>
         <div class="buy-card"><div class="buy-amt">500K</div><div class="buy-vnd">500.000₫</div><div class="buy-cr">+1.000 credit</div><button type="button" class="btn block buy-pack" data-pack="topup-500">Nạp 500K</button></div>
-        <div class="buy-card hot"><span class="tag">Lời nhất</span><div class="buy-amt">1000K</div><div class="buy-vnd">1.000.000₫</div><div class="buy-cr">+2.000 credit</div><button type="button" class="btn primary block buy-pack" data-pack="topup-1000">Nạp 1000K</button></div>
     </div>
   </div>
 
@@ -1204,13 +1203,6 @@ footer{padding:42px 0 110px;color:var(--muted);font-size:14px}
         <div style="color:var(--muted)">500.000₫ · ≈ 200 ảnh hoặc 33 video 5s</div>
         <ul><li>Dùng cho cả ảnh &amp; video</li><li>Lưu kết quả 30 ngày</li><li>Hoàn credit khi gen lỗi</li></ul>
         <button class="btn block buy-pack" data-pack="topup-500" type="button">Nạp 500K</button>
-      </div>
-      <div class="pack">
-        <h3>Nạp 1000K</h3>
-        <div class="credits">2.000 <small>credit</small></div>
-        <div style="color:var(--muted)">1.000.000₫ · ≈ 400 ảnh hoặc 66 video 5s</div>
-        <ul><li>Dùng cho cả ảnh &amp; video</li><li>Lưu kết quả 30 ngày</li><li>Hoàn credit khi gen lỗi</li></ul>
-        <button class="btn block buy-pack" data-pack="topup-1000" type="button">Nạp 1000K</button>
       </div>
     </div>
   </div>
@@ -1400,7 +1392,7 @@ function loadServerModels(){
   }).catch(function(){});
 }
 /* ===== Nap tien: QR + ma token ===== */
-var PACK_INFO={ "topup-50":{label:"50K",amount:50000,credits:100}, "topup-100":{label:"100K",amount:100000,credits:200}, "topup-200":{label:"200K",amount:200000,credits:400}, "topup-500":{label:"500K",amount:500000,credits:1000}, "topup-1000":{label:"1000K",amount:1000000,credits:2000} };
+var PACK_INFO={ "topup-50":{label:"50K",amount:50000,credits:100}, "topup-100":{label:"100K",amount:100000,credits:200}, "topup-200":{label:"200K",amount:200000,credits:400}, "topup-500":{label:"500K",amount:500000,credits:1000} };
 /* DIEN THONG TIN NHAN TIEN THAT: bank = ma ngan hang VietQR (vd MB, VCB, TCB), account = so tai khoan */
 var QR_CFG={ bank:"", account:"", name:"HORA STUDIO" };
 var qrState={ code:"" };
@@ -1890,5 +1882,34 @@ document.addEventListener("DOMContentLoaded",init);
 </script>
 <!-- deploy nudge 2026-11-12: kich lai Cloudflare Pages sau khi studio.html bi 404 tren live du da co tren main -->
 
+<style>
+/* ===== Studio mobile (2026-11-12): bo dock co dinh duoi, tab ngang kieu account o tren, cum dieu khien gon, kho tai nguyen ===== */
+@media(max-width:860px){
+#view-studio .studio-scope{flex-direction:column}
+#view-studio .st-side{position:static;width:100%;flex:none;flex-direction:column;flex-wrap:nowrap;align-items:stretch;gap:8px;min-height:0;height:auto;padding:10px 12px;border-right:0;border-bottom:1px solid var(--line);box-shadow:none}
+#view-studio .st-side-brand{display:block;flex:none;padding:2px 4px 0;margin:0}
+#view-studio .st-tabs{position:static;display:flex;flex-direction:row;flex-wrap:nowrap;overflow-x:auto;gap:5px;padding:1px 1px 7px;background:transparent;border:0;box-shadow:none;scrollbar-width:thin}
+#view-studio .st-tabs .st-side-item{flex:0 0 auto;width:auto;white-space:nowrap;flex-direction:row;align-items:center;justify-content:flex-start;text-align:left;gap:8px;padding:10px 12px;font-size:12.5px;line-height:1.25;color:var(--ink)}
+#view-studio .st-tabs .st-side-item::after{content:none}
+#view-studio .st-tabs .st-side-item.on{background:transparent;box-shadow:inset 0 -2px 0 var(--accent);color:var(--accent)}
+#view-studio .st-tabs .st-side-item.on::before{content:none}
+#view-studio .st-side-userbox{flex:none;flex-direction:row;align-items:center;gap:12px;margin:0;border-top:1px solid var(--line);padding:8px 4px 2px}
+#view-studio .st-side-credit{display:flex}
+body.studio #view-studio{padding-bottom:0}
+.studio-scope .ctrl-row{gap:8px}
+.studio-scope .ctrl-row .model-select{flex:1 1 100%;width:100%;max-width:none}
+.studio-scope .ctrl-row .dur-select{flex:1 1 0;width:auto;max-width:none;min-width:0}
+.studio-scope .ctrl-row #st-genBtn{flex:1 1 100%}
+.studio-scope .ctrl-row .attach-row{margin-left:0}
+#st-dashboard .dash-head{position:sticky;top:0;z-index:6;background:var(--card);padding-top:10px}
+#st-dashboard .dash-head h2{font-size:19px}
+#st-libGrid{grid-template-columns:repeat(3,1fr);gap:10px}
+#st-libGrid .gcard .prompt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#st-libGrid .gcard .meta span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+}
+@media(max-width:560px){
+#st-libGrid{grid-template-columns:repeat(2,1fr)}
+}
+</style>
 </body>
 </html>

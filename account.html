@@ -2143,6 +2143,22 @@ section[data-view="orders"] .orders-welcome p{color:var(--muted)}
 @media(max-width:760px){.lic-sec-head{padding:2px 16px 0}.lic-cards{padding:0 16px 6px}.lic-foot{flex-direction:column;align-items:flex-start}}
 @media(max-width:640px){.set-row{flex-direction:column;align-items:flex-start}}
 </style>
+<style>
+/* ===== Mobile app-mode (2026-11-12): khung co dinh khong cuon ca trang, hien lai logo ve trang chu, view Lich su pin tieu de + chi danh sach license cuon ===== */
+@media(max-width:760px){
+  .side-profile{display:flex}
+  body:has(>.shell:not(.solo)){height:100dvh;overflow:hidden}
+  .shell:not(.solo){height:calc(100dvh - 65px);box-sizing:border-box;padding-bottom:18px;overflow:hidden}
+  .shell:not(.solo) .side{flex:0 0 auto}
+  .shell:not(.solo) .content{flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden}
+  .shell:not(.solo) #dash{display:flex;flex:1;flex-direction:column;min-height:0;overflow:hidden}
+  .shell:not(.solo) #dash.hidden{display:none!important}
+  .shell:not(.solo) .view-panel:not(.hidden){flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain}
+  .shell:not(.solo) .view-panel[data-view="orders"]:not(.hidden){display:flex;flex-direction:column;overflow:hidden}
+  .shell:not(.solo) .view-panel[data-view="orders"] .orders-welcome{flex:0 0 auto}
+  .shell:not(.solo) .view-panel[data-view="orders"] .orders-body{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain}
+}
+</style>
 </head>
 <body>
 

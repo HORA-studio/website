@@ -33,7 +33,6 @@ export const CREDIT_PACKS = {
   "topup-100": { name: "Nạp 100K", credits: 200, amountVnd: 100000 },
   "topup-200": { name: "Nạp 200K", credits: 400, amountVnd: 200000 },
   "topup-500": { name: "Nạp 500K", credits: 1000, amountVnd: 500000 },
-  "topup-1000": { name: "Nạp 1000K", credits: 2000, amountVnd: 1000000 },
 };
 
 // Tim model cho 1 yeu cau gen: uu tien bang gia tinh; khi da noi Dreamina

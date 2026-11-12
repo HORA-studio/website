@@ -198,16 +198,19 @@ td.y{color:var(--accent2);font-weight:800}
 }
 @media(max-width:760px){
 .wrap{padding:0 16px}
-.nav-links{display:none}
+.nav{flex-wrap:wrap;height:auto;min-height:64px;padding-top:10px;padding-bottom:10px;row-gap:8px}
+.nav-links{display:flex;order:3;flex:1 1 100%;margin-left:0;overflow-x:auto;scrollbar-width:none}
+.nav-links::-webkit-scrollbar{display:none}
+.nav-links a{white-space:nowrap}
 .nav-actions .btn.login{display:inline-flex;background:linear-gradient(120deg,var(--accent),var(--accent2));color:#fff;border:0}
-.burger{display:grid;place-items:center}
-.hero{padding:112px 0 4px}
+.burger{display:none}
+.hero{padding:152px 0 4px}
 .tools,.feats,.prices{grid-template-columns:1fr}
 .cases{grid-template-columns:1fr 1fr}
 .lib{grid-template-columns:1fr 1fr}
 .section{padding:58px 0 4px}
 .cta{padding:0 16px}
-#view-pricing{padding-top:100px}
+#view-pricing{padding-top:140px}
 }
 .pains{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
 .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;counter-reset:step}
@@ -247,7 +250,7 @@ td.y{color:var(--accent2);font-weight:800}
 /* ===== View Mua credit (#/mua) ===== */
 #view-buy{display:none;padding:118px 0 6px}
 @media(max-width:860px){
-#view-buy{padding-top:100px}
+#view-buy{padding-top:140px}
 }
 .hdr-credit{display:inline-flex;align-items:center;padding:8px 14px;border-radius:999px;font-weight:800;font-size:13.5px;background:linear-gradient(90deg,rgba(124,92,255,.22),rgba(32,201,178,.18));border:1px solid rgba(124,92,255,.5);color:var(--ink);white-space:nowrap}
 @media(max-width:640px){
@@ -265,7 +268,7 @@ body.blog #view-home,body.blog #view-studio,body.blog #view-buy,body.blog #view-
 .blog-soon{display:inline-block;margin-top:14px;font-size:12.5px;font-weight:700;color:var(--gold)}
 @media(max-width:860px){
 .blog-grid{grid-template-columns:1fr}
-#view-blog{padding-top:100px}
+#view-blog{padding-top:140px}
 }
 .buy-panel{padding:30px 26px 12px}
 .buy-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;margin-top:20px}
