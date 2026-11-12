@@ -1731,8 +1731,16 @@ function doGenerate(){
     toast("Đã xếp hàng tạo trên server — kết quả sẽ vào Thư viện khi provider xử lý xong.");
     fill.style.width="100%";
     setTimeout(function(){ bar.style.display="none"; fill.style.width="0"; btn.disabled=false; loadLiveData(); startLivePoll(); },600);
-  }).catch(function(){
-    /* Che do xem thu: tao item NGAY voi thumbnail mac dinh + vong xoay; tai xong moi cap nhat anh that va bo animation */
+  }).catch(function(err){
+    /* DA DANG NHAP ma request that loi: hien loi THAT, khong gia lap xem thu.
+       (Ban xem thu chi danh cho khach chua dang nhap.) */
+    if(state.user){
+      bar.style.display="none"; fill.style.width="0"; btn.disabled=false;
+      var emsg=(typeof err==="number")? ("lỗi HTTP "+err) : "không kết nối được tới server";
+      toast("Tạo đơn trên server thất bại — "+emsg+". Đơn CHƯA được tạo, hãy thử lại sau ít phút.");
+      return;
+    }
+    /* Che do xem thu (chua dang nhap): tao item NGAY voi thumbnail mac dinh + vong xoay; tai xong moi cap nhat anh that va bo animation */
     wallet.balance-=cost;
     wallet.ledger.push({at:new Date().toISOString(), label:"Tạo "+(state.mode==="video"?"video":"ảnh")+" · "+state.model.name, amount:-cost, after:wallet.balance});
     persistWallet(); renderCredits(); renderLedger();
@@ -1770,7 +1778,10 @@ function loadLiveData(){
     if(library.some(function(it){ return it.status==="processing"||it.status==="queued"; })) startLivePoll();
     var mp=$("st-modePill"); if(mp){ mp.textContent="● Đã đăng nhập — dữ liệu thật"; mp.classList.add("live"); }
     checkTopupNotifications();
-  }).catch(function(){ /* giu che do xem thu */ });
+  }).catch(function(){
+    /* Da dang nhap ma tai du lieu that bi loi: noi ro tren pill, khong im lang gia vo xem thu */
+    if(state.user){ var mp2=$("st-modePill"); if(mp2) mp2.textContent="⚠ Đã đăng nhập nhưng chưa tải được dữ liệu thật — hãy tải lại trang"; }
+  });
 }
 
 /* Poll du lieu that moi 4s khi con item dang tao: xong la thumbnail tu cap nhat, vong xoay tu tat */
