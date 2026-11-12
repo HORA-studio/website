@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Phòng chung của đội — HORA</title>
+<style>
+  :root { --bg:#15151e; --panel:#1e1e2a; --panel2:#232330; --line:#33334a; --txt:#eceaf6; --dim:#a5a3bd; --accent:#6c5cff; --danger:#f85149; --ok:#3fb950; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; }
+  button { background:var(--accent); color:#fff; border:0; border-radius:8px; padding:9px 16px; cursor:pointer; font-size:14px; min-height:40px; }
+  button.ghost { background:var(--panel2); color:var(--txt); border:1px solid var(--line); }
+  button.danger { background:transparent; color:var(--danger); border:1px solid var(--danger); padding:5px 10px; min-height:32px; font-size:12px; }
+  button.small { padding:5px 10px; min-height:32px; font-size:12px; }
+  input, textarea { background:var(--panel2); color:var(--txt); border:1px solid var(--line); border-radius:8px; padding:10px 12px; font-size:14px; width:100%; }
+  .wrap { max-width:1060px; margin:0 auto; padding:18px 14px 30px; }
+  .card { background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:18px; }
+  h1 { font-size:20px; margin:0 0 4px; } h2 { font-size:15px; margin:0 0 10px; }
+  .dim { color:var(--dim); font-size:13px; }
+  .err { color:var(--danger); font-size:13px; min-height:18px; }
+  #loginView { max-width:420px; margin:8vh auto 0; }
+  #loginView .field { margin-bottom:12px; }
+  .layout { display:flex; gap:14px; align-items:flex-start; }
+  .main { flex:1; min-width:0; }
+  .side { width:300px; flex:none; display:flex; flex-direction:column; gap:14px; }
+  #msgs { height:52vh; overflow-y:auto; display:flex; flex-direction:column; gap:8px; padding:4px 2px; }
+  .msg { background:var(--panel2); border:1px solid var(--line); border-radius:10px; padding:8px 12px; }
+  .msg .meta { font-size:12px; color:var(--dim); margin-bottom:3px; }
+  .msg .meta b { color:var(--txt); }
+  .msg.mine { border-color:var(--accent); }
+  .composer { display:flex; gap:8px; margin-top:12px; }
+  .composer textarea { resize:none; height:44px; }
+  .member { display:flex; align-items:center; gap:8px; padding:7px 0; border-bottom:1px solid var(--line); font-size:14px; }
+  .member:last-child { border-bottom:0; }
+  .dot { width:9px; height:9px; border-radius:50%; background:#55556e; flex:none; }
+  .dot.on { background:var(--ok); }
+  .member .ops { margin-left:auto; display:flex; gap:6px; }
+  .logrow { font-size:12.5px; padding:5px 0; border-bottom:1px solid var(--line); color:var(--dim); }
+  .logrow b { color:var(--txt); }
+  .codebox { background:#101018; border:1px dashed var(--accent); border-radius:10px; padding:10px 12px; font-size:15px; word-break:break-all; margin-top:8px; }
+  header.top { display:flex; align-items:center; gap:12px; margin-bottom:14px; }
+  header.top .sp { flex:1; }
+  @media (max-width: 760px) { .layout { flex-direction:column; } .side { width:100%; } #msgs { height:46vh; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div id="loginView" class="card" hidden>
+    <h1>Phòng chung của đội</h1>
+    <p class="dim">Vào bằng tên của bạn và mã riêng được cấp. Mã sai nhiều lần sẽ bị khóa tạm 10 phút.</p>
+    <div class="field"><input id="loginName" list="nameList" placeholder="Tên (vd: Rocky)" autocomplete="off">
+      <datalist id="nameList"><option>Owner</option><option>Boss</option><option>Rocky</option><option>Juno</option><option>Maren</option><option>Juny</option></datalist></div>
+    <div class="field"><input id="loginCode" placeholder="Mã vào phòng (vd: XXXX-XXXX-XXXX)" autocomplete="off" style="text-transform:uppercase"></div>
+    <div class="err" id="loginErr"></div>
+    <button id="loginBtn" style="width:100%">Vào phòng</button>
+  </div>
+
+  <div id="roomView" hidden>
+    <header class="top">
+      <div><h1>Phòng chung của đội</h1><div class="dim" id="meLine"></div></div>
+      <div class="sp"></div>
+      <button class="ghost" id="logoutBtn">Rời phòng</button>
+    </header>
+    <div class="layout">
+      <div class="main card">
+        <div id="msgs"></div>
+        <div class="composer">
+          <textarea id="composer" placeholder="Nhắn vào phòng... (Enter để gửi)"></textarea>
+          <button id="sendBtn">Gửi</button>
+        </div>
+      </div>
+      <div class="side">
+        <div class="card"><h2>Thành viên</h2><div id="members"></div></div>
+        <div class="card" id="ownerPanel" hidden>
+          <h2>Chủ phòng</h2>
+          <div class="dim" style="margin-bottom:8px">Thêm thành viên mới (mã hiện 1 lần, gửi riêng cho người đó):</div>
+          <div style="display:flex;gap:8px"><input id="newName" placeholder="Tên mới"><button class="small" id="addBtn">Thêm</button></div>
+          <div id="newCode"></div>
+          <h2 style="margin-top:16px">Nhật ký vào phòng</h2>
+          <div id="accessLog"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+<script>
+const $ = (id) => document.getElementById(id);
+let me = null, lastId = 0, pollTimer = null;
+
+async function api(path, opts) {
+  const r = await fetch(path, { credentials: "same-origin", headers: { "Content-Type": "application/json" }, ...opts });
+  const data = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(data.message || data.error || ("HTTP " + r.status));
+  return data;
+}
+function fmtTime(s) { if (!s) return "chưa từng vào"; const d = new Date(s.replace(" ", "T") + "Z"); return d.toLocaleString("vi-VN"); }
+function esc(s) { const d = document.createElement("div"); d.textContent = s; return d.innerHTML; }
+
+async function tryEnter() {
+  try {
+    const data = await api("/api/team/members");
+    me = data.me; showRoom(data.members);
+  } catch { showLogin(); }
+}
+function showLogin() { $("roomView").hidden = true; $("loginView").hidden = false; }
+function showRoom(members) {
+  $("loginView").hidden = true; $("roomView").hidden = false;
+  $("meLine").textContent = "Bạn là " + me.name + (me.role === "owner" ? " (chủ phòng)" : "");
+  $("ownerPanel").hidden = me.role !== "owner";
+  renderMembers(members);
+  loadMessages(true);
+  if (me.role === "owner") loadLog();
+  clearInterval(pollTimer);
+  pollTimer = setInterval(() => { loadMessages(false); refreshMembers(); if (me.role === "owner") loadLog(); }, 5000);
+}
+function renderMembers(members) {
+  $("members").innerHTML = members.map(m => {
+    const recent = m.last_seen_at && (Date.now() - new Date(m.last_seen_at.replace(" ", "T") + "Z").getTime() < 5 * 60000);
+    const ops = (me.role === "owner" && m.role !== "owner")
+      ? `<span class="ops">
+           <button class="small ghost" onclick="adminAct('reset','${esc(m.name)}')">Đổi mã</button>
+           ${m.revoked ? `<button class="small ghost" onclick="adminAct('unrevoke','${esc(m.name)}')">Mở lại</button>`
+                       : `<button class="danger" onclick="adminAct('revoke','${esc(m.name)}')">Thu hồi</button>`}
+         </span>` : "";
+    return `<div class="member"><span class="dot ${recent ? "on" : ""}"></span><span><b>${esc(m.name)}</b>${m.role === "owner" ? " · chủ phòng" : ""}${m.revoked ? " · <span style='color:var(--danger)'>đã thu hồi</span>" : ""}<br><span class="dim">Vào gần nhất: ${fmtTime(m.last_seen_at)}</span></span>${ops}</div>`;
+  }).join("");
+}
+async function refreshMembers() { try { const d = await api("/api/team/members"); renderMembers(d.members); } catch { showLogin(); } }
+function renderMessages(list, reset) {
+  const box = $("msgs");
+  if (reset) { box.innerHTML = ""; lastId = 0; }
+  for (const m of list) {
+    lastId = Math.max(lastId, m.id);
+    const div = document.createElement("div");
+    div.className = "msg" + (m.name === me.name ? " mine" : "");
+    div.innerHTML = `<div class="meta"><b>${esc(m.name)}</b> · ${fmtTime(m.created_at)}</div><div>${esc(m.body)}</div>`;
+    box.appendChild(div);
+  }
+  if (list.length) box.scrollTop = box.scrollHeight;
+}
+async function loadMessages(reset) { try { const d = await api("/api/team/messages?after=" + (reset ? 0 : lastId)); renderMessages(d.messages, reset); } catch { showLogin(); } }
+async function loadLog() {
+  try {
+    const d = await api("/api/team/admin");
+    $("accessLog").innerHTML = d.log.slice(0, 20).map(l =>
+      `<div class="logrow"><b>${esc(l.name || "?")}</b> — ${l.ok ? "vào được" : "bị chặn"} · ${fmtTime(l.created_at)}</div>`).join("") || "<div class='dim'>Chưa có lượt nào.</div>";
+  } catch {}
+}
+window.adminAct = async (action, name) => {
+  if (action === "revoke" && !confirm("Thu hồi mã của " + name + "? Người này sẽ bị văng khỏi phòng ngay.")) return;
+  try {
+    const d = await api("/api/team/admin", { method: "POST", body: JSON.stringify({ action, name }) });
+    if (d.code) $("newCode").innerHTML = `<div class="codebox">Mã mới của ${esc(d.name)}: <b>${esc(d.code)}</b><br><span class="dim">Chỉ hiện lần này — gửi riêng cho ${esc(d.name)} ngay.</span></div>`;
+    refreshMembers(); loadLog();
+  } catch (e) { alert(e.message); }
+};
+$("loginBtn").onclick = async () => {
+  $("loginErr").textContent = "";
+  try {
+    const d = await api("/api/team/login", { method: "POST", body: JSON.stringify({ name: $("loginName").value, code: $("loginCode").value }) });
+    me = { name: d.name, role: d.role };
+    const m = await api("/api/team/members"); showRoom(m.members);
+  } catch (e) { $("loginErr").textContent = e.message; }
+};
+$("loginCode").addEventListener("keydown", (e) => { if (e.key === "Enter") $("loginBtn").click(); });
+$("sendBtn").onclick = async () => {
+  const v = $("composer").value.trim(); if (!v) return;
+  $("composer").value = "";
+  try { await api("/api/team/messages", { method: "POST", body: JSON.stringify({ body: v }) }); loadMessages(false); }
+  catch (e) { alert(e.message); }
+};
+$("composer").addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); $("sendBtn").click(); } });
+$("logoutBtn").onclick = async () => { await api("/api/team/logout", { method: "POST" }).catch(() => {}); clearInterval(pollTimer); showLogin(); };
+$("addBtn").onclick = async () => {
+  const name = $("newName").value.trim(); if (!name) return;
+  try {
+    const d = await api("/api/team/admin", { method: "POST", body: JSON.stringify({ action: "add", name }) });
+    $("newName").value = "";
+    $("newCode").innerHTML = `<div class="codebox">Mã của ${esc(d.name)}: <b>${esc(d.code)}</b><br><span class="dim">Chỉ hiện lần này — gửi riêng cho ${esc(d.name)} ngay.</span></div>`;
+    refreshMembers(); loadLog();
+  } catch (e) { alert(e.message); }
+};
+tryEnter();
+</script>
+</body>
+</html>
