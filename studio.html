@@ -1111,6 +1111,7 @@ body.st-gated #view-buy{visibility:hidden}
   <div class="buy-panel" id="st-buyPanel" style="display:none">
     <div class="dash-head"><div><h2>Mua credit</h2></div></div>
     <div class="buy-grid">
+        <div class="buy-card"><div class="buy-amt">10K</div><div class="buy-vnd">10.000₫</div><div class="buy-cr">+10 credit · Trải nghiệm</div><button type="button" class="btn block buy-pack" data-pack="topup-test">Nạp 10K</button></div>
         <div class="buy-card"><div class="buy-amt">80K</div><div class="buy-vnd"><s>100.000₫</s> 80.000₫</div><div class="buy-cr">+100 credit · Offer −20%</div><button type="button" class="btn block buy-pack" data-pack="topup-50">Nạp 80K</button></div>
         <div class="buy-card"><div class="buy-amt">160K</div><div class="buy-vnd"><s>200.000₫</s> 160.000₫</div><div class="buy-cr">+200 credit · Offer −20%</div><button type="button" class="btn block buy-pack" data-pack="topup-100">Nạp 160K</button></div>
         <div class="buy-card hot"><span class="tag">Phổ biến</span><div class="buy-amt">320K</div><div class="buy-vnd"><s>400.000₫</s> 320.000₫</div><div class="buy-cr">+400 credit · Offer −20%</div><button type="button" class="btn primary block buy-pack" data-pack="topup-200">Nạp 320K</button></div>
@@ -1199,6 +1200,13 @@ body.st-gated #view-buy{visibility:hidden}
     <h2 class="title" style="text-align:center">Mua credit một lần, dùng cho cả ảnh &amp; video</h2>
     <p style="text-align:center;color:var(--muted);margin:4px 0 0">Ưu đãi mở bán: giảm 20% trên giá gốc 1.000₫ = 1 credit — giá hiển thị đã là giá sau giảm, khách chỉ trả 80%. Thanh toán chuyển khoản qua SePay.</p>
     <div class="packs">
+      <div class="pack">
+        <h3>Nạp 10K</h3>
+        <div class="credits">10 <small>credit</small></div>
+        <div style="color:var(--muted)">10.000₫ · gói trải nghiệm · ≈ 1 ảnh</div>
+        <ul><li>Dùng cho cả ảnh &amp; video</li><li>Lưu kết quả 30 ngày</li><li>Hoàn credit khi gen lỗi</li></ul>
+        <button class="btn block buy-pack" data-pack="topup-test" type="button">Nạp 10K</button>
+      </div>
       <div class="pack">
         <h3>Nạp 80K</h3>
         <div class="credits">100 <small>credit</small></div>
@@ -1450,7 +1458,7 @@ function loadServerModels(){
   }).catch(function(){});
 }
 /* ===== Nap tien: QR + ma token ===== */
-var PACK_INFO={ "topup-50":{label:"80K",amount:80000,credits:100}, "topup-100":{label:"160K",amount:160000,credits:200}, "topup-200":{label:"320K",amount:320000,credits:400}, "topup-500":{label:"800K",amount:800000,credits:1000} };
+var PACK_INFO={ "topup-test":{label:"10K",amount:10000,credits:10}, "topup-50":{label:"80K",amount:80000,credits:100}, "topup-100":{label:"160K",amount:160000,credits:200}, "topup-200":{label:"320K",amount:320000,credits:400}, "topup-500":{label:"800K",amount:800000,credits:1000} };
 /* DIEN THONG TIN NHAN TIEN THAT: bank = ma ngan hang VietQR (vd MB, VCB, TCB), account = so tai khoan */
 var QR_CFG={ bank:"", account:"", name:"HORA STUDIO" };
 var qrState={ code:"" };

@@ -33,6 +33,7 @@ export const STUDIO_MODELS = {
 // (amountVnd). Id goi giu nguyen (topup-50/100/200/500) vi phien nap cu
 // dang pending van khop theo dong topup da luu, khong qua bang nay.
 export const CREDIT_PACKS = {
+  "topup-test": { name: "Nạp 10K", credits: 10, amountVnd: 10000, listVnd: 10000 },
   "topup-50": { name: "Nạp 80K", credits: 100, amountVnd: 80000, listVnd: 100000 },
   "topup-100": { name: "Nạp 160K", credits: 200, amountVnd: 160000, listVnd: 200000 },
   "topup-200": { name: "Nạp 320K", credits: 400, amountVnd: 320000, listVnd: 400000 },
