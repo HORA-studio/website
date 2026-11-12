@@ -25,6 +25,15 @@ export const SEED_MEMBERS = [
 
 let schemaReady = false;
 
+// Migration nhe: them cot neu thieu (kiem qua PRAGMA) — khong vo du lieu live.
+async function ensureColumn(env, table, column, ddl) {
+  const { results } = await env.DB.prepare(`PRAGMA table_info(${table})`).all();
+  const has = (results || []).some((r) => r.name === column);
+  if (!has) {
+    await env.DB.prepare(`ALTER TABLE ${table} ADD COLUMN ${column} ${ddl}`).run();
+  }
+}
+
 export async function ensureSchema(env) {
   if (schemaReady) return;
   const stmts = [
@@ -56,6 +65,12 @@ export async function ensureSchema(env) {
      )`,
   ];
   for (const s of stmts) await env.DB.prepare(s).run();
+  // Cot bo sung cua ban nang cap (khoa API + luong hoi dap) — them khi thieu.
+  await ensureColumn(env, "team_members", "api_hash", "TEXT");
+  await ensureColumn(env, "team_messages", "mentions", "TEXT");
+  await ensureColumn(env, "team_messages", "kind", "TEXT");
+  await ensureColumn(env, "team_messages", "status", "TEXT");
+  await ensureColumn(env, "team_messages", "reply_to", "INTEGER");
   // Seed thanh vien lan dau (bang rong moi seed).
   const { results } = await env.DB.prepare("SELECT COUNT(*) AS n FROM team_members").all();
   if ((results?.[0]?.n ?? 0) === 0) {
@@ -86,7 +101,15 @@ function cookieValue(request, name) {
   return null;
 }
 
-export async function getSessionMember(env, request) {
+// Hien dien: cap nhat last_seen toi da 1 lan/phut.
+async function touchPresence(env, name) {
+  await env.DB.prepare(
+    "UPDATE team_members SET last_seen_at = datetime('now') WHERE name = ?1 AND (last_seen_at IS NULL OR last_seen_at < datetime('now', '-60 seconds'))"
+  ).bind(name).run();
+}
+
+// Xac thuc bang cookie phien dang nhap web.
+export async function getCookieMember(env, request) {
   await ensureSchema(env);
   const token = cookieValue(request, "team_session");
   if (!token) return null;
@@ -98,11 +121,48 @@ export async function getSessionMember(env, request) {
   ).bind(tokenHash).all();
   const row = results?.[0];
   if (!row || row.revoked) return null;
-  // Hien dien: cap nhat last_seen toi da 1 lan/phut.
-  await env.DB.prepare(
-    "UPDATE team_members SET last_seen_at = datetime('now') WHERE name = ?1 AND (last_seen_at IS NULL OR last_seen_at < datetime('now', '-60 seconds'))"
-  ).bind(row.name).run();
+  await touchPresence(env, row.name);
   return { name: row.name, role: row.role };
+}
+
+// Xac thuc bang khoa API may: header "Authorization: Bearer tk_...".
+export async function getApiMember(env, request) {
+  await ensureSchema(env);
+  const auth = request.headers.get("Authorization") || "";
+  const m = auth.match(/^Bearer\s+(tk_.+)$/);
+  if (!m) return null;
+  const hash = await sha256Hex(m[1].trim());
+  const { results } = await env.DB.prepare(
+    "SELECT name, role, revoked FROM team_members WHERE api_hash = ?1"
+  ).bind(hash).all();
+  const row = results?.[0];
+  if (!row || row.revoked) return null;
+  await touchPresence(env, row.name);
+  return { name: row.name, role: row.role };
+}
+
+// Xac thuc chung: thu cookie truoc, roi khoa API. Tra them via: 'cookie'|'api'.
+export async function getSessionMember(env, request) {
+  const byCookie = await getCookieMember(env, request);
+  if (byCookie) return { ...byCookie, via: "cookie" };
+  const byApi = await getApiMember(env, request);
+  if (byApi) return { ...byApi, via: "api" };
+  return null;
+}
+
+// Khoa API dai han cho may/worker tu dong canh phong. D1 chi luu ban bam.
+export function newApiToken() {
+  const bytes = new Uint8Array(24);
+  crypto.getRandomValues(bytes);
+  return "tk_" + [...bytes].map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+export async function issueApiToken(env, name) {
+  const token = newApiToken();
+  const hash = await sha256Hex(token);
+  await env.DB.prepare("UPDATE team_members SET api_hash = ?2 WHERE name = ?1")
+    .bind(name, hash).run();
+  return token;
 }
 
 export async function createSession(env, name) {

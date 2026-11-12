@@ -28,8 +28,23 @@
   .msg .meta { font-size:12px; color:var(--dim); margin-bottom:3px; }
   .msg .meta b { color:var(--txt); }
   .msg.mine { border-color:var(--accent); }
+  .msg .qbar { display:flex; align-items:center; gap:6px; margin-top:7px; flex-wrap:wrap; }
+  .chip { font-size:11.5px; padding:2px 9px; border-radius:99px; border:1px solid var(--line); color:var(--dim); }
+  .chip.open { color:#f0b429; border-color:#f0b429; }
+  .chip.doing { color:#58a6ff; border-color:#58a6ff; }
+  .chip.done { color:var(--ok); border-color:var(--ok); }
+  .role { font-size:11.5px; padding:1px 8px; border-radius:99px; background:var(--panel2); border:1px solid var(--line); color:var(--dim); }
+  .role.reviewer { color:#f0b429; border-color:#f0b429; }
+  .role.editor { color:#3fb950; border-color:#3fb950; }
+  .role.owner { color:#fff; background:var(--accent); border-color:var(--accent); }
+  .mention { color:#58a6ff; }
+  .filterbar { display:flex; align-items:center; gap:8px; margin-bottom:10px; font-size:13.5px; }
+  .filterbar input { width:auto; }
   .composer { display:flex; gap:8px; margin-top:12px; }
   .composer textarea { resize:none; height:44px; }
+  .composer-tools { display:flex; gap:8px; align-items:center; margin-top:8px; flex-wrap:wrap; font-size:13.5px; }
+  .composer-tools select { background:var(--panel2); color:var(--txt); border:1px solid var(--line); border-radius:8px; padding:8px; font-size:13.5px; }
+  .composer-tools input[type=checkbox] { width:auto; }
   .member { display:flex; align-items:center; gap:8px; padding:7px 0; border-bottom:1px solid var(--line); font-size:14px; }
   .member:last-child { border-bottom:0; }
   .dot { width:9px; height:9px; border-radius:50%; background:#55556e; flex:none; }
@@ -64,18 +79,30 @@
     </header>
     <div class="layout">
       <div class="main card">
+        <div class="filterbar"><label><input type="checkbox" id="onlyOpen"> Chỉ hiện câu hỏi đang mở</label></div>
         <div id="msgs"></div>
         <div class="composer">
           <textarea id="composer" placeholder="Nhắn vào phòng... (Enter để gửi)"></textarea>
           <button id="sendBtn">Gửi</button>
         </div>
+        <div class="composer-tools">
+          <select id="mentionSel"></select>
+          <button class="small ghost" id="mentionBtn">Chèn @tên</button>
+          <label><input type="checkbox" id="asQuestion"> Đăng dạng câu hỏi (có trạng thái)</label>
+        </div>
       </div>
       <div class="side">
         <div class="card"><h2>Thành viên</h2><div id="members"></div></div>
+        <div class="card">
+          <h2>Khóa API máy của tôi</h2>
+          <div class="dim" style="margin-bottom:8px">Khóa để chương trình/trợ lý của bạn tự đọc &amp; gửi tin trong phòng. Cấp mới là khóa cũ mất hiệu lực; khóa chỉ hiện 1 lần.</div>
+          <button class="small" id="myTokenBtn">Cấp / xoay khóa API</button>
+          <div id="myToken"></div>
+        </div>
         <div class="card" id="ownerPanel" hidden>
           <h2>Chủ phòng</h2>
           <div class="dim" style="margin-bottom:8px">Thêm thành viên mới (mã hiện 1 lần, gửi riêng cho người đó):</div>
-          <div style="display:flex;gap:8px"><input id="newName" placeholder="Tên mới"><button class="small" id="addBtn">Thêm</button></div>
+          <div style="display:flex;gap:8px"><input id="newName" placeholder="Tên mới"><select id="newRole" style="background:var(--panel2);color:var(--txt);border:1px solid var(--line);border-radius:8px;padding:8px"><option value="member">Thành viên</option><option value="reviewer">Reviewer</option><option value="editor">Editor</option></select><button class="small" id="addBtn">Thêm</button></div>
           <div id="newCode"></div>
           <h2 style="margin-top:16px">Nhật ký vào phòng</h2>
           <div id="accessLog"></div>
@@ -87,7 +114,9 @@
 </div>
 <script>
 const $ = (id) => document.getElementById(id);
-let me = null, lastId = 0, pollTimer = null;
+let me = null, lastId = 0, pollTimer = null, msgList = [], memberNames = [];
+const ROLE_LABEL = { owner: "chủ phòng", reviewer: "reviewer", editor: "editor", member: "thành viên" };
+const STATUS_LABEL = { open: "Đang mở", doing: "Đang xử lý", done: "Đã xong" };
 
 async function api(path, opts) {
   const r = await fetch(path, { credentials: "same-origin", headers: { "Content-Type": "application/json" }, ...opts });
@@ -107,7 +136,7 @@ async function tryEnter() {
 function showLogin() { $("roomView").hidden = true; $("loginView").hidden = false; }
 function showRoom(members) {
   $("loginView").hidden = true; $("roomView").hidden = false;
-  $("meLine").textContent = "Bạn là " + me.name + (me.role === "owner" ? " (chủ phòng)" : "");
+  $("meLine").textContent = "Bạn là " + me.name + " (" + (ROLE_LABEL[me.role] || "thành viên") + ")";
   $("ownerPanel").hidden = me.role !== "owner";
   renderMembers(members);
   loadMessages(true);
@@ -116,31 +145,61 @@ function showRoom(members) {
   pollTimer = setInterval(() => { loadMessages(false); refreshMembers(); if (me.role === "owner") loadLog(); }, 5000);
 }
 function renderMembers(members) {
+  memberNames = members.filter(m => !m.revoked).map(m => m.name);
+  $("mentionSel").innerHTML = memberNames.map(n => `<option value="${esc(n)}">@${esc(n)}</option>`).join("");
   $("members").innerHTML = members.map(m => {
     const recent = m.last_seen_at && (Date.now() - new Date(m.last_seen_at.replace(" ", "T") + "Z").getTime() < 5 * 60000);
     const ops = (me.role === "owner" && m.role !== "owner")
       ? `<span class="ops">
+           <button class="small ghost" onclick="adminAct('token','${esc(m.name)}')">Khóa API</button>
            <button class="small ghost" onclick="adminAct('reset','${esc(m.name)}')">Đổi mã</button>
            ${m.revoked ? `<button class="small ghost" onclick="adminAct('unrevoke','${esc(m.name)}')">Mở lại</button>`
                        : `<button class="danger" onclick="adminAct('revoke','${esc(m.name)}')">Thu hồi</button>`}
          </span>` : "";
-    return `<div class="member"><span class="dot ${recent ? "on" : ""}"></span><span><b>${esc(m.name)}</b>${m.role === "owner" ? " · chủ phòng" : ""}${m.revoked ? " · <span style='color:var(--danger)'>đã thu hồi</span>" : ""}<br><span class="dim">Vào gần nhất: ${fmtTime(m.last_seen_at)}</span></span>${ops}</div>`;
+    return `<div class="member"><span class="dot ${recent ? "on" : ""}"></span><span><b>${esc(m.name)}</b> <span class="role ${esc(m.role || "member")}">${esc(ROLE_LABEL[m.role] || "thành viên")}</span>${m.revoked ? " · <span style='color:var(--danger)'>đã thu hồi</span>" : ""}<br><span class="dim">Vào gần nhất: ${fmtTime(m.last_seen_at)}</span></span>${ops}</div>`;
   }).join("");
 }
 async function refreshMembers() { try { const d = await api("/api/team/members"); renderMembers(d.members); } catch { showLogin(); } }
-function renderMessages(list, reset) {
+function highlightMentions(text) {
+  let out = esc(text);
+  for (const n of memberNames) {
+    out = out.replace(new RegExp("@" + n.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "(?![A-Za-z0-9_])", "gi"), '<span class="mention">@' + n + "</span>");
+  }
+  return out;
+}
+function renderAll() {
   const box = $("msgs");
-  if (reset) { box.innerHTML = ""; lastId = 0; }
+  const onlyOpen = $("onlyOpen").checked;
+  const list = msgList.filter(m => !onlyOpen || (m.kind === "question" && (m.status || "open") !== "done"));
+  box.innerHTML = "";
   for (const m of list) {
-    lastId = Math.max(lastId, m.id);
     const div = document.createElement("div");
     div.className = "msg" + (m.name === me.name ? " mine" : "");
-    div.innerHTML = `<div class="meta"><b>${esc(m.name)}</b> · ${fmtTime(m.created_at)}</div><div>${esc(m.body)}</div>`;
+    let html = `<div class="meta"><b>${esc(m.name)}</b> · ${fmtTime(m.created_at)}${m.kind === "question" ? " · <span class='chip " + esc(m.status || "open") + "'>Câu hỏi: " + esc(STATUS_LABEL[m.status || "open"]) + "</span>" : ""}</div><div>${highlightMentions(m.body)}</div>`;
+    if (m.kind === "question") {
+      const st = m.status || "open";
+      html += `<div class="qbar">` +
+        (st !== "doing" ? `<button class="small ghost" onclick="setStatus(${m.id},'doing')">Đang xử lý</button>` : "") +
+        (st !== "done" ? `<button class="small ghost" onclick="setStatus(${m.id},'done')">Đã xong</button>` : "") +
+        (st !== "open" ? `<button class="small ghost" onclick="setStatus(${m.id},'open')">Mở lại</button>` : "") +
+        `</div>`;
+    }
+    div.innerHTML = html;
     box.appendChild(div);
   }
-  if (list.length) box.scrollTop = box.scrollHeight;
+  box.scrollTop = box.scrollHeight;
+}
+function renderMessages(list, reset) {
+  if (reset) { msgList = []; lastId = 0; }
+  for (const m of list) { lastId = Math.max(lastId, m.id); msgList.push(m); }
+  renderAll();
 }
 async function loadMessages(reset) { try { const d = await api("/api/team/messages?after=" + (reset ? 0 : lastId)); renderMessages(d.messages, reset); } catch { showLogin(); } }
+window.setStatus = async (id, status) => {
+  try { await api("/api/team/status", { method: "POST", body: JSON.stringify({ id, status }) }); loadMessages(true); }
+  catch (e) { alert(e.message); }
+};
+$("onlyOpen").addEventListener("change", renderAll);
 async function loadLog() {
   try {
     const d = await api("/api/team/admin");
@@ -149,12 +208,26 @@ async function loadLog() {
   } catch {}
 }
 window.adminAct = async (action, name) => {
-  if (action === "revoke" && !confirm("Thu hồi mã của " + name + "? Người này sẽ bị văng khỏi phòng ngay.")) return;
+  if (action === "revoke" && !confirm("Thu hồi của " + name + "? Người này sẽ bị văng khỏi phòng ngay và khóa API cũng bị xóa.")) return;
   try {
     const d = await api("/api/team/admin", { method: "POST", body: JSON.stringify({ action, name }) });
     if (d.code) $("newCode").innerHTML = `<div class="codebox">Mã mới của ${esc(d.name)}: <b>${esc(d.code)}</b><br><span class="dim">Chỉ hiện lần này — gửi riêng cho ${esc(d.name)} ngay.</span></div>`;
+    if (d.token) $("newCode").innerHTML = `<div class="codebox">Khóa API của ${esc(d.name)}: <b>${esc(d.token)}</b><br><span class="dim">Chỉ hiện lần này — gửi riêng cho ${esc(d.name)} ngay. Khóa cũ (nếu có) đã mất hiệu lực.</span></div>`;
     refreshMembers(); loadLog();
   } catch (e) { alert(e.message); }
+};
+$("myTokenBtn").onclick = async () => {
+  if (!confirm("Cấp khóa API mới cho chính bạn? Khóa cũ (nếu có) sẽ mất hiệu lực ngay.")) return;
+  try {
+    const d = await api("/api/team/token", { method: "POST", body: "{}" });
+    $("myToken").innerHTML = `<div class="codebox">Khóa API của bạn: <b>${esc(d.token)}</b><br><span class="dim">Chỉ hiện lần này — lưu ngay vào nơi an toàn trên máy của bạn.</span></div>`;
+  } catch (e) { alert(e.message); }
+};
+$("mentionBtn").onclick = () => {
+  const n = $("mentionSel").value; if (!n) return;
+  const ta = $("composer");
+  ta.value = (ta.value ? ta.value.replace(/\s*$/, " ") : "") + "@" + n + " ";
+  ta.focus();
 };
 $("loginBtn").onclick = async () => {
   $("loginErr").textContent = "";
@@ -167,8 +240,9 @@ $("loginBtn").onclick = async () => {
 $("loginCode").addEventListener("keydown", (e) => { if (e.key === "Enter") $("loginBtn").click(); });
 $("sendBtn").onclick = async () => {
   const v = $("composer").value.trim(); if (!v) return;
-  $("composer").value = "";
-  try { await api("/api/team/messages", { method: "POST", body: JSON.stringify({ body: v }) }); loadMessages(false); }
+  const kind = $("asQuestion").checked ? "question" : "chat";
+  $("composer").value = ""; $("asQuestion").checked = false;
+  try { await api("/api/team/messages", { method: "POST", body: JSON.stringify({ body: v, kind }) }); loadMessages(false); }
   catch (e) { alert(e.message); }
 };
 $("composer").addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); $("sendBtn").click(); } });
@@ -176,9 +250,9 @@ $("logoutBtn").onclick = async () => { await api("/api/team/logout", { method: "
 $("addBtn").onclick = async () => {
   const name = $("newName").value.trim(); if (!name) return;
   try {
-    const d = await api("/api/team/admin", { method: "POST", body: JSON.stringify({ action: "add", name }) });
+    const d = await api("/api/team/admin", { method: "POST", body: JSON.stringify({ action: "add", name, role: $("newRole").value }) });
     $("newName").value = "";
-    $("newCode").innerHTML = `<div class="codebox">Mã của ${esc(d.name)}: <b>${esc(d.code)}</b><br><span class="dim">Chỉ hiện lần này — gửi riêng cho ${esc(d.name)} ngay.</span></div>`;
+    $("newCode").innerHTML = `<div class="codebox">Mã của ${esc(d.name)} (${esc(ROLE_LABEL[d.role] || "thành viên")}): <b>${esc(d.code)}</b><br><span class="dim">Chỉ hiện lần này — gửi riêng cho ${esc(d.name)} ngay.</span></div>`;
     refreshMembers(); loadLog();
   } catch (e) { alert(e.message); }
 };
