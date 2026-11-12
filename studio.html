@@ -993,7 +993,17 @@ footer{padding:42px 0 110px;color:var(--muted);font-size:14px}
   </div>
 </header>
 
-<div id="view-studio">
+<style>
+/* Cong tai trang Studio: an giao dien den khi du lieu that tai xong — tranh nhay demo -> that */
+#view-studio{position:relative}
+#view-studio.st-booting>*:not(#st-boot){visibility:hidden}
+#st-boot{display:none}
+#view-studio.st-booting #st-boot{display:flex;position:absolute;inset:0;z-index:60;align-items:flex-start;justify-content:center;gap:12px;padding-top:120px;background:#15151e;color:#b9b9c9;font:500 15px system-ui,sans-serif}
+.st-boot-spin{width:22px;height:22px;flex:none;border-radius:50%;border:3px solid rgba(255,255,255,.18);border-top-color:#6c5cff;animation:stbootspin .8s linear infinite}
+@keyframes stbootspin{to{transform:rotate(360deg)}}
+</style>
+<div id="view-studio" class="st-booting">
+  <div id="st-boot"><div class="st-boot-spin"></div><span>Đang tải Studio…</span></div>
   <div class="studio-scope">
     <!-- ============ HERO + GENERATOR (clone layout ShrimpReel) ============ -->
 <aside class="st-side">
@@ -1405,7 +1415,7 @@ function renderRatioPills(){
 /* Tai danh muc model THAT tu server (/api/studio/models — proxy sang Dreamina
    Tool khi da noi); loi/khong co thi giu danh muc tinh san co. */
 function loadServerModels(){
-  fetch("/api/studio/models",{credentials:"same-origin"}).then(function(r){ return r.ok? r.json(): null; }).then(function(d){
+  return fetch("/api/studio/models",{credentials:"same-origin"}).then(function(r){ return r.ok? r.json(): null; }).then(function(d){
     if(!d) return;
     ["image","video"].forEach(function(k){
       if(Array.isArray(d[k])&&d[k].length) MODELS[k]=d[k].map(function(m){ return { id:m.id, name:m.name, desc:m.desc||"", cost:m.cost, perSecond:!!m.perSecond, durations:m.durations||null, ratios:m.ratios||null, resolutions:m.resolutions||null }; });
@@ -1800,6 +1810,13 @@ function startLivePoll(){
 
 /* ===== Khoi tao ===== */
 function init(){
+  /* Cong tai trang: giu nguyen giao dien an (class st-booting) cho den khi CA model THAT
+     va trang thai dang nhap/du lieu that tai xong moi mo — het canh nhay demo -> that.
+     Fail-safe 6s: du loi mang cung khong bao gio ket trang trang. */
+  var bootLeft=2, bootLifted=false;
+  function liftBoot(){ if(bootLifted) return; bootLifted=true; var v=$("view-studio"); if(v) v.classList.remove("st-booting"); }
+  function bootStep(){ bootLeft--; if(bootLeft<=0) liftBoot(); }
+  setTimeout(liftBoot,6000);
   $("st-inviteInput").value=location.origin+"/studio.html?ref=demo";
   renderShow("dance"); setMode("image"); renderCredits(); renderLib(); renderResults(); renderLedger();
   $("st-tabImage").addEventListener("click",function(){ setMode("image"); });
@@ -1833,7 +1850,7 @@ function init(){
   $("qrOverlay").addEventListener("click",function(e){ if(e.target===$("qrOverlay")) closeQr(); });
   document.addEventListener("keydown",function(e){ if(e.key==="Escape") closeQr(); });
   $("qrCopyCode").addEventListener("click",function(){ try{ navigator.clipboard.writeText(qrState.code); }catch(err){} toast("Đã sao chép nội dung chuyển khoản."); });
-  loadServerModels();
+  var mres=loadServerModels(); if(mres&&mres.then) mres.then(bootStep,bootStep); else bootStep();
   $("st-inviteCopy").addEventListener("click",function(){ $("st-inviteInput").select(); try{ navigator.clipboard.writeText($("st-inviteInput").value); }catch(e){ document.execCommand("copy"); } toast("Đã sao chép link mời."); });
   $("st-exportBtn").addEventListener("click",function(){
     var blob=new Blob([JSON.stringify({library:library, wallet:wallet},null,2)],{type:"application/json"});
@@ -1855,7 +1872,7 @@ function init(){
     return loadLiveData();
   }).catch(function(){
     var mp=$("st-modePill"); if(mp) mp.textContent="● Chế độ xem thử (chưa đăng nhập)"; 
-  });
+  }).then(bootStep,bootStep);
 }
 document.addEventListener("DOMContentLoaded",init);
 
