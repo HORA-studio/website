@@ -28,11 +28,15 @@ export const STUDIO_MODELS = {
 // Goi credit le + goi thang (hien thi o studio.html #pricing; thanh toan di
 // qua don hang/orders hien co — webhook thanh toan cong credit bang
 // grantCredits(..., 'purchase', orderId), xem docs/studio.md).
+// Gia nap le (user chot 2026-11-12): gia goc theo gia tri trang chu
+// 1.000d = 1 credit (listVnd), Studio offer giam 20% -> khach tra 80%
+// (amountVnd). Id goi giu nguyen (topup-50/100/200/500) vi phien nap cu
+// dang pending van khop theo dong topup da luu, khong qua bang nay.
 export const CREDIT_PACKS = {
-  "topup-50": { name: "Nạp 50K", credits: 100, amountVnd: 50000 },
-  "topup-100": { name: "Nạp 100K", credits: 200, amountVnd: 100000 },
-  "topup-200": { name: "Nạp 200K", credits: 400, amountVnd: 200000 },
-  "topup-500": { name: "Nạp 500K", credits: 1000, amountVnd: 500000 },
+  "topup-50": { name: "Nạp 80K", credits: 100, amountVnd: 80000, listVnd: 100000 },
+  "topup-100": { name: "Nạp 160K", credits: 200, amountVnd: 160000, listVnd: 200000 },
+  "topup-200": { name: "Nạp 320K", credits: 400, amountVnd: 320000, listVnd: 400000 },
+  "topup-500": { name: "Nạp 800K", credits: 1000, amountVnd: 800000, listVnd: 1000000 },
 };
 
 // Tim model cho 1 yeu cau gen: uu tien bang gia tinh; khi da noi Dreamina
