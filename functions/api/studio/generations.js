@@ -3,11 +3,14 @@
 //          (expires_at < now) tu chuyen status 'expired' va an result_url.
 // POST   — tao yeu cau gen: validate -> tinh gia theo model -> TRU credit
 //          (ledger 'spend') -> ghi generation status 'queued', expires_at +30d.
-//          Provider gen that (fal.ai / Dreamina) xu ly tiep o tang Queue/Worker
-//          (chua noi trong nhanh nay — xem docs/studio.md): worker cap nhat
-//          status done/failed; failed thi goi addLedger 'refund' hoan 100%.
+//          Ghi don SAP sau khi da tru -> tu ghi 'refund' bu ngay (khong de
+//          spend mo coi). Provider gen that (Dreamina Tool) xu ly tiep: GET
+//          dong bo done/failed; failed thi addLedger 'refund' hoan 100%.
+//          Don ket (queued/working khong tien trien duoc) qua 15 phut -> GET
+//          tu chuyen failed + hoan 100%.
 // DELETE — ?id=... : khach xoa muc cua chinh minh (file R2 do cron don theo
-//          result_key, hoac xoa ngay khi co worker).
+//          result_key, hoac xoa ngay khi co worker). Muc CHUA xong
+//          (queued/working) thi xoa kem HOAN credit dang giu.
 import { json, errorJson, readJson, requireAuth } from "../_lib.js";
 import { findModel, resolveModel, generationCost, generationOut, addLedger, getBalance, newStudioId, RETENTION_DAYS, toolBase, toolModelId, toolCreateJob, toolGetJob, toolFileUrl, toolPullResultToR2 } from "./_studio.js";
 
@@ -26,6 +29,28 @@ export async function onRequestGet({ request, env }) {
   ).bind(a.customer.id).all();
   const rows = results || [];
 
+  // Don KET khong co toolJobId (tool mat ket noi dung luc tao nen job chua bao
+  // gio sang duoc tool): qua 15 phut thi chuyen failed + HOAN 100% — truoc day
+  // cac don nay ket 'queued' vo thoi han va credit bi giu mai. Guard UPDATE
+  // chi thanh cong 1 lan (status con queued/working) nen khong hoan trung.
+  const STUCK_AFTER_MS = 15 * 60 * 1000;
+  const nowMs = Date.now();
+  for (const r of rows) {
+    if (r.status !== "queued" && r.status !== "working") continue;
+    if (nowMs - new Date(r.created_at).getTime() <= STUCK_AFTER_MS) continue;
+    let p = null;
+    try { p = r.params_json ? JSON.parse(r.params_json) : null; } catch (e) { p = null; }
+    if (p && p.toolJobId) continue; // Co job ben tool: nhanh dong bo tool o duoi xu ly.
+    const stuckMsg = "Quá 15 phút vẫn chưa gửi được job sang máy tạo (mất kết nối lúc tạo) — đã hoàn credit";
+    const up = await env.DB.prepare(
+      "UPDATE studio_generations SET status = 'failed', error = ?2 WHERE id = ?1 AND status IN ('queued','working')"
+    ).bind(r.id, stuckMsg).run();
+    if (up.meta && up.meta.changes === 1) {
+      await addLedger(env, a.customer.id, r.credit_cost, "refund", r.id, "Hoan credit — don ket qua 15 phut");
+      r.status = "failed"; r.error = stuckMsg;
+    }
+  }
+
   // Dong bo trang thai tu Dreamina Tool cho cac muc dang chay (neu da noi).
   if (toolBase(env)) {
     for (const r of rows) {
@@ -39,7 +64,22 @@ export async function onRequestGet({ request, env }) {
       const tid = params && params.toolJobId;
       if (!tid) continue;
       const t = await toolGetJob(env, tid);
-      if (!t.ok || !t.job) continue;
+      if (!t.ok || !t.job) {
+        // Job khong con ton tai ben tool (404 — tool mat du lieu/reset) va don
+        // da qua 15 phut: ket that su -> failed + hoan. Loi mang tam thoi
+        // (network) hoac tool tra 5xx thi giu nguyen, lan mo sau thu lai.
+        if (isRunning && !t.network && t.status === 404 && nowMs - new Date(r.created_at).getTime() > STUCK_AFTER_MS) {
+          const goneMsg = "Job không còn tồn tại bên máy tạo — đã hoàn credit";
+          const up = await env.DB.prepare(
+            "UPDATE studio_generations SET status = 'failed', error = ?2 WHERE id = ?1 AND status IN ('queued','working')"
+          ).bind(r.id, goneMsg).run();
+          if (up.meta && up.meta.changes === 1) {
+            await addLedger(env, a.customer.id, r.credit_cost, "refund", r.id, "Hoan credit — job mat ben tool");
+            r.status = "failed"; r.error = goneMsg;
+          }
+        }
+        continue;
+      }
       if (needsPull) {
         if (t.job.status === "done") {
           const pulled = await toolPullResultToR2(env, r.id, t.job).catch(() => null);
@@ -125,11 +165,18 @@ export async function onRequestPost({ request, env }) {
     ? body.refs.filter((r) => typeof r === "string" && r.startsWith("data:image/") && r.length < 12_000_000).slice(0, 10)
     : [];
   const params = { ratio, ...(duration ? { duration } : {}), ...(resolution ? { resolution } : {}), ...(body.sourceKey ? { sourceKey: String(body.sourceKey) } : {}), ...(refs.length ? { refCount: refs.length } : {}) };
-  await env.DB.prepare(
-    `INSERT INTO studio_generations
-       (id, customer_id, kind, prompt, model, model_name, params_json, status, credit_cost, created_at, expires_at)
-     VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, 'queued', ?8, ?9, ?10)`
-  ).bind(id, a.customer.id, kind, prompt, model.id, model.name, JSON.stringify(params), cost, now.toISOString(), expires.toISOString()).run();
+  try {
+    await env.DB.prepare(
+      `INSERT INTO studio_generations
+         (id, customer_id, kind, prompt, model, model_name, params_json, status, credit_cost, created_at, expires_at)
+       VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, 'queued', ?8, ?9, ?10)`
+    ).bind(id, a.customer.id, kind, prompt, model.id, model.name, JSON.stringify(params), cost, now.toISOString(), expires.toISOString()).run();
+  } catch (e) {
+    // Da tru credit o tren ma ghi don sap (vd DB loi/thieu bang): HOAN BU ngay
+    // bang 1 dong refund cung ref — khong de dong spend mo coi khong don di kem.
+    await addLedger(env, a.customer.id, cost, "refund", id, "Hoan credit — ghi don that bai").catch(() => undefined);
+    return errorJson("CREATE_FAILED", "Không ghi được đơn — credit đã được hoàn lại đầy đủ, vui lòng thử lại.", 500);
+  }
 
   // Day job sang Dreamina Tool neu da cau hinh STUDIO_TOOL_URL.
   if (toolBase(env)) {
@@ -176,12 +223,27 @@ export async function onRequestDelete({ request, env }) {
   if (a.response) return a.response;
   const id = new URL(request.url).searchParams.get("id");
   if (!id) return errorJson("MISSING_ID", "Thiếu tham số id.", 400);
-  // Co file tren R2 thi xoa luon (best-effort) — tranh file rac ton kho.
   const row = await env.DB.prepare(
-    "SELECT result_key FROM studio_generations WHERE id = ?1 AND customer_id = ?2"
+    "SELECT status, credit_cost, result_key FROM studio_generations WHERE id = ?1 AND customer_id = ?2"
   ).bind(id, a.customer.id).first();
-  if (row && row.result_key && env.STUDIO_MEDIA) {
+  if (!row) return errorJson("NOT_FOUND", "Không tìm thấy mục này trong thư viện của bạn.", 404);
+  // Co file tren R2 thi xoa luon (best-effort) — tranh file rac ton kho.
+  if (row.result_key && env.STUDIO_MEDIA) {
     await env.STUDIO_MEDIA.delete(row.result_key).catch(() => undefined);
+  }
+  // Muc CHUA xong (queued/working): credit dang bi giu cho muc nay — xoa thi
+  // phai HOAN. DELETE kem dieu kien status de khong hoan trung voi nhanh dong
+  // bo failed->refund o GET: ben nao doi status/xoa truoc thi ben do thang,
+  // ben con lai thay 0 changes thi khong hoan nua.
+  if (row.status === "queued" || row.status === "working") {
+    const res = await env.DB.prepare(
+      "DELETE FROM studio_generations WHERE id = ?1 AND customer_id = ?2 AND status IN ('queued','working')"
+    ).bind(id, a.customer.id).run();
+    if (res.meta && res.meta.changes === 1) {
+      await addLedger(env, a.customer.id, row.credit_cost, "refund", id, "Hoan credit — xoa muc chua hoan thanh");
+      return json({ ok: true, refunded: row.credit_cost });
+    }
+    // Status vua doi o nhanh khac (done/failed): roi xuong xoa thuong, khong hoan.
   }
   const res = await env.DB.prepare(
     "DELETE FROM studio_generations WHERE id = ?1 AND customer_id = ?2"
