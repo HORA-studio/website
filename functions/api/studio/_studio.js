@@ -103,7 +103,11 @@ export function generationOut(r) {
     params: r.params_json ? safeParse(r.params_json) : null,
     status: r.status,
     creditCost: r.credit_cost,
-    resultUrl: r.result_url || null,
+    // File chua co ban R2 (result_key rong): khong dua link tunnel tho cho
+    // trinh duyet — the <img> khong gui duoc header x-tool-token nen chi
+    // nhan 401. Dua link /api/studio/media de web proxy file tu tool bang
+    // token phia server (media.js tu tim toolJobId trong params_json).
+    resultUrl: r.status === "done" && r.result_url && !r.result_key ? "/api/studio/media?id=" + r.id : (r.result_url || null),
     error: r.error || null,
     createdAt: r.created_at,
     completedAt: r.completed_at || null,

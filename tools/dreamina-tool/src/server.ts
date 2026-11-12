@@ -92,7 +92,16 @@ async function handle(req: http.IncomingMessage, res: http.ServerResponse) {
   }
 
   try {
-    if (TOOL_TOKEN && (p.startsWith("/api/") || p.startsWith("/files/"))) {
+    // Host cua request: localhost = truy cap ngay tren may worker (cung co
+    // che phan biet voi viec an UI qua tunnel o duoi).
+    let reqHost = (req.headers.host || "").toLowerCase();
+    reqHost = reqHost.startsWith("[") ? reqHost.slice(0, reqHost.indexOf("]") + 1) : reqHost.split(":")[0];
+    const fromLocalhost = ["localhost", "127.0.0.1", "::1", "[::1]"].includes(reqHost);
+    // /files/* tu localhost KHONG can token: trinh duyet tai anh/video bang
+    // the <img>/<video> nen khong gui duoc header x-tool-token — khoa chat
+    // thi UI ngay tren may worker cung khong xem duoc file ket qua. Qua
+    // tunnel (Host la ten mien) van bat buoc token nhu cu; /api/* giu nguyen.
+    if (TOOL_TOKEN && (p.startsWith("/api/") || (p.startsWith("/files/") && !fromLocalhost))) {
       if (req.headers["x-tool-token"] !== TOOL_TOKEN) {
         return sendJson(res, 401, { error: "Thiếu hoặc sai x-tool-token (tool đang bật TOOL_TOKEN)" });
       }
