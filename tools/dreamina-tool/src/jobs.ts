@@ -407,7 +407,11 @@ async function resolveMode(
   refTypes: string[]
 ): Promise<string | null> {
   if (job.kind === "image") {
-    return refCount > 0 ? "i2i" : "t2i";
+    // PHẢI gán vào job.mode: caller lấy job.mode để dựng lệnh node create.
+    // Bản cũ chỉ return mà không gán → --mode "" → CLI lỗi [mã 2]
+    // "mode is absent or empty", MỌI job ảnh đều chết ở bước tạo node.
+    job.mode = refCount > 0 ? "i2i" : "t2i";
+    return job.mode;
   }
 
   const r = await runCli(["model", "list", "--type", "video"], { profile: job.profile, timeoutMs: 60_000 });
@@ -485,6 +489,7 @@ async function runPipeline(job: Job, refs: string[]): Promise<void> {
   // Chọn mode sinh chính xác theo model + refs (tránh sai mode gây lỗi CLI)
   const mode = await resolveMode(job, refs.length, []);
   if (!mode) return;
+  job.mode = mode; // phòng thủ: mode dùng cho lệnh CLI luôn lấy từ giá trị đã resolve
 
   // 1) Tạo node (chưa chạy)
   job.stage = "Đang tạo node trên canvas...";
