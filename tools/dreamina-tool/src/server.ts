@@ -77,7 +77,19 @@ async function handle(req: http.IncomingMessage, res: http.ServerResponse) {
   const url = new URL(req.url || "/", `http://localhost:${PORT}`);
   const p = url.pathname;
   const method = req.method || "GET";
-  const profile = url.searchParams.get("profile") || "default";
+  const requestedProfile = url.searchParams.get("profile");
+  let profile = requestedProfile || "default";
+  if (!requestedProfile) {
+    // Request không chỉ định profile (web Studio gọi /api/models, /api/voices
+    // như vậy): dùng profile ĐÃ ĐĂNG NHẬP đầu tiên trong danh sách thay vì
+    // cứng "default" — tài khoản làm việc thật có thể mang tên bất kỳ; ép
+    // "default" làm các lời gọi này chết oan "Authentication is required"
+    // dù tài khoản thật đang đăng nhập ngon lành.
+    for (const p of listProfiles()) {
+      const s = await getAuthStatus(p.name).catch(() => null);
+      if (s?.loggedIn) { profile = p.name; break; }
+    }
+  }
 
   try {
     if (TOOL_TOKEN && (p.startsWith("/api/") || p.startsWith("/files/"))) {
