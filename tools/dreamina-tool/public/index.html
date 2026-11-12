@@ -201,6 +201,7 @@ function loadState() {
   } catch { /* ignore */ }
 }
 
+let tokenPrompt = null;
 async function api(path, opts = {}) {
   const headers = { "Content-Type": "application/json", ...(opts.headers || {}) };
   const tok = sessionStorage.getItem("toolToken");
@@ -208,10 +209,26 @@ async function api(path, opts = {}) {
   const r = await fetch(path, { ...opts, headers });
   const data = await r.json().catch(() => ({}));
   if (r.status === 401 && String(data.error || "").includes("x-tool-token")) {
-    const t = prompt("Tool đang bật cổng token — nhập TOOL_TOKEN để dùng UI này:");
-    if (t) {
-      sessionStorage.setItem("toolToken", t);
-      return api(path, opts);
+    if (opts._retried) {
+      // Token vừa nhập vẫn sai — xoá khỏi bộ nhớ để lần gọi sau hỏi lại từ đầu
+      sessionStorage.removeItem("toolToken");
+    } else {
+      // Nhiều lời gọi cùng lúc chỉ mở MỘT hộp hỏi token (tránh hỏi chồng nhau)
+      if (!tokenPrompt) {
+        tokenPrompt = new Promise((resolve) => {
+          setTimeout(() => {
+            const t = prompt("Tool đang bật cổng token — nhập đúng TOOL_TOKEN đã đặt khi chạy tool:");
+            tokenPrompt = null;
+            resolve(t);
+          }, 50);
+        });
+      }
+      const t = await tokenPrompt;
+      if (t) {
+        sessionStorage.setItem("toolToken", t);
+        return api(path, { ...opts, _retried: true });
+      }
+      sessionStorage.removeItem("toolToken");
     }
   }
   if (!r.ok) throw new Error(data.error || `HTTP ${r.status}`);
