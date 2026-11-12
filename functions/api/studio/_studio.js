@@ -173,3 +173,36 @@ export function toolFileUrl(env, job) {
   const f = job.results.find((x) => x && x.file);
   return f ? base + "/files/" + job.id + "/" + encodeURIComponent(f.file) : null;
 }
+
+const MEDIA_CT = {
+  ".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg",
+  ".webp": "image/webp", ".gif": "image/gif",
+  ".mp4": "video/mp4", ".webm": "video/webm", ".mov": "video/quicktime",
+};
+export function mediaContentType(file) {
+  const m = /\.([a-z0-9]+)$/i.exec(String(file || ""));
+  return (m && MEDIA_CT["." + m[1].toLowerCase()]) || "application/octet-stream";
+}
+
+// Keo file ket qua tu tool ve R2 STUDIO_MEDIA mot lan duy nhat khi job xong:
+// link khach nhan sau do nam tren hora.works (route /api/studio/media) — may
+// worker tat hay tunnel doi dia chi cung khong lam chet link. Chua gan binding
+// STUDIO_MEDIA (dashboard) thi tra null, phia goi tu roi ve link tunnel nhu cu.
+export async function toolPullResultToR2(env, genId, job) {
+  if (!env || !env.STUDIO_MEDIA || !job) return null;
+  const base = toolBase(env);
+  if (!base || !Array.isArray(job.results)) return null;
+  const f = job.results.find((x) => x && x.file);
+  if (!f) return null;
+  const r = await fetch(base + "/files/" + job.id + "/" + encodeURIComponent(f.file), {
+    headers: toolHeaders(env),
+  });
+  if (!r.ok) return null;
+  const buf = await r.arrayBuffer();
+  if (!buf || !buf.byteLength) return null;
+  const key = "results/" + genId + "/" + f.file;
+  await env.STUDIO_MEDIA.put(key, buf, {
+    httpMetadata: { contentType: mediaContentType(f.file) },
+  });
+  return { key };
+}

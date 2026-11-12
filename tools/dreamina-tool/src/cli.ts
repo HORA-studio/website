@@ -6,6 +6,7 @@ import { spawn } from "child_process";
 import fs from "fs";
 import os from "os";
 import path from "path";
+import { proxyEnvFor } from "./profiles.js";
 
 export interface CliResult {
   ok: boolean;
@@ -76,7 +77,14 @@ export function runCli(
   const timeoutMs = opts.timeoutMs ?? 120_000;
 
   return new Promise((resolve) => {
-    const child = spawn(bin, fullArgs, { windowsHide: true });
+    // Profile có đặt proxy → truyền HTTP(S)_PROXY vào tiến trình CLI (CLI là
+    // chương trình Go, đọc biến môi trường proxy chuẩn). Không đặt → kế thừa
+    // nguyên môi trường của tool như cũ.
+    const proxyEnv = opts.profile ? proxyEnvFor(opts.profile) : null;
+    const child = spawn(bin, fullArgs, {
+      windowsHide: true,
+      ...(proxyEnv ? { env: { ...process.env, ...proxyEnv } } : {}),
+    });
     let out = "";
     let err = "";
     const timer = setTimeout(() => {

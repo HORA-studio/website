@@ -8,6 +8,14 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { binaryFound, cliVersion, runCli, cliErrorText } from "./cli.js";
 import { startLogin, getAuthStatus, logout } from "./auth.js";
+import {
+  setProfileProxy,
+  listProfiles,
+  ensureProfile,
+  deleteProfile,
+  validateProfileName,
+  normalizeProxy,
+} from "./profiles.js";
 import { createJob, listJobs, getJob, approveJob, loadJobs, resultsDir } from "./jobs.js";
 
 const rootDir = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -106,6 +114,50 @@ async function handle(req: http.IncomingMessage, res: http.ServerResponse) {
       return sendJson(res, 200, { pending: r.pending });
     }
 
+    if (method === "GET" && p === "/api/profiles") {
+      return sendJson(res, 200, { profiles: listProfiles() });
+    }
+
+    if (method === "POST" && p === "/api/profiles") {
+      const body = await readBody(req);
+      try {
+        const name = validateProfileName(String(body.name || ""));
+        // Kiểm tra proxy trước khi tạo, tránh tạo nửa vời khi proxy sai định dạng
+        if (body.proxy && String(body.proxy).trim()) normalizeProxy(String(body.proxy));
+        ensureProfile(name);
+        if (body.proxy && String(body.proxy).trim()) setProfileProxy(name, String(body.proxy));
+        return sendJson(res, 201, {
+          ok: true,
+          profile: listProfiles().find((x) => x.name === name),
+        });
+      } catch (e: any) {
+        return sendJson(res, 400, { error: e?.message || String(e) });
+      }
+    }
+
+    const profileDelMatch = p.match(/^\/api\/profiles\/([A-Za-z0-9_-]+)$/);
+    if (method === "DELETE" && profileDelMatch) {
+      try {
+        const name = validateProfileName(profileDelMatch[1]);
+        await logout(name).catch(() => undefined); // đăng xuất CLI luôn nếu được
+        deleteProfile(name);
+        return sendJson(res, 200, { ok: true });
+      } catch (e: any) {
+        return sendJson(res, 400, { error: e?.message || String(e) });
+      }
+    }
+
+    if (method === "POST" && p === "/api/profiles/proxy") {
+      const body = await readBody(req);
+      const prof = String(body.profile || "default");
+      try {
+        const info = setProfileProxy(prof, body.proxy ?? "");
+        return sendJson(res, 200, { ok: true, profile: prof, proxy: info });
+      } catch (e: any) {
+        return sendJson(res, 400, { error: e?.message || String(e) });
+      }
+    }
+
     if (method === "POST" && p === "/api/auth/logout") {
       const body = await readBody(req);
       const r = await logout(body.profile || "default");
@@ -164,9 +216,28 @@ async function handle(req: http.IncomingMessage, res: http.ServerResponse) {
       if (!["image", "video"].includes(body.kind)) {
         return sendJson(res, 400, { error: "kind phải là image|video" });
       }
-      const job = createJob({
+      // Kiểm tra ảnh đính kèm ngay tại cổng: tối đa 10 ảnh, mỗi ảnh là data
+      // URL ảnh và không quá 10MB — sai thì từ chối ngay thay vì để job chạy
+      // nửa chừng mới chết (phía web coi 4xx là tool từ chối → hoàn credit).
+      const refsIn: any[] = Array.isArray(body.refs) ? body.refs : [];
+      if (refsIn.length > 10) {
+        return sendJson(res, 400, { error: "Tối đa 10 ảnh đính kèm cho một job" });
+      }
+      for (let i = 0; i < refsIn.length; i++) {
+        const r = refsIn[i];
+        if (typeof r !== "string" || !r.startsWith("data:image/")) {
+          return sendJson(res, 400, { error: `Ảnh đính kèm thứ ${i + 1} không phải data URL ảnh hợp lệ` });
+        }
+        const b64 = r.slice(r.indexOf(",") + 1);
+        if (Math.floor((b64.length * 3) / 4) > 10 * 1024 * 1024) {
+          return sendJson(res, 400, { error: `Ảnh đính kèm thứ ${i + 1} vượt quá 10MB` });
+        }
+      }
+      const { job, deduped } = createJob({
         kind: body.kind,
-        profile: body.profile || "default",
+        // Không chỉ định tài khoản → "auto": bộ điều phối gán vào tài khoản
+        // đang rảnh có hàng đợi ngắn nhất lúc job tới lượt chạy.
+        profile: body.profile || "auto",
         projectId: body.projectId || undefined,
         prompt: body.prompt.trim(),
         model: body.model.trim(),
@@ -175,9 +246,10 @@ async function handle(req: http.IncomingMessage, res: http.ServerResponse) {
         duration: body.duration ? Number(body.duration) : undefined,
         count: body.count ? Number(body.count) : 1,
         creditCeiling: body.creditCeiling !== undefined ? Number(body.creditCeiling) : 0,
-        refs: Array.isArray(body.refs) ? body.refs : [],
+        clientRef: body.clientRef ? String(body.clientRef).slice(0, 80) : undefined,
+        refs: refsIn,
       });
-      return sendJson(res, 201, { job });
+      return sendJson(res, 201, { job, deduped });
     }
 
     if (method === "GET" && p === "/api/jobs") {

@@ -87,10 +87,20 @@ Các bước:
 - **Token là bắt buộc khi có tunnel**: không đặt `TOOL_TOKEN`/
   `STUDIO_TOOL_TOKEN` thì bất cứ ai có URL tunnel cũng tạo job và tiêu
   credit Dreamina được.
-- **File kết quả sống trên máy worker**: `result_url` trỏ thẳng về tool.
-  Máy worker tắt/ngủ là khách không xem được file dù web vẫn `done`.
-  Bản lâu dài: worker đẩy file lên R2 (`STUDIO_MEDIA`) rồi web phát link
-  qua route có đăng nhập — chưa làm, xem `docs/studio.md`.
+- **File kết quả**: từ bản 2026-11-12 (hàng đợi), khi job xong web **tự kéo
+  file về R2** (binding `STUDIO_MEDIA`) và phát qua route có đăng nhập
+  `/api/studio/media?id=...` — link bền trên hora.works, máy worker tắt
+  cũng xem được; mục done cũ chưa có bản R2 sẽ được kéo bổ sung dần mỗi
+  lần khách mở danh sách. Muốn bật: (1) Cloudflare → R2 → tạo bucket
+  (vd `hora-studio-media`); (2) Pages → Settings → Functions → R2 bucket
+  bindings → thêm binding tên `STUDIO_MEDIA` trỏ vào bucket đó
+  (Production); (3) deploy lại 1 lần. Chưa gắn binding thì web tự dùng
+  link tunnel như cũ (máy worker tắt = link chết).
+- **Hàng đợi phía tool**: mỗi tài khoản Dreamina tối đa 1 job chạy tại một
+  thời điểm, toàn máy tối đa 3 job đồng thời; job web không chỉ định tài
+  khoản nên tool tự gán vào tài khoản đang rảnh có hàng đợi ngắn nhất.
+  Một đơn web luôn mang `clientRef` = id của đơn — mạng chập chờn gửi
+  trùng cũng chỉ chạy một job.
 - **Quick tunnel chỉ để test**: muốn URL cố định thì tạo *named tunnel*
   trong Cloudflare (hostname riêng, vd `tool.hora.works`) trỏ về
   `localhost:5100`, rồi đặt `STUDIO_TOOL_URL` theo hostname đó 1 lần.

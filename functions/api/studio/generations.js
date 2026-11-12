@@ -9,7 +9,7 @@
 // DELETE — ?id=... : khach xoa muc cua chinh minh (file R2 do cron don theo
 //          result_key, hoac xoa ngay khi co worker).
 import { json, errorJson, readJson, requireAuth } from "../_lib.js";
-import { findModel, resolveModel, generationCost, generationOut, addLedger, getBalance, newStudioId, RETENTION_DAYS, toolBase, toolModelId, toolCreateJob, toolGetJob, toolFileUrl } from "./_studio.js";
+import { findModel, resolveModel, generationCost, generationOut, addLedger, getBalance, newStudioId, RETENTION_DAYS, toolBase, toolModelId, toolCreateJob, toolGetJob, toolFileUrl, toolPullResultToR2 } from "./_studio.js";
 
 export async function onRequestGet({ request, env }) {
   const a = await requireAuth(env, request);
@@ -29,20 +29,44 @@ export async function onRequestGet({ request, env }) {
   // Dong bo trang thai tu Dreamina Tool cho cac muc dang chay (neu da noi).
   if (toolBase(env)) {
     for (const r of rows) {
-      if (r.status !== "queued" && r.status !== "working") continue;
+      const isRunning = r.status === "queued" || r.status === "working";
+      // Muc da done nhung file van o may worker (chua co ban R2): keo bo sung
+      // moi khi khach mo danh sach, cho toi khi co result_key thi thoi.
+      const needsPull = r.status === "done" && !!env.STUDIO_MEDIA && !r.result_key;
+      if (!isRunning && !needsPull) continue;
       let params = null;
       try { params = r.params_json ? JSON.parse(r.params_json) : null; } catch (e) { params = null; }
       const tid = params && params.toolJobId;
       if (!tid) continue;
       const t = await toolGetJob(env, tid);
       if (!t.ok || !t.job) continue;
+      if (needsPull) {
+        if (t.job.status === "done") {
+          const pulled = await toolPullResultToR2(env, r.id, t.job).catch(() => null);
+          if (pulled) {
+            const url = "/api/studio/media?id=" + r.id;
+            await env.DB.prepare(
+              "UPDATE studio_generations SET result_key = ?2, result_url = ?3 WHERE id = ?1 AND status = 'done'"
+            ).bind(r.id, pulled.key, url).run();
+            r.result_key = pulled.key; r.result_url = url;
+          }
+        }
+        continue;
+      }
       if (t.job.status === "done") {
-        const url = toolFileUrl(env, t.job);
+        // Uu tien keo file ve R2 ngay khi xong: link ben vung tren hora.works.
+        // Keo loi/chua gan R2 -> tam dung link tunnel nhu cu, lan mo sau keo lai.
+        let r2key = null;
+        if (env.STUDIO_MEDIA) {
+          const pulled = await toolPullResultToR2(env, r.id, t.job).catch(() => null);
+          if (pulled) r2key = pulled.key;
+        }
+        const url = r2key ? "/api/studio/media?id=" + r.id : toolFileUrl(env, t.job);
         if (!url) continue;
         const up = await env.DB.prepare(
-          "UPDATE studio_generations SET status = 'done', result_url = ?2, completed_at = ?3 WHERE id = ?1 AND status IN ('queued','working')"
-        ).bind(r.id, url, new Date().toISOString()).run();
-        if (up.meta && up.meta.changes === 1) { r.status = "done"; r.result_url = url; }
+          "UPDATE studio_generations SET status = 'done', result_url = ?2, result_key = ?3, completed_at = ?4 WHERE id = ?1 AND status IN ('queued','working')"
+        ).bind(r.id, url, r2key, new Date().toISOString()).run();
+        if (up.meta && up.meta.changes === 1) { r.status = "done"; r.result_url = url; r.result_key = r2key; }
       } else if (t.job.status === "failed" || t.job.status === "interrupted") {
         const errMsg = String(t.job.error || t.job.stage || "Dreamina tool bao loi");
         const up = await env.DB.prepare(
@@ -111,6 +135,9 @@ export async function onRequestPost({ request, env }) {
   if (toolBase(env)) {
     const sent = await toolCreateJob(env, {
       kind,
+      // Ma don phia web: tool thay clientRef da co job chua loi thi tra lai
+      // job do (chong tao trung khi mang chap chon lam mot don chay 2 lan).
+      clientRef: id,
       prompt,
       model: toolModelId(env, kind, model),
       ratio,
@@ -149,6 +176,13 @@ export async function onRequestDelete({ request, env }) {
   if (a.response) return a.response;
   const id = new URL(request.url).searchParams.get("id");
   if (!id) return errorJson("MISSING_ID", "Thiếu tham số id.", 400);
+  // Co file tren R2 thi xoa luon (best-effort) — tranh file rac ton kho.
+  const row = await env.DB.prepare(
+    "SELECT result_key FROM studio_generations WHERE id = ?1 AND customer_id = ?2"
+  ).bind(id, a.customer.id).first();
+  if (row && row.result_key && env.STUDIO_MEDIA) {
+    await env.STUDIO_MEDIA.delete(row.result_key).catch(() => undefined);
+  }
   const res = await env.DB.prepare(
     "DELETE FROM studio_generations WHERE id = ?1 AND customer_id = ?2"
   ).bind(id, a.customer.id).run();

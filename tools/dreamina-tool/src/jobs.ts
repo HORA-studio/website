@@ -10,6 +10,7 @@ import path from "path";
 import { randomUUID } from "crypto";
 import { fileURLToPath } from "url";
 import { runCli, cliErrorText } from "./cli.js";
+import { getProfileProxyInfo, listProfiles } from "./profiles.js";
 
 const rootDir = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
 export const dataDir = path.join(rootDir, "data");
@@ -48,6 +49,8 @@ export interface Job {
   nodeId?: string;
   submitId?: string;
   confirmToken?: string;
+  /** Mã đơn của hệ thống gọi sang (vd id generation phía web) — chống tạo trùng */
+  clientRef?: string;
   quoteTotal?: number;
   confirmationRequired?: boolean;
   status: JobStatus;
@@ -60,6 +63,20 @@ export interface Job {
 }
 
 const jobs = new Map<string, Job>();
+
+/** ===== Bộ điều phối hàng đợi =====
+ *  - Mỗi tài khoản (profile): tối đa 1 job chạy tại một thời điểm.
+ *  - Toàn cục: tối đa MAX_CONCURRENT job chạy đồng thời (gồm cả job đang
+ *    theo dõi kết quả phía Dreamina).
+ *  - Job không chỉ định tài khoản (profile "auto"): lúc tới lượt chạy, tự
+ *    gán vào tài khoản đang rảnh có hàng đợi ngắn nhất.
+ *  pendingRefs giữ ảnh đính kèm (data URL) của job đang xếp hàng — chỉ ở bộ
+ *  nhớ: server khởi động lại thì job chưa gửi chạy bị đánh dấu interrupted
+ *  như cũ (phía web hoàn credit), không mất tiền oan. */
+const MAX_CONCURRENT = 3;
+const activeJobs = new Set<string>();
+const pendingRefs = new Map<string, string[]>();
+let pumping = false;
 
 function ensureDirs() {
   for (const d of [dataDir, resultsDir, uploadsDir]) {
@@ -94,9 +111,11 @@ export function loadJobs() {
   } catch {
     /* file hỏng → bắt đầu trắng */
   }
-  // khôi phục theo dõi các job đã gửi chạy
+  // khôi phục theo dõi các job đã gửi chạy — chúng giữ suất của tài khoản
+  // cho tới khi kết thúc, để job mới của tài khoản đó không chạy chồng lên
   for (const j of jobs.values()) {
     if (j.status === "working" && j.submitId && j.projectId) {
+      activeJobs.add(j.id);
       void pollAndFinish(j).catch(() => undefined);
     }
   }
@@ -127,7 +146,119 @@ function fail(job: Job, stage: string, msg: string): Job {
   job.error = msg;
   log(job, `LỖI: ${msg}`);
   persist();
+  releaseSlot(job);
+  pump();
   return job;
+}
+
+function releaseSlot(job: Job): void {
+  activeJobs.delete(job.id);
+}
+
+function profileBusy(name: string): boolean {
+  for (const id of activeJobs) {
+    const j = jobs.get(id);
+    if (j && j.profile === name) return true;
+  }
+  return false;
+}
+
+function logProxyLine(job: Job): void {
+  const px = getProfileProxyInfo(job.profile);
+  if (px.set) log(job, `Đi qua proxy của tài khoản: ${px.masked}`);
+}
+
+/** Cập nhật dòng trạng thái cho job đang chờ: còn mấy job phía trước. */
+function refreshQueueStages(): void {
+  const queued = [...jobs.values()]
+    .filter((j) => j.status === "queued")
+    .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+  let changed = false;
+  for (const job of queued) {
+    let stage: string;
+    if (job.profile === "auto") {
+      stage = "Đang xếp hàng — chờ gán tài khoản";
+    } else {
+      const ahead =
+        (profileBusy(job.profile) ? 1 : 0) +
+        queued.filter((q) => q.profile === job.profile && q.createdAt < job.createdAt).length;
+      stage =
+        ahead === 0
+          ? `Đang xếp hàng — sắp tới lượt (tài khoản ${job.profile})`
+          : `Đang xếp hàng — còn ${ahead} job phía trước (tài khoản ${job.profile})`;
+    }
+    if (job.stage !== stage) {
+      job.stage = stage;
+      job.updatedAt = now();
+      changed = true;
+    }
+  }
+  if (changed) persist();
+}
+
+/** Khởi động một job đã giữ suất: job mới chạy pipeline từ đầu; job đã duyệt
+ *  credit (đã có node) chạy tiếp từ bước báo giá/duyệt. */
+function startJob(job: Job): void {
+  job.status = "working";
+  if (job.nodeId) {
+    job.stage = "Đang chạy tiếp sau khi được duyệt...";
+    log(job, "Chạy tiếp từ bước báo giá/duyệt (đã có node từ trước)");
+    void quoteAndMaybeRun(job).catch((e: any) => fail(job, "Pipeline lỗi", e?.message || String(e)));
+  } else {
+    const refs = pendingRefs.get(job.id) || [];
+    pendingRefs.delete(job.id);
+    void runPipeline(job, refs).catch((e: any) => fail(job, "Pipeline lỗi", e?.message || String(e)));
+  }
+  persist();
+}
+
+/** Trái tim điều phối: lấp các suất chạy trống bằng job đủ điều kiện —
+ *  tài khoản của job phải đang rảnh, và còn suất toàn cục. */
+function pump(): void {
+  if (pumping) return;
+  pumping = true;
+  const orphaned: Job[] = [];
+  try {
+    const queued = [...jobs.values()]
+      .filter((j) => j.status === "queued")
+      .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+    for (const job of queued) {
+      if (activeJobs.size >= MAX_CONCURRENT) break;
+      if (job.profile === "auto") {
+        const profiles = listProfiles().map((x) => x.name);
+        if (!profiles.length) {
+          orphaned.push(job);
+          continue;
+        }
+        const free = profiles.filter((p) => !profileBusy(p));
+        if (!free.length) continue;
+        const loadOf = (p: string) =>
+          [...jobs.values()].filter((j) => j.profile === p && j.status === "queued").length;
+        free.sort((a, b) => loadOf(a) - loadOf(b));
+        job.profile = free[0];
+        log(job, `Gán tự động vào tài khoản ${job.profile} (đang rảnh, hàng đợi ngắn nhất)`);
+        logProxyLine(job);
+      } else if (profileBusy(job.profile)) {
+        continue;
+      }
+      activeJobs.add(job.id);
+      startJob(job);
+    }
+    refreshQueueStages();
+  } finally {
+    pumping = false;
+  }
+  // Job "auto" mà tool chưa có tài khoản nào → fail rõ ràng, làm ngoài pump
+  // để fail() gọi pump() không bị đệ quy.
+  for (const job of orphaned) {
+    if (job.status === "queued") {
+      fail(
+        job,
+        "Chưa có tài khoản",
+        "Tool chưa có tài khoản Dreamina nào — thêm và đăng nhập một tài khoản trước khi tạo job"
+      );
+    }
+  }
 }
 
 /** Lấy sâu 1 khóa trong object (quét tối đa 3 tầng) — phòng khi CLI đổi cấu trúc nhẹ */
@@ -155,15 +286,28 @@ export interface NewJobInput {
   duration?: number;
   count?: number;
   creditCeiling?: number;
+  /** Mã đơn của hệ thống gọi sang (vd id generation phía web) — chống tạo trùng */
+  clientRef?: string;
   /** data URL của ảnh đính kèm (khung đầu/cuối hoặc ảnh tham chiếu) */
   refs?: string[];
 }
 
-export function createJob(input: NewJobInput): Job {
+export function createJob(input: NewJobInput): { job: Job; deduped: boolean } {
+  // Chống tạo trùng: cùng clientRef (mã đơn phía web) mà job trước chưa kết
+  // thúc lỗi → trả lại chính job đó, không tạo job mới — một đơn không bao
+  // giờ chạy (và trừ credit) hai lần vì lỗi mạng/chập chờn.
+  if (input.clientRef) {
+    const ex = [...jobs.values()]
+      .filter((j) => j.clientRef === input.clientRef)
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0];
+    if (ex && ex.status !== "failed" && ex.status !== "interrupted") {
+      return { job: ex, deduped: true };
+    }
+  }
   const job: Job = {
     id: randomUUID(),
     kind: input.kind,
-    profile: input.profile || "default",
+    profile: input.profile || "auto",
     projectId: input.projectId || undefined,
     prompt: input.prompt,
     model: input.model,
@@ -174,22 +318,23 @@ export function createJob(input: NewJobInput): Job {
     duration: input.duration,
     count: Math.max(1, Math.min(10, input.count || 1)),
     creditCeiling: Math.max(0, Math.floor(input.creditCeiling || 0)),
+    clientRef: input.clientRef || undefined,
     status: "queued",
-    stage: "Đang chờ chạy",
+    stage: "Đang xếp hàng",
     results: [],
     logs: [],
     createdAt: now(),
     updatedAt: now(),
   };
   jobs.set(job.id, job);
+  pendingRefs.set(job.id, input.refs || []);
   log(
     job,
     `Tạo job ${job.kind === "image" ? "ảnh" : "video"} — model ${job.model}, trần tự duyệt ${job.creditCeiling} credit`
   );
-  void runPipeline(job, input.refs || []).catch((e) => {
-    fail(job, "Pipeline lỗi", e?.message || String(e));
-  });
-  return job;
+  if (job.profile !== "auto") logProxyLine(job);
+  pump();
+  return { job, deduped: false };
 }
 
 async function ensureCanvas(job: Job): Promise<boolean> {
@@ -409,6 +554,8 @@ async function quoteAndMaybeRun(job: Job): Promise<void> {
       job.stage = `Chờ duyệt: giá ${job.quoteTotal} credit vượt trần tự duyệt ${job.creditCeiling}`;
       log(job, job.stage + " — bấm nút Duyệt ở thẻ job để chạy tiếp");
       persist();
+      releaseSlot(job); // nhường suất chạy cho job khác trong lúc chờ người duyệt
+      pump();
       return;
     }
   }
@@ -434,15 +581,16 @@ async function doConfirm(job: Job, ceiling: number): Promise<boolean> {
   return true;
 }
 
-/** User bấm Duyệt trên UI: nâng trần lên mức được duyệt rồi chạy tiếp */
+/** User bấm Duyệt trên UI: nâng trần lên mức được duyệt rồi XẾP HÀNG chạy
+ *  tiếp (qua bộ điều phối như job mới — tài khoản có thể đang bận job khác). */
 export async function approveJob(id: string, ceiling: number): Promise<Job | null> {
   const job = jobs.get(id);
   if (!job || job.status !== "awaiting_approval") return null;
   job.creditCeiling = Math.max(ceiling, job.quoteTotal || 0);
-  job.status = "working";
-  log(job, `User đã duyệt trần ${job.creditCeiling} credit → chạy tiếp`);
-  if (!(await doConfirm(job, job.creditCeiling))) return job;
-  await doRun(job);
+  job.status = "queued";
+  job.stage = "Đã duyệt — đang xếp hàng chạy tiếp";
+  log(job, `User đã duyệt trần ${job.creditCeiling} credit → xếp hàng chạy tiếp`);
+  pump();
   return job;
 }
 
@@ -515,6 +663,29 @@ async function pollAndFinish(job: Job): Promise<void> {
   fail(job, "Quá thời gian chờ", "Đã theo dõi 30 phút mà Dreamina chưa trả kết quả cuối — kiểm tra lại trên canvas web");
 }
 
+/** Kiểm chứng nhanh 1 file kết quả: tồn tại, đủ lớn, và đầu file mang chữ ký
+ *  của một định dạng ảnh/video phổ biến (PNG/JPEG/GIF/WebP/MP4/WebM). Chặn
+ *  trường hợp CLI "tải xong" nhưng file rỗng/trang lỗi lọt qua thành link chết. */
+function verifyMediaFile(filePath: string): boolean {
+  try {
+    const st = fs.statSync(filePath);
+    if (!st.isFile() || st.size < 100) return false;
+    const fd = fs.openSync(filePath, "r");
+    const buf = Buffer.alloc(12);
+    fs.readSync(fd, buf, 0, 12, 0);
+    fs.closeSync(fd);
+    if (buf[0] === 0x89 && buf[1] === 0x50 && buf[2] === 0x4e && buf[3] === 0x47) return true; // PNG
+    if (buf[0] === 0xff && buf[1] === 0xd8 && buf[2] === 0xff) return true; // JPEG
+    if (buf.toString("ascii", 0, 4) === "GIF8") return true; // GIF
+    if (buf.toString("ascii", 0, 4) === "RIFF" && buf.toString("ascii", 8, 12) === "WEBP") return true; // WebP
+    if (buf.toString("ascii", 4, 8) === "ftyp") return true; // MP4 / MOV
+    if (buf[0] === 0x1a && buf[1] === 0x45 && buf[2] === 0xdf && buf[3] === 0xa3) return true; // WebM
+    return false;
+  } catch {
+    return false;
+  }
+}
+
 async function downloadResults(job: Job): Promise<void> {
   job.stage = "Đang tải kết quả về máy...";
   const outDir = path.join(resultsDir, job.id);
@@ -549,8 +720,35 @@ async function downloadResults(job: Job): Promise<void> {
   } catch {
     /* bỏ qua */
   }
+  // Kiểm chứng từng file trước khi dám báo xong: file rỗng/sai định dạng bị
+  // loại; không còn file hợp lệ nào → job THẤT BẠI (phía web hoàn credit)
+  // thay vì báo xong kèm link chết.
+  for (const res of job.results) {
+    if (!res.file) continue;
+    const fp = path.join(outDir, res.file);
+    if (!verifyMediaFile(fp)) {
+      log(job, `File ${res.file} tải về không hợp lệ (rỗng hoặc sai định dạng) — loại bỏ`);
+      try {
+        fs.unlinkSync(fp);
+      } catch {
+        /* bỏ qua */
+      }
+      res.file = undefined;
+    }
+  }
+  const okFiles = job.results.filter((r) => r.file).length;
+  if (!okFiles) {
+    fail(
+      job,
+      "Tải kết quả thất bại",
+      "Dreamina báo sinh xong nhưng không có file hợp lệ nào tải được về máy — mở canvas web để lấy trực tiếp hoặc tạo lại job"
+    );
+    return;
+  }
   job.status = "done";
   job.stage = "Hoàn tất";
-  log(job, `Xong — ${job.results.filter((r) => r.file).length} file đã tải về`);
+  log(job, `Xong — ${okFiles} file đã tải về`);
   persist();
+  releaseSlot(job);
+  pump();
 }

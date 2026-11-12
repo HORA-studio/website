@@ -55,8 +55,8 @@
     <h2>Trạng thái &amp; tài khoản</h2>
     <div id="cliStatus" class="msg">Đang kiểm tra CLI...</div>
     <div class="row" style="margin-top:10px;">
-      <div><label>Profile (mỗi profile = 1 tài khoản Dreamina)</label>
-        <input id="profile" value="default"></div>
+      <div><label>Tài khoản đang chọn (mỗi tài khoản = 1 profile Dreamina)</label>
+        <select id="profile"><option value="default">default</option></select></div>
       <div><label>&nbsp;</label>
         <div style="display:flex; gap:8px;">
           <button id="btnCheck">Kiểm tra</button>
@@ -66,7 +66,7 @@
     </div>
     <div id="loginBox" class="hidden" style="margin-top:12px;">
       <div class="msg">Bấm link để đăng nhập + ủy quyền, xong quay lại đây — tool tự nhận:</div>
-      <div style="margin:8px 0;"><a id="loginLink" href="#" target="_blank" rel="noopener">Mở trang ủy quyền Dreamina</a></div>
+      <div style="margin:8px 0;"><a id="loginLink" href="#" target="_blank" rel="noopener">Mở trang ủy quyền Dreamina</a> <button id="btnCopyLoginLink" type="button">Copy link</button></div>
       <div class="hint">Mã nếu trang yêu cầu nhập tay: <b id="loginCode"></b> · Hết hạn: <span id="loginExp"></span></div>
     </div>
     <div id="accountBox" class="hidden" style="margin-top:12px;">
@@ -74,6 +74,22 @@
       <details><summary>Chi tiết tài khoản (dữ liệu gốc từ CLI)</summary><pre class="raw" id="accountRaw"></pre></details>
     </div>
     <div id="authMsg" class="msg"></div>
+    <div style="margin-top:18px;">
+      <h3 style="margin:0 0 8px;">Danh sách tài khoản</h3>
+      <div id="profileList" style="display:flex; flex-direction:column; gap:6px;"></div>
+      <div class="row" style="margin-top:10px;">
+        <div><label>Tên tài khoản</label>
+          <input id="newProfileName" placeholder="vd: acc2"></div>
+        <div style="flex:2;"><label>Proxy đi kèm (để trống thì gắn sau)</label>
+          <input id="newProfileProxy" placeholder="host:port:user:pass"></div>
+        <div><label>&nbsp;</label>
+          <div style="display:flex; gap:8px;">
+            <button id="btnAddProfile">Lưu</button>
+            <button id="btnAddCheck">Kiểm tra</button>
+          </div></div>
+      </div>
+      <div id="addProfileMsg" class="hint">Lưu = tạo tài khoản + gắn proxy + chọn luôn tài khoản đó và mở đăng nhập OAuth (CLI chính thức không có nhập cookie — đăng nhập bằng OAuth). Kiểm tra = xem tài khoản vừa nhập đã đăng nhập hay chưa. Đổi proxy của tài khoản đã có: nhập lại đúng tên + proxy mới rồi Lưu; gỡ hẳn proxy: nút Bỏ proxy ở dòng tài khoản.</div>
+    </div>
   </div>
 
   <div class="card">
@@ -140,6 +156,7 @@ const $ = (id) => document.getElementById(id);
 let KIND = "image";
 let MODELS = { image: [], video: [] };
 let refData = [];
+let savedProfile = "";
 
 function saveState() {
   const state = {
@@ -162,7 +179,7 @@ function loadState() {
     const s = JSON.parse(localStorage.getItem("dreamina-tool-state") || "{}");
     if (!s) return;
     if (s.kind) setKind(s.kind);
-    if (s.profile) $("profile").value = s.profile;
+    if (s.profile) { savedProfile = s.profile; $("profile").value = s.profile; }
     if (s.canvas) setTimeout(() => { $("canvasSel").value = s.canvas; updateCanvasOpen(); }, 0);
     if (s.ratio) setTimeout(() => { $("ratio").value = s.ratio; }, 0);
     if (s.resolution) setTimeout(() => { $("resolution").value = s.resolution; }, 0);
@@ -178,6 +195,7 @@ function loadState() {
   } catch { /* ignore */ }
 }
 
+let tokenPrompt = null;
 async function api(path, opts = {}) {
   const headers = { "Content-Type": "application/json", ...(opts.headers || {}) };
   const tok = sessionStorage.getItem("toolToken");
@@ -185,10 +203,26 @@ async function api(path, opts = {}) {
   const r = await fetch(path, { ...opts, headers });
   const data = await r.json().catch(() => ({}));
   if (r.status === 401 && String(data.error || "").includes("x-tool-token")) {
-    const t = prompt("Tool đang bật cổng token — nhập TOOL_TOKEN để dùng UI này:");
-    if (t) {
-      sessionStorage.setItem("toolToken", t);
-      return api(path, opts);
+    if (opts._retried) {
+      // Token vừa nhập vẫn sai — xoá khỏi bộ nhớ để lần gọi sau hỏi lại từ đầu
+      sessionStorage.removeItem("toolToken");
+    } else {
+      // Nhiều lời gọi cùng lúc chỉ mở MỘT hộp hỏi token (tránh hỏi chồng nhau)
+      if (!tokenPrompt) {
+        tokenPrompt = new Promise((resolve) => {
+          setTimeout(() => {
+            const t = prompt("Tool đang bật cổng token — nhập đúng TOOL_TOKEN đã đặt khi chạy tool:");
+            tokenPrompt = null;
+            resolve(t);
+          }, 50);
+        });
+      }
+      const t = await tokenPrompt;
+      if (t) {
+        sessionStorage.setItem("toolToken", t);
+        return api(path, { ...opts, _retried: true });
+      }
+      sessionStorage.removeItem("toolToken");
     }
   }
   if (!r.ok) throw new Error(data.error || `HTTP ${r.status}`);
@@ -216,8 +250,17 @@ async function refreshAuth() {
       const acc = a.account || {};
       const pick = (...keys) => keys.map(k => acc[k]).find(v => v !== undefined && v !== null && v !== "");
       const name = pick("displayName", "name", "nickname", "email", "userId", "uid");
-      const credits = pick("credits", "creditBalance", "balance", "totalCredits");
-      const tier = pick("membershipTier", "tier", "plan", "membership");
+      const fmtVal = (v) => {
+        if (v === undefined || v === null) return undefined;
+        if (typeof v === "object") {
+          const inner = ["amount", "value", "total", "balance", "count", "credits", "available"]
+            .map((k) => v[k]).find((x) => typeof x === "number" || typeof x === "string");
+          return inner !== undefined ? String(inner) : JSON.stringify(v);
+        }
+        return String(v);
+      };
+      const credits = fmtVal(pick("credits", "creditBalance", "balance", "totalCredits"));
+      const tier = fmtVal(pick("membershipTier", "tier", "plan", "membership"));
       $("accountSummary").innerHTML =
         `<span class="chip ok">Đã đăng nhập</span> ${name ? esc(name) : ""}` +
         (tier ? ` · Gói: <b>${esc(tier)}</b>` : "") +
@@ -244,7 +287,7 @@ async function refreshAuth() {
   } catch (e) { $("authMsg").textContent = "Lỗi kiểm tra đăng nhập: " + e.message; }
 }
 
-$("btnCheck").onclick = () => { refreshStatus(); refreshAuth(); };
+$("btnCheck").onclick = () => { refreshStatus(); refreshAuth(); loadProfiles(); };
 $("btnLogin").onclick = async () => {
   $("authMsg").textContent = "Đang lấy link đăng nhập...";
   try {
@@ -257,11 +300,112 @@ $("btnLogin").onclick = async () => {
     $("authMsg").textContent = "Đã có link — bấm vào, đăng nhập + Authorize, tool tự nhận khi xong.";
   } catch (e) { $("authMsg").textContent = "Lỗi: " + e.message; }
 };
+$("btnCopyLoginLink").onclick = async () => {
+  const href = $("loginLink").href;
+  if (!href || href.endsWith("#")) { $("authMsg").textContent = "Chưa có link — bấm Đăng nhập trước."; return; }
+  const btn = $("btnCopyLoginLink");
+  try { await navigator.clipboard.writeText(href); }
+  catch {
+    const ta = document.createElement("textarea");
+    ta.value = href; document.body.appendChild(ta); ta.select();
+    document.execCommand("copy"); ta.remove();
+  }
+  const old = btn.textContent;
+  btn.textContent = "Đã copy ✓ — dán sang trình duyệt khác để đăng nhập";
+  setTimeout(() => { btn.textContent = old; }, 2500);
+};
 $("btnLogout").onclick = async () => {
   try { await api("/api/auth/logout", { method: "POST", body: JSON.stringify({ profile: profile() }) }); $("authMsg").textContent = "Đã đăng xuất."; refreshAuth(); }
   catch (e) { $("authMsg").textContent = "Lỗi: " + e.message; }
 };
 $("profile").onchange = () => { refreshAuth(); saveState(); };
+
+let profilesCache = [];
+async function loadProfiles() {
+  try {
+    const r = await api("/api/profiles");
+    profilesCache = r.profiles || [];
+    renderProfiles();
+    for (const p of profilesCache) void checkProfileRow(p.name);
+  } catch (e) { $("profileList").textContent = "Lỗi tải danh sách tài khoản: " + e.message; }
+}
+function renderProfiles() {
+  // Dropdown chọn tài khoản ở trên: dựng lại options, giữ lựa chọn hiện tại
+  const sel = $("profile");
+  const want = sel.value || savedProfile || "default";
+  sel.innerHTML = profilesCache.map((p) => `<option value="${esc(p.name)}">${esc(p.name)}</option>`).join("");
+  sel.value = profilesCache.some((p) => p.name === want) ? want : "default";
+  // Danh sách tài khoản: tên + trạng thái + proxy
+  const el = $("profileList");
+  if (!profilesCache.length) { el.innerHTML = '<div class="hint">Chưa có tài khoản nào.</div>'; return; }
+  el.innerHTML = profilesCache.map((p) => `
+    <div class="job" style="display:flex; align-items:center; gap:10px; padding:8px 10px; margin-bottom:0;">
+      <b>${esc(p.name)}</b>
+      <span id="pf-status-${esc(p.name)}" class="hint">đang kiểm tra…</span>
+      <span class="hint">${p.proxy.set ? "Proxy: " + esc(p.proxy.masked) : "Không proxy"}</span>
+      <span style="margin-left:auto; display:flex; gap:6px;">
+        ${p.proxy.set ? `<button data-act="noproxy" data-name="${esc(p.name)}">Bỏ proxy</button>` : ""}
+        <button data-act="del" data-name="${esc(p.name)}" class="danger">Xoá</button>
+      </span>
+    </div>`).join("");
+}
+async function checkProfileRow(name) {
+  const el = document.getElementById("pf-status-" + name);
+  try {
+    const a = await api(`/api/auth/status?profile=${encodeURIComponent(name)}`);
+    if (!el) return;
+    if (a.loggedIn) {
+      const acc = a.account || {};
+      const nm = acc.displayName || acc.name || acc.nickname || acc.email || acc.userId || acc.uid || "";
+      el.innerHTML = `<span class="chip ok">Đã đăng nhập</span> ${esc(nm)}`;
+    } else el.textContent = "Chưa đăng nhập";
+  } catch { if (el) el.textContent = "Lỗi kiểm tra"; }
+}
+$("profileList").onclick = async (ev) => {
+  const btn = ev.target.closest("button[data-act]");
+  if (!btn) return;
+  const name = btn.dataset.name;
+  if (btn.dataset.act === "noproxy") {
+    try {
+      await api("/api/profiles/proxy", { method: "POST", body: JSON.stringify({ profile: name, proxy: "" }) });
+      loadProfiles();
+    } catch (e) { alert("Lỗi bỏ proxy: " + e.message); }
+    return;
+  }
+  if (btn.dataset.act !== "del") return;
+  if (!confirm(`Xoá tài khoản "${name}" khỏi danh sách? Tool sẽ đăng xuất tài khoản này và bỏ proxy của nó.`)) return;
+  try {
+    await api(`/api/profiles/${encodeURIComponent(name)}`, { method: "DELETE" });
+    if (profile() === name) { savedProfile = "default"; saveState(); refreshAuth(); }
+    loadProfiles();
+  } catch (e) { alert("Lỗi xoá: " + e.message); }
+};
+$("btnAddProfile").onclick = async () => {
+  const name = $("newProfileName").value.trim();
+  const proxy = $("newProfileProxy").value.trim();
+  if (!name) { $("addProfileMsg").textContent = "Chưa nhập tên tài khoản."; return; }
+  try {
+    await api("/api/profiles", { method: "POST", body: JSON.stringify({ name, proxy: proxy || undefined }) });
+    $("newProfileName").value = ""; $("newProfileProxy").value = "";
+    $("addProfileMsg").textContent = `Đã lưu tài khoản "${name}"${proxy ? " kèm proxy" : ""} — đang mở đăng nhập…`;
+    await loadProfiles();
+    $("profile").value = name; savedProfile = name; saveState();
+    refreshAuth();
+    $("btnLogin").click();
+  } catch (e) { $("addProfileMsg").textContent = "Lỗi: " + e.message; }
+};
+$("btnAddCheck").onclick = async () => {
+  const name = $("newProfileName").value.trim();
+  if (!name) { $("addProfileMsg").textContent = "Chưa nhập tên tài khoản cần kiểm tra."; return; }
+  if (!profilesCache.some((p) => p.name === name)) {
+    $("addProfileMsg").textContent = `Chưa có tài khoản "${name}" — bấm Lưu để tạo trước.`;
+    return;
+  }
+  $("profile").value = name; savedProfile = name; saveState();
+  refreshAuth();
+  await loadProfiles();
+  $("addProfileMsg").textContent = `Đã kiểm tra "${name}" — xem trạng thái ở danh sách tài khoản phía trên.`;
+};
 
 async function loadCanvases() {
   try {
@@ -474,6 +618,7 @@ async function refreshJobs() {
 
 refreshStatus();
 refreshAuth();
+loadProfiles();
 refreshJobs();
 loadState();
 setInterval(refreshJobs, 3000);
