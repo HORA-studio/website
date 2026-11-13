@@ -2,22 +2,24 @@
 <html lang="vi">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Phòng chung của đội — HORA</title>
 <style>
   :root { --bg:#15151e; --panel:#1e1e2a; --panel2:#232330; --line:#33334a; --txt:#eceaf6; --dim:#a5a3bd; --accent:#6c5cff; --danger:#f85149; --ok:#3fb950; }
   * { box-sizing:border-box; }
+  html, body { height:100%; }
   body { margin:0; background:var(--bg); color:var(--txt); font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; }
   button { background:var(--accent); color:#fff; border:0; border-radius:8px; padding:9px 16px; cursor:pointer; font-size:14px; min-height:40px; }
   button.ghost { background:var(--panel2); color:var(--txt); border:1px solid var(--line); }
   button.danger { background:transparent; color:var(--danger); border:1px solid var(--danger); padding:5px 10px; min-height:32px; font-size:12px; }
   button.small { padding:5px 10px; min-height:32px; font-size:12px; }
   input, textarea { background:var(--panel2); color:var(--txt); border:1px solid var(--line); border-radius:8px; padding:10px 12px; font-size:14px; width:100%; }
-  .wrap { max-width:880px; margin:0 auto; padding:12px 10px calc(14px + env(safe-area-inset-bottom)); }
-  #roomView { display:flex; flex-direction:column; height:100dvh; }
+  .wrap { max-width:880px; margin:0 auto; padding:12px 10px calc(14px + env(safe-area-inset-bottom)); height:100vh; height:100dvh; display:flex; flex-direction:column; }
+  #roomView { display:flex; flex-direction:column; flex:1; min-height:0; }
+  #roomView[hidden], #loginView[hidden] { display:none !important; }
   #roomView .layout { flex:1; min-height:0; display:flex; }
   #roomView .main { flex:1; display:flex; flex-direction:column; min-height:0; min-width:0; }
-  #msgs { flex:1; height:auto !important; }
+  #msgs { flex:1; min-height:0; height:auto !important; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; }
   .msg { font-size:15.5px; line-height:1.55; padding:10px 13px; }
   .msg .meta { font-size:12.5px; }
   input, textarea { font-size:16px; }
