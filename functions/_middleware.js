@@ -6,7 +6,6 @@
 // studio.html trên main là bản web cập nhật theo (cache tối đa ~5 phút).
 // Khi nào Pages phát hành được file tĩnh bình thường thì XOÁ file này.
 const RAW_URL = "https://raw.githubusercontent.com/HORA-studio/website/main/studio.html";
-const TEAM_RAW_URL = "https://raw.githubusercontent.com/HORA-studio/website/main/team.html";
 
 async function serveRaw(rawUrl, next) {
   try {
@@ -37,15 +36,6 @@ export async function onRequest(context) {
     request.method === "GET"
   ) {
     return serveRaw(RAW_URL, next);
-  }
-  // Phòng chung của đội: /team + /team.html, và gốc của subdomain team.hora.works.
-  if (
-    request.method === "GET" &&
-    (url.pathname === "/team.html" ||
-      url.pathname === "/team" ||
-      (url.hostname === "team.hora.works" && url.pathname === "/"))
-  ) {
-    return serveRaw(TEAM_RAW_URL, next);
   }
   return next();
 }
