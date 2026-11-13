@@ -57,6 +57,12 @@
   .composer { display:flex; gap:8px; padding:8px 0; background:var(--bg); }
   .composer textarea { resize:none; height:46px; }
   .composer button { flex:none; padding:0 20px; }
+  .composer-wrap { position:relative; }
+  #mentionPop { position:absolute; left:0; right:0; bottom:100%; margin-bottom:2px; background:var(--panel2); border:1px solid var(--line); border-radius:12px; max-height:264px; overflow-y:auto; overflow-x:hidden; z-index:6; box-shadow:0 -6px 18px rgba(0,0,0,.45); }
+  #mentionPop[hidden] { display:none; }
+  #mentionPop .mp-item { display:flex; align-items:center; width:100%; min-height:44px; padding:10px 14px; background:transparent; color:var(--txt); border:0; border-bottom:1px solid var(--line); border-radius:0; font-size:15px; text-align:left; cursor:pointer; }
+  #mentionPop .mp-item:last-child { border-bottom:0; }
+  #mentionPop .mp-item.active { background:var(--accent); color:#fff; }
   .composer-tools { display:flex; gap:8px; align-items:center; padding:0 0 calc(8px + env(safe-area-inset-bottom)); flex-wrap:wrap; font-size:13px; color:var(--dim); }
   .composer-tools select { background:var(--panel2); color:var(--txt); border:1px solid var(--line); border-radius:8px; padding:7px; font-size:16px; }
   .composer-tools input[type=checkbox] { width:auto; }
@@ -102,9 +108,12 @@
         <div class="filterbar"><label><input type="checkbox" id="onlyOpen"> Chỉ hiện câu hỏi đang mở</label></div>
         <div id="msgs"></div>
         <button id="jumpBtn" hidden>⬇ Tin mới nhất</button>
-        <div class="composer">
-          <textarea id="composer" placeholder="Nhắn vào phòng... (Enter để gửi)"></textarea>
-          <button id="sendBtn">Gửi</button>
+        <div class="composer-wrap">
+          <div id="mentionPop" hidden></div>
+          <div class="composer">
+            <textarea id="composer" placeholder="Nhắn vào phòng... (Enter để gửi)"></textarea>
+            <button id="sendBtn">Gửi</button>
+          </div>
         </div>
         <div class="composer-tools">
           <select id="mentionSel"></select>
@@ -187,10 +196,12 @@ function renderMembers(members) {
   memberNames = names;
   $("mentionSel").innerHTML = memberNames.map(n => `<option value="${esc(n)}">@${esc(n)}</option>`).join("");
   if (memberNames.includes(prev)) $("mentionSel").value = prev;
+  if (mpOpen) updateMentionPop(); // danh sach ten thay doi -> loc lai dropdown @mention dang mo
 }
 async function refreshMembers() { try { const d = await api("/api/team/members"); renderMembers(d.members); } catch { showLogin(); } }
 function highlightMentions(text) {
   let out = esc(text);
+  out = out.replace(/@Tất cả mọi người(?![A-Za-z0-9_])/gi, '<span class="mention">@Tất cả mọi người</span>');
   for (const n of memberNames) {
     out = out.replace(new RegExp("@" + n.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "(?![A-Za-z0-9_])", "gi"), '<span class="mention">@' + n + "</span>");
   }
@@ -272,6 +283,77 @@ $("mentionBtn").onclick = () => {
   ta.value = (ta.value ? ta.value.replace(/\s*$/, " ") : "") + "@" + n + " ";
   ta.focus();
 };
+// Bo chon @mention ngay trong o soan (bo chot 18:49 13/11): go "@" o dau dong
+// hoac sau khoang trang -> dropdown #mentionPop hien ngay tren o soan; go tiep
+// thi loc theo chu do; cham/click, Enter/Tab de chon; mui ten len/xuong de di
+// chuyen; Esc dong. Muc dau "Tat ca moi nguoi" chen "@Tất cả mọi người " —
+// server (messages.js) trich thanh mentions = toan bo thanh vien.
+let mpOpen = false, mpItems = [], mpActive = 0, mpStart = -1, mpQuery = null;
+const ALL_MENTION_LABEL = "Tất cả mọi người";
+function mentionContext() {
+  const ta = $("composer");
+  const pos = ta.selectionStart == null ? ta.value.length : ta.selectionStart;
+  const m = ta.value.slice(0, pos).match(/(^|\s)@([^\s@]*)$/);
+  if (!m) return null;
+  return { start: pos - m[2].length - 1, query: m[2] };
+}
+function buildMentionItems(query) {
+  const q = query.toLowerCase();
+  const items = [];
+  if (!q || ALL_MENTION_LABEL.toLowerCase().includes(q)) items.push({ label: "📣 " + ALL_MENTION_LABEL, insert: "@" + ALL_MENTION_LABEL + " " });
+  for (const n of memberNames) {
+    if (!q || n.toLowerCase().includes(q)) items.push({ label: "@" + n, insert: "@" + n + " " });
+  }
+  return items;
+}
+function renderMentionPop() {
+  const pop = $("mentionPop");
+  pop.innerHTML = "";
+  if (!mpOpen || !mpItems.length) { pop.hidden = true; return; }
+  mpItems.forEach((it, i) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "mp-item" + (i === mpActive ? " active" : "");
+    b.textContent = it.label;
+    b.addEventListener("mousedown", (e) => e.preventDefault()); // giu focus + con tro trong o soan khi cham chon
+    b.addEventListener("click", () => pickMention(i));
+    pop.appendChild(b);
+  });
+  pop.hidden = false;
+  const act = pop.children[mpActive];
+  if (act) act.scrollIntoView({ block: "nearest" });
+}
+function closeMentionPop() {
+  mpOpen = false; mpItems = []; mpActive = 0; mpQuery = null;
+  const pop = $("mentionPop");
+  pop.hidden = true; pop.innerHTML = "";
+}
+function updateMentionPop() {
+  const ctx = mentionContext();
+  if (!ctx) { closeMentionPop(); return; }
+  mpStart = ctx.start;
+  if (ctx.query !== mpQuery) { mpQuery = ctx.query; mpActive = 0; }
+  mpItems = buildMentionItems(ctx.query);
+  if (!mpItems.length) { closeMentionPop(); return; }
+  mpOpen = true;
+  if (mpActive >= mpItems.length) mpActive = 0;
+  renderMentionPop();
+}
+function pickMention(i) {
+  const it = mpItems[i]; if (!it) return;
+  const ta = $("composer");
+  const pos = ta.selectionStart == null ? ta.value.length : ta.selectionStart;
+  const before = ta.value.slice(0, mpStart);
+  const after = ta.value.slice(pos);
+  ta.value = before + it.insert + after;
+  const caret = before.length + it.insert.length;
+  closeMentionPop();
+  ta.focus();
+  ta.setSelectionRange(caret, caret);
+}
+$("composer").addEventListener("input", updateMentionPop);
+$("composer").addEventListener("click", updateMentionPop);
+$("composer").addEventListener("blur", () => setTimeout(closeMentionPop, 150));
 $("loginBtn").onclick = async () => {
   $("loginErr").textContent = "";
   try {
@@ -286,11 +368,19 @@ $("loginCode").addEventListener("keydown", (e) => { if (e.key === "Enter") $("lo
 $("sendBtn").onclick = async () => {
   const v = $("composer").value.trim(); if (!v) return;
   const kind = $("asQuestion").checked ? "question" : "chat";
-  $("composer").value = ""; $("asQuestion").checked = false;
+  $("composer").value = ""; $("asQuestion").checked = false; closeMentionPop();
   try { await api("/api/team/messages", { method: "POST", body: JSON.stringify({ body: v, kind }) }); stickBottom = true; loadMessages(false); }
   catch (e) { alert(e.message); }
 };
-$("composer").addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); $("sendBtn").click(); } });
+$("composer").addEventListener("keydown", (e) => {
+  if (mpOpen) {
+    if (e.key === "ArrowDown") { e.preventDefault(); mpActive = Math.min(mpActive + 1, mpItems.length - 1); renderMentionPop(); return; }
+    if (e.key === "ArrowUp") { e.preventDefault(); mpActive = Math.max(mpActive - 1, 0); renderMentionPop(); return; }
+    if (e.key === "Enter" || e.key === "Tab") { e.preventDefault(); pickMention(mpActive); return; } // dropdown dang mo: Enter/Tab = chon, KHONG gui tin
+    if (e.key === "Escape") { e.preventDefault(); closeMentionPop(); return; }
+  }
+  if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); $("sendBtn").click(); }
+});
 $("logoutBtn").onclick = async () => { await api("/api/team/logout", { method: "POST" }).catch(() => {}); clearCreds(); clearInterval(pollTimer); showLogin(); };
 tryEnter();
 </script>

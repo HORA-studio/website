@@ -33,12 +33,16 @@ function escapeRegExp(s) {
 }
 
 // Trich @Ten khop ten thanh vien (khong phan biet hoa thuong, dung ranh gioi tu).
+// "@Tất cả mọi người" hoac "@mọi người" (bo chot 13/11: muc chon tat ca trong
+// bo chon @mention cua team.html) -> mentions = TOAN BO ten thanh vien.
 async function extractMentions(env, text) {
   const { results } = await env.DB.prepare("SELECT name FROM team_members").all();
+  const names = (results || []).map((row) => row.name);
+  if (/@(tất cả mọi người|mọi người)(?![A-Za-z0-9_])/i.test(text)) return names;
   const found = [];
-  for (const row of results || []) {
-    const re = new RegExp("@" + escapeRegExp(row.name) + "(?![A-Za-z0-9_])", "i");
-    if (re.test(text)) found.push(row.name);
+  for (const name of names) {
+    const re = new RegExp("@" + escapeRegExp(name) + "(?![A-Za-z0-9_])", "i");
+    if (re.test(text)) found.push(name);
   }
   return found;
 }
