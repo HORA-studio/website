@@ -7,7 +7,7 @@
 <style>
   :root { --bg:#15151e; --panel:#1e1e2a; --panel2:#232330; --line:#33334a; --txt:#eceaf6; --dim:#a5a3bd; --accent:#6c5cff; --danger:#f85149; --ok:#3fb950; }
   * { box-sizing:border-box; }
-  html, body { height:100%; }
+  html, body { height:100%; overflow-x:hidden; }
   body { margin:0; background:var(--bg); color:var(--txt); font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; touch-action:manipulation; }
   button { background:var(--accent); color:#fff; border:0; border-radius:10px; padding:9px 16px; cursor:pointer; font-size:15px; min-height:44px; }
   button.ghost { background:var(--panel2); color:var(--txt); border:1px solid var(--line); }
@@ -37,8 +37,9 @@
   .layout { display:flex; gap:14px; align-items:flex-start; }
   .main { flex:1; min-width:0; }
   .side { width:300px; flex:none; display:flex; flex-direction:column; gap:14px; }
-  #msgs { flex:1; min-height:0; overflow-y:auto; display:flex; flex-direction:column; gap:8px; padding:8px 0; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; touch-action:pan-y; }
-  .msg { background:var(--panel2); border:1px solid var(--line); border-radius:12px; padding:9px 12px; font-size:15.5px; line-height:1.55; }
+  #msgs { flex:1; min-height:0; overflow-y:auto; overflow-x:hidden; display:flex; flex-direction:column; gap:8px; padding:8px 0; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; touch-action:pan-y; }
+  .msg { background:var(--panel2); border:1px solid var(--line); border-radius:12px; padding:9px 12px; font-size:15.5px; line-height:1.55; min-width:0; max-width:100%; overflow-wrap:anywhere; }
+  .msg > div { overflow-wrap:anywhere; min-width:0; }
   .msg .meta { font-size:12.5px; color:var(--dim); margin-bottom:3px; }
   .msg .meta b { color:var(--mc, var(--txt)); font-size:13.5px; }
   .msg .qbar { display:flex; align-items:center; gap:6px; margin-top:7px; flex-wrap:wrap; }
