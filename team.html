@@ -19,7 +19,10 @@
   #roomView { display:flex; flex-direction:column; flex:1; min-height:0; }
   #roomView[hidden], #loginView[hidden] { display:none !important; }
   #roomView .layout { flex:1; min-height:0; display:flex; }
-  #roomView .main { flex:1; display:flex; flex-direction:column; min-height:0; min-width:0; }
+  #roomView .main { flex:1; display:flex; flex-direction:column; min-height:0; min-width:0; position:relative; }
+  .daynote { text-align:center; color:var(--dim); font-size:12.5px; padding:4px 2px 2px; }
+  #jumpBtn { position:absolute; right:14px; bottom:118px; z-index:5; border-radius:99px; box-shadow:0 4px 14px rgba(0,0,0,.45); padding:8px 14px; min-height:38px; font-size:13.5px; }
+  #jumpBtn[hidden] { display:none; }
   .card { background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:16px; }
   #roomView .main.card { background:transparent; border:0; border-radius:0; padding:0 10px; }
   h1 { font-size:17px; margin:0; } h2 { font-size:15px; margin:0 0 10px; }
@@ -97,6 +100,7 @@
       <div class="main card">
         <div class="filterbar"><label><input type="checkbox" id="onlyOpen"> Chỉ hiện câu hỏi đang mở</label></div>
         <div id="msgs"></div>
+        <button id="jumpBtn" hidden>⬇ Tin mới nhất</button>
         <div class="composer">
           <textarea id="composer" placeholder="Nhắn vào phòng... (Enter để gửi)"></textarea>
           <button id="sendBtn">Gửi</button>
@@ -113,7 +117,7 @@
 </div>
 <script>
 const $ = (id) => document.getElementById(id);
-let me = null, lastId = 0, pollTimer = null, msgList = [], memberNames = [];
+let me = null, lastId = 0, pollTimer = null, msgList = [], memberNames = [], stickBottom = true;
 const ROLE_LABEL = { owner: "chủ phòng", reviewer: "reviewer", editor: "editor", member: "thành viên" };
 const STATUS_LABEL = { open: "Đang mở", doing: "Đang xử lý", done: "Đã xong" };
 // Mau rieng tung thanh vien (bo chot 09:33 13/11): khung tin nhan to mau nhe theo
@@ -184,11 +188,28 @@ function highlightMentions(text) {
   }
   return out;
 }
+// Phong chi hien hoi thoai cua HOM NAY (bo chot 13/11): tin cac ngay truoc tu an,
+// ngay moi mo ra la phong gon. Gio tao la UTC -> doi sang ngay local cua may xem.
+function isToday(s) {
+  if (!s) return false;
+  const d = new Date(s.replace(" ", "T") + "Z"), n = new Date();
+  return d.getFullYear() === n.getFullYear() && d.getMonth() === n.getMonth() && d.getDate() === n.getDate();
+}
+function updateJumpBtn() { $("jumpBtn").hidden = stickBottom; }
 function renderAll() {
   const box = $("msgs");
   const onlyOpen = $("onlyOpen").checked;
-  const list = msgList.filter(m => !onlyOpen || (m.kind === "question" && (m.status || "open") !== "done"));
+  // Giu nguyen vi tri cuon cua nguoi doc: truoc ban nay renderAll luon ep
+  // scrollTop = scrollHeight moi 5s (poll) -> dien thoai khong cuon len duoc.
+  const prevTop = box.scrollTop, prevH = box.scrollHeight;
+  const todayList = msgList.filter(m => isToday(m.created_at));
+  const hiddenOld = msgList.length - todayList.length;
+  const list = todayList.filter(m => !onlyOpen || (m.kind === "question" && (m.status || "open") !== "done"));
   box.innerHTML = "";
+  const note = document.createElement("div");
+  note.className = "daynote";
+  note.textContent = "Hội thoại hôm nay (" + new Date().toLocaleDateString("vi-VN") + ")" + (hiddenOld > 0 ? " · đã ẩn " + hiddenOld + " tin nhắn của các ngày trước" : "");
+  box.appendChild(note);
   for (const m of list) {
     const div = document.createElement("div");
     div.className = "msg" + (m.name === me.name ? " mine" : "");
@@ -209,7 +230,11 @@ function renderAll() {
     div.innerHTML = html;
     box.appendChild(div);
   }
-  box.scrollTop = box.scrollHeight;
+  // Dang o gan cuoi (hoac vua mo phong) thi bam sat tin moi nhat; dang doc
+  // do o tren thi giu nguyen doan dang doc, tin moi chi cong chieu cao o duoi.
+  if (stickBottom) box.scrollTop = box.scrollHeight;
+  else box.scrollTop = Math.max(0, prevTop + (box.scrollHeight - prevH));
+  updateJumpBtn();
 }
 function renderMessages(list, reset) {
   if (reset) { msgList = []; lastId = 0; }
@@ -221,7 +246,18 @@ window.setStatus = async (id, status) => {
   try { await api("/api/team/status", { method: "POST", body: JSON.stringify({ id, status }) }); loadMessages(true); }
   catch (e) { alert(e.message); }
 };
-$("onlyOpen").addEventListener("change", renderAll);
+$("onlyOpen").addEventListener("change", () => { stickBottom = true; renderAll(); });
+$("msgs").addEventListener("scroll", () => {
+  const box = $("msgs");
+  stickBottom = (box.scrollHeight - box.scrollTop - box.clientHeight) < 120;
+  updateJumpBtn();
+});
+$("jumpBtn").onclick = () => {
+  stickBottom = true;
+  const box = $("msgs");
+  box.scrollTo({ top: box.scrollHeight, behavior: "smooth" });
+  updateJumpBtn();
+};
 $("mentionBtn").onclick = () => {
   const n = $("mentionSel").value; if (!n) return;
   const ta = $("composer");
@@ -243,7 +279,7 @@ $("sendBtn").onclick = async () => {
   const v = $("composer").value.trim(); if (!v) return;
   const kind = $("asQuestion").checked ? "question" : "chat";
   $("composer").value = ""; $("asQuestion").checked = false;
-  try { await api("/api/team/messages", { method: "POST", body: JSON.stringify({ body: v, kind }) }); loadMessages(false); }
+  try { await api("/api/team/messages", { method: "POST", body: JSON.stringify({ body: v, kind }) }); stickBottom = true; loadMessages(false); }
   catch (e) { alert(e.message); }
 };
 $("composer").addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); $("sendBtn").click(); } });
