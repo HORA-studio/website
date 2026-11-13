@@ -18,7 +18,7 @@
   .wrap { max-width:880px; margin:0 auto; height:100vh; height:100dvh; display:flex; flex-direction:column; padding:0; }
   #roomView { display:flex; flex-direction:column; flex:1; min-height:0; }
   #roomView[hidden], #loginView[hidden] { display:none !important; }
-  #roomView .layout { flex:1; min-height:0; display:flex; }
+  #roomView .layout { flex:1; min-height:0; display:flex; align-items:stretch; }
   #roomView .main { flex:1; display:flex; flex-direction:column; min-height:0; min-width:0; position:relative; }
   .daynote { text-align:center; color:var(--dim); font-size:12.5px; padding:4px 2px 2px; }
   #jumpBtn { position:absolute; right:14px; bottom:118px; z-index:5; border-radius:99px; box-shadow:0 4px 14px rgba(0,0,0,.45); padding:8px 14px; min-height:38px; font-size:13.5px; }
@@ -178,8 +178,15 @@ function showRoom(members) {
 function renderMembers(members) {
   // Panel thành viên đã bỏ khỏi phòng (bố xem ở app ngoài) — hàm này chỉ còn
   // cấp danh sách tên cho ô chèn @mention và tô sáng mention.
-  memberNames = members.filter(m => !m.revoked).map(m => m.name);
+  // CHI rebuild khi danh sach thay doi that + giu nguyen lua chon dang chon:
+  // truoc day moi 5s poll deu dung lai <select> -> lua chon cua nguoi dung
+  // bi nhay ve ten dau tien ("chon xong no tu nhay nguoc lai").
+  const names = members.filter(m => !m.revoked).map(m => m.name);
+  if (names.join("|") === memberNames.join("|")) return;
+  const prev = $("mentionSel").value;
+  memberNames = names;
   $("mentionSel").innerHTML = memberNames.map(n => `<option value="${esc(n)}">@${esc(n)}</option>`).join("");
+  if (memberNames.includes(prev)) $("mentionSel").value = prev;
 }
 async function refreshMembers() { try { const d = await api("/api/team/members"); renderMembers(d.members); } catch { showLogin(); } }
 function highlightMentions(text) {
