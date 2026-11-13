@@ -2,13 +2,13 @@
 <html lang="vi">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Phòng chung của đội — HORA</title>
 <style>
   :root { --bg:#15151e; --panel:#1e1e2a; --panel2:#232330; --line:#33334a; --txt:#eceaf6; --dim:#a5a3bd; --accent:#6c5cff; --danger:#f85149; --ok:#3fb950; }
   * { box-sizing:border-box; }
   html, body { height:100%; }
-  body { margin:0; background:var(--bg); color:var(--txt); font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; }
+  body { margin:0; background:var(--bg); color:var(--txt); font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; touch-action:manipulation; }
   button { background:var(--accent); color:#fff; border:0; border-radius:10px; padding:9px 16px; cursor:pointer; font-size:15px; min-height:44px; }
   button.ghost { background:var(--panel2); color:var(--txt); border:1px solid var(--line); }
   button.danger { background:transparent; color:var(--danger); border:1px solid var(--danger); padding:5px 10px; min-height:32px; font-size:12px; }
@@ -37,7 +37,7 @@
   .layout { display:flex; gap:14px; align-items:flex-start; }
   .main { flex:1; min-width:0; }
   .side { width:300px; flex:none; display:flex; flex-direction:column; gap:14px; }
-  #msgs { flex:1; min-height:0; overflow-y:auto; display:flex; flex-direction:column; gap:8px; padding:8px 0; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; }
+  #msgs { flex:1; min-height:0; overflow-y:auto; display:flex; flex-direction:column; gap:8px; padding:8px 0; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; touch-action:pan-y; }
   .msg { background:var(--panel2); border:1px solid var(--line); border-radius:12px; padding:9px 12px; font-size:15.5px; line-height:1.55; }
   .msg .meta { font-size:12.5px; color:var(--dim); margin-bottom:3px; }
   .msg .meta b { color:var(--mc, var(--txt)); font-size:13.5px; }
@@ -57,7 +57,7 @@
   .composer textarea { resize:none; height:46px; }
   .composer button { flex:none; padding:0 20px; }
   .composer-tools { display:flex; gap:8px; align-items:center; padding:0 0 calc(8px + env(safe-area-inset-bottom)); flex-wrap:wrap; font-size:13px; color:var(--dim); }
-  .composer-tools select { background:var(--panel2); color:var(--txt); border:1px solid var(--line); border-radius:8px; padding:7px; font-size:13px; }
+  .composer-tools select { background:var(--panel2); color:var(--txt); border:1px solid var(--line); border-radius:8px; padding:7px; font-size:16px; }
   .composer-tools input[type=checkbox] { width:auto; }
   .member { display:flex; align-items:center; gap:8px; padding:7px 0; border-bottom:1px solid var(--line); font-size:14px; }
   .member:last-child { border-bottom:0; }
